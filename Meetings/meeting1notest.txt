@@ -1,0 +1,32 @@
+Read papers on data structures on  tervel.
+
+Use:
+	-Skip list
+	-Priority queue / multi dimensinal list
+
+Approach 1:
+	- Do what MemSQL does, except in an open source way.
+
+Know what the data structures use + the how the memory works.
+
+Start small, build up on it later.
+
+We will have access to the git repository.
+
+Goals:
+	- Be able to one basic benchmark.
+	- Move on to the git repo.
+	- Performance improvement over a regular database.
+	- 8-10 page report (not just features, more like academic workshop - what is new and interesting about this).
+	- By Nov 16th, some source code in the repo. As well as a plan for the design of the database. 
+		- Half page on problem statement, a page on related work.
+	- Similar to MemSQL, setting for ACID vs performace.	
+	
+- We should create our own schedule / milestones. 
+- Use Tervel.
+- We will get a document for scheduling time for using the server.
+- ANSI
+- Follow Google C++ styleguide.
+- C++ 14 can be used.
+- Make tools as we need them
+- READ THE PAPER
