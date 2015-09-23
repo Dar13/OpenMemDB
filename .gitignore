@@ -36,3 +36,6 @@
 *.log
 *.pdf
 *.backup
+
+# Gedit backup file
+.*~
