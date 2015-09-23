@@ -1,4 +1,4 @@
-Read papers on data structures on  tervel.
+Read papers on data structures on Tervel.
 
 Use:
 	-Skip list
@@ -9,24 +9,39 @@ Approach 1:
 
 Know what the data structures use + the how the memory works.
 
-Start small, build up on it later.
+Principles:
+ - Start small, build up on it later.
+ - Wait-free does not have any automated way of testing
+ - Google C++ style guide (C++14 permitted)
 
-We will have access to the git repository.
+Resources given to us:
+ - Going to get control of git repository with ability to create more as needed
+ - Server (time-shared with other students)
 
-Goals:
-	- Be able to one basic benchmark.
-	- Move on to the git repo.
-	- Performance improvement over a regular database.
-	- 8-10 page report (not just features, more like academic workshop - what is new and interesting about this).
-	- By Nov 16th, some source code in the repo. As well as a plan for the design of the database. 
-		- Half page on problem statement, a page on related work.
-	- Similar to MemSQL, setting for ACID vs performace.	
+Overall Goals:
+ - Be able to one basic benchmark.
+ - Move on to the git repo.
+ - Performance improvement over a regular database.
+ - 8-10 page report (not just features, more like academic workshop - what is new and interesting about this).
+ - Similar to MemSQL, setting for ACID vs performace.
+
+Senior Design 1 Deliverable(s):
+ - System architecture
+ - Initial documentation
+ - Motivation & Problem statement (half-page)
+ - Related work (half-page) and comparison of this project to that work
 	
-- We should create our own schedule / milestones. 
-- Use Tervel.
-- We will get a document for scheduling time for using the server.
-- ANSI
-- Follow Google C++ styleguide.
-- C++ 14 can be used.
-- Make tools as we need them
-- READ THE PAPER
+Project:
+ - Create own milestones and project progression (Incremental, Spiral, Agile?)
+ - Make tools as we need them
+ - Read the materials given so that we know how to use the algorithms provided
+ - Biweekly email updates
+ - Monthly in-person meetings with Dechev on Fridays (email him to confirm times)
+
+Expected Final Deliverable:
+ - Source code on UCF GitHub
+ - GitHub Page similar to Tervel's
+ - Able to run a basic benchmark (e.g. SQLite's benchmark)
+ - In-depth documentation
+ - Workshop paper that details new approaches used in databases
+ - Database uses ANSI SQL
