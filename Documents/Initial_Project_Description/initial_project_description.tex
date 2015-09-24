@@ -3,6 +3,7 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[pass,letterpaper]{geometry}
+\usepackage{graphicx}
 
 \title{Non-blocking,In-memory Database\thanks{Sponsor: Dr. Dechev}}
 \author{Michael McGee, Robert Medina, Neil Moore, Jason Stavrinaky}
@@ -59,7 +60,7 @@
   \end{itemize}
   
   \section{Proposed Architecture}
-  \textless Insert block diagrams and initial component interaction\textgreater
+  \includegraphics[scale=.5]{OpenMemDbDiagram.png}
   
   \section{Financial Concerns}
   Our sponsor is supplying us with a 64-core server that should be sufficient for our development needs. I do not believe any further financial
@@ -86,11 +87,20 @@
   \begin{itemize}
    \item Connector implementation that can spawn threads upon SQL queries.
    \item Basic SQL engine that handles parsing and parameterization of queries.
+   \item Initial design of API used by applications to access database.
   \end{itemize}
-  \subsection{Milestone 3 ??/??/????}
+  \subsection{Milestone 3 01/30/2016}
   \begin{itemize}
-   \item Lorem ipsum
+   \item Finalized system architecture.
+   \item Rudimentary implementation of the transaction manager.
+   \item Preliminary implementation of the disk synchronization service.
+   \item Further work on workshop paper
   \end{itemize}
+  \subsection{Milestone 4 02/30/2016}
+  \begin{itemize}
+   \item 
+  \end{itemize}
+
 
 
 
