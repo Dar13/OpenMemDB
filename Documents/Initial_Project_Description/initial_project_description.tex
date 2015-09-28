@@ -80,8 +80,9 @@
   \includegraphics[scale=.70]{OpenMemDbDiagram.png}
   \subsection{Work Manager}
   The work manager module is the main thread of the system that owns the file descriptor to the the port used by the database as well as managing
-  all child threads. Maintains the connections to the various clients using this database and interacts with their connectors (ODBC, JDBC, etc.)
-  as well with a custom API layer customized to our database.
+  all child threads. It also maintains the connections to the various clients using this database and interacts with their connectors (ODBC, JDBC, etc.),
+  as well as with a custom API layer which will be customized
+   to our database.
   
   \subsection{SQL Engine}
   This module transforms a SQL query into an internal representation that can then be optimized to our data structures. Is composed of a tokenizer,
@@ -122,29 +123,30 @@
    \item Basic SQL engine that handles parsing and parameterization of queries.
    \item Initial design of API used by applications to access database.
   \end{itemize}
-  \subsection{Milestone 3 01/30/2016}
+  \subsection{Milestone 3 - 01/30/2016}
   \begin{itemize}
    \item Finalized system architecture.
    \item Rudimentary implementation of the transaction manager.
    \item Preliminary implementation of the disk synchronization service.
    \item Further work on workshop paper.
   \end{itemize}
-  \subsection{Milestone 4 02/30/2016}
+  \subsection{Milestone 4 - 02/30/2016}
   \begin{itemize}
    \item Finalized API to be used between server and client applications when not using a connector.
    \item First draft of workshop paper.
    \item Implement Atomicity guarantee in the transaction manager.
   \end{itemize}
-  \subsection{Milestone 5}
+  \subsection{Milestone 5 - 03/30/2016}
    \begin{itemize}
     \item Implement Consistency and Integrity guarantee in transaction manager.
     \item Another draft of the workshop paper.
     \item Pass SQLLogicTests' core tests.
     \item Exploratory implementation of ODBC driver.
    \end{itemize}
-   \subsection{Milestone 6}
+   \subsection{Milestone 6 - 04/13/2016}
    \begin{itemize}
-    \item ???
+    \item Finalized project with testing. 
+    \item Completion of final draft of workshop paper and project presentation.
    \end{itemize}
 
 
