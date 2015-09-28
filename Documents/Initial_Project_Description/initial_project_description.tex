@@ -51,7 +51,6 @@
   and possibly can be improved on. I think that databases is a necessary skill for anyone who pursues a career in computer science. The challenge of making a non-blocking database is 
   a great opportunity to showcase my knowledge from the past four years of my education. I look forward into learning about multicore programming, lock-free algorithms, wait-free algorithms,
   and database architecture.
-  \textless Insert actual text here\textgreater
   \subsubsection{Neil Moore's Motivation}
   My motivation for working on this project is to further my knowledge on multiprocessor programming as well as high-performance computing.  
   As hardware vendors put more and more cores into computers, parallelization of algorithms and programs will become much more important than
@@ -63,7 +62,6 @@
   multiprocessor heavy paradigm, it is an essential skill. Working on a big project involving this is a great opportunity to learn. Not only
   about multiprocessor programming but also memory management. In addition, creating an open source solution to memSQL sounds like an exciting
   challange to undertake while also contributing to the programming community.
-  \textless Insert actual text here\textgreater
   
   \section{Requirements}
   Our deliverable requirements are as follows:
@@ -77,7 +75,7 @@
   \end{itemize}
   
   \section{Proposed Architecture}
-  \includegraphics[scale=.70]{OpenMemDbDiagram.png}
+  \centerline{\includegraphics[scale=.75]{OpenMemDbDiagram.png}}
   \subsection{Work Manager}
   The work manager module is the main thread of the system that owns the file descriptor to the the port used by the database as well as managing
   all child threads. It also maintains the connections to the various clients using this database and interacts with their connectors (ODBC, JDBC, etc.),
@@ -100,6 +98,7 @@
   support would be required as we are aiming to utilize open-source software and toolkits in our development. An advanced C++ code linter or static
   analyzer is a tool that we may look into acquiring that could require finnancial investment.
   
+  \pagebreak
   \section{Project Milestones}
   For this project we're going to utilize the incremental software development process which emphasizes development of small modules concurrently
   with a focus on:
