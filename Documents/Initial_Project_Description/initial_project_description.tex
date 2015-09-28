@@ -30,6 +30,17 @@
   as well as various lock-free and wait-free data structures. These data structures will permit us to handle many concurrent transactions without 
   waits or locks.
   
+  When we researched how current database systems handle data and their architecture, a typical object-oriented approach does not fit well into the 
+  way data flows through a database system. As such, we have decided to take a more functional approach with a focus on transformations on data rather
+  than manipulating objects.
+  
+  \subsection{Broader Impacts}
+  An open-source, in-memory and wait-free database would allow for startups or students to experiment with extremely high-frequency applications that
+  still need transactional or relational models without dealing with proprietary software such as MemSQL. As the product will be wait-free, scalability 
+  with additional hardware should be near-linear as each additional hardware-backed thread allows more concurrent SQL queries to be processed. The 
+  applications of such a technology are the same as any other database system, though the speed and scalability of the system lends itself to high-frequency
+  and relatively low storage size databases.
+  
   \subsection{Motivations}
   \subsubsection{Michael McGee's Motivation}
   My motivation for choosing this project is simply a desire to learn. I have always been interested in database systems as well concurrent programming. Nowhere do these issues more converge than in the project that Dr. Dechev proposed.  
@@ -57,7 +68,8 @@
   \section{Requirements}
   Our deliverable requirements are as follows:
   \begin{itemize}
-   \item Able to run simple SQL benchmark such as the one bundled into SQLite.
+   \item Able to run SQLLogicTests from the SQLite project.
+   \item ANSI SQL Core compliance.
    \item GitHub Page similar to the Tervel framework's.
    \item Source code on the UCF GitHub subdomain.
    \item In-depth documentation on project internals and architecture.
@@ -65,11 +77,27 @@
   \end{itemize}
   
   \section{Proposed Architecture}
-  \includegraphics[scale=.5]{OpenMemDbDiagram.png}
+  \includegraphics[scale=.70]{OpenMemDbDiagram.png}
+  \subsection{Work Manager}
+  The work manager module is the main thread of the system that owns the file descriptor to the the port used by the database as well as managing
+  all child threads. Maintains the connections to the various clients using this database and interacts with their connectors (ODBC, JDBC, etc.)
+  as well with a custom API layer customized to our database.
+  
+  \subsection{SQL Engine}
+  This module transforms a SQL query into an internal representation that can then be optimized to our data structures. Is composed of a tokenizer,
+  parser, and potentially an optimizer. We're currently looking into open-source implementations of SQL engines to lessen code duplication as well
+  as overall effort needed on our part.
+  
+  \subsection{Transaction Manager}
+  The transaction manager provides a central interface to the database objects as well as enforcing the ACID (Atomicity, Consistency, Integrity
+  and Durability) guarantees that make up a transaction. This would implement caching techniques as well as snapshot isolation of the
+  database. This module would be where most of the interactions between threads occur and as such would utilize the Tervel framework to 
+  safely achieve wait-free concurrent access to the database structures.
   
   \section{Financial Concerns}
   Our sponsor is supplying us with a 64-core server that should be sufficient for our development needs. I do not believe any further financial
-  support would be required.
+  support would be required as we are aiming to utilize open-source software and toolkits in our development. An advanced C++ code linter or static
+  analyzer is a tool that we may look into acquiring that could require finnancial investment.
   
   \section{Project Milestones}
   For this project we're going to utilize the incremental software development process which emphasizes development of small modules concurrently
@@ -99,12 +127,27 @@
    \item Finalized system architecture.
    \item Rudimentary implementation of the transaction manager.
    \item Preliminary implementation of the disk synchronization service.
-   \item Further work on workshop paper
+   \item Further work on workshop paper.
   \end{itemize}
   \subsection{Milestone 4 02/30/2016}
   \begin{itemize}
-   \item 
+   \item Finalized API to be used between server and client applications when not using a connector.
+   \item First draft of workshop paper.
+   \item Implement Atomicity guarantee in the transaction manager.
   \end{itemize}
+  \subsection{Milestone 5}
+   \begin{itemize}
+    \item Implement Consistency and Integrity guarantee in transaction manager.
+    \item Another draft of the workshop paper.
+    \item Pass SQLLogicTests' core tests.
+    \item Exploratory implementation of ODBC driver.
+   \end{itemize}
+   \subsection{Milestone 6}
+   \begin{itemize}
+    \item ???
+   \end{itemize}
+
+
 
 
 
