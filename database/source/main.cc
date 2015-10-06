@@ -14,7 +14,6 @@
 #include <signal.h>
 #include <unistd.h>
 
-tervel::Tervel* g_tervel;
 
 void handler(int signal)
 {
@@ -31,13 +30,20 @@ void handler(int signal)
 typedef tervel::containers::wf::vector::Vector<uint64_t> tervelVector;
 
 // This is the thread function
-void add_hello_world(uint64_t thread_id, tervelVector* vector)
+void add_hello_world(uint64_t thread_id, tervel::Tervel* tervel, tervelVector* vector)
 {
     if(vector == nullptr) { printf("vector object null!\n"); return; }
 
-    tervel::ThreadContext* thread_context = new tervel::ThreadContext(g_tervel);
+    tervel::ThreadContext* thread_context = new tervel::ThreadContext(tervel);
 
-    while(!vector->push_back(thread_id)) {}
+    size_t ret = vector->push_back_only(thread_id);
+    //printf("thread_id: %lu\n", thread_id);
+
+    delete thread_context;
+
+    std::this_thread::yield();
+
+    return;
 }
 
 // This is needed so that tervel doesn't assert.
@@ -63,41 +69,40 @@ int main (int argc, char** argv)
         printf("\t%s\n", argv[i]);
     }
 
+    tervel::Tervel* tervel;
     tervelVector* test_vector;
     
     // Tervel initialization code
-    g_tervel = new tervel::Tervel(4);
+    tervel = new tervel::Tervel(5);
     test_vector = new tervelVector(64);
+
+    // The main thread counts as a thread
+    tervel::ThreadContext* thread_context = new tervel::ThreadContext(tervel);
 
     // Initialize and start the threads
     std::vector<std::thread> threads;
-    for(int i = 0; i < 4; i++)
+    for(int i = 1; i < 5; i++)
     {
         tervel_uint64_t v;
         v.tervel_reserved = 0;
         v.tervel_value = i;
 
-        std::thread th(add_hello_world, v.value, test_vector);
+        std::thread th(add_hello_world, v.value, tervel, test_vector);
         threads.push_back(std::move(th));
     }
 
-    // Wait for the threads to finish
-    threads[0].join();
-    threads[1].join();
-    threads[2].join();
-    threads[3].join();
-
-    // Print out what was put into the vector
-    for(int i = 0; i < test_vector->size(); i++)
+    while(true)
     {
+        // Print out what was put into the vector
         uint64_t t = 0;
         tervel_uint64_t id;
         id.value = 0;
 
-        while(!test_vector->pop_back(t)) {}
-
-        id.value = t;
-        printf("Hello World %lu\n", id.tervel_value);
+        if(test_vector->pop_back_only(t))
+        {
+            id.value = t;
+            printf("Hello World %lu\n", id.tervel_value);
+        }
     }
 
     return 0;

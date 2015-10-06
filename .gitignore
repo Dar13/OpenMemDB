@@ -39,3 +39,9 @@
 
 # Gedit backup file
 .*~
+
+# Vim backup/swap files
+*.swp
+
+# Compiled executable
+openmemdb
