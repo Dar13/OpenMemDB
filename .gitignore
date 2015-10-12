@@ -4,6 +4,9 @@
 *.obj
 *.elf
 
+# Executable
+openmemdb
+
 # Precompiled Headers
 *.gch
 *.pch
@@ -39,3 +42,6 @@
 
 # Gedit backup file
 .*~
+
+# VIM temp files
+*.swp

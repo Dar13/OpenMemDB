@@ -2,6 +2,9 @@
  *
  */
 
+// Project includes
+#include <util/network/common.h>
+
 // Linux-specific includes
 #include <sys/types.h>
 
@@ -22,6 +25,6 @@ namespace omdb
         
         //std::string recv();
     private:
-        int m_socket_fd;
+        uint32_t socket_fd;
     };
 }

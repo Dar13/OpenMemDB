@@ -8,6 +8,12 @@
 // Project includes
 #include <workmanager/types.h>
 
+/**
+ * @brief This is the framework in which the thread's jobs are executed in.
+ *
+ * @note This currently utilizes mutual exclusion to create a mechanism to pass these tasks
+ *       to the thread, and this can be replaced with a Tervel FIFO data structure.
+ */
 void WorkThread::Run(WorkThreadData* data)
 {
     // TODO: Remove the need for a mutex
@@ -43,6 +49,12 @@ void WorkThread::Run(WorkThreadData* data)
     }
 }
 
+/**
+ *  @brief Generates a task to be given to a thread.
+ *
+ *  @note This currently uses a lambda that binds the passed in string, we can
+ *        instead use a wrapper or normal function.
+ */
 Job WorkThread::GenerateJob(int job_num, std::string command)
 {
     Job job([job_num, command] (int test)
@@ -50,7 +62,7 @@ Job WorkThread::GenerateJob(int job_num, std::string command)
                 std::cout << job_num << " : ";
                 std::cout << command << std::endl;
 
-                return test;
+                return job_num;
             });
 
     return job;

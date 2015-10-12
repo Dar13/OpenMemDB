@@ -10,6 +10,10 @@ WorkManager::WorkManager(uint32_t num_threads, tervel::Tervel* tervel)
 {
 }
 
+/**
+ *  @brief Initialize the internal data structures and members, prepare to 
+ *         begin executing tasks.
+ */
 int32_t WorkManager::Initialize()
 {
     std::cout << "Initializing stuff\n";
@@ -28,6 +32,10 @@ int32_t WorkManager::Initialize()
     return E_NONE;
 }
 
+/**
+ *  @brief Start the processing of client requests/commands, this method is 
+ *         essentially starting the database server.
+ */
 int32_t WorkManager::Run()
 {
     std::cout << "Running WorkManager::Run()\n";
@@ -57,6 +65,7 @@ int32_t WorkManager::Run()
             if(result.valid() && 
                result.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
             {
+                // TODO: Return result to proper connection
                 std::cout << "Job num " << result.get();
                 std::cout << " is done!" << std::endl;
             }

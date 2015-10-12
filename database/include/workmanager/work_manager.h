@@ -12,6 +12,8 @@
 
 // Standard library includes
 #include <thread>
+#include <map>
+#include <vector>
 
 // Linux-specific includes
 #include <sys/types.h>
@@ -19,7 +21,8 @@
 #include <netdb.h>
 
 // Project includes
-#include "types.h"
+#include <workmanager/types.h>
+#include <util/network/connection.h>
 
 /**
  *  @brief Class that handles the main thread and load balancing.
@@ -39,11 +42,6 @@ public:
         E_OTHER_ERR     = -4
     };
 
-    /**
-     *  @brief Initialize the work manager, set up data structures and prepare to do work.
-     *
-     *  @return Any return value less than 0 is an error code(@refer WorkManager::Errors)
-     */
     int32_t Initialize();
 
     int32_t Run();
@@ -54,6 +52,8 @@ private:
     std::array<WorkThreadData, 8> m_thread_data;
     std::vector<std::future<Result>> m_thread_results;
 
+    std::vector<omdb::Connection> m_connections;
+    std::map<uint32_t, omdb::Connection> m_job_to_connection;
 };
 
 #endif

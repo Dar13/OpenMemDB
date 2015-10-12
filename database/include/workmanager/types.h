@@ -34,6 +34,7 @@ struct WorkThreadData
     WorkThreadData()
         : stop(false)
     {}
+
     //! Thread ID
     uint32_t id;
     
