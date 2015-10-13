@@ -37,9 +37,8 @@ public:
     {
         E_NONE          = 0,
         E_TERVEL_ERR    = -1,
-        E_BIND_ERR      = -2,
-        E_LISTEN_ERR    = -3,
-        E_OTHER_ERR     = -4
+        E_NET_ERR      = -2,
+        E_OTHER_ERR     = -3
     };
 
     int32_t Initialize();
@@ -47,11 +46,15 @@ public:
     int32_t Run();
 
 private:
+
+    uint32_t GetAvailableThread();
+
     tervel::Tervel* m_tervel;
 
     std::array<WorkThreadData, 8> m_thread_data;
     std::vector<std::future<Result>> m_thread_results;
 
+    uint32_t m_server_socket_fd;
     std::vector<omdb::Connection> m_connections;
     std::map<uint32_t, omdb::Connection> m_job_to_connection;
 };

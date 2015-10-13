@@ -18,7 +18,11 @@
 #include <util/types.h>
 
 // TODO: Make this into a true result type for SQL Query or Database command
-typedef uint64_t Result;
+typedef struct
+{
+    uint32_t job_number;    //!< The job number that's associated to this result
+    uint64_t result;        // TODO: Make this into a real result
+} Result;
 typedef Result (*JobFunctor)(int);
 
 //using Job = std::packaged_task<JobFunctor>;

@@ -57,12 +57,16 @@ void WorkThread::Run(WorkThreadData* data)
  */
 Job WorkThread::GenerateJob(int job_num, std::string command)
 {
-    Job job([job_num, command] (int test)
+    Job job([job_num, command] (int test) -> Result
             {
                 std::cout << job_num << " : ";
                 std::cout << command << std::endl;
 
-                return job_num;
+                Result res;
+                res.job_number = job_num;
+                res.result = test;
+
+                return res;
             });
 
     return job;

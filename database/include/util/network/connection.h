@@ -2,6 +2,9 @@
  *
  */
 
+#ifndef UTIL_NET_CONN_H
+#define UTIL_NET_CONN_H
+
 // Project includes
 #include <util/network/common.h>
 
@@ -19,12 +22,20 @@ namespace omdb
     class Connection
     {
     public:
-        Connection(int socket_fd);
+        Connection();
+        Connection(int32_t socket_fd, sockaddr_storage conn_info);
 
-        //void send(std::string& msg);
+        bool IsValid();
+
+        NetworkStatus send(const char* in_buffer, size_t length);
         
-        //std::string recv();
+        NetworkStatus recv(char* out_buffer, size_t length);
+
     private:
-        uint32_t socket_fd;
+        bool m_is_valid;
+        uint32_t m_socket_fd;
+        sockaddr_storage m_conn_info;
     };
 }
+
+#endif
