@@ -9,13 +9,18 @@
  */
 int main(int argc, char** argv)
 {
+    // TODO: Integrate Tervel
     WorkManager work_manager(8, nullptr);
 
-    work_manager.Initialize();
+    int32_t status = 0;
 
-    work_manager.Run();
+    // TODO: Error handling
+    status = work_manager.Initialize();
 
-    printf("Done!\n");
+    // TODO: Error handling
+    status = work_manager.Run();
+
+    printf("Shutting down program...\n");
 
     return 0;
 }

@@ -7,8 +7,6 @@
 
 // Tervel includes
 #include <tervel/util/tervel.h>
-//#include <tervel/containers/wf/vector/vector.hpp>
-//#include <tervel/containers/wf/hash-map/wf_hash_map.h>
 
 // Standard library includes
 #include <thread>
@@ -32,7 +30,11 @@ class WorkManager
 public:
     WorkManager(uint32_t num_threads, tervel::Tervel* tervel);
 
-    // NM: Not sure about these error codes...
+    // NM: TODO:Not sure about these error codes...
+    /**
+     *  @brief An enumeration of all error codes that can be returned when
+     *         running any member function.
+     */
     enum Errors
     {
         E_NONE          = 0,
@@ -49,13 +51,24 @@ private:
 
     uint32_t GetAvailableThread();
 
+    bool ReceiveCommand(omdb::Connection& conn);
+
+    //! Tervel object to give to the worker threads
     tervel::Tervel* m_tervel;
 
+    // TODO: Figure out scalable replacement
     std::array<WorkThreadData, 8> m_thread_data;
+
+    //! Holds the futures for currently running jobs
     std::vector<std::future<Result>> m_thread_results;
 
+    //! The listening server socket file descriptor
     uint32_t m_server_socket_fd;
+
+    //! The list of current connections
     std::vector<omdb::Connection> m_connections;
+
+    //! The mapping of job to connection
     std::map<uint32_t, omdb::Connection> m_job_to_connection;
 };
 

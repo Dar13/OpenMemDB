@@ -25,12 +25,7 @@ void WorkThread::Run(WorkThreadData* data)
 
         data->cond_var.wait(thread_lock, [data] ()
                 {
-                    if(data->stop)
-                    {
-                        return true;
-                    }
-
-                    if(!data->jobs.empty())
+                    if(data->stop || !data->jobs.empty())
                     {
                         return true;
                     }
@@ -59,11 +54,11 @@ Job WorkThread::GenerateJob(int job_num, std::string command)
 {
     Job job([job_num, command] (int test) -> Result
             {
-                std::cout << job_num << " : ";
-                std::cout << command << std::endl;
-
                 Result res;
                 res.job_number = job_num;
+
+                printf("Command: %s\n", command.c_str());
+
                 res.result = test;
 
                 return res;

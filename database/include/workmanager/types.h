@@ -23,9 +23,11 @@ typedef struct
     uint32_t job_number;    //!< The job number that's associated to this result
     uint64_t result;        // TODO: Make this into a real result
 } Result;
+
+//! Typedef of a function pointer that returns a @refer Result and takes an integer.
 typedef Result (*JobFunctor)(int);
 
-//using Job = std::packaged_task<JobFunctor>;
+//! Convenient typedef for the job concept.
 typedef std::packaged_task<Result(int)> Job;
 
 /**
@@ -58,6 +60,12 @@ struct WorkThreadData
     bool stop;
 };
 
+/**
+ *  @brief Abstraction of a worker thread.
+ *
+ *  @note In its current implementation, the class is never actually instantiated.
+ *  TODO: Replace with nested namespace?
+ */
 class WorkThread
 {
 public:

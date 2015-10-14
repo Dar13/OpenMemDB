@@ -12,10 +12,16 @@
 // Project includes
 #include <util/network/common.h>
 
+/**
+ *  @brief Creates and initializes a socket that listens to the given port.
+ *
+ *  @note TODO: Replace raw socket file descriptor with @refer omdb::Connection object
+ */
 omdb::NetworkStatus omdb::ListenToPort(uint16_t port_id,
                                        uint32_t* socket_fd,
                                        bool dont_block)
 {
+    // If the pointer isn't valid, can't do anything with it.
     if(socket_fd == nullptr)
     {
         return NetworkStatus(omdb::E_INV_PARAM);
@@ -28,11 +34,12 @@ omdb::NetworkStatus omdb::ListenToPort(uint16_t port_id,
 
     memset(&hints, 0, sizeof(addrinfo));
     hints.ai_family = AF_UNSPEC;         // Use either IPv4 or IPv6
-    hints.ai_socktype = SOCK_STREAM;           // non-blocking TCP
+    hints.ai_socktype = SOCK_STREAM;     // TCP
     hints.ai_flags = AI_PASSIVE;         // Server address
 
     std::string port_id_str = std::to_string(port_id);
 
+    // Gets all possible address/port pairs we can bind to.
     status = getaddrinfo(NULL, port_id_str.c_str(),
                          &hints, &name_info_list);
 
@@ -57,7 +64,6 @@ omdb::NetworkStatus omdb::ListenToPort(uint16_t port_id,
         if(status == -1)
         {
             continue;
-            //return NetworkError(E_SOCKET, errno);
         }
         else
         {
@@ -92,6 +98,7 @@ omdb::NetworkStatus omdb::ListenToPort(uint16_t port_id,
         return omdb::NetworkStatus(omdb::E_BIND, errno);
     }
 
+    // Attempt to listen to the bound socket/port pair.
     status = listen(*socket_fd, CONN_BACKLOG);
     if(status == -1)
     {
@@ -101,14 +108,22 @@ omdb::NetworkStatus omdb::ListenToPort(uint16_t port_id,
     return omdb::NetworkStatus(omdb::SUCCESS);
 }
 
+/**
+ *  @brief Attempt to accept a connection waiting on the socket's assigned port.
+ *
+ *  @note TODO: Replace the raw socket file descriptor with omdb::Connection
+ */
 omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
                                            uint32_t* conn_fd,
                                            sockaddr_storage* conn_addr)
 {
     socklen_t addr_len = 0;
+
+    // Needed to use a special version of accept() to make sure it's non-blocking
     int32_t status = accept4(socket_fd, reinterpret_cast<sockaddr*>(conn_addr), 
                             &addr_len, SOCK_NONBLOCK);
 
+    // Error handling
     if(status == -1)
     {
         *conn_fd = 0;
@@ -122,5 +137,6 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
     }
 
     *conn_fd = status;
+
     return omdb::NetworkStatus(omdb::SUCCESS);
 }
