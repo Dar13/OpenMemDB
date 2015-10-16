@@ -6,8 +6,11 @@ Questions
 5. Definition of initial documentation? Is auto-generated Doxygen along with a system diagram enough?
 
 Answers
-1.
-2.
-3.
-4.
-5.
+1. Emailing us now.
+2. Taken care of in meeting
+3. Steven will continue supporting.
+4. Email Dechev about it.
+5. Quick write-up on architecture, demonstrate strong understanding on non-blocking principles. Make sure importance of non-blocking properties.
+
+ Motivation - why is problem interesting, why solve it?
+ Problem - How to solve it?
