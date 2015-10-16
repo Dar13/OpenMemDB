@@ -1,0 +1,13 @@
+Questions
+1. FIFO data structure in Tervel (Queue, Deque, etc)?
+2. Server access?
+3. Tervel support after Steven leaves?
+4. Workshop paper resources (examples, guidelines, etc)?
+5. Definition of initial documentation? Is auto-generated Doxygen along with a system diagram enough?
+
+Answers
+1.
+2.
+3.
+4.
+5.
