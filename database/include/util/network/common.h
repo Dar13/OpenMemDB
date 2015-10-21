@@ -59,7 +59,7 @@ namespace omdb
         /**
          *  The status code used to classify errors.
          */
-        uint32_t status_code;
+        int32_t status_code;
 
         /** 
          *  The platform error code or a subclassification

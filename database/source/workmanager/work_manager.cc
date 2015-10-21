@@ -65,14 +65,6 @@ int32_t WorkManager::Run()
 {
     std::cout << "Running WorkManager::Run()\n";
 
-    // We're making this unsigned so the overflow behavior is predictable
-    // If we ever get more than 3 billion concurrent requests, we'll be in trouble though...
-    uint32_t job_number = 0;
-
-    // Buffer to use for network operations
-    // TODO: Make magic number a const
-    char buffer[256];
-
     omdb::NetworkStatus status;
 
     // Here's where we store the results
@@ -205,6 +197,9 @@ bool WorkManager::ReceiveCommand(omdb::Connection& conn)
 {
     // TODO: Make magic number into a const
     char buffer[256];
+    
+    // We're making this unsigned so the overflow behavior is predictable
+    // If we ever get more than 3 billion concurrent requests, we'll be in trouble though...
     static uint32_t job_number = 0;
 
     omdb::NetworkStatus status;
