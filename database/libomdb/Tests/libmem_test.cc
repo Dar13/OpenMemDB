@@ -35,7 +35,7 @@ int main (int argc, char**argv) {
   // Use libmem to send a message to the server.
 
   //1. Connect to server [Test server is port 3490]
-  int sock_fd = libmem::Connect(3490, "mike-Latitude-E5420", "");
+  int sock_fd = libmem::Connect(3490, "localhost", "");
   std::cout << "Connected" << std::endl;
   //2. Execute a SQLCommand
   libmem::ResultSet result_set = libmem::ExecuteSQL("SELECT * FROM Users",

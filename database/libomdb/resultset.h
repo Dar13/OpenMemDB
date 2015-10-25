@@ -61,7 +61,7 @@ namespace libmem {
 	/**
 	 * Variant for SQLType
 	 */
-	typedef boost::variant<int, std::string, bool> sql_type;
+	typedef boost::variant<int, std::string> sql_type;
 
 	/**
 	 * Visitor function for accessing sql_type value
@@ -94,7 +94,8 @@ namespace libmem {
 //	     :m_name(name), m_value(value) {}
 
 	  ResultPair()
-	  :m_name(NULL), m_value(NULL){}
+	   : m_name(""), m_value((uint32_t)0) 
+      {}
 
 	   ~ResultPair(){}
 
@@ -178,7 +179,7 @@ namespace libmem {
 
 	  ResultSet()
 	  : m_result_code(RESULT_ERROR), m_current_row(0),
-	    m_result_type(QUERY), m_size(0), m_result_set(NULL){}
+	    m_result_type(QUERY), m_size(0), m_result_set(0){}
 
 	  ~ResultSet(){}
 
