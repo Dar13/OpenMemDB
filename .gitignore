@@ -45,3 +45,5 @@ openmemdb
 
 # VIM temp files
 *.swp
+*.cproject
+*.project
