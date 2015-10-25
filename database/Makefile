@@ -11,9 +11,11 @@ CFLAGS=-Wall -Wextra -g -std=c++11 -I$(INC_DIR) -I$(TERVEL_DIR)
 
 LDFLAGS=-L$(TERVEL_DIR) -rdynamic -pthread -std=c++11
 
-FILES=main.cc workmanager/work_manager.cc workmanager/types.cc util/network/common.cc util/network/connection.cc
+#FILES=main.cc workmanager/work_manager.cc workmanager/types.cc util/network/common.cc util/network/connection.cc
 
-SOURCES=$(addprefix $(SRC_DIR), $(FILES))
+SOURCES=$(shell find $(SRC_DIR) -name *.cc)
+
+#SOURCES=$(addprefix $(SRC_DIR), $(FILES))
 SOURCES += $(shell find $(TERVEL_DIR)/tervel/util/ -name *.cc)
 OBJECTS=$(SOURCES:.cc=.o)
 
