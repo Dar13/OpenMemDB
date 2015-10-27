@@ -40,6 +40,15 @@ int main (int argc, char**argv) {
   //2. Execute a SQLCommand
   libmem::ResultSet result_set = libmem::ExecuteSQL("SELECT * FROM Users",
                                                      sock_fd);
+
+  // Try to print some of the result.
+/*for (auto&& res: result_set) {
+    for (auto&& pair: res) {
+      std::cout << pair.get_name() << ":" << pair.get_value();
+    }
+    std::cout << std::endl;
+  }*/
+
   std::cout << "Executed command" << std::endl;
   //3.Disconnect from database.
   libmem::Disconnect(sock_fd);

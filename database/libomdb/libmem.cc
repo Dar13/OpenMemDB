@@ -40,10 +40,22 @@ uint32_t libmem::Connect(uint16_t port_number, std::string host_name,
    return connector::Connect(port_number, host_name);
 }
 
+
+/**
+ * @brief Disconnects from the passed in socket
+ * @param socket_fd The file desciptor of the socket to disconnect from
+ */
 void libmem::Disconnect(uint32_t socket_fd) {
   connector::Disconnect(socket_fd);
 }
 
+
+/**
+ * @brief Sends SQL command to connector to be send to the server and processed
+ * @param command The command to execute
+ * @param socket_fd The socket to send the the message to.
+ * @return The result set returned from the databse.
+ */
 libmem::ResultSet libmem::ExecuteSQL(std::string command,
                                         uint32_t socket_fd) {
   //TODO: Add connections to individual databases.
