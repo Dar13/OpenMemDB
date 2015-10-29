@@ -20,6 +20,7 @@ public:
   SQLBoolean();
   SQLBoolean(const SQLBoolean& other);
   SQLBoolean(SQLBoolean& other);
+  SQLBoolean(bool value);
   SQLBoolean(BooleanValue value);
   SQLBoolean(BooleanValue value, bool nullable);
 
@@ -33,6 +34,8 @@ private:
 };
 
 SQLBoolean operator!(SQLBoolean value);
+SQLBoolean operator||(const SQLBoolean& lhs, const SQLBoolean& rhs);
+SQLBoolean operator&&(const SQLBoolean& lhs, const SQLBoolean& rhs);
 
 SQLBoolean operator==(const SQLBoolean& lhs, const SQLBoolean& rhs);
 SQLBoolean operator!=(const SQLBoolean& lhs, const SQLBoolean& rhs);

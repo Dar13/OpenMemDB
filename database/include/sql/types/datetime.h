@@ -11,6 +11,7 @@
 
 // Project-specific includes
 #include <sql/common.h>
+#include <sql/types/boolean.h>
 
 class SQLTimestamp;
 
@@ -40,14 +41,14 @@ public:
   SQLDate& operator=(SQLDate& other);
 };
 
-bool operator==(const SQLDate& lhs, const SQLDate& rhs);
-bool operator!=(const SQLDate& lhs, const SQLDate& rhs);
+SQLBoolean operator==(const SQLDate& lhs, const SQLDate& rhs);
+SQLBoolean operator!=(const SQLDate& lhs, const SQLDate& rhs);
 
-bool operator< (const SQLDate& lhs, const SQLDate& rhs);
-bool operator<=(const SQLDate& lhs, const SQLDate& rhs);
+SQLBoolean operator< (const SQLDate& lhs, const SQLDate& rhs);
+SQLBoolean operator<=(const SQLDate& lhs, const SQLDate& rhs);
 
-bool operator> (const SQLDate& lhs, const SQLDate& rhs);
-bool operator>=(const SQLDate& lhs, const SQLDate& rhs);
+SQLBoolean operator> (const SQLDate& lhs, const SQLDate& rhs);
+SQLBoolean operator>=(const SQLDate& lhs, const SQLDate& rhs);
 
 /**
  *  \brief Representation of the SQL:2003 TIME data type

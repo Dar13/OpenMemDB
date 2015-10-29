@@ -16,6 +16,10 @@ SQLBoolean::SQLBoolean(SQLBoolean& other)
   : SQLNullable(other.IsNull(), other.IsNullable()), m_value(other.m_value)
 {}
 
+SQLBoolean::SQLBoolean(bool value)
+  : SQLNullable(false, true), m_value(value ? SQL_TRUE : SQL_FALSE)
+{}
+
 SQLBoolean::SQLBoolean(BooleanValue value)
   : SQLNullable(false), m_value(value)
 {}
@@ -48,6 +52,21 @@ SQLBoolean operator!(SQLBoolean value)
     default:
       return SQL_UNKNOWN;
   }
+}
+
+SQLBoolean operator||(const SQLBoolean& lhs, const SQLBoolean& rhs)
+{
+  if(lhs.IsUnknown() || rhs.IsUnknown())
+  {
+    return SQLBoolean(SQL_UNKNOWN);
+  }
+
+  return (lhs.m_value == SQL_TRUE) || (rhs.m_value == SQL_TRUE);
+}
+
+SQLBoolean operator&&(const SQLBoolean& lhs, const SQLBoolean& rhs)
+{
+  return !((!lhs) || (!rhs));
 }
 
 

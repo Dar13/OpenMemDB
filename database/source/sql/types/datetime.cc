@@ -80,6 +80,63 @@ SQLDate& SQLDate::operator=(SQLDate& other)
   return *this;
 }
 
+SQLBoolean operator==(const SQLDate& lhs, const SQLDate& rhs)
+{
+  if(lhs.IsNull() || rhs.IsNull())
+  {
+    return SQLBoolean(SQL_UNKNOWN);
+  }
+
+  if(lhs.m_year == rhs.m_year && lhs.m_month == rhs.m_month && lhs.m_day == rhs.m_day)
+  {
+    return SQLBoolean(SQL_TRUE);
+  }
+  else
+  {
+    return SQLBoolean(SQL_FALSE);
+  }
+}
+
+SQLBoolean operator!=(const SQLDate& lhs, const SQLDate& rhs)
+{
+  return !(lhs == rhs);
+}
+
+SQLBoolean operator< (const SQLDate& lhs, const SQLDate& rhs)
+{
+  if(lhs.IsNull() || rhs.IsNull())
+  {
+    return SQLBoolean(SQL_UNKNOWN);
+  }
+
+  if(lhs.m_year < rhs.m_year || 
+     (lhs.m_year == rhs.m_year && lhs.m_month < rhs.m_month) ||
+     (lhs.m_year == rhs.m_year && lhs.m_month == rhs.m_month && lhs.m_day < rhs.m_day))
+  {
+    return SQLBoolean(SQL_TRUE);
+  }
+  else
+  {
+    return SQLBoolean(SQL_FALSE);
+  }
+}
+
+SQLBoolean operator<=(const SQLDate& lhs, const SQLDate& rhs)
+{
+  return (lhs < rhs) || (lhs == rhs);
+}
+
+SQLBoolean operator> (const SQLDate& lhs, const SQLDate& rhs)
+{
+  return !(lhs <= rhs);
+}
+
+SQLBoolean operator>=(const SQLDate& lhs, const SQLDate& rhs)
+{
+  return !(lhs < rhs);
+
+}
+
 // ------------------- SQLTime Definition -------------------------------------
 
 /**
