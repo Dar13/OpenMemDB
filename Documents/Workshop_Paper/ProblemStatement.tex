@@ -1,0 +1,34 @@
+
+
+
+\documentclass[10pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[pass, letterpaper]{geometry}
+\usepackage{graphicx}
+
+
+\begin{document}
+	\pagenumbering{gobble}
+	\section{Related Works}
+	Databases are slow while memory is getting cheaper. Memory is following a long running pattern, from costing thousands of dollars for a few megabytes to about \$40 for 8 gigabytes \cite{jcmit}.
+	With this trend, we can take advantage and design extremely fast databases.	While there are many applications for which	current database solutions are fast enough
+	(website logins for example), these solutions leave something to be	desired	for countless other applications. Take big data analytics for example. With hundreds of terabytes of
+	data and millions of users to	account for, traditional database	systems fail to provide real time analytics. 
+	
+	\subsection{The Zynga Case}Zynga, the developers of Words with Friends and Farmville, faced the slow database problem. With so many users, their database solution was not fast enough to provide real time analytics.
+	There were just too many transactions going on at once. They remedied this by switching to MemSQL: a closed-source in-memory database. With this solution, Zynga can "make
+	decisions based on billions of data points in real-time to provide better in-game personalization and overall customer satisfaction" \cite{MemSQL} and "make real-time
+	in-game decisions based on players' engagement levels with new game extras or interactions with other players" \cite{MemSQL}.
+	
+	
+
+	\section{Motivation}
+	Our main motivation for this project is the desire to learn. Computer science is heading towards a very multiprocessor programming heavy era. Designing a wait-free database gives us the 		opportunity to learn more about multiprocessor software design. Our secondary objective for this project is to contribute to the computer science community. There is a lack of open-source, in-memory, and fully wait-free database systems. OpenMemDB plans to solve this problem. With our thirst for knowledge and motivation to contribute, we strive to improve the computer science community.
+
+	\pagebreak
+
+	\bibliography{ProblemStatement}
+	\bibliographystyle{plain}
+
+\end{document}
