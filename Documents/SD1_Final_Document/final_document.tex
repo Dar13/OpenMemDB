@@ -137,6 +137,45 @@ thread pool pulls work from. Tasks are C++11 lambda functions that are packaged 
 via the standard library's \lstinline|packaged\_task| class. This class provides an interface that
 allows us to create a future
 
+\subsection{Data Store}
+\subsubsection{Indexing}
+%author Robert Medina
+Indexing allows for fast retrieval from a collection of data. There are many ways to accomplish this, and some ways are better suited depending on the constraints. Tree-based indexing and Hash-based indexing are two popular solutions for an implementation of a database. Given a set of data in memory, indexing takes a key data value and stores it into a data structure. Based off this key value, the indexing data structure will point to the file in memory or memory address, depending on how the data is stored. Based on this, a file scan of the database is now just reduced to scanning an index file. 
+%\includegraphics{graphics/indexentry.png}
+However searching through an index file can still be a costly operation. Index files are smaller than the data it is referencing but it can still use a considerable about memory space. Therefore it would be reasonable to use a data structure for fast retrieval of data based on a range of values or based on the actual data value stored.
+
+
+\subsubsection{Tree-based Indexing}
+%author Robert Medina
+Tree-based indexing is an index file structured into a variant of a binary search tree. The tree is based off the key value and references to where that key is stored. Indexing requires fast retrieval of data, low cost insertion and low cost deletion of data. There are two types of trees that are useful for this type of operation, ISAM and B+ Tree.
+
+\subsubsection{B+ Tree}
+%author Robert Medina
+B+ Tree is a balanced tree in which the non-leaf nodes direct where the data will be stored and the leaf nodes contain the data entries. The leaf nodes are contained in a doubly-linked list for fast retrieval of all leaf nodes.
+%\includegraphics{graphics/B+_Tree_Abstract.png}
+Specifically, B+ Tree is an n-ary tree that has a root, internal nodes and leaf children. Each index entry contains an array of key values and a pointer. Each node references to another node based on a branching property. Each parent node contains m+1 children, m is index entries. The left children must be less than the parent key value, the middle children must be between the left and right side children values, and the right children must be greater or equal to the parent key value. Every node except root must be at least half full. 
+%\includegraphics{graphics/B+_Tree_Example.png}
+The runtime for a B+ Tree is the following:
+Searching is logm(n), m is index entries
+Insertion is same as searching
+Deletion is same as searching
+Searching with range (logm(n) + k), m is index entries and k is number of data records
+
+\subsubsection{Hash-based Indexing}
+%author Robert Medina
+	Hash-based Indexing references a key value to a pointer using a hash function. This can be used for indexing when there is an equal key value within the hash. Range operations using a key value is not possible with a hash function since it would simply be too costly of an operation. Hash-based indexing suffers from overflow chaining such as ISAM, which can hinder performance. There exists multiple hash-based indexing such as Static Hashing, Extendible Hashing, and Linear Hashing. 
+\subsubsection{Static Hashing}
+%author Robert Medina
+Static Hashing is a hash table based on a key value with a pointer to a bucket of pages that contain said key. These data entries may be sorted but it depends on the application. This data structure is static for the most part but it does allow for overflow page allocation. In the event of inserting beyond the memory allocated, this data entry is placed into a new page and the page is added to an overflow chain in the hash table.
+%\includegraphics{graphics/Static_Hashing_Abstract}
+A good hash function is imperative to uniformly distribute values over the collection of buckets. An example of a good hash would be hash(key) = (a*key + b), a and b are constants. Some problems of Static Hashing are the fact that it is static. When the index file is created bucket sizes are known at time of creation, so pages can be stored successively in the buckets. However as the index file continues to grow if the same key value is stored repeatedly then a long overflow chain develops. Since the number of buckets are static if the index file shrinks in size then there is wasted memory space. If the file grows too large then it results in poor performance. Otherwise, the performance for operations is very fast. The following is the runtimes:
+Search O() 1 I/O read
+Insertion O() 2 I/O read/write page
+Deletion O() 2 I/O read/write page
+Rehashing:
+	Intuitively a simple hash table with a pointer to a page would make sense. However in the case of additional pages, without an overflow chain rehashing the table would be necessary. In this case rehashing the table would be a costly operation. Including that the data structure is unusable while rehashing is in progress. Dynamic hashing techniques solve this problem.
+Extendible Hashing:
+
 \subsection{SQL Engine}
 %author Mike McGee
 One of the most important pieces of a Database Management System is the SQL Engine. 
@@ -240,6 +279,7 @@ convenient mechanism for passing state information down to the action routines w
 having to use global variables.”\cite{lemon_parser}
 \end{quotation}
 
+<<<<<<< HEAD
 \subsubsection{Query Planner}
 The query planner is the most challenging and important piece of a typical DBMS as it
 determines how the data in the SQL tables are retrieved which has a huge impact on 
@@ -250,6 +290,118 @@ a theorem solver is employed to determine how to solve the given problem. A larg
 solver is impractical in a system with high-performance, low-latency environment such as 
 a DBMS, so we must generate our own significantly stripped-down version that can handle a 
 specific set of query relations extremely fast.
+=======
+\subsubsection{Code Generator}
+
+\subsection{Related Works}
+	Over the last 30 years the there has been tremendous advancements in computing
+	hardware. "Processors are thousands of times faster and memory is thousands of
+	times times larger"\cite{stonebraker2007end}. Most technologies have advanced 
+	along with hardware, however database management systems have struggled to improve
+	at a similar rate. This is mostly due to concurrency issues. "Existing studies show
+	that current database engines can spend more than 30\% of time in 
+	synchronization-related operations (e.g.locking and latching), even when only a 
+	single client thread is running."\cite{soares2015database}
+   \par\vspace{\baselineskip}
+  	There have been several attempts to solve this problem. Some of which will sacrifice
+  	some data consistency in order to achieve a higher better performance. Still others
+  	remain fully ACID compliant and attempt to parallelize individual steps in the 
+  	DBMS or solely use multiple threads when executing query plans. Then there are those
+  	that attempt to implement some level of lock freedom into their DBMS.
+  	\par\vspace{\baselineskip}
+	\subsubsection{MemSQL and VoltDB}
+	MemSQL\footnote{MemSQL can be configured as a Columnstore that stores data on disk}
+	and VoltDB are both fully in memory DBMS as is OpenMemDB. This is where the
+	similarities end as far as OpenMemDB is concerned. MemSQL and VoltDB on the other 
+	hand both use distributed systems to achieve performance gains. MemSQL differs from 
+	VoltDB in a few ways, the most important being it's use of lock free data structures
+	for storing data and its storing of pre-compiled commonly used queries\cite{MemSQL}.
+	VoltDB tries to make its performance gains by what they call "Concurreny through
+	scheduling"\cite{VoltDB}. This is the process of using a single-threaded pipeline 
+	that performs the task it was scheduled. This limits the need for locking during
+	transactions by intelligently scheduling the transactions so that locks are not
+	necessary.
+	\par\vspace{\baselineskip}
+	OpenMemDB aims to take a different approach, one that is fully wait free. The goal is 
+	to use powerful wait free data structures that will allow for a massively parallel 
+	DBMS that can scale with the addition of processors and memory. It is our assumption 
+	that the achievement of a fully weight free DBMS will achieve the performance gains 
+	that have been lacking in the DBMS world while eliminating the complexity of 
+	distributed systems, all while retaining full ACID compliance.
+	
+	\subsubsection{Other Database Management Systems}
+	The two DBMS systems listed above are far from the only ones that exist. They were
+	researched more heavily because of there perceived similarities to our project and
+	because the documentation for them was thorough. However, there are numerous lesser
+	known and less well documented DBMS that are worthy of note.
+	\par\vspace{\baselineskip}
+	Aerospike is an AGPL licensed NoSQL flash-optimized in memory 
+	DBMS. Aerospike is an open source project that follows the similar pattern of 
+	a distributed shared-nothing architecture that is appearing common among most
+	in-memory DBMS. 
+	\begin{quote}
+	Aerospike architecture is derived from its core principles – NoSQL scalability and
+	flexibility, along with traditional database consistency, reliability and extensibility.
+	\cite{aerospike}
+	\end{quote}
+	\par\vspace{\baselineskip}
+%%\includegraphics{graphics/RelatedWorksArchitectures/aerospike_dbms_architecture.png}
+	\cite{aerospike}
+	\par\vspace{\baselineskip}	
+	Apache Geode is an Apache licensed distributed in-memory DBMS. Apache Geode is a brand
+	new project and as such has very limited documentation. They claim on there github page
+	to be 
+	\begin{quote}
+	... a data management platform that provides real-time, consistent access to 
+	data-intensive applications throughout widely distributed cloud architectures.
+	\end{quote}
+	The specifics of their architecture is not listed. 
+	\par\vspace{\baselineskip}
+	dashDB is IBM's in-memory data warehouse. Self described as 
+	\begin{quote}
+	a high performance, massively scalable cloud data warehouse service, 
+	fully managed by IBM. \cite{dashDB}
+	\end{quote}
+	dashDB comes in a couple different configurations, the one that most resembles 
+	our project is the MPP, "Massively Parallel Processing", configuration. 
+	MPP operates by allowing the data warehouse to leverage multiple servers 
+	in a network cluster to process data simultaneously. 
+	\par\vspace{\baselineskip}
+%%	\includegraphics{graphics/RelatedWorksArchitectures/dashDB_mpp_architecture.png}
+	\cite{dashDB}
+	\par\vspace{\baslineskip}
+	Each server in this data warehouse utilizes a number of key technologies, including: 
+	\begin{itemize}
+	  \item Dynamic in-memory processing: Even when a dataset
+	  does not fit entirely in memory, dashDB still processes at
+	  lightning fast speeds using a series of patented algorithms
+	  that enable in-memory acceleration. While every workload
+	  is different, dashDB only requires RAM size to be 5 percent
+	  of the original pre-load source data size in order to run at
+      in-memory optimized speeds.
+     \item Actionable compression: dashDB performs a broad range
+	  of operations—including joins and predicate evaluations—
+	  directly on compressed data, therefore improving memory
+	  and cache bandwidth, and saving CPU costs.
+   	 \item Parallel vector processing: dashDB is CPU optimized
+	  and designed for the latest generation of microprocessors.
+	  Both multi-core parallelism and SIMD vector instructions
+      enable dashDB to maximize hardware performance.
+	  \item Data skipping: BLU enables dashDB to intelligently avoid
+	  scanning entire ranges of column data that don’t qualify for
+	  analysis, preserving time and resources.
+	\end{itemize}
+	
+	dashDB uses a highly parallelized infrastructure optimized for columnar data
+	exchange that is organized as such:
+	\par\vspace{\baselineskip}
+%%	\includegraphics{graphics/RelatedWorksArchitectues/dashDB_query_architecture.png}
+	\cite{dashDB}
+	\par\vspace{\baselineskip}
+	
+		
+	
+>>>>>>> dece7356307d5b3a7a613486f4c8c95eed3d4d7e
 \newpage
 
 \section{Design Summary}
