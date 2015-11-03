@@ -45,3 +45,12 @@ openmemdb
 
 # VIM temp files
 *.swp
+
+# Latex files
+*.bbl
+*.dvi
+*.blg
+
+# Graphics files
+*.png
+graphics

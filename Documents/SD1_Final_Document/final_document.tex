@@ -6,32 +6,111 @@
 \usepackage{graphicx}
 \usepackage{listings}
 
-\title{Non-Blocking In Memory Database}
-\author{}
-\date{}
+\title{Non-Blocking In-Memory Database\thanks{Sponsor: Dr. Damian Dechev}}
+\author{Michael McGee, Robert Medina, Neil Moore, Jason Stavrinaky\\[2ex]
+	\includegraphics{graphics/OpenMemDB_logo_transparency.png}\\[1ex]
+}
+\date{11/4/2015}
 
 \pdfinfo{%
   /Title    (Non-blocking, In-memory Database)
   /Author   (Michael McGee, Robert Medina, Neil Moore, Jason Stavrinaky)
   /Creator  (Neil Moore)
   /Producer ()
-  /Subject  (Initial Project Description for COP4934)
+  /Subject  (Final Document for COP4934)
   /Keywords ()
 }
 
 \begin{document}
+\pagenumbering{gobble}
 \maketitle
 \newpage
 
+\pagenumbering{roman}
 \tableofcontents
 \newpage
 
+\pagenumbering{arabic}
+
 \section{Executive Summary}
+The database as a concept has always emphasized speed, as many other pieces of both software
+and business rely on the information contained within them. As such, these pieces of software
+are part of a class of software that strive for every piece of performance possible, either through
+hardware improvements or algorithmic optimizations. While in-memory databases are not a new concept,
+Random Access Memory (RAM) has, until recently, not been cheap enough to completely house a useful
+set of data. The ability to do this in such a way beyond simply using main memory as a cache for the 
+actual data on the hard disk opens up the possibility of fully utilizing the processing power
+available to the system fully.
+
+Utilizing the full hardware resources available to us requires the use of multiple threads or 
+multiple processes spread out over all the cores available. Accessing the same data location 
+from multiple threads or processes causes issues where threads are unable to progress further in their
+work. This state is called deadlock, and is the bane of any programmer that creates multi-threaded
+programs. Our project attempts to entirely avoid both deadlock and their common mitigator, locks,
+by implementing and using wait-free data structures and algorithms.
+
+Wait-free is a guarantee that the system will always progress, as a whole, within a given period of time
+regardless of work-load or contention over resources. The application of this guarantee to many
+of the common algorithms and data structures familiar to computer scientists is still under heavy research
+(as an example, there is still no widely-accepted implementation of a wait-free binary search tree).
+
+The objectives for this project is to successfully implement a SQL database that is both fully in-memory
+and fully wait-free, even at the cost of performance. In order for this to be possible within the time
+given to us, the scope of this project must be toned down and strictly enforced. While we will 
+attempt to be SQL-compliant, certain aspects of that standard heavily imply a type of mutual 
+exclusion be used which we obviously cannot use if we wish to remain wait-free. The pure size of
+the standard is also a major obstacle to this objective.
+
+While our technical approach is prone to change as our understanding of the various concepts
+and systems at play in a Database Management System (DBMS), we do have a general sense that we
+wish to utilize a functional or imperative style of data flow. Objects will be used when appropriate
+but we would not describe the overall design as object-oriented in any way. On the contrary, we would 
+find a much more suitable term in data-oriented programming as we are almost entirely dealing
+with large amounts of arbitrary manipulation rather than the interaction of objects.
+
+To facilitate a wait-free system, we will implement a system where a pre-determined pool of threads
+that will be assigned a queue of tasks, whether they be SQL queries or database-specific commands.
+These threads will be almost entirely distinct and independent of the others, with as little
+inter-communication as possible in order to avoid the possibility of deadlock or the necessity of
+locking. The assignment of these tasks will be done by a work manager that will perform some form 
+of load-balancing when distributing the tasks among the pool of threads.
+
+Each thread will independently analyze, plan and execute its tasks in such a way that no shared memory
+outside of the actual data is needed. The access to the data store, necessary in any database, 
+will be handled via a common set of interfaces that will then utilize the algorithms and data structures
+given to us by our sponsor. The planning and optimization of these tasks will be primary source 
+of technical challenge in this project as the task language chosen (SQL) is declarative rather
+than imperative or functional in nature. In other words, the tasks' language only tells us what
+to retrieve rather than how to retrieve it.
+
+The advantages given to us by the approach detailed above is the inherent and explicit wait-freedomn
+that occurs when the need for locking or shared state is removed entirely. As a result of that, we 
+hope to be at least competitive or comparable to current in-memory or traditional databases in terms
+of performance.
+
 \newpage
 
 \section{Project Motivation}
+As hardware reaches the limits in Moore's Law and processors stop becoming faster and faster
+and instead focus on becoming more and more parallel, algorithms and the software that implement
+them must adapt in order to maximize both performance and hardware utilization.
+
+% Graphic showing Moore's Law tapering off (graph of GHz and number of cores?)
+
+Recent research done by multiple universities and companies have yielded the concept of wait-freedom,
+the guarantee that the entire system will make progress towards a goal in a given period of time.
+This is a stronger guarantee than lock-freedom as lock-freedom only guarantees that a single thread
+will make progress in a period of time. Our sponsor, Dr. Dechev, and his lab here at the University
+of Central Florida have created a framework of wait-free data structures named Tervel ~\cite{tervel}.
 
 \subsection{Personal Motivations}
+\subsubsection{Neil Moore}
+This project is one that I knew would be incredibly challenging, yet also had the greatest
+potential in terms of personal growth and end product. These technologies are only going to
+become more and more important and widespread throughout the software industry as hardware 
+continues to parallelize, memory becomes faster and cheaper, and wait-free/lock-free algorithms
+become more mature. Experience working with high-performance, memory-intensive, and
+standard-defined technologies opens the door for later opportunities in cutting-edge technologies.
 \newpage
 
 \section{Broader Impacts}
@@ -55,24 +134,25 @@ parser, and the code generator.
 
 \subsubsection{Parser}
 %author Mike McGee
-When researching SQL parsers we found that most database management systems use a 
+When researching SQL parsers we found that most database management systems use a
 parser generator tool to develop a parser for the query language that they support.
-The purpose of any parser generator is to implement a parser in the programming language
-desired that will accurately parse the context free grammar that it was passed in the 
-grammar specification file.
-\\\\
-The two parser generators that we found were "Lemon" and "YACC". PostgreSQL uses "YACC",
-which stands for "Yet Another Compiler Compiler", while SQLite uses "Lemon", which stands
-for "Lemon". Both tools will generate a C code parser for your query language when
-provided a grammar specification file. According to the tutorial provided by "Lemon" there
-are some vast differences between these two parser generators. 
-\\
+The purpose of any parser generator is to implement a parser in the programming
+language desired that will accurately parse the context free grammar that it 
+was passed in the grammar specification file.
+
+The two parser generators that we found were "Lemon" and "YACC". PostgreSQL uses 
+"YACC", which stands for "Yet Another Compiler Compiler", while SQLite uses 
+"Lemon", which stands for "Lemon". Both tools will generate a C code parser for 
+your query language when provided a grammar specification file. According to the 
+tutorial provided by "Lemon" there are some vast differences between these 
+two parser generators. 
+
 “It uses a different grammar syntax which is designed to reduce the number of coding
 errors. Lemon also uses a more sophisticated parsing engine that is faster than yacc and
 bison and which is both reentrant and thread-safe. Furthermore, Lemon implements features
 that can be used to eliminate resource leaks, making is suitable for use in long-running
 programs such as graphical user interfaces or embedded controllers.”\cite{lemon_parser}
-\\\\
+
 It is because of these benefits, especially thread safety, that we chose to use Lemon
 as our parser generator. The Lemon parser generator is contained in one C code file and
 is used by running the program with the grammar specification file as an argument.
@@ -94,14 +174,14 @@ developer must first create the parser as follows:
 This call allocates and initializes a new parser and returns a pointer to it. The
 parameter to the call is the subroutine used to allocate memory. For our purposes it will
 most likely be something Tervel specific.
-\\\\ 
+
 After the programmer is done using the parser they must free the memory that was allocated
 to the parser using a subroutine of their choice. It is done as follows
 \begin{lstlisting}
 	ParseFree (pParser, free) 
 \end{lstlisting}
 where free is the subroutine used to reclaim the memory, again probably Tervel specific for our purposes. 
-\\\\
+
 After the parser is allocated, the developer will provide the parser with a sequence of
 tokens to be parsed. This is done by calling:
 \begin{lstlisting}
@@ -125,7 +205,6 @@ convenient mechanism for passing state information down to the action routines w
 having to use global variables.”\cite{lemon_parser}
 
 \subsubsection{Code Generator}
-
 \newpage
 
 \section{Design Summary}
@@ -134,7 +213,7 @@ having to use global variables.”\cite{lemon_parser}
 \section{Facilities and Equipment}
 \newpage
 
-\section{Consultants, Subcontractors, and Suppliers}
+\subsection{Consultants, Subcontractors, and Suppliers}
 \newpage
 
 \section{Budget and Financing}
