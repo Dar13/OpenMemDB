@@ -98,7 +98,7 @@ and instead focus on becoming more and more parallel, algorithms and the softwar
 them must adapt in order to maximize both performance and hardware utilization.
 \par\vspace{\baselineskip}
 % Graphic showing Moore's Law tapering off (graph of GHz and number of cores?)
-\includegraphics{graphics/Moores_Law_core_freq_comparison.png}
+%\includegraphics{graphics/Moores_Law_core_freq_comparison.png}
 Recent research done by multiple universities and companies have yielded the concept of wait-freedom,
 the guarantee that the entire system will make progress towards a goal in a given period of time.
 This is a stronger guarantee than lock-freedom as lock-freedom only guarantees that a single thread
@@ -122,6 +122,21 @@ standard-defined technologies opens the door for later opportunities in cutting-
 \newpage
 
 \section{Research}
+\subsection{Work Manager}
+The Work Manager is a conglomeration of multiple minor, but not insignificant, roles
+within the DBMS. Specifically, it is the:
+\begin{itemize}
+  \item Main thread
+  \item Sole communicator with the client
+  \item Load-balancer between the primary worker threads
+  \item System resource monitor
+\end{itemize}
+
+Work distribution between threads is done via a task-queue that each thread in the
+thread pool pulls work from. Tasks are C++11 lambda functions that are packaged up 
+via the standard library's \lstinline|packaged\_task| class. This class provides an interface that
+allows us to create a future
+
 \subsection{SQL Engine}
 %author Mike McGee
 One of the most important pieces of a Database Management System is the SQL Engine. 
@@ -130,7 +145,7 @@ language and transforming those commands into an internal representation that ca
 executed by the DBMS. The SQL Engine often consists of three pieces: the tokenizer, the
 parser, and the code generator.
 
-\includegraphics{graphics/SQLEngine_activity_overview.png}
+%\includegraphics{graphics/SQLEngine_activity_overview.png}
 
 \subsubsection{Tokenizer}
 %initial author Neil Moore
@@ -225,7 +240,16 @@ convenient mechanism for passing state information down to the action routines w
 having to use global variables.”\cite{lemon_parser}
 \end{quotation}
 
-\subsubsection{Code Generator}
+\subsubsection{Query Planner}
+The query planner is the most challenging and important piece of a typical DBMS as it
+determines how the data in the SQL tables are retrieved which has a huge impact on 
+the overall performance of the DBMS. The need for a query planner comes from the 
+declarative nature of SQL queries, where the query doesn't tell you how to retrieve the
+data but instead tells you what to retrieve. This is similar to languages such as Prolog where
+a theorem solver is employed to determine how to solve the given problem. A large theorem 
+solver is impractical in a system with high-performance, low-latency environment such as 
+a DBMS, so we must generate our own significantly stripped-down version that can handle a 
+specific set of query relations extremely fast.
 \newpage
 
 \section{Design Summary}
