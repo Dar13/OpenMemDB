@@ -8,10 +8,10 @@
 \contentsline {subsection}{\numberline {5.1}SQL Engine}{6}
 \contentsline {subsubsection}{\numberline {5.1.1}Tokenizer}{6}
 \contentsline {subsubsection}{\numberline {5.1.2}Parser}{6}
-\contentsline {subsubsection}{\numberline {5.1.3}Code Generator}{7}
-\contentsline {section}{\numberline {6}Design Summary}{8}
-\contentsline {section}{\numberline {7}Facilities and Equipment}{9}
-\contentsline {subsection}{\numberline {7.1}Consultants, Subcontractors, and Suppliers}{10}
-\contentsline {section}{\numberline {8}Budget and Financing}{11}
-\contentsline {section}{\numberline {9}Project Summary}{12}
-\contentsline {section}{\numberline {A}Appendix A}{14}
+\contentsline {subsubsection}{\numberline {5.1.3}Code Generator}{8}
+\contentsline {section}{\numberline {6}Design Summary}{9}
+\contentsline {section}{\numberline {7}Facilities and Equipment}{10}
+\contentsline {subsection}{\numberline {7.1}Consultants, Subcontractors, and Suppliers}{11}
+\contentsline {section}{\numberline {8}Budget and Financing}{12}
+\contentsline {section}{\numberline {9}Project Summary}{13}
+\contentsline {section}{\numberline {A}Appendix A}{15}
