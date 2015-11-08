@@ -7,9 +7,26 @@
 
 #include <cstdint>
 
-namespace omdb
+enum SQLAsciiUsage
 {
+  SQL_SPACE       = 0x1,
+  SQL_ALPHA       = 0x2,
+  SQL_DIGIT       = 0x4,
+  SQL_ALNUM       = (SQL_DIGIT | SQL_ALPHA),
+  SQL_XDIGIT      = 0x8,
+  SQL_UPPER_ALPHA = 0x20,
+  SQL_IDENT       = 0x40,
+  SQL_NONE        = 0x0
+};
+
+extern const unsigned char sql_ascii_map[256];
+
+inline bool isSQLIdentifierChar(unsigned char ch)
+{
+  return (sql_ascii_map[ch] & SQL_IDENT) != 0;
 }
+
+int strnicmp(const char* left, const char* right, int n);
 
 class SQLNullable
 {

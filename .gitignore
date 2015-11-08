@@ -6,6 +6,7 @@
 
 # Executable
 openmemdb
+lemon
 
 # Precompiled Headers
 *.gch
@@ -16,6 +17,7 @@ openmemdb
 *.a
 *.la
 *.lo
+*.out
 
 # Shared objects (inc. Windows DLLs)
 *.dll
@@ -45,3 +47,7 @@ openmemdb
 
 # VIM temp files
 *.swp
+
+# generic temp file
+*.tmp
+*.temp

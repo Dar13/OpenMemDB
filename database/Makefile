@@ -1,24 +1,27 @@
 # Compiler to use
 CC=g++
 
+# NAWK-compatible AWK
+NAWK=gawk
+
 TERVEL_DIR=../Tervel
-INC_DIR=./include/
-SRC_DIR=./source/
+INC_DIR=./include
+SRC_DIR=./source
 EXEC=openmemdb
+
+TOOLS_DIR=./tools
+
+LEMON_GRAM_LOC=$(realpath ./include/sql/parser/parse.y)
 
 # Basic flags that will be shared between debug and release configurations
 CFLAGS=-Wall -Wextra -g -std=c++11 -I$(INC_DIR) -I$(TERVEL_DIR)
 
 LDFLAGS=-L$(TERVEL_DIR) -rdynamic -pthread -std=c++11
 
-#FILES=main.cc workmanager/work_manager.cc workmanager/types.cc util/network/common.cc util/network/connection.cc
-
 SOURCES=$(shell find $(SRC_DIR) -name *.cc)
 
-#SOURCES=$(addprefix $(SRC_DIR), $(FILES))
 SOURCES += $(shell find $(TERVEL_DIR)/tervel/util/ -name *.cc)
 OBJECTS=$(SOURCES:.cc=.o)
-
 
 all: $(SOURCES) $(EXEC)
 
@@ -31,3 +34,10 @@ $(EXEC): $(OBJECTS)
 clean:
 	rm -f $(EXEC)
 	rm $(OBJECTS)
+
+lemon:
+	make -C $(TOOLS_DIR)/lemon
+	cd $(TOOLS_DIR)/lemon && ./lemon $(LEMON_GRAM_LOC)
+	mv $(INC_DIR)/sql/parser/parse.h $(INC_DIR)/sql/parser/parse.h.tmp
+	mv $(INC_DIR)/sql/parser/parse.c $(SRC_DIR)/sql/parser/parse.c
+	$(NAWK)	-f $(TOOLS_DIR)/lemon/addopcodes.awk $(INC_DIR)/sql/parser/parse.h.tmp >$(INC_DIR)/sql/parser/parse.h
