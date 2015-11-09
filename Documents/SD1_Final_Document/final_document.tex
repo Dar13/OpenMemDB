@@ -6,32 +6,113 @@
 \usepackage{graphicx}
 \usepackage{listings}
 
-\title{Non-Blocking In Memory Database}
-\author{}
-\date{}
+\setlength{\parindent}{0cm}
+
+\title{Non-Blocking In-Memory Database\thanks{Sponsor: Dr. Damian Dechev}}
+\author{Michael McGee, Robert Medina, Neil Moore, Jason Stavrinaky\\[2ex]
+	\includegraphics{graphics/OpenMemDB_logo_transparency.png}\\[1ex]
+}
+\date{11/4/2015}
 
 \pdfinfo{%
   /Title    (Non-blocking, In-memory Database)
   /Author   (Michael McGee, Robert Medina, Neil Moore, Jason Stavrinaky)
   /Creator  (Neil Moore)
   /Producer ()
-  /Subject  (Initial Project Description for COP4934)
+  /Subject  (Final Document for COP4934)
   /Keywords ()
 }
 
 \begin{document}
+\pagenumbering{gobble}
 \maketitle
 \newpage
 
+\pagenumbering{roman}
 \tableofcontents
 \newpage
 
+\pagenumbering{arabic}
+
 \section{Executive Summary}
+The database as a concept has always emphasized speed, as many other pieces of both software
+and business rely on the information contained within them. As such, these pieces of software
+are part of a class of software that strive for every piece of performance possible, either through
+hardware improvements or algorithmic optimizations. While in-memory databases are not a new concept,
+Random Access Memory (RAM) has, until recently, not been cheap enough to completely house a useful
+set of data. The ability to do this in such a way beyond simply using main memory as a cache for the 
+actual data on the hard disk opens up the possibility of fully utilizing the processing power
+available to the system fully.
+\par\vspace{\baselineskip}
+Utilizing the full hardware resources available to us requires the use of multiple threads or 
+multiple processes spread out over all the cores available. Accessing the same data location 
+from multiple threads or processes causes issues where threads are unable to progress further in their
+work. This state is called deadlock, and is the bane of any programmer that creates multi-threaded
+programs. Our project attempts to entirely avoid both deadlock and their common mitigator, locks,
+by implementing and using wait-free data structures and algorithms.
+\par\vspace{\baselineskip}
+Wait-free is a guarantee that the system will always progress, as a whole, within a given period of time
+regardless of work-load or contention over resources. The application of this guarantee to many
+of the common algorithms and data structures familiar to computer scientists is still under heavy research
+(as an example, there is still no widely-accepted implementation of a wait-free binary search tree).
+\par\vspace{\baselineskip}
+The objectives for this project is to successfully implement a SQL database that is both fully in-memory
+and fully wait-free, even at the cost of performance. In order for this to be possible within the time
+given to us, the scope of this project must be toned down and strictly enforced. While we will 
+attempt to be SQL-compliant, certain aspects of that standard heavily imply a type of mutual 
+exclusion be used which we obviously cannot use if we wish to remain wait-free. The pure size of
+the standard is also a major obstacle to this objective.
+\par\vspace{\baselineskip}
+While our technical approach is prone to change as our understanding of the various concepts
+and systems at play in a Database Management System (DBMS), we do have a general sense that we
+wish to utilize a functional or imperative style of data flow. Objects will be used when appropriate
+but we would not describe the overall design as object-oriented in any way. On the contrary, we would 
+find a much more suitable term in data-oriented programming as we are almost entirely dealing
+with large amounts of arbitrary manipulation rather than the interaction of objects.
+\par\vspace{\baselineskip}
+To facilitate a wait-free system, we will implement a system where a pre-determined pool of threads
+that will be assigned a queue of tasks, whether they be SQL queries or database-specific commands.
+These threads will be almost entirely distinct and independent of the others, with as little
+inter-communication as possible in order to avoid the possibility of deadlock or the necessity of
+locking. The assignment of these tasks will be done by a work manager that will perform some form 
+of load-balancing when distributing the tasks among the pool of threads.
+\par\vspace{\baselineskip}
+Each thread will independently analyze, plan and execute its tasks in such a way that no shared memory
+outside of the actual data is needed. The access to the data store, necessary in any database, 
+will be handled via a common set of interfaces that will then utilize the algorithms and data structures
+given to us by our sponsor. The planning and optimization of these tasks will be primary source 
+of technical challenge in this project as the task language chosen (SQL) is declarative rather
+than imperative or functional in nature. In other words, the tasks' language only tells us what
+to retrieve rather than how to retrieve it.
+\par\vspace{\baselineskip}
+The advantages given to us by the approach detailed above is the inherent and explicit wait-freedomn
+that occurs when the need for locking or shared state is removed entirely. As a result of that, we 
+hope to be at least competitive or comparable to current in-memory or traditional databases in terms
+of performance.
+
 \newpage
 
 \section{Project Motivation}
+As hardware reaches the limits in Moore's Law and processors stop becoming faster and faster
+and instead focus on becoming more and more parallel, algorithms and the software that implement
+them must adapt in order to maximize both performance and hardware utilization.
+\par\vspace{\baselineskip}
+% Graphic showing Moore's Law tapering off (graph of GHz and number of cores?)
+\includegraphics{graphics/Moores_Law_core_freq_comparison.png}
+Recent research done by multiple universities and companies have yielded the concept of wait-freedom,
+the guarantee that the entire system will make progress towards a goal in a given period of time.
+This is a stronger guarantee than lock-freedom as lock-freedom only guarantees that a single thread
+will make progress in a period of time. Our sponsor, Dr. Dechev, and his lab here at the University
+of Central Florida have created a framework of wait-free data structures named Tervel ~\cite{tervel}.
 
 \subsection{Personal Motivations}
+\subsubsection{Neil Moore}
+This project is one that I knew would be incredibly challenging, yet also had the greatest
+potential in terms of personal growth and end product. These technologies are only going to
+become more and more important and widespread throughout the software industry as hardware 
+continues to parallelize, memory becomes faster and cheaper, and wait-free/lock-free algorithms
+become more mature. Experience working with high-performance, memory-intensive, and
+standard-defined technologies opens the door for later opportunities in cutting-edge technologies.
 \newpage
 
 \section{Broader Impacts}
@@ -87,30 +168,46 @@ language and transforming those commands into an internal representation that ca
 executed by the DBMS. The SQL Engine often consists of three pieces: the tokenizer, the
 parser, and the code generator.
 
-%Insert an image here that shows the sql engine process
+\includegraphics{graphics/SQLEngine_activity_overview.png}
 
 \subsubsection{Tokenizer}
+%initial author Neil Moore
+To start the query planning and execution process, we must tokenize the provided query
+from a straight string into a format readable by the parser. This tokenizer is very
+similar to a generic compiler tokenizer though it's job is made considerably easier 
+by the importance of spaces in SQL queries/commands regarding token delineation.
+\par\vspace{\baselineskip}
+In an effort to reduce code duplication and facilitate rapid development, we chose
+to appropriate the tokenizer from the SQLite project. SQLite is a public domain
+SQL database library that integrates very cleanly into many applications big
+or small.
+\par\vspace{\baselineskip}
+SQLite is not entirely SQL compliant, as that is simply unreasonable to achieve
+given its use cases and problem domain. As such, changes to the tokenizer will be
+needed in order to make sure it can handle proper SQL queries/commands while 
+not supporting non-standard SQL tokens.
 
 \subsubsection{Parser}
 %author Mike McGee
-When researching SQL parsers we found that most database management systems use a 
+When researching SQL parsers we found that most database management systems use a
 parser generator tool to develop a parser for the query language that they support.
-The purpose of any parser generator is to implement a parser in the programming language
-desired that will accurately parse the context free grammar that it was passed in the 
-grammar specification file.
-\\\\
-The two parser generators that we found were "Lemon" and "YACC". PostgreSQL uses "YACC",
-which stands for "Yet Another Compiler Compiler", while SQLite uses "Lemon", which stands
-for "Lemon". Both tools will generate a C code parser for your query language when
-provided a grammar specification file. According to the tutorial provided by "Lemon" there
-are some vast differences between these two parser generators. 
-\\
+The purpose of any parser generator is to implement a parser in the programming
+language desired that will accurately parse the context free grammar that it 
+was passed in the grammar specification file.
+\par\vspace{\baselineskip}
+The two parser generators that we found were "Lemon" and "YACC". PostgreSQL uses 
+"YACC", which stands for "Yet Another Compiler Compiler", while SQLite uses 
+"Lemon", which stands for "Lemon". Both tools will generate a C code parser for 
+your query language when provided a grammar specification file. According to the 
+tutorial provided by "Lemon" there are some vast differences between these 
+two parser generators. 
+\par\vspace{\baselineskip}
 “It uses a different grammar syntax which is designed to reduce the number of coding
 errors. Lemon also uses a more sophisticated parsing engine that is faster than yacc and
 bison and which is both reentrant and thread-safe. Furthermore, Lemon implements features
 that can be used to eliminate resource leaks, making is suitable for use in long-running
 programs such as graphical user interfaces or embedded controllers.”\cite{lemon_parser}
-\\\\
+\par\vspace{\baselineskip}
 It is because of these benefits, especially thread safety, that we chose to use Lemon
 as our parser generator. The Lemon parser generator is contained in one C code file and
 is used by running the program with the grammar specification file as an argument.
@@ -132,19 +229,22 @@ developer must first create the parser as follows:
 This call allocates and initializes a new parser and returns a pointer to it. The
 parameter to the call is the subroutine used to allocate memory. For our purposes it will
 most likely be something Tervel specific.
-\\\\ 
+
 After the programmer is done using the parser they must free the memory that was allocated
 to the parser using a subroutine of their choice. It is done as follows
 \begin{lstlisting}
 	ParseFree (pParser, free) 
 \end{lstlisting}
 where free is the subroutine used to reclaim the memory, again probably Tervel specific for our purposes. 
-\\\\
+
 After the parser is allocated, the developer will provide the parser with a sequence of
 tokens to be parsed. This is done by calling:
 \begin{lstlisting}
 	Parse(pParser, hTokenID, sTokenData, pArg);
 \end{lstlisting}
+
+% What's the deal with this? - Neil
+\begin{quotation}
 “The first argument to the Parse() routine is the pointer returned by ParseAlloc(). The
 second argument is a small positive integer that tells the parse the type of the next
 token in the data stream. There is one token type for each terminal symbol in the grammar.
@@ -161,21 +261,177 @@ fourth parameter that can be of any type chosen by the programmer. The parser do
 anything with this argument except to pass it through to action routines. This is a
 convenient mechanism for passing state information down to the action routines without
 having to use global variables.”\cite{lemon_parser}
+\end{quotation}
 
 \subsubsection{Code Generator}
 
+\subsection{Related Works}
+	Over the last 30 years the there has been tremendous advancements in computing
+	hardware. "Processors are thousands of times faster and memory is thousands of
+	times times larger"\cite{stonebraker2007end}. Most technologies have advanced 
+	along with hardware, however database management systems have struggled to improve
+	at a similar rate. This is mostly due to concurrency issues. "Existing studies show
+	that current database engines can spend more than 30\% of time in 
+	synchronization-related operations (e.g.locking and latching), even when only a 
+	single client thread is running."\cite{soares2015database}
+   \par\vspace{\baselineskip}
+  	There have been several attempts to solve this problem. Some of which will sacrifice
+  	some data consistency in order to achieve a higher better performance. Still others
+  	remain fully ACID compliant and attempt to parallelize individual steps in the 
+  	DBMS or solely use multiple threads when executing query plans. Then there are those
+  	that attempt to implement some level of lock freedom into their DBMS.
+  	\par\vspace{\baselineskip}
+	\subsubsection{MemSQL and VoltDB}
+	MemSQL\footnote{MemSQL can be configured as a Columnstore that stores data on disk}
+	and VoltDB are both fully in memory DBMS as is OpenMemDB. This is where the
+	similarities end as far as OpenMemDB is concerned. MemSQL and VoltDB on the other 
+	hand both use distributed systems to achieve performance gains. MemSQL differs from 
+	VoltDB in a few ways, the most important being it's use of lock free data structures
+	for storing data and its storing of pre-compiled commonly used queries\cite{MemSQL}.
+	VoltDB tries to make its performance gains by what they call "Concurreny through
+	scheduling"\cite{VoltDB}. This is the process of using a single-threaded pipeline 
+	that performs the task it was scheduled. This limits the need for locking during
+	transactions by intelligently scheduling the transactions so that locks are not
+	necessary.
+	\par\vspace{\baselineskip}
+	OpenMemDB aims to take a different approach, one that is fully wait free. The goal is 
+	to use powerful wait free data structures that will allow for a massively parallel 
+	DBMS that can scale with the addition of processors and memory. It is our assumption 
+	that the achievement of a fully weight free DBMS will achieve the performance gains 
+	that have been lacking in the DBMS world while eliminating the complexity of 
+	distributed systems, all while retaining full ACID compliance.
+	
+	\subsubsection{Other Database Management Systems}
+	The two DBMS systems listed above are far from the only ones that exist. They were
+	researched more heavily because of there perceived similarities to our project and
+	because the documentation for them was thorough. However, there are numerous lesser
+	known and less well documented DBMS that are worthy of note.
+	\par\vspace{\baselineskip}
+	Aerospike is an AGPL licensed NoSQL flash-optimized in memory 
+	DBMS. Aerospike is an open source project that follows the similar pattern of 
+	a distributed shared-nothing architecture that is appearing common among most
+	in-memory DBMS. 
+	\begin{quote}
+	Aerospike architecture is derived from its core principles – NoSQL scalability and
+	flexibility, along with traditional database consistency, reliability and extensibility.
+	\cite{aerospike}
+	\end{quote}
+	\par\vspace{\baselineskip}
+%%\includegraphics{graphics/RelatedWorksArchitectures/aerospike_dbms_architecture.png}
+	\cite{aerospike}
+	\par\vspace{\baselineskip}	
+	Apache Geode is an Apache licensed distributed in-memory DBMS. Apache Geode is a brand
+	new project and as such has very limited documentation. They claim on there github page
+	to be 
+	\begin{quote}
+	... a data management platform that provides real-time, consistent access to 
+	data-intensive applications throughout widely distributed cloud architectures.
+	\end{quote}
+	The specifics of their architecture is not listed. 
+	\par\vspace{\baselineskip}
+	dashDB is IBM's in-memory data warehouse. Self described as 
+	\begin{quote}
+	a high performance, massively scalable cloud data warehouse service, 
+	fully managed by IBM. \cite{dashDB}
+	\end{quote}
+	dashDB comes in a couple different configurations, the one that most resembles 
+	our project is the MPP, "Massively Parallel Processing", configuration. 
+	MPP operates by allowing the data warehouse to leverage multiple servers 
+	in a network cluster to process data simultaneously. 
+	\par\vspace{\baselineskip}
+%%	\includegraphics{graphics/RelatedWorksArchitectures/dashDB_mpp_architecture.png}
+	\cite{dashDB}
+	\par\vspace{\baslineskip}
+	Each server in this data warehouse utilizes a number of key technologies, including: 
+	\begin{itemize}
+	  \item Dynamic in-memory processing: Even when a dataset
+	  does not fit entirely in memory, dashDB still processes at
+	  lightning fast speeds using a series of patented algorithms
+	  that enable in-memory acceleration. While every workload
+	  is different, dashDB only requires RAM size to be 5 percent
+	  of the original pre-load source data size in order to run at
+      in-memory optimized speeds.
+     \item Actionable compression: dashDB performs a broad range
+	  of operations—including joins and predicate evaluations—
+	  directly on compressed data, therefore improving memory
+	  and cache bandwidth, and saving CPU costs.
+   	 \item Parallel vector processing: dashDB is CPU optimized
+	  and designed for the latest generation of microprocessors.
+	  Both multi-core parallelism and SIMD vector instructions
+      enable dashDB to maximize hardware performance.
+	  \item Data skipping: BLU enables dashDB to intelligently avoid
+	  scanning entire ranges of column data that don’t qualify for
+	  analysis, preserving time and resources.
+	\end{itemize}
+	
+	dashDB uses a highly parallelized infrastructure optimized for columnar data
+	exchange that is organized as such:
+	\par\vspace{\baselineskip}
+%%	\includegraphics{graphics/RelatedWorksArchitectues/dashDB_query_architecture.png}
+	\cite{dashDB}
+	\par\vspace{\baselineskip}
+	
+		
+	
 \newpage
 
 \section{Design Summary}
 \newpage
 
 \section{Facilities and Equipment}
+Our primary meeting place as a team was the computer science senior design lab in Harris Engineering
+Center (HEC) 105. Workstations are provided along with collaboration equipment such as 
+whiteboards and computers hooked up to TVs. A rack-mounted server was also made available and 
+some members of the team were given virtual machines on it to use as development
+platforms.
+\par\vspace{\baselineskip}
+Individual group members were able to use their personal machines as development platforms, though 
+eventually all but the most trivial testing had to be moved to the server(s) we had access to
+as their consumer-level hardware could not provide enough raw power to properly benchmark and
+stress-test the system. The hardware used by each member:
+\begin{itemize}
+ \item Thor (Neil Moore's personal machine)
+ \begin{itemize}
+  \item{\makebox[4cm]{CPU:\hfill} AMD FX-8350 (8-core)}
+  \item{\makebox[4cm]{RAM:\hfill} 16 GB DDR3}
+  \item{\makebox[4cm]{Motherboard:\hfill} Asus M5A99X EVO R2.0}
+  \item{\makebox[4cm]{GPU:\hfill} AMD Radeon HD 7870}
+  \item{\makebox[4cm]{Primary Hard Disk:\hfill} PNY Optima 240 GB SSD}
+  \item{\makebox[4cm]{Total Available Storage:\hfill} 3 terabytes}
+  \item{\makebox[4cm]{Operating System:\hfill} Arch Linux}
+ \end{itemize}
+\end{itemize}
+\par\vspace{\baselineskip}
+In addition to the senior design lab, we also had access to the Scalable and Secure Systems lab server
+thanks to Dr. Dechev. This server was the primary test-bed for OpenMemDB as consumer hardware simply
+doesn't have the necessary parallization or memory needed in order to truly test and stress a
+highly-parallelized and memory-intensive database management system. The server we were allowed to 
+use had the following hardware characteristics:
+\begin{itemize}
+ \item 64 cores
+ \item 312 gigabytes of RAM
+ \item 1 terabyte of hard disk storage
+\end{itemize}
+
 \newpage
 
-\section{Consultants, Subcontractors, and Suppliers}
+\subsection{Consultants, Subcontractors, and Suppliers}
+Throughout the course of designing and developing this database management system we sought the advice
+and knowledge of various people, as none of us are experts or even particularly knowledgeable in 
+massively parallel systems. Our primary source of information and advice was Steven Feldman, the 
+original developer of Tervel and its maintainer, even past his departure from the University of Central
+Florida to Google. His insight into the internals of Tervel proved invaluable, as did his many 
+explanations on the concepts of wait-freedom and how to create a wait-free system.
+\par\vspace{\baselineskip}
+Dr. Dechev also proved a reliable source to consult when either Steven was unavailable or when he
+had particular insight into a problem we were facing. 
+%Include stuff about the other guy...
 \newpage
 
 \section{Budget and Financing}
+Thanks to the contributions from our sponsor and the nature of our project, we did not need to expend
+any additional funds outside of normal maintenance each team member performed on their personal
+machines.
 \newpage
 
 \section{Project Summary}
