@@ -41,6 +41,44 @@
 \newpage
 
 \section{Research}
+\subsection{Indexing}
+%author Robert Medina
+Indexing allows for fast retrieval from a collection of data. There are many ways to accomplish this, and some ways are better suited depending on the constraints. Tree-based indexing and Hash-based indexing are two popular solutions for an implementation of a database. Given a set of data in memory, indexing takes a key data value and stores it into a data structure. Based off this key value, the indexing data structure will point to the file in memory or memory address, depending on how the data is stored. Based on this, a file scan of the database is now just reduced to scanning an index file. 
+\includegraphics{graphics/indexentry.png}
+However searching through an index file can still be a costly operation. Index files are smaller than the data it is referencing but it can still use a considerable about memory space. Therefore it would be reasonable to use a data structure for fast retrieval of data based on a range of values or based on the actual data value stored.
+
+
+\subsection{Tree-based Indexing}
+%author Robert Medina
+Tree-based indexing is an index file structured into a variant of a binary search tree. The tree is based off the key value and references to where that key is stored. Indexing requires fast retrieval of data, low cost insertion and low cost deletion of data. There are two types of trees that are useful for this type of operation, ISAM and B+ Tree.
+
+\subsection{B+ Tree}
+%author Robert Medina
+B+ Tree is a balanced tree in which the non-leaf nodes direct where the data will be stored and the leaf nodes contain the data entries. The leaf nodes are contained in a doubly-linked list for fast retrieval of all leaf nodes.
+\includegraphics{graphics/B+_Tree_Abstract.png}
+Specifically, B+ Tree is an n-ary tree that has a root, internal nodes and leaf children. Each index entry contains an array of key values and a pointer. Each node references to another node based on a branching property. Each parent node contains m+1 children, m is index entries. The left children must be less than the parent key value, the middle children must be between the left and right side children values, and the right children must be greater or equal to the parent key value. Every node except root must be at least half full. 
+\includegraphics{graphics/B+_Tree_Example.png}
+The runtime for a B+ Tree is the following:
+Searching is logm(n), m is index entries
+Insertion is same as searching
+Deletion is same as searching
+Searching with range (logm(n) + k), m is index entries and k is number of data records
+
+\subsection{Hash-based Indexing}
+%author Robert Medina
+	Hash-based Indexing references a key value to a pointer using a hash function. This can be used for indexing when there is an equal key value within the hash. Range operations using a key value is not possible with a hash function since it would simply be too costly of an operation. Hash-based indexing suffers from overflow chaining such as ISAM, which can hinder performance. There exists multiple hash-based indexing such as Static Hashing, Extendible Hashing, and Linear Hashing. 
+\subsection{Static Hashing}
+%author Robert Medina
+Static Hashing is a hash table based on a key value with a pointer to a bucket of pages that contain said key. These data entries may be sorted but it depends on the application. This data structure is static for the most part but it does allow for overflow page allocation. In the event of inserting beyond the memory allocated, this data entry is placed into a new page and the page is added to an overflow chain in the hash table.
+\includegraphics{graphics/Static_Hashing_Abstract}
+A good hash function is imperative to uniformly distribute values over the collection of buckets. An example of a good hash would be hash(key) = (a*key + b), a and b are constants. Some problems of Static Hashing are the fact that it is static. When the index file is created bucket sizes are known at time of creation, so pages can be stored successively in the buckets. However as the index file continues to grow if the same key value is stored repeatedly then a long overflow chain develops. Since the number of buckets are static if the index file shrinks in size then there is wasted memory space. If the file grows too large then it results in poor performance. Otherwise, the performance for operations is very fast. The following is the runtimes:
+Search O() 1 I/O read
+Insertion O() 2 I/O read/write page
+Deletion O() 2 I/O read/write page
+Rehashing:
+	Intuitively a simple hash table with a pointer to a page would make sense. However in the case of additional pages, without an overflow chain rehashing the table would be necessary. In this case rehashing the table would be a costly operation. Including that the data structure is unusable while rehashing is in progress. Dynamic hashing techniques solve this problem.
+Extendible Hashing:
+
 \subsection{SQL Engine}
 %author Mike McGee
 One of the most important pieces of a Database Management System is the SQL Engine. 

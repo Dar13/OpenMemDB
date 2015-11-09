@@ -4,13 +4,18 @@
 \contentsline {section}{\numberline {3}Broader Impacts}{5}
 \contentsline {section}{\numberline {4}Specification and Requirements}{6}
 \contentsline {section}{\numberline {5}Research}{7}
-\contentsline {subsection}{\numberline {5.1}SQL Engine}{7}
-\contentsline {subsubsection}{\numberline {5.1.1}Tokenizer}{7}
-\contentsline {subsubsection}{\numberline {5.1.2}Parser}{7}
-\contentsline {subsubsection}{\numberline {5.1.3}Code Generator}{8}
-\contentsline {section}{\numberline {6}Design Summary}{9}
-\contentsline {section}{\numberline {7}Facilities and Equipment}{10}
-\contentsline {section}{\numberline {8}Consultants, Subcontractors, and Suppliers}{11}
-\contentsline {section}{\numberline {9}Budget and Financing}{12}
-\contentsline {section}{\numberline {10}Project Summary}{13}
-\contentsline {section}{\numberline {A}Appendix A}{15}
+\contentsline {subsection}{\numberline {5.1}Indexing}{7}
+\contentsline {subsection}{\numberline {5.2}Tree-based Indexing}{7}
+\contentsline {subsection}{\numberline {5.3}B+ Tree}{7}
+\contentsline {subsection}{\numberline {5.4}Hash-based Indexing}{9}
+\contentsline {subsection}{\numberline {5.5}Static Hashing}{9}
+\contentsline {subsection}{\numberline {5.6}SQL Engine}{11}
+\contentsline {subsubsection}{\numberline {5.6.1}Tokenizer}{11}
+\contentsline {subsubsection}{\numberline {5.6.2}Parser}{11}
+\contentsline {subsubsection}{\numberline {5.6.3}Code Generator}{12}
+\contentsline {section}{\numberline {6}Design Summary}{13}
+\contentsline {section}{\numberline {7}Facilities and Equipment}{14}
+\contentsline {section}{\numberline {8}Consultants, Subcontractors, and Suppliers}{15}
+\contentsline {section}{\numberline {9}Budget and Financing}{16}
+\contentsline {section}{\numberline {10}Project Summary}{17}
+\contentsline {section}{\numberline {A}Appendix A}{19}
