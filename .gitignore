@@ -54,3 +54,7 @@ openmemdb
 # Graphics files
 *.png
 graphics
+
+#Latex intermidiate and compilation files
+*.toc
+*.gz
