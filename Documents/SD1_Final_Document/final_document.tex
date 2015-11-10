@@ -334,72 +334,158 @@ specific set of query relations extremely fast.
 	researched more heavily because of there perceived similarities to our project and
 	because the documentation for them was thorough. However, there are numerous lesser
 	known and less well documented DBMS that are worthy of note.
-	\par\vspace{\baselineskip}
-	Aerospike is an AGPL licensed NoSQL flash-optimized in memory 
-	DBMS. Aerospike is an open source project that follows the similar pattern of 
-	a distributed shared-nothing architecture that is appearing common among most
-	in-memory DBMS. 
-	\begin{quote}
-	Aerospike architecture is derived from its core principles – NoSQL scalability and
-	flexibility, along with traditional database consistency, reliability and extensibility.
-	\cite{aerospike}
-	\end{quote}
-	\par\vspace{\baselineskip}
-%%\includegraphics{graphics/RelatedWorksArchitectures/aerospike_dbms_architecture.png}
-	\cite{aerospike}
-	\par\vspace{\baselineskip}	
-	Apache Geode is an Apache licensed distributed in-memory DBMS. Apache Geode is a brand
-	new project and as such has very limited documentation. They claim on there github page
-	to be 
-	\begin{quote}
-	... a data management platform that provides real-time, consistent access to 
-	data-intensive applications throughout widely distributed cloud architectures.
-	\end{quote}
-	The specifics of their architecture is not listed. 
-	\par\vspace{\baselineskip}
-	dashDB is IBM's in-memory data warehouse. Self described as 
-	\begin{quote}
-	a high performance, massively scalable cloud data warehouse service, 
-	fully managed by IBM. \cite{dashDB}
-	\end{quote}
-	dashDB comes in a couple different configurations, the one that most resembles 
-	our project is the MPP, "Massively Parallel Processing", configuration. 
-	MPP operates by allowing the data warehouse to leverage multiple servers 
-	in a network cluster to process data simultaneously. 
-	\par\vspace{\baselineskip}
-%%	\includegraphics{graphics/RelatedWorksArchitectures/dashDB_mpp_architecture.png}
-	\cite{dashDB}
-	\par\vspace{\baslineskip}
-	Each server in this data warehouse utilizes a number of key technologies, including: 
+
 	\begin{itemize}
-	  \item Dynamic in-memory processing: Even when a dataset
-	  does not fit entirely in memory, dashDB still processes at
-	  lightning fast speeds using a series of patented algorithms
-	  that enable in-memory acceleration. While every workload
-	  is different, dashDB only requires RAM size to be 5 percent
-	  of the original pre-load source data size in order to run at
-      in-memory optimized speeds.
-     \item Actionable compression: dashDB performs a broad range
-	  of operations—including joins and predicate evaluations—
-	  directly on compressed data, therefore improving memory
-	  and cache bandwidth, and saving CPU costs.
-   	 \item Parallel vector processing: dashDB is CPU optimized
-	  and designed for the latest generation of microprocessors.
-	  Both multi-core parallelism and SIMD vector instructions
-      enable dashDB to maximize hardware performance.
-	  \item Data skipping: BLU enables dashDB to intelligently avoid
-	  scanning entire ranges of column data that don’t qualify for
-	  analysis, preserving time and resources.
-	\end{itemize}
+	  \par\vspace{\baselineskip}
+	  \item Aerospike is an AGPL licensed NoSQL flash-optimized in memory 
+	  DBMS. Aerospike is an open source project that follows the similar pattern of 
+	  a distributed shared-nothing architecture that is appearing common among most
+	  in-memory DBMS. 
+	  \begin{quote}
+	  "Aerospike architecture is derived from its core principles – NoSQL scalability and
+	  flexibility, along with traditional database consistency, reliability and
+	  extensibility."
+	  \cite{aerospike}
+	  \end{quote}
+	  \par\vspace{\baselineskip}
+%%\includegraphics{graphics/RelatedWorksArchitectures/aerospike_dbms_architecture.png}
+	  \cite{aerospike}
+	  \par\vspace{\baselineskip}	
+	  \item Apache Geode is an Apache licensed distributed in-memory DBMS. Apache Geode is
+	  a brand new project and as such has very limited documentation. They claim on there
+	  github page to be 
+	  \begin{quote}
+	  "... a data management platform that provides real-time, consistent access to 
+	  data-intensive applications throughout widely distributed cloud architectures."
+	  \cite{aerospike}
+	  \end{quote}
+	  The specifics of their architecture is not listed. 
+	  \par\vspace{\baselineskip}
+	  \item dashDB is IBM's in-memory data warehouse. Self described as 
+	  \begin{quote}
+	  "a high performance, massively scalable cloud data warehouse service, 
+	  fully managed by IBM." \cite{dashDB}
+	  \end{quote}
+	  dashDB comes in a couple different configurations, the one that most resembles 
+	  our project is the MPP, "Massively Parallel Processing", configuration. 
+	  MPP operates by allowing the data warehouse to leverage multiple servers 
+	  in a network cluster to process data simultaneously. 
+	  \par\vspace{\baselineskip}
+%%	\includegraphics{graphics/RelatedWorksArchitectures/dashDB_mpp_architecture.png}
+	  \cite{dashDB}
+	  \par\vspace{\baslineskip}
+	  Each server in this data warehouse utilizes a number of key technologies, including: 
+	  \begin{itemize}
+	    \item Dynamic in-memory processing: Even when a dataset
+	    does not fit entirely in memory, dashDB still processes at
+	    lightning fast speeds using a series of patented algorithms
+	    that enable in-memory acceleration. While every workload
+	    is different, dashDB only requires RAM size to be 5 percent
+	    of the original pre-load source data size in order to run at
+        in-memory optimized speeds.
+        \item Actionable compression: dashDB performs a broad range
+	    of operations—including joins and predicate evaluations—
+	    directly on compressed data, therefore improving memory
+	    and cache bandwidth, and saving CPU costs.
+   	   \item Parallel vector processing: dashDB is CPU optimized
+	   and designed for the latest generation of microprocessors.
+	   Both multi-core parallelism and SIMD vector instructions
+       enable dashDB to maximize hardware performance.
+	   \item Data skipping: BLU enables dashDB to intelligently avoid
+	   scanning entire ranges of column data that don’t qualify for
+	   analysis, preserving time and resources.
+	 \end{itemize}
 	
-	dashDB uses a highly parallelized infrastructure optimized for columnar data
-	exchange that is organized as such:
-	\par\vspace{\baselineskip}
-%%	\includegraphics{graphics/RelatedWorksArchitectues/dashDB_query_architecture.png}
-	\cite{dashDB}
-	\par\vspace{\baselineskip}
-	
-		
+	  dashDB uses a highly parallelized infrastructure optimized for columnar data
+	  exchange that is organized as such:
+	  \par\vspace{\baselineskip}
+%%	\includegraphics{graphics/RelatedWorksArchitectures/dashDB_query_architecture.png}
+	  \cite{dashDB}
+	  \par\vspace{\baselineskip}
+	  \item eXtremeDB is the in-memory variant of the McObject family of data management
+	  projects.
+	  It stores its data entirely in main memory, eliminating the need for disk I/O. 
+	  eXtremeDB claims to have an "Ultra-small" footprint stating that through 
+	  streamlining of core database functions they are able to reduce their RAM footprint
+	  to around 100KB. They also do not translate the data they store in memory. They 
+	  store the data exactly how it will be used by the application. "No mapping a C data
+	  element to a relational representation"\cite{extremeDB} eXtremeDB claims to fully 
+	  support ACID properties. It does this by ensuring that operations grouped into
+	  transactions will complete together or the database will be rolled back to a 
+	  pre-transaction state.\cite{extremeDB}
+	  \par\vspace{\baselineskip}
+%%	\includegraphics{graphics/RelatedWorksArchitectures/extremeDB_dbms_architecture.jpg}
+	  \cite{extremeDB}
+	  \par\vspace{\baselineskip}
+	  
+	  \item GemFire is a distributed, in-memory, shared-nothing, NoSQL key-value store.
+	  GemFire is designed for working with operational data needed by real time 
+	  applications. It is not meant for working on very large quantities. In order to 
+	  achieve massive speeds GemFire relies on being primarily, not fully, 
+	  main memory based. " It uses highly-concurrent main-memory data structures to avoid
+	  lock contention and a data distribution
+	  layer that avoids redundant message copying, and it uses native serialization and
+	  smart buffering to ensure messages move from node to node faster than what
+	  traditional messaging would provide."\cite{gemfire}
+	  \par\vspace{\baselineskip}
+%%	  \includegraphics{graphics/RelatedWorksArchitectures/gemfire_peer_architecture.png}
+	  \par\vspace{\baselineskip}
+	  
+	  \item Hekaton is Microsoft's database engine that is optimized for memory resident
+	  OLTP data. Hekaton is fully implemented within SQL Server and can be utilized from
+	  within. 
+	  \begin{quote}
+	  "Hekaton is designed for high levels of concurrency but does not
+	  rely on partitioning to achieve this. Any thread can access any row
+	  in a table without acquiring latches or locks. The engine uses latchfree
+	  (lock-free) data structures to avoid physical interference
+	  among threads and a new optimistic, multiversion concurrency
+	  control technique to avoid interference among transactions"\cite{hekaton}
+	  \end{quote}
+	  Hekaton stores it's data in two different formats: a lock-free hash table and a 
+	  lock free B-tree called a Bw-tree. Data is always accessed with an index lookup.
+	  \par\vspace{\baselineskip}
+	  Hekaton's Architecture:
+	  \begin{itemize}
+	    \item The Hekaton storage engine manages user data and indexes.
+		It provides transactional operations on tables of records, hash
+		and range indexes on the tables, and base mechanisms for storage,
+		checkpointing, recovery and high-availability.
+		\item The Hekaton compiler takes an abstract tree representation of
+		a T-SQL stored procedure, including the queries within it, plus
+		table and index metadata and compiles the procedure into native
+		code designed to execute against tables and indexes managed
+		by the Hekaton storage engine.
+		\item The Hekaton runtime system is a relatively small component
+		that provides integration with SQL Server resources and
+		serves as a common library of additional functionality needed
+		by compiled stored procedures.
+		\item Metadata: Metadata about Hekaton tables, indexes, etc. is
+		stored in the regular SQL Server catalog. Users view and manage
+		them using exactly the same tools as regular tables and
+		indexes.
+		\item Query optimization: Queries embedded in compiled stored
+		procedures are optimized using the regular SQL Server optimizer.
+		The Hekaton compiler compiles the query plan into native
+		code.
+		\item Query interop: Hekaton provides operators for accessing data
+		in Hekaton tables that can be used in interpreted SQL Server
+		query plans. There is also an operator for inserting, deleting,
+		and updating data in Hekaton tables.
+		\item Transactions: A regular SQL Server transaction can access
+		and update data both in regular tables and Hekaton tables.
+		Commits and aborts are fully coordinated across the two engines.
+		\item High availability: Hekaton is integrated with AlwaysOn,
+		SQL Server’s high availability feature. Hekaton tables in a database
+		fail over in the same way as other tables and are also
+		readable on secondary servers.
+		\item Storage, log: Hekaton logs its updates to the regular SQL
+		Server transaction log. It uses SQL Server file streams for storing
+		checkpoints. Hekaton tables are automatically recovered
+		when a database is recovered. 
+	  \end{itemize} \cite{hekaton}
+
+	\end{itemize}	
 	
 \newpage
 
