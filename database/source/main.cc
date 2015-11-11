@@ -2,6 +2,7 @@
  *
  */
 
+#include <tervel/util/tervel.h>
 #include <workmanager/work_manager.h>
 
 /**
@@ -9,16 +10,33 @@
  */
 int main(int argc, char** argv)
 {
-  // TODO: Integrate Tervel
-  WorkManager work_manager(8, nullptr);
+  // TODO: Handle passed in parameters
+  printf("Arguments passed in:\n");
+  for(int i = 0; i < argc; i++)
+  {
+    printf("\t- %s\n", argv[i]);
+  }
+
+  tervel::Tervel* tervel_main = new tervel::Tervel(8);
+  WorkManager work_manager(8, tervel_main);
 
   int32_t status = 0;
 
-  // TODO: Error handling
   status = work_manager.Initialize();
+  if(status != WorkManager::E_NONE)
+  {
+    printf("Work manager failed to initialize!\n");
+    printf("Error code = %d\n", status);
+    return 1;
+  }
 
-  // TODO: Error handling
   status = work_manager.Run();
+  if(status != WorkManager::E_NONE)
+  {
+    printf("Work manager failed to run!\n");
+    printf("Error code = %d\n", status);
+    return 1;
+  }
 
   printf("Shutting down program...\n");
 

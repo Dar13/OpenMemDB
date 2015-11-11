@@ -41,3 +41,4 @@ lemon:
 	mv $(INC_DIR)/sql/parser/parse.h $(INC_DIR)/sql/parser/parse.h.tmp
 	mv $(INC_DIR)/sql/parser/parse.c $(SRC_DIR)/sql/parser/parse.c
 	$(NAWK)	-f $(TOOLS_DIR)/lemon/addopcodes.awk $(INC_DIR)/sql/parser/parse.h.tmp >$(INC_DIR)/sql/parser/parse.h
+	rm $(INC_DIR)/sql/parser/parse.h.tmp
