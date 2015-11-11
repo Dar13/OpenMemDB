@@ -113,6 +113,15 @@ become more and more important and widespread throughout the software industry a
 continues to parallelize, memory becomes faster and cheaper, and wait-free/lock-free algorithms
 become more mature. Experience working with high-performance, memory-intensive, and
 standard-defined technologies opens the door for later opportunities in cutting-edge technologies.
+
+\subsubsection{Michael McGee}
+  My motivation for choosing this project is simply a desire to learn. I have always been
+  interested in database systems as well concurrent programming. Nowhere do these issues
+  more converge than in the project that Dr. Dechev proposed. I hope to gain from this
+  project, a greater understanding of the underlying principles of database system design,
+  as well as discover broader applications for lock-free and wait-free data structures. I
+  know that throughout the course of this project I will learn a great deal and come out
+  as a much improved software developer and computer scientist.  
 \newpage
 
 \section{Broader Impacts}
@@ -122,6 +131,124 @@ standard-defined technologies opens the door for later opportunities in cutting-
 \newpage
 
 \section{Research}
+
+\subsection{Database Management Systems}
+To begin researching a database management system you must first understand what a 
+database is. According to the book "Database Management Systems" a database is
+
+\begin{quote}
+"... a collection of data, typically describing the activities of one or more related
+organizations."\cite{ramakrishnan2000database}
+\end{quote}
+
+A database management system, according to the same text is
+
+\begin{quote}
+"... software designed to assist in maintaining and utilizing large collections of data".
+\cite{ramakrishnan2000database}
+\end{quote}
+
+There are many different types of database management system that can achieve the
+goal of maintaining large collections of data. Some are specialized for the larger, and 
+more volatile web data, while some are more suited for large persistent data.  
+\par\vspace{\baselineskip}
+Some different types of database management systems are:
+\begin{itemize}
+\item Relational
+\item Hierarchical
+\item Network
+\item Object-oriented
+\item NoSQL
+\item NewSQL
+\end{itemize}
+
+\subsubsection{Relational}
+Perhaps the most common and well known of all database management systems is the
+Relational DBMS. The relation data model is based off of tables that represent 
+the data, as well as the relationship among the data. It is defined in the book 
+"Fundamentals of Relational Database Management Systems" as such:
+\begin{quote}
+"The relational model uses a collection of tables to represent both data and
+the relationships among those data. Tables are logical structures maintained
+by the database manager. The relational model is a combination of three
+components, such as Structural, Integrity, and Manipulative parts."
+\cite{sumathi2007fundamentals}
+\end{quote}
+\begin{figure}
+  \centering
+  \textbf{Relational DBMS Structure}
+  \includegraphics{graphics/DBMS_Diagrams/dbms_RDBMS_structure.png}
+  \caption{Represents a disk based RDBMS}
+\end{figure}
+The three components can be further broken down.
+\par\vspace{\baselineskip}
+\textit{The Structural Part} is what defines the database as a collection of relations,
+\par\vspace{\baselineskip}
+\textit{The Integrity Part} is maintained using primary and foreign keys,
+\par\vspace{\baselineskip}and 
+\textit{The Manipulative Part} are the tools, such as relational algebra and 
+relational calculus, that are used to manipulate the data.
+\par\vspace{\baselineskip}
+The author lists the key features of the relational model as follows: 
+\begin{itemize}
+\item Each row in the table is called tuple
+\item Each column in the table is called attribute.
+\item The intersection of row with the column will have data value.
+\item In relational model rows can be in any order.
+\item In relational model attributes can be in any order.
+\item By definition, all rows in a relation are distinct. No two rows can be exactly
+the same.
+\item Relations must have a key. Keys can be a set of attributes 
+\item For each column of a table there is a set of possible values called its
+domain. The domain contains all possible values that can appear under
+that column.
+\item  Domain is the set of valid values for an attribute.
+\item Degree of the relation is the number of attributes (columns) in the relation.
+\item Cardinality of the relation is the number of tuples (rows) in the relation.
+\end{itemize}
+
+The idea of a \textit{key} is an important one in the world of relational database 
+management systems. So it is worth taking some time to talk about it. "A key is an
+attribute or a group of attributes, which is used to identify a row in a relation."
+\cite{sumathi2007fundamentals}
+According to the author of "Fundamentals of Relational Database Management Systems" a
+key can be classified into one of three categories.
+\begin{itemize}
+\setlength{\itemsep}{1pt}
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+\item Superkey
+\item Candidate key
+\item Primary key
+\end{itemize}
+A superkey is "a subset of attributes of an entity-set that uniquely identifies
+the entities. Superkeys represent a constraint that prevents two entities from
+ever having the same value for those attributes."\cite{sumathi2007fundamentals}
+\par\vspace{\baselineskip}
+A candidate key is "a minimal superkey. A candidate key for a relation schema
+is a minimal set of attributes whose values uniquely identify tuples in the
+corresponding relation."\cite{sumathi2007fundamentals}
+\par\vspace{\baselineskip}
+A primary key is a " designated candidate key. It is to be noted that the
+primary key should not be null."\cite{sumathi2007fundamentals}
+\par\vspace{\baselineskip}
+There is also a key known as a foreign key, which is a "set of fields or attributes in one
+relation that is used to “refer” to a tuple in another relation."
+\cite{sumathi2007fundamentals}
+
+
+\subsubsection{Hierarchical}
+
+\subsubsection{Network}
+
+\subsubsection{Object-oriented}
+
+\subsubsection{NoSQL}
+
+\subsubsection{NewSQL}
+
+\newpage
+
 \subsection{Work Manager}
 The Work Manager is a conglomeration of multiple minor, but not insignificant, roles
 within the DBMS. Specifically, it is the:
@@ -316,11 +443,23 @@ specific set of query relations extremely fast.
 	hand both use distributed systems to achieve performance gains. MemSQL differs from 
 	VoltDB in a few ways, the most important being it's use of lock free data structures
 	for storing data and its storing of pre-compiled commonly used queries\cite{MemSQL}.
+	\begin{figure}
+	  \centering
+	  \textbf{MemSQL Two-tiered Architecture}
+	  \includegraphics{graphics/RelatedWorksArchitectures/memsql_dbms_architecture.png}
+	  \caption{MemSQL Architecture}
+	\end{figure}
 	VoltDB tries to make its performance gains by what they call "Concurreny through
 	scheduling"\cite{VoltDB}. This is the process of using a single-threaded pipeline 
 	that performs the task it was scheduled. This limits the need for locking during
 	transactions by intelligently scheduling the transactions so that locks are not
 	necessary.
+	\begin{figure}
+	  \centering
+	  \textbf{VoltDB Serialized Architecture}
+	  \includegraphics{graphics/RelatedWorksArchitectures/voltdb_serialized_architecture.png}
+	  \caption{VoltDB Serialized Processing}
+	\end{figure}
 	\par\vspace{\baselineskip}
 	OpenMemDB aims to take a different approach, one that is fully wait free. The goal is 
 	to use powerful wait free data structures that will allow for a massively parallel 
@@ -348,7 +487,11 @@ specific set of query relations extremely fast.
 	  \cite{aerospike}
 	  \end{quote}
 	  \par\vspace{\baselineskip}
-%%\includegraphics{graphics/RelatedWorksArchitectures/aerospike_dbms_architecture.png}
+	  \begin{figure}
+	    \centering
+	    \includegraphics{graphics/RelatedWorksArchitectures/aerospike_dbms_architecture.png}
+	    \caption{Aerospike Architecture}
+	  \end{figure}
 	  \cite{aerospike}
 	  \par\vspace{\baselineskip}	
 	  \item Apache Geode is an Apache licensed distributed in-memory DBMS. Apache Geode is
