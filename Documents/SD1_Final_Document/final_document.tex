@@ -112,7 +112,7 @@ potential in terms of personal growth and end product. These technologies are on
 become more and more important and widespread throughout the software industry as hardware 
 continues to parallelize, memory becomes faster and cheaper, and wait-free/lock-free algorithms
 become more mature. Experience working with high-performance, memory-intensive, and
-standard-defined technologies opens the door for later opportunities in cutting-edge technologies.
+standards-defined technologies opens the door for later opportunities in cutting-edge technologies.
 
 \subsubsection{Michael McGee}
   My motivation for choosing this project is simply a desire to learn. I have always been
@@ -261,8 +261,38 @@ within the DBMS. Specifically, it is the:
 
 Work distribution between threads is done via a task-queue that each thread in the
 thread pool pulls work from. Tasks are C++11 lambda functions that are packaged up 
-via the standard library's \lstinline|packaged\_task| class. This class provides an interface that
-allows us to create a future
+via the standard library's \lstinline[basicstyle=\ttfamily]|std::packaged_task<>|  class. 
+This class provides an interface that allows us to generate a \lstinline[basicstyle=\ttfamily]|std::future<>| 
+object that is a thread-safe interface to a thread's return value. The bulk of the 
+ideas behind this thread pool were found online \cite{stackoverflow1} though we substituted
+the command queue, that was initially implemented using a \lstinline[basicstyle=\ttfamily]|std::mutex|
+and \lstinline[basicstyle=\ttfamily]|std::queue<>|, with a Tervel queue that allows
+non-blocking and wait-free access and insertion into the command queue.
+\par\vspace{\baselineskip}
+The task of communicating between the client and the server, which is the database itself,
+is given to the work manager as it is the main thread and is where all the results of
+the SQL query end up. This task also requires initialization and management of the network
+sockets as well as the management of the socket identification numbers that are assigned
+to specific connections. In turn, the module that manages these connections must be able to
+determine which connection a query came from and where the query's results should be
+returned to. The module that is in the best place for this work is the work manager
+and has therefore been assigned these tasks.
+\par\vspace{\baselineskip}
+The work manager is also the part of the database management system that will be cognizant
+of the amount of resources used by the system. Processor utilization, memory usage, thread
+performance, and various other metrics listed below will be measured and able to be
+requested by clients or management software. The full list of system resources measured
+and reported by the server is as follows:
+\begin{itemize}
+ \item Processor utilization
+ \item Amount of memory in use
+ \item Percentage of RAM used in comparison to the maximum capacity of the hardware
+ \item Shortest execution time of a query
+ \item Longest execution time of a query
+ \item Median execution time of a query
+ \item Average ``load'' of a worker thread
+ \item TODO: others??
+\end{itemize}
 
 \subsection{Data Store}
 \subsubsection{Indexing}
@@ -386,7 +416,6 @@ tokens to be parsed. This is done by calling:
 	Parse(pParser, hTokenID, sTokenData, pArg);
 \end{lstlisting}
 
-% What's the deal with this? - Neil
 \begin{quotation}
 “The first argument to the Parse() routine is the pointer returned by ParseAlloc(). The
 second argument is a small positive integer that tells the parse the type of the next
@@ -516,7 +545,7 @@ specific set of query relations extremely fast.
 	  \par\vspace{\baselineskip}
 %%	\includegraphics{graphics/RelatedWorksArchitectures/dashDB_mpp_architecture.png}
 	  \cite{dashDB}
-	  \par\vspace{\baslineskip}
+	  \par\vspace{\baselineskip}
 	  Each server in this data warehouse utilizes a number of key technologies, including: 
 	  \begin{itemize}
 	    \item Dynamic in-memory processing: Even when a dataset
