@@ -235,9 +235,46 @@ primary key should not be null."\cite{sumathi2007fundamentals}
 There is also a key known as a foreign key, which is a "set of fields or attributes in one
 relation that is used to “refer” to a tuple in another relation."
 \cite{sumathi2007fundamentals}
-
+\par\vspace{\baselineskip}
+\par\vspace{\baselinsskip}
+There are many other aspects that full make up what it is to be a relational database
+management system. The most important of which being relational algebra. 
+\par\vspace{\baselineskip}
+"Relational algebra is a theoretical language with operations that work on
+one or more relations to define another relation without changing the original
+relation"\cite{sumathi2007fundamentals}
+Operations of relational algebra include such things as selection operations, projection
+operations, rename operations, union operations, intersection operations, difference
+operations, division operations, as well as joins. 
+\par\vspace{\baselineskip}
+The advantages of relational algebra is that is has a solid mathematical background. 
+This mathematical background is beneficial when it comes to optimization of queries,
+because if two expressions can be proven to be equivalent a query optimizer can 
+substitute the more efficient operation whenever necessary.
+\par\vspace{\baselineskip}
+There are some disadvantages to using a relational model and to relational algebra in
+particular. One disadvantage is the growing complexity of the data that needs to be 
+stored. Relational database management systems are good for linking together similar types
+of data, and with the movement towards increasingly complex data-types these similarities 
+are becoming less common. Another disadvantage of an RDBMS is that it can be a complex
+system to set up. A database administrator must take significantly more into consideration
+when designing and RDBMS then when dealing with a simple object store. 
 
 \subsubsection{Hierarchical}
+Hierarchical Databases are a data model in which the data is organized into a tree type 
+structure with a one-to-many relationship from the parent to the children. The data 
+within the tree are stored as records that are connected together through links. Each
+record contains a set of fields with each field containing only one value. 
+\par\vspace{\baselineskip}
+The hierarchical database model is typically used for large amounts of data that are 
+unlikely to change. It is recognized as the first database model used by IBM in 
+the 1960s.\cite{hierarchical_dbms_techopedia}
+\par\vspace{\baselineskip}
+\begin{figure}
+  \centering
+  \includegraphics{graphics/DBMS_Diagrams/dbms_RDBMS_structure.png}
+  \caption{Example structure for hierarchical database}
+\end{figure}
 
 \subsubsection{Network}
 
@@ -261,7 +298,8 @@ within the DBMS. Specifically, it is the:
 
 Work distribution between threads is done via a task-queue that each thread in the
 thread pool pulls work from. Tasks are C++11 lambda functions that are packaged up 
-via the standard library's \lstinline[basicstyle=\ttfamily]|std::packaged_task<>|  class. 
+via the standard library's \lstinline[basicstyle=\ttfamily]|std::packaged_task<>|
+ class. 
 This class provides an interface that allows us to generate a \lstinline[basicstyle=\ttfamily]|std::future<>| 
 object that is a thread-safe interface to a thread's return value. The bulk of the 
 ideas behind this thread pool were found online \cite{stackoverflow1} though we substituted
