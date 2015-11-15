@@ -277,6 +277,53 @@ the 1960s.\cite{hierarchical_dbms_techopedia}
 \end{figure}
 
 \subsubsection{Network}
+The Network Model for a database management system is structures similarly to that of the
+hierarchical model in that it consists of parent and child nodes. However the network 
+model does not limit itself to having every child have only one parent. In the network 
+model all children can have multiple parents, and obviously parents can have multiple 
+children. The network model also consists of items called "records" that which is a 
+collection of data items. Each data item has a name and a value. 
+
+\begin{figure}
+  \centering
+  \textbf{Network model record example}
+  \includegraphics{graphics/DBMS_Diagrams/dbms_network_model_record.gif}
+  \caption{Example of network model record}
+  \cite{network_model_coronet}
+\end{figure}
+
+Each record can have it's own grouping within by grouping two or more elementary items.
+A record can also contain a table, which is a collection of values that are grouped 
+under one data item. 
+\par\vspace{\baselineskip}
+The data within the network model consists of two main parts: data objects, and
+relationships.
+ 
+\begin{figure}
+  \centering
+  \includegraphics{graphics/DBMS_Diagrams/dbms_network_data.gif}
+  \caption{Network information model}
+  \cite{network_model_coronet}
+\end{figure}
+
+Relationships between records can be implemented by using logical constructions. 
+This is called a "Data Set" . In the most basic case, each set consists of a father 
+and a child. The "Data Set" has the following properties: 
+
+\begin{itemize}
+  \item Each set includes exactly one record of the first type. This record is called an Owner of the set.
+  \item Each set may include 0 (i.e. an Empty set occurrence), 1 or N records of the same type. These records are called members of the data set.
+  \item All members within one set occurrence have a fixed order (are sorted).
+\end{itemize}
+
+\begin{figure}
+  \centering
+  \includegraphics{graphics/network/relationship.gif}
+  \caption{Example of network model relationship}
+\end{figure}
+
+The basic setup of a network model is therefore a collection of record occurrences and
+data sets. 
 
 \subsubsection{Object-oriented}
 
