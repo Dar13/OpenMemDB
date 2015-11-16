@@ -41,16 +41,25 @@ int main (int argc, char**argv) {
   libmem::ResultSet result_set = libmem::ExecuteSQL("SELECT * FROM Users",
                                                      sock_fd);
 
-  for (int i = 0, j = result_set.get_size(); i < j; ++i) {
-    libmem::ResultRow current_row = result_set.get_next_row();
-    std::vector<libmem::ResultPair> cur_vec = current_row.m_result_row;
-    for (int k = 0, n = current_row.m_result_row.size(); k < n; ++k){
-      std::cout << "Name :" << cur_vec.at(k).get_name();
-      std::cout << "Value: " << cur_vec.at(k).get_value() << std::endl;   
-    }
-  }
+ // for (int i = 0, j = result_set.get_size(); i < j; ++i) {
+  //  libmem::ResultRow current_row = result_set.get_next_row();
+  //  std::vector<libmem::ResultPair> cur_vec = current_row.m_result_row;
+  //  for (int k = 0, n = current_row.m_result_row.size(); k < n; ++k){
+  //    std::cout << "Name :" << cur_vec.at(k).get_name();
+//      std::cout << "Value: " << cur_vec.at(k).get_value() << std::endl;   
+    //}
+  //}
 
+  libmem::ResultRow row;
+  for (int i = 0; i < result_set.get_size(); ++i) {
+    row = result_set.get_next_row();
+    for (auto pair: row.m_result_row) {
+      std::cout << "Name: " << pair.get_name();
+      std::cout << "Value: " << pair.get_value();
+    }
+  } 
   
+
 
   std::cout << "Executed command" << std::endl;
   //3.Disconnect from database.
