@@ -41,13 +41,16 @@ int main (int argc, char**argv) {
   libmem::ResultSet result_set = libmem::ExecuteSQL("SELECT * FROM Users",
                                                      sock_fd);
 
-  // Try to print some of the result.
-/*for (auto&& res: result_set) {
-    for (auto&& pair: res) {
-      std::cout << pair.get_name() << ":" << pair.get_value();
+  for (int i = 0, j = result_set.get_size(); i < j; ++i) {
+    libmem::ResultRow current_row = result_set.get_next_row();
+    std::vector<libmem::ResultPair> cur_vec = current_row.m_result_row;
+    for (int k = 0, n = current_row.m_result_row.size(); k < n; ++k){
+      std::cout << "Name :" << cur_vec.at(k).get_name();
+      std::cout << "Value: " << cur_vec.at(k).get_value() << std::endl;   
     }
-    std::cout << std::endl;
-  }*/
+  }
+
+  
 
   std::cout << "Executed command" << std::endl;
   //3.Disconnect from database.
