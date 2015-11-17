@@ -236,7 +236,7 @@ There is also a key known as a foreign key, which is a "set of fields or attribu
 relation that is used to “refer” to a tuple in another relation."
 \cite{sumathi2007fundamentals}
 \par\vspace{\baselineskip}
-\par\vspace{\baselinsskip}
+\par\vspace{\baselineskip}
 There are many other aspects that full make up what it is to be a relational database
 management system. The most important of which being relational algebra. 
 \par\vspace{\baselineskip}
@@ -326,6 +326,36 @@ The basic setup of a network model is therefore a collection of record occurrenc
 data sets. 
 
 \subsubsection{Object-oriented}
+Object oriented databases are databases where the information stored within is organized
+in the form of objects, like what would be used in an object oriented programming
+language. An OODBMS combines the the features of an object-oriented language and a
+DBMS. The OODBMS permits a much tighter coupling between the database and the application. This allows the programmer to maintain consistency within a single environment. 
+\par\vspace{\baselineskip}
+In an OODBMS data is encapsulated in \textit{abstract data objects}, also known 
+as ADOs. ADOs all have the following properties: 
+
+\begin{itemize}
+  \item It has a unique identity
+  \item It has a private memory and a number of operations that can be applied to the current state of that memory. 
+  \item The values held in the private memory are themselves ADOs that are referenced from
+within by means of variable identifiers called instance variables. Note the emphasis
+“from within”, which underlines the idea of encapsulation, ie. such instance variables
+or objects they denote or any organisation of the objects into any structure in the
+private memory are not visible from outside the ADO.
+  \item The only way that the internal state of an ADO can be accessed or modified from
+outside is through the invocation of operations it provides. An operation can be
+invoked by sending a message to it. The message must of course contain enough
+information to decide which operation to invoke and provide also any input needed
+by that operation. The object can respond to the message in a number of ways, but
+typically by returning some (other) object back to the message sender and/or causing
+some observable change (eg. in a graphical user interface).
+\end{itemize} \cite{object_oriented_data_model}
+
+\begin{figure}
+  \centering
+  \includegraphics{graphics/DBMS_Diagrams/dbms_oodbms_example.png}
+  \caption{An example of an object-oriented model}
+\end{figure}
 
 \subsubsection{NoSQL}
 
