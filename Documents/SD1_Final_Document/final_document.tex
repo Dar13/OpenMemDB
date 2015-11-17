@@ -358,6 +358,66 @@ some observable change (eg. in a graphical user interface).
 \end{figure}
 
 \subsubsection{NoSQL}
+NoSQL databases, which originally stood for "Non SQL" and now some people refer to as 
+"Not only SQL", are databases that store information in a non-relational, non-tabular
+manner. Some of the ways that a NoSQL database management system may store information are: 
+
+\begin{itemize}
+  \item Document-style stores
+  \item Key-value stores.
+\end{itemize}
+
+Some examples of document-style stores are CouchDB and MongoDB. These are stores 
+"in which a database record consists of a collection of key-value pairs plus a payload."
+\cite{stonebraker2010sql}
+\par\vspace{\baselineskip}
+Examples of key-value stores include MemcacheDB and Dynamo. These type of database 
+management system store data by strict key value pairs and are usually implemented by 
+distributed hash tables.
+\par\vspace{\baselineskip}
+With both of these styles you will be accessing the data one record at 
+at time as apposed to a SQL style database.
+\par\vspace{\baselineskip}
+There are typically two different arguments for choosing a NoSQL database management 
+system. These arguments can be summarized as such:
+
+\begin{quote}
+"There are two possible reasons
+to move to either of these alternate
+DBMS technologies: performance and
+flexibility.
+The performance argument goes
+something like the following: I started
+with MySQL for my data storage needs
+and over time found performance to be
+inadequate. My options were:
+
+\begin{itemize}
+  \item 1. “Shard” my data to partition it
+across several sites, giving me a serious
+headache managing distributed data
+in my application or
+  \item 2. Abandon MySQL and pay big licensing
+fees for an enterprise SQL
+DBMS or 
+\item Move to something other
+than a SQL DBMS.
+\end{itemize}\footnote{Formatting mine}
+
+The flexibility argument goes something
+like the following: My data does
+not conform to a rigid relational schema.
+Hence, I can’t be bound by the
+structure of a RDBMS and need something
+more flexible"
+\end{quote} \cite{stonebraker2010sql}
+
+\begin{figure}
+  \centering
+  \textbf{Example NoSQL Architecture}
+  \includegraphics{graphics/DBMS_Diagrams/dbms_nosql_mongo_architecture.jpg}
+  \caption{Example NoSQL Architecture}
+\end{figure}
 
 \subsubsection{NewSQL}
 
@@ -786,6 +846,9 @@ specific set of query relations extremely fast.
 \newpage
 
 \section{Design Summary}
+%% A summary describing the overall architecture should go here. Followed by subsections
+%% for each major piece.  
+  \subsection{libomdb: The Connection API}
 \newpage
 
 \section{Facilities and Equipment}
