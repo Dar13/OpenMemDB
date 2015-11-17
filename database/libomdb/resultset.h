@@ -43,10 +43,10 @@ THE SOFTWARE.
 
 namespace libmem {
 
-	enum ResultCode {
-		RESULT_SUCCESS = uint16_t(0),
-		RESULT_EMPTY = uint16_t(1),
-		RESULT_ERROR = uint16_t(2)
+  enum ResultCode {
+	  RESULT_SUCCESS = uint16_t(0),
+	  RESULT_EMPTY = uint16_t(1),
+	  RESULT_ERROR = uint16_t(2)
 	};
 
 	enum ResultType {
