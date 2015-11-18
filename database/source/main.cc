@@ -5,11 +5,18 @@
 #include <tervel/util/tervel.h>
 #include <workmanager/work_manager.h>
 
+/* TODO: REMOVE THIS, JUST FOR TESTING */
+#include <sql/omdb_parser.h>
+
 /**
  *  @brief The entry point of the application.
  */
 int main(int argc, char** argv)
 {
+  parse();
+
+  return 1;
+
   // TODO: Handle passed in parameters
   printf("Arguments passed in:\n");
   for(int i = 0; i < argc; i++)
