@@ -68,13 +68,26 @@ namespace libomdb{
    */
   class Connection {
    public:
+
+   /**
+    * Connects to specified location and returns object representing
+    * connection
+    * @param hostname  The name of the host to connect to
+    * @param port      The name of the port to connect to
+    * @param db        The name of the database to connect to
+    */
+    static libomdb::Connection connect(std::string hostname, 
+                                       uint16_t port, 
+                                       std::string db);
     
-    /**
-     * Gets requested query results from database
-     * @param query The query to execute
-     * @return A ResultSet representing the results of the query.
-     */
-    libmem::ResultSet executeQuery(std::string query);
+
+   /**
+    * Disconnects the connection object.
+    * @param connection The connection object to terminate
+    */
+    static void disconnect(libomdb::Connection connection);
+
+
     
     /**
      * Performs requested action on database
@@ -82,6 +95,15 @@ namespace libomdb{
      * @return a CommandResult struct with result information.
      */
     libomdb::CommandResult executeCommand(std::string command);
+
+
+    /**
+     * Gets requested query results from database
+     * @param query The query to execute
+     * @return A ResultSet representing the results of the query.
+     */
+    libmem::ResultSet executeQuery(std::string query);
+    
 
     /**
      * Gets the meta data object that describes the connection
@@ -106,21 +128,5 @@ namespace libomdb{
  *************************************************************************/
 
 
-/**
- * Connects to specified location and returns object representing
- * connection
- * @param hostname  The name of the host to connect to
- * @param port      The name of the port to connect to
- * @param db        The name of the database to connect to
- */
-libomdb::Connection connect(std::string hostname, uint16_t port, 
-                           std::string db);
-
-
-/**
- * Disconnects the connection object.
- * @param connection The connection object to terminate
- */
-void disconnect(libomdb::Connection connection);
 
 #endif /* CONNECTION_H */
