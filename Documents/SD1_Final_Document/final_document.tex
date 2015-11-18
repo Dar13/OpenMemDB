@@ -423,16 +423,30 @@ Tree-based indexing is an index file structured into a variant of a binary searc
 
 \subsubsection{B+ Tree}
 %author Robert Medina
-B+ Tree is a balanced tree in which the non-leaf nodes direct where the data will be stored and the leaf nodes contain the data entries. The leaf nodes are contained in a doubly-linked list for fast retrieval of all leaf nodes.
-%\includegraphics{graphics/B+_Tree_Abstract.png}
-Specifically, B+ Tree is an n-ary tree that has a root, internal nodes and leaf children. Each index entry contains an array of key values and a pointer. Each node references to another node based on a branching property. Each parent node contains m+1 children, m is index entries. The left children must be less than the parent key value, the middle children must be between the left and right side children values, and the right children must be greater or equal to the parent key value. Every node except root must be at least half full. 
-%\includegraphics{graphics/B+_Tree_Example.png}
+B+ Trees are a variant of a B Tree. B Trees is an n-ary tree that splits data
+	based on a key value into nodes with T(j) subtrees and K(j) nodes, where j = (1<j<m).
+	By definition a B tree is a tree with the following properties:
+	Each node consists of T(i) subtrees and K(i) keys, where i = (0,...,j)
+	There is a single root that contains a range of m children, 2<= m < j
+	Each node contains a range of m children, (m/2) <= m < j
+	For each sub-tree T(i) where i = (0,...,j) each sub-tree contains keys k(j) such that:
+		T(0) sub-tree have keys k(0) where k(0) < k(i)
+		T(i) sub-tree have keys k(i), i = (1, ..., j-1) where k(0) <= k(i) <= k(j)
+		T(j) sub-tree have keys k(j) where k(j) < k(j)
+	All T(i) sub-trees are either non-empty or empty.
+	B Trees have a height of log(m)(N), m = number of children
+%\includegraphics{graphics/B_Tree_Example.png}
+B+ Tree differs slightly in the fact that B trees store their data (keys) within the internal nodes while B+ trees only points to the data. All the data in a B+ is stored in the leaves of tree. In addition, B+ Tree links all their leaves together with a doubly linked list.
+%\includegraphics{graphics/B_B+_Tree_Difference.png}
 The runtime for a B+ Tree is the following:
 Searching is logm(n), m is index entries
 Insertion is same as searching
 Deletion is same as searching
 Searching with range (logm(n) + k), m is index entries and k is number of data records
-
+Key Compression:
+The height of a B+ tree is log(m)(n), m = number of children, n = number of data entries.
+Tradiationally for databases on disk the number of data entries would be based on the size of the data and
+the size of the page. This is because tree nodes should fit on a single page, if B+ Tree leaves take up more memory than a page offers then B+ tree is resized to fit onto a page. Since the page can only fit so much data this is why the number of data entries is dependent on the size of data entries. So, it is reasonable to max the number of data entries by making the size of data smaller. This enures that more entires will fit on a page and the height of the B+ tree would remain small, thus keeping data retrevial performance fast.
 \subsubsection{Hash-based Indexing}
 %author Robert Medina
 	Hash-based Indexing references a key value to a pointer using a hash function. This can be used for indexing when there is an equal key value within the hash. Range operations using a key value is not possible with a hash function since it would simply be too costly of an operation. Hash-based indexing suffers from overflow chaining such as ISAM, which can hinder performance. There exists multiple hash-based indexing such as Static Hashing, Extendible Hashing, and Linear Hashing. 
