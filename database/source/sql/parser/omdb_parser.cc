@@ -1,43 +1,32 @@
 /* TODO: File header */
 
 #include <cstdlib>
+#include <map>
 #include "sql/omdb_parser.h"
 
 #include "../source/sql/parser/parse.c"
 
-void parse()
+static thread_local std::map<std::string, int> keywords;
+static thread_local StatementBuilder builder;
+
+void parse(std::string input)
 {
   void* parser = ParseAlloc(malloc);
 
   Token token;
   int token_id = 0;
 
-  std::string input = "CREATE TABLE users (test INTEGER, test2 INTEGER);";
+  // Tokenize the input string
+  std::vector<TokenPair> tokens = tokenize(input);
 
-  // CREATE TABLE users ( test INTEGER );
-  Token tokens[8];
-  tokens[0] = new std::string("CREATE");
-  tokens[1] = new std::string("TABLE");
-  tokens[2] = new std::string("users");
-  tokens[3] = new std::string("(");
-  tokens[4] = new std::string("test");
-  tokens[5] = new std::string("INTEGER");
-  tokens[6] = new std::string(")");
-  tokens[7] = new std::string(";");
-
-  int token_ids[8] = { TK_CREATE, TK_TABLE, TK_ID, TK_LPAREN, TK_ID,
-                       TK_STRING, TK_RPAREN, TK_SEMICOLON};
-
-  StatementBuilder* builder = new StatementBuilder();
-
-  for(int i = 0; i < 8; i++)
+  for(auto token_pair : tokens)
   {
-    Parse(parser, token_ids[i], tokens[i], builder);
+    Parse(parser, token_pair.token_type, token_pair.token, &builder);
   }
-  Parse(parser, 0, token, builder);
+  Parse(parser, 0, nullptr, &builder);
   ParseFree(parser, free);
 
-  CreateTableCommand* create_command = (CreateTableCommand*)builder->statement;
+  CreateTableCommand* create_command = (CreateTableCommand*)builder.statement;
   if(create_command == nullptr)
   {
     printf("Command not created\n");
@@ -51,4 +40,89 @@ void parse()
 void token_print(Token token)
 {
   printf("Token: %s\n", token->c_str());
+}
+
+std::vector<TokenPair> tokenize(std::string input)
+{
+  std::string::iterator start_token = input.end();
+  std::string::iterator end_token = input.end();
+
+  std::string::iterator itr = input.begin();
+
+  std::vector<TokenPair> tokens;
+
+  TokenPair pair;
+
+  while(itr != input.end())
+  {
+    if(isSQLIdentifierChar(*itr))
+    {
+      // Continue through the string until whitespace or non-identifier char found
+      std::string::iterator next = itr + 1;
+
+      while(isSQLIdentifierChar(*next))
+      {
+        next++;
+      }
+
+      pair.token = new std::string(itr, next);
+      if(keywords.find(*pair.token) != keywords.end())
+      {
+        pair.token_type = keywords[*pair.token];
+      }
+      else
+      {
+        pair.token_type = TK_ID;
+      }
+
+      itr = next;
+
+      tokens.push_back(pair);
+
+      continue;
+    }
+    else
+    {
+      if(isSQLSymbolChar(*itr))
+      {
+        // Finish out the symbol
+        switch(*itr)
+        {
+          case '(':
+            pair.token = new std::string("(");
+            pair.token_type = TK_LPAREN;
+            break;
+          case ')':
+            pair.token = new std::string(")");
+            pair.token_type = TK_RPAREN;
+            break;
+          case ';':
+            pair.token = new std::string(";");
+            pair.token_type = TK_SEMICOLON;
+            break;
+          case ',':
+            pair.token = new std::string(",");
+            pair.token_type = TK_COMMA;
+            break;
+          default:
+            pair.token = new std::string("ILLEGAL");
+            pair.token_type = TK_ILLEGAL;
+            break;
+        }
+
+        tokens.push_back(pair);
+      }
+    }
+      
+    itr++;
+  }
+
+  return tokens;
+}
+
+void setupTokenMappings()
+{
+  // TODO: Update this as necessary
+  keywords["CREATE"] = TK_CREATE;
+  keywords["TABLE"] = TK_TABLE;
 }

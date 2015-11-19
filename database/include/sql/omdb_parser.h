@@ -25,11 +25,28 @@ typedef uint64_t u64;
  */
 typedef std::string* Token;
 
+/* TODO: Come back and rework this whole type system. */
+/**
+ *  \brief All the information related to a token needed by the parser
+ */
+struct TokenPair
+{
+  //! The actual token
+  Token token;
+
+  //! The token type
+  uint32_t token_type;
+};
+
+void setupTokenMappings();
+
 void token_print(Token token);
+
+std::vector<TokenPair> tokenize(std::string input);
 
 struct Parse;
 
-void parse();
+void parse(std::string input);
 
 #define NEVER(X) 0
 

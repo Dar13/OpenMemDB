@@ -13,7 +13,8 @@
  */
 int main(int argc, char** argv)
 {
-  parse();
+  setupTokenMappings();
+  parse("CREATE TABLE test (user_id INTEGER, is_admin BOOLEAN);");
 
   return 1;
 

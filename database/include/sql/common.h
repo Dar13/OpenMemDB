@@ -39,6 +39,7 @@ enum SQLAsciiUsage
   SQL_XDIGIT      = 0x8,
   SQL_UPPER_ALPHA = 0x20,
   SQL_IDENT       = 0x40,
+  SQL_SYMBOL      = 0x80,
   SQL_NONE        = 0x0
 };
 
@@ -46,7 +47,12 @@ extern const unsigned char sql_ascii_map[256];
 
 inline bool isSQLIdentifierChar(unsigned char ch)
 {
-  return (sql_ascii_map[ch] & SQL_IDENT) != 0;
+  return (sql_ascii_map[ch] & (SQL_IDENT | SQL_ALNUM)) != 0;
+}
+
+inline bool isSQLSymbolChar(unsigned char ch)
+{
+  return (sql_ascii_map[ch] & SQL_SYMBOL) != 0;
 }
 
 int strnicmp(const char* left, const char* right, int n);
