@@ -417,9 +417,32 @@ more flexible"
   \textbf{Example NoSQL Architecture}
   \includegraphics{graphics/DBMS_Diagrams/dbms_nosql_mongo_architecture.jpg}
   \caption{Example NoSQL Architecture}
+  \citep{mongodb_architecture}
 \end{figure}
 
 \subsubsection{NewSQL}
+NewSQL is a database management system that attempts to provide
+the same scalable performance that a NoSQL DBMS can provide while still conforming to 
+the relational model. "Generally speaking, NewSQL data stores meet many of the 
+requirements for data management in cloud environments and also offer the benefits of 
+the well-known SQL standard"\cite{grolinger2013data}
+\par\vspace{\baselinskip}
+Since NewSQL is based on the relational model, every NewSQL DBMS must offer their clients
+a pure relational view of data. This means that the data is interacted in terms of tables
+and relations. This does not mean that the internal data representation is the same across
+all NewSQL stores. 
+\par\vspace{\baselineskip}
+"One of the main characteristics of the NoSQL and NewSQL data stores is their ability to 
+scale horizontally and effectively by adding more servers into the resource pool. Even 
+though there have been attempts to scale relational databases horizontally, on the contrary, 
+RDBs are designed to scale vertically by means of adding more power to a single existing 
+server"\cite{grolinger2013data}
+
+\begin{figure}
+  \textbf{Partitioning, replication, consistency, and concurrency control capabilities}
+  \includegraphics{graphics/DBMS_Diagrams/nosql_newsql_scalability_table.png}
+  \caption{NoSQL and NewSQL Data Modeling}
+\end{figure}
 
 \newpage
 
