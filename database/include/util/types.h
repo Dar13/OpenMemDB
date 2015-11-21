@@ -2,6 +2,9 @@
  *
  */
 
+#ifndef OMDB_UTIL_TYPES_H
+#define OMDB_UTIL_TYPES_H
+
 /**
  *  @brief Templated wrapper class that should handle Tervel's bit-fiddling
  *         graciously.
@@ -16,3 +19,5 @@ struct TervelWrapper
     uint8_t reserved;
     T data;
 };
+
+#endif

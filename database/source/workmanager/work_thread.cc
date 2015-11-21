@@ -1,12 +1,7 @@
-/**
- *
- */
+/* TODO: File header */
 
-// Standard library includes
-#include <iostream>
-
-// Project includes
 #include <workmanager/types.h>
+#include <workmanager/work_thread.h>
 
 /**
  * @brief This is the framework in which the thread's jobs are executed in.
