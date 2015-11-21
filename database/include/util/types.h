@@ -2,6 +2,9 @@
  *
  */
 
+#ifndef OMDB_UTILS_TYPES
+#define OMDB_UTILS_TYPES
+
 namespace omdb
 {
     /**
@@ -19,3 +22,5 @@ namespace omdb
         T data;
     };
 }
+
+#endif

@@ -9,6 +9,7 @@
 
 // Project includes
 #include <workmanager/work_manager.h>
+#include <workmanager/work_thread.h>
 
 WorkManager::WorkManager(uint32_t num_threads, tervel::Tervel* tervel)
     : m_tervel(tervel)
