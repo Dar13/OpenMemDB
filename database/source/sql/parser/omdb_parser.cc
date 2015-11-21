@@ -125,4 +125,15 @@ void setupTokenMappings()
   // TODO: Update this as necessary
   keywords["CREATE"] = TK_CREATE;
   keywords["TABLE"] = TK_TABLE;
+  keywords["AS"] = TK_AS;
+  keywords["WHERE"] = TK_WHERE;
+  keywords["SELECT"] = TK_SELECT;
+  keywords["FROM"] = TK_FROM;
+  keywords["ALL"] = TK_ALL;
+  keywords["DISTINCT"] = TK_DISTINCT;
+  keywords["UNIQUE"] = TK_UNIQUE;
+  keywords["AUTO_INCREMENT"] = TK_AUTO_INCREMENT;
+  keywords["NOT"] = TK_NOT;
+  keywords["NULL"] = TK_NULL;
+  keywords["DEFAULT"] = TK_DEFAULT;
 }

@@ -7,6 +7,10 @@
 
 #include <cstdint>
 
+#include <string>
+
+typedef std::string* SQLToken;
+
 enum class SQLType : uint16_t
 {
   NONE = 0,

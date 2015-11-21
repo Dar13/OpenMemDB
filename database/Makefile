@@ -37,7 +37,7 @@ clean:
 
 lemon:
 	make -C $(TOOLS_DIR)/lemon
-	cd $(TOOLS_DIR)/lemon && ./lemon $(LEMON_GRAM_LOC)
+	cd $(TOOLS_DIR)/lemon && ./lemon -p $(LEMON_GRAM_LOC)
 	mv $(INC_DIR)/sql/parser/parse.h $(INC_DIR)/sql/parser/parse.h.tmp
 	mv $(INC_DIR)/sql/parser/parse.c $(SRC_DIR)/sql/parser/parse.c
 	$(NAWK)	-f $(TOOLS_DIR)/lemon/addopcodes.awk $(INC_DIR)/sql/parser/parse.h.tmp >$(INC_DIR)/sql/parser/parse.h

@@ -23,7 +23,7 @@ typedef uint64_t u64;
 /**
  *  \brief The datatype passed into the parser from the tokenizer
  */
-typedef std::string* Token;
+typedef SQLToken Token;
 
 /* TODO: Come back and rework this whole type system. */
 /**

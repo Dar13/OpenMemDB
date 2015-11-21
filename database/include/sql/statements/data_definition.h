@@ -18,4 +18,9 @@ struct CreateTableCommand
   std::vector<SQLConstraint> column_constraints;
 };
 
+struct DropTableCommand
+{
+  std::string table_name;
+};
+
 #endif
