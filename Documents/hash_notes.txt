@@ -1,0 +1,24 @@
+Hash-based indexing:
+Basically the idea is to map key values into a range of bucket numbers
+to find the page on which a desired data entry belongs. 
+Hash-based indexing cannot support range searches, unlike tree-based indexing
+Useful for implementing relational operations (ex. join)
+
+Hash Function:
+Good hash functions are deterministic, provide uniformity, and have variable range. Deterministic means that for any given key value it will
+generate the corrseponding index consistently. This is necessary to provide accurate data retrevial from a hash map. Uniformity means that 
+a hash map will evenly distribute hash index values over its value range. Without this the performance will suffer greatly since the number of
+collisions will increase this hinders performance. 
+
+Static-based:
+Static Hashing is a hash map with buckets. The hash map is based on a key value and 
+the location where hash map refers to is a bucket containing the pages where the key value occurs.
+In the event a bucket is full since a static hash map cannot allocate new memory an overflow bucket chain
+must be created. The overflow page is added to the overflow bucket chain.
+
+Extendible Hashing:
+
+Linear Hashing:
+
+
+
