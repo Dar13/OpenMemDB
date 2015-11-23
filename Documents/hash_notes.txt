@@ -14,11 +14,44 @@ Static-based:
 Static Hashing is a hash map with buckets. The hash map is based on a key value and 
 the location where hash map refers to is a bucket containing the pages where the key value occurs.
 In the event a bucket is full since a static hash map cannot allocate new memory an overflow bucket chain
-must be created. The overflow page is added to the overflow bucket chain.
+must be created. The overflow page is added to the bucket which is more appropiately called an overflow chain.
+
+*insert static hashing picture*
+
+Runtimes:
+Search: O(1)
+Insert: O(1)
+Delete: O(1)
+
+Runtimes with Overflow Chains:
+Search: O(n)
+Insert: O(1)
+Delete: O(n)
+
+If there are multiple collisions then the hashmap usefullness becomes impared. The hashmap devolves into a more
+of a linked list so having long chains can really hinder performance as you see above. Therefore static hashing
+is not a reliable method for inserting new objects since the possiblity of overflow chains and re-indexing can
+ruin the property of a hashmap. 
 
 Extendible Hashing:
+Extendible Hashing is a hash map of pointers that maps to buckets with various levels of depth. This directory 
+is based on an index value using X mod 2^(global depth). The global depth is the number of bits for the binary
+representation of that index value. Each bucket in the directory has a shared data entry limit for the number of 
+entries each bucket can hold. 
+
+*insert picture of hash map*
+*insert picture of hash map*
+
+Whenever a data entry is inserted, the local depth of that bucket is compared with the global depth. If the local depth
+is equal to the global depth then the directory is doubled and each pointer in the newly allocated memory is mapped to the
+original buckets respectively. Also the global depth is increased by one and the directory index values are reindex to new
+bit values. When this overflow occurs the maximum bucket gets split up into two buckets, one at the original index and the 
+second one at this new index value. This new index value holds the data entry and it's local depth is increased by one, along with
+the original bucket local depth value. 
+
+*insert picture of hash map insertion*
+
+Runtimes:
 
 Linear Hashing:
-
-
 
