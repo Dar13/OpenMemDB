@@ -467,6 +467,16 @@ the command queue, that was initially implemented using a \lstinline[basicstyle=
 and \lstinline[basicstyle=\ttfamily]|std::queue<>|, with a Tervel queue that allows
 non-blocking and wait-free access and insertion into the command queue.
 \par\vspace{\baselineskip}
+The reference used mutual exclusion objects such as \lstinline[basicstyle=\ttfamily]|std::mutex|
+which is contrary to our goal of a fully non-blocking and wait-free system. Using the Tervel
+queue as detailed above allows us to remain non-blocking and wait-free as long as Tervel
+is also considered non-blocking and wait-free. While the implementation uses condition variables,
+they are used to sleep inactive threads rather than block waiting for a process. Letting these 
+threads sleep allow the operating system to schedule other threads in their place such as 
+background processes or other worker threads and their helper threads. This practice is also 
+considered common courtesy in multi-process systems so that the server is able to run more than
+a single process and can conserve power in times of low demand.
+\par\vspace{\baselineskip}
 The task of communicating between the client and the server, which is the database itself,
 is given to the work manager as it is the main thread and is where all the results of
 the SQL query end up. This task also requires initialization and management of the network
@@ -482,15 +492,12 @@ performance, and various other metrics listed below will be measured and able to
 requested by clients or management software. The full list of system resources measured
 and reported by the server is as follows:
 \begin{itemize}
- \item Processor utilization
- \item Amount of memory in use
- \item Percentage of RAM used in comparison to the maximum capacity of the hardware
  \item Shortest execution time of a query
  \item Longest execution time of a query
  \item Median execution time of a query
  \item Average ``load'' of a worker thread
- \item TODO: others??
 \end{itemize}
+\par\vspace{\baselineskip}
 
 \subsection{Data Store}
 \subsubsection{Indexing}
