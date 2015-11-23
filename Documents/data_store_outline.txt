@@ -1,0 +1,9 @@
+Data Store:
+Tervel Data Structures
+Row Store Architecture
+Hash-Based Indexing
+CI - compliant
+A-Log Manager (need disk to log pages)
+C-Tervel wait-free property
+I-Tervel wait-free property
+D-(need disk to snapshot db)
