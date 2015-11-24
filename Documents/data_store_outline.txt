@@ -1,7 +1,57 @@
 Data Store:
+Data Store receives data requests and based on those requests will return a subset of data from
+the database. This database will represent data in a table format using nested vectors. Each table
+will be stored in a table hashmap to allow for easy table lookup. Each table contains a relational
+schema for the type of data each column can accept. This is represented as a pair in the table 
+lookup hashmap. 
+
+*Table into nested vectors*
+
+*Table lookup hashmap*
+
+Nested vectors are stored as row store architecture and column store architecture.
+
+*row store architecture: row_store_ex*
+
+*column store architecture: column_store_ex*
+
+*row_store_and_column_ex*
+
+Whenever a data request inquires about a table or more the data store will return a subset of that
+data in the form of nested vectors. It looks up the table that in memory as shown below.
+
+Tables stored in the RAM:
+*table lookup from memory picture: abstract_tables_in_memory*
+
+Table Hashmap Lookup:
+*table lookup hash example: my_picture*
+
+Row Store vs Column Store
+Column Store:
+The advantage of column based tables are faster data access, better compression, and better parallel processing.
+In order to change a column from a row store architecture, each row in the table must be search in order to find the
+column and then it requires to change the value. This makes it slow to check for integrity constraints. Column store 
+is a simply search through one vector row or column. Column vectors are very similar to each other value, which allows
+for easy compression of data, unlike row vectors which could contain many different data types. In column store, data
+is already partition into seperate columns so each column can be processed by itself. 
+
+Row Store:
+The advantages of row based tables are easy row inserts into tables, and easy row access. This is useful when a query
+wants to manipulate the entire row data instead of a few columns. In column store this would require multiple column vectors
+being rewritten and maniuplated which would be a costly operation to perform. 
+
+*example of query for row and column store: query_of_table_ex*
+Seeing in the row store and column store figure previously, it would be
+difficult to find the sales column in a row store column, and it is easily
+noticeable to see how adding a new row in column store would require multiple
+access to multiple column vectors.
+
 Tervel Data Structures
 Row Store Architecture
 Hash-Based Indexing
+Transaction Manager?? (Should I only apply COMMIT?)
+Logger?? (Should I log the transactions in a stack?? what will the logs be used for?)
+Snapshot Isolation (Should the database be backed up to disk??)
 CI - compliant
 A-Log Manager (need disk to log pages)
 C-Tervel wait-free property
