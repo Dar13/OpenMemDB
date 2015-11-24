@@ -893,6 +893,29 @@ specific set of query relations extremely fast.
 %% A summary describing the overall architecture should go here. Followed by subsections
 %% for each major piece.  
   \subsection{libomdb: The Connection API}
+  With any database management system it is common to provide an easy way to connect
+  to a specific database, and to execute commands that act on that database. The most common
+  way to provide this connectivity is to support either ODBC or JDBC. However, the work 
+  required to be an ODBC or JDBC compliant database is considerable, and given that it is
+  not one of the requirements of our project we will not be going down that road. We have
+  decided in stead to design our own connection library, which we are calling 
+  "libombd". libomdb will provide all of the absolutely necessary components needed to 
+  connect to a specific database and to execute all of the supported SQL operations on
+  that database. 
+  \par\vspace{\baselineskip}
+  libomdb is broken in to two main operations: connecting to a database, and performing
+  operations on the database that you are connected to. In order to connect to the database
+  the application developer will call the 
+  \lstinline[basicstyle=\ttfamily]connect()| method that is provided by the libomdb API. 
+  This method will return a \lstinline[basicstyle=\ttfamily]|Connection| object that can
+  then be used to execute queries or commands to the database that was connected to. 
+  \par\vspace{\baselineskip}
+  \begin{figure}
+    \centering
+    \textbf{Overall libomdb Class Architecture}
+    \includegraphics{graphics/libomdb_Diagrams/libomdb_Class.png}
+    \caption{libomdb Class Diagram}
+  \end{figure}
 \newpage
 
 \section{Facilities and Equipment}
