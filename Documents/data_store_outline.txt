@@ -7,7 +7,7 @@ lookup hashmap.
 
 *Table into nested vectors*
 
-*Table lookup hashmap*
+*Table lookup hashmap with relational schema*
 
 Nested vectors are stored as row store architecture and column store architecture.
 
@@ -46,14 +46,58 @@ difficult to find the sales column in a row store column, and it is easily
 noticeable to see how adding a new row in column store would require multiple
 access to multiple column vectors.
 
+*
 Tervel Data Structures
 Row Store Architecture
 Hash-Based Indexing
-Transaction Manager?? (Should I only apply COMMIT?)
-Logger?? (Should I log the transactions in a stack?? what will the logs be used for?)
+REMOVE: Transaction Manager?? (Should I only apply COMMIT?)
+REMOVE: Logger?? (Should I log the transactions in a stack?? what will the logs be used for?)
 Snapshot Isolation (Should the database be backed up to disk??)
-CI - compliant
+*
+
+ACID:
+Properties of a reliable database is outline as ACID. In order to guarantee that 
+database transactions are processed reliably a database must have atomicity, consistency,
+isolation and durability. 
+
+Atomicity refers to the ability of a database to guarantee that all transactions
+are performed or none of them are. Transactions that abort operations midway leaves
+for data inconsistency. In the event that a transaction is aborted then the database 
+returns to the last commited transaction state.
+
+Consistency refers to the ability of a transaction to take the database from one valid state
+to another. Before a transaction and after a transaction the database must remain in a valid state.
+Any data written to the database must be valid according to any constraints, cascades and triggers. 
+
+Isolation refers to the level of visibility of transactions to other users or systems. In other words,
+transactions from two users cannot interact with one another and if two concurrent transactions occur then
+those changes to the state of the database are not reflected to each other user. If those transactions occur
+concurrently and rely on each other then locking will occur.
+
+Durability means that once a transaction is commited then those changes on the database will be reflected to the user
+and will be recorded pernamently. This is usually performed by backing up valid states of the database. 
+
+*
 A-Log Manager (need disk to log pages)
-C-Tervel wait-free property
-I-Tervel wait-free property
+C-Constraint Checker Function (enum datatypes added to relational schema)
+I-tervel wait-free property
 D-(need disk to snapshot db)
+*
+*
+Features to illistrate, must write and add diagrams for each feature:
+CRUD-style queries (CREATE TABLE, INSERT, SELECT, UPDATE, DELETE, DROP TABLE)
+Table constraints (PRIMARY KEY, NOT NULL, DEFAULT, FOREIGN KEY, UNIQUE, AUTO_INCREMENT)
+Limited Datatypes (INTEGER, BOOLEAN, CHAR/VARCHAR, FLOAT, DATE, TIME, TIMESTAMP)
+Joins(?)
+Subqueries(tentatively), with EXISTS/NOT EXISTS contingent on this
+WHERE, ORDER BY, GROUP BY, IN, BETWEEN,
+ODBC implementation
+UNION(?)
+Aliases(?)
+Boolean expressions
+Regex (LIKE, wildcards, etc)(?)
+Math aggregate functions (MAX, MIN, AVG, COUNT, SUM)
+*
+*Constraint checker function write up with diagram(simple hashmap):
+...
+*
