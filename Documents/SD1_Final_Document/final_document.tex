@@ -500,12 +500,81 @@ and reported by the server is as follows:
 \par\vspace{\baselineskip}
 
 \subsection{Data Store}
+%author Robert Medina
+Data Store receives data requests and based on those requests will return a subset of data from
+the database. This database will represent data in a table format using nested vectors. Each table
+will be stored in a table hashmap to allow for easy table lookup. Each table contains a relational
+schema for the type of data each column can accept. This is represented as a pair in the table 
+lookup hashmap.
+
+%\includegraphics{graphics/Table_In_Memory.png}
+
+Nested vectors are stored as row store architecture and column store architecture.
+
+Row Store Architecture stores the memory of a row in a vector of multiple types as such
+%\includegraphics{graphics/row_store_example.png}
+Column Store Architecture stores the memory of a row in a vector of one type
+%\includegraphics{graphics/column_store_example.png}
+
+Side by Side Difference between row and column store
+%\includegraphics{graphics/row_store_and_column_example.png}
+
+Whenever a data request inquires about a table or more the data store will return a subset of that
+data in the form of nested vectors. 
+
+%\includegraphics{graphics/row_store_and_column_example.png}
+
+Row Store vs Column Store
+Column Store:
+The advantage of column based tables are faster data access, better compression, and better parallel processing.
+In order to change a column from a row store architecture, each row in the table must be search in order to find the
+column and then it requires to change the value. This makes it slow to check for integrity constraints. Column store 
+is a simply search through one vector row or column. Column vectors are very similar to each other value, which allows
+for easy compression of data, unlike row vectors which could contain many different data types. In column store, data
+is already partition into seperate columns so each column can be processed by itself. 
+
+Row Store:
+The advantages of row based tables are easy row inserts into tables, and easy row access. This is useful when a query
+wants to manipulate the entire row data instead of a few columns. In column store this would require multiple column vectors
+being rewritten and maniuplated which would be a costly operation to perform. 
+
+%\includegraphics{graphics/query_of_table_example.png}
+
+Seeing in the row store and column store figure previously, it would be
+difficult to find the sales column in a row store column, and it is easily
+noticeable to see how adding a new row in column store would require multiple
+access to multiple column vectors.
+
+\subsubsection{ACID}
+%author Robert Medina
+
+ACID:
+Properties of a reliable database is outline as ACID. In order to guarantee that 
+database transactions are processed reliably a database must have atomicity, consistency,
+isolation and durability. 
+
+Atomicity refers to the ability of a database to guarantee that all transactions
+are performed or none of them are. Transactions that abort operations midway leaves
+for data inconsistency. In the event that a transaction is aborted then the database 
+returns to the last commited transaction state.
+
+Consistency refers to the ability of a transaction to take the database from one valid state
+to another. Before a transaction and after a transaction the database must remain in a valid state.
+Any data written to the database must be valid according to any constraints, cascades and triggers. 
+
+Isolation refers to the level of visibility of transactions to other users or systems. In other words,
+transactions from two users cannot interact with one another and if two concurrent transactions occur then
+those changes to the state of the database are not reflected to each other user. If those transactions occur
+concurrently and rely on each other then locking will occur.
+
+Durability means that once a transaction is commited then those changes on the database will be reflected to the user
+and will be recorded pernamently. This is usually performed by backing up valid states of the database.
+
 \subsubsection{Indexing}
 %author Robert Medina
 Indexing allows for fast retrieval from a collection of data. There are many ways to accomplish this, and some ways are better suited depending on the constraints. Tree-based indexing and Hash-based indexing are two popular solutions for an implementation of a database. Given a set of data in memory, indexing takes a key data value and stores it into a data structure. Based off this key value, the indexing data structure will point to the file in memory or memory address, depending on how the data is stored. Based on this, a file scan of the database is now just reduced to scanning an index file. 
 %\includegraphics{graphics/indexentry.png}
 However searching through an index file can still be a costly operation. Index files are smaller than the data it is referencing but it can still use a considerable about memory space. Therefore it would be reasonable to use a data structure for fast retrieval of data based on a range of values or based on the actual data value stored.
-
 
 \subsubsection{Tree-based Indexing}
 %author Robert Medina
@@ -539,18 +608,71 @@ Tradiationally for databases on disk the number of data entries would be based o
 the size of the page. This is because tree nodes should fit on a single page, if B+ Tree leaves take up more memory than a page offers then B+ tree is resized to fit onto a page. Since the page can only fit so much data this is why the number of data entries is dependent on the size of data entries. So, it is reasonable to max the number of data entries by making the size of data smaller. This enures that more entires will fit on a page and the height of the B+ tree would remain small, thus keeping data retrevial performance fast.
 \subsubsection{Hash-based Indexing}
 %author Robert Medina
-	Hash-based Indexing references a key value to a pointer using a hash function. This can be used for indexing when there is an equal key value within the hash. Range operations using a key value is not possible with a hash function since it would simply be too costly of an operation. Hash-based indexing suffers from overflow chaining such as ISAM, which can hinder performance. There exists multiple hash-based indexing such as Static Hashing, Extendible Hashing, and Linear Hashing. 
+	Hash-based Indexing references a key value to a data entry using a hash function. This can be used for indexing when there is an equal key value within the hash. Range operations using a key value is not possible with a hash function since it would simply be too costly of an operation. Hash-based indexing suffers from overflow chaining such as ISAM, which can hinder performance. There exists multiple hash-based indexing such as Static Hashing, Extendible Hashing, and Linear Hashing. 
+\subsection{Hash Function}
+%author Robert Medina
+Hash Function:
+Good hash functions are deterministic, provide uniformity, and have variable range. Deterministic means that for any given key value it will generate the corrseponding index consistently. This is necessary to provide accurate data retrevial from a hash map. Uniformity means that a hash map will evenly distribute hash index values over its value range. Without this the performance will suffer greatly since the number of collisions will increase this hinders performance. 
 \subsubsection{Static Hashing}
 %author Robert Medina
-Static Hashing is a hash table based on a key value with a pointer to a bucket of pages that contain said key. These data entries may be sorted but it depends on the application. This data structure is static for the most part but it does allow for overflow page allocation. In the event of inserting beyond the memory allocated, this data entry is placed into a new page and the page is added to an overflow chain in the hash table.
+Static Hashing is a hash table based on a key value that maps to a bucket containing pages. These data entries may be sorted but it depends on the application. This data structure is static for the most part but it does allow for overflow page allocation. In the event of inserting beyond the memory allocated, this data entry is placed into a new page and the page is added to an overflow chain in the bucket.
 %\includegraphics{graphics/Static_Hashing_Abstract}
 A good hash function is imperative to uniformly distribute values over the collection of buckets. An example of a good hash would be hash(key) = (a*key + b), a and b are constants. Some problems of Static Hashing are the fact that it is static. When the index file is created bucket sizes are known at time of creation, so pages can be stored successively in the buckets. However as the index file continues to grow if the same key value is stored repeatedly then a long overflow chain develops. Since the number of buckets are static if the index file shrinks in size then there is wasted memory space. If the file grows too large then it results in poor performance. Otherwise, the performance for operations is very fast. The following is the runtimes:
-Search O() 1 I/O read
-Insertion O() 2 I/O read/write page
-Deletion O() 2 I/O read/write page
+Search O(1) 1 I/O read
+Insertion O(1) 2 I/O read/write page
+Deletion O(1) 2 I/O read/write page
+Runtimes with Overflow Chains:
+Search: O(n)
+Insert: O(1)
+Delete: O(n)
+
+If there are multiple collisions then the hashmap usefullness becomes impared. The hashmap devolves into a more
+of a linked list so having long chains can really hinder performance as you see above. Therefore static hashing
+is not a reliable method for inserting new objects since the possiblity of overflow chains and re-indexing can
+ruin the property of a hashmap.
+
 Rehashing:
-	Intuitively a simple hash table with a pointer to a page would make sense. However in the case of additional pages, without an overflow chain rehashing the table would be necessary. In this case rehashing the table would be a costly operation. Including that the data structure is unusable while rehashing is in progress. Dynamic hashing techniques solve this problem.
+Intuitively a simple hash table with a pointer to a page would make sense. However in the case of additional pages, without an overflow chain rehashing the table would be necessary. In this case rehashing the table would be a costly operation. Including that the data structure is unusable while rehashing is in progress. Dynamic hashing techniques solve this problem.
+
 Extendible Hashing:
+Extendible Hashing is a hash map of pointers that maps to buckets with various levels of depth. This directory 
+is based on an index value using X mod 2^(global depth). The global depth is the number of bits for the binary
+representation of that index value. Each bucket in the directory has a shared data entry limit for the number of 
+entries each bucket can hold.
+
+Extendible Hashmap
+%\includegraphics{graphics/ExtendibleHashing_Depth_2}
+
+Spliting Occurs
+%\includegraphics{graphics/ExtendibleHashing_Spliting}
+
+Whenever a data entry is inserted, the local depth of that bucket is compared with the global depth. If the local depth
+is equal to the global depth then the directory is doubled and each pointer in the newly allocated memory is mapped to the
+original buckets respectively. Also the global depth is increased by one and the directory index values are reindex to new
+bit values. When this overflow occurs the maximum bucket gets split up into two buckets, one at the original index and the 
+second one at this new index value. This new index value holds the data entry and it's local depth is increased by one, along with
+the original bucket local depth value.
+
+Directory Doubles and Global Depth increases to 3
+%\includegraphics{graphics/ExtendibleHashing_Depth_3}
+
+Runtimes:
+Search: O(n)
+Insert: O(1)
+Delete: O(n)
+
+In practice however, the length of a bucket is much smaller than static hashing and has a uniform limit. This makes it more desirable
+in terms of performance on an average.
+
+Linear Hashing: *in progress*
+
+n = pointer that points to the bucket that will be split
+m = number of buckets
+split function = X > X if current items/total capacity of data entries is greater than some percentage then split
+bucket capacity = X, number of data entries
+
+expanding directory:
+increase m by 1, n increased by 1
 
 \subsection{SQL Engine}
 %author Mike McGee
