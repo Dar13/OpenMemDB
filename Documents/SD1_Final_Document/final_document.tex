@@ -5,6 +5,10 @@
 \usepackage[pass,letterpaper]{geometry}
 \usepackage{graphicx}
 \usepackage{listings}
+\usepackage[square,sort,comma,numbers]{natbib}
+
+% Temporarily ignore graphics
+\renewcommand{\includegraphics}[2][]{\fbox{}}
 
 \setlength{\parindent}{0cm}
 
@@ -426,7 +430,8 @@ the same scalable performance that a NoSQL DBMS can provide while still conformi
 the relational model. "Generally speaking, NewSQL data stores meet many of the 
 requirements for data management in cloud environments and also offer the benefits of 
 the well-known SQL standard"\cite{grolinger2013data}
-\par\vspace{\baselinskip}
+% Got errors here, commenting out for now
+%\par\vspace{\baselinskip}
 Since NewSQL is based on the relational model, every NewSQL DBMS must offer their clients
 a pure relational view of data. This means that the data is interacted in terms of tables
 and relations. This does not mean that the internal data representation is the same across
@@ -636,7 +641,7 @@ Intuitively a simple hash table with a pointer to a page would make sense. Howev
 
 Extendible Hashing:
 Extendible Hashing is a hash map of pointers that maps to buckets with various levels of depth. This directory 
-is based on an index value using X mod 2^(global depth). The global depth is the number of bits for the binary
+is based on an index value using X mod 2\^(global depth). The global depth is the number of bits for the binary
 representation of that index value. Each bucket in the directory has a shared data entry limit for the number of 
 entries each bucket can hold.
 
