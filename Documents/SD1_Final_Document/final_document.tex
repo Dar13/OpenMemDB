@@ -679,6 +679,36 @@ bucket capacity = X, number of data entries
 expanding directory:
 increase m by 1, n increased by 1
 
+\
+\newpage
+\subsection{Non-Blocking Properties}
+% Author: Jason
+% TODO: make a new section for multiprocessing?
+The core of OpenMemDB relies on non-blocking algorithms and data structures. Non-blocking properties ensure a massively parallelizable database architecture. It is important to take advantage of parallelization because processors have hit a wall of reasonable clock speed\citep{processorspeed}. The maximum consumer processor clock speed has hovered around 4GHz for many years now. Instead of increasing clock speed, processor manufacturers are starting to include more cores and new technologies such as hyperthreading to compensate for clock speed insufficiency. Processors just aren't getting faster fast enough.
+\par\vspace{\baselineskip}
+An algorithm that has the non-blocking property ensures the system makes progress. There are two types of non-blocking algorithms. These are defined as: 
+\begin{itemize}
+	\item \textit{Lock-free}: Ensures at least one thread makes progress in a finite amount of time.
+	\item \textit{Wait-free}: Ensures all threads make progress in a finite amount of time. 
+\end{itemize}
+In order to take advantage of modern processors, we implement a wait-free data store module. After some research, we have discovered that no current DBMS uses wait-free data structures, at most they are lock-free.
+\par\vspace{\baselineskip}
+From looking at the definitions, it is clear that wait-freedom grants much more powerful guarantees in regards to system progress. It is also easy to conclude that it is much harder to implement. In the next few sections we discuss this as well as the advantages and disadvantages of both. 
+
+\subsubsection{Lock Freedom}
+\begin{quotation}
+	"A method is lock-free if it guarantees that infinitely often some method call finishes in a finite number of steps"\citep[p. 60]{artofmulti}.
+\end{quotation}
+
+\subsubsection{Wait Freedom}
+\begin{quotation}
+	"A method is wait-free if it guarantees that every call finishes its execution
+	in a finite number of steps"\citep[p. 59]{artofmulti}.
+\end{quotation}
+
+\newpage
+
+
 \subsection{SQL Engine}
 %author Mike McGee
 One of the most important pieces of a Database Management System is the SQL Engine. 
