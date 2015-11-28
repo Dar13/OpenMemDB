@@ -161,7 +161,7 @@ As such, the following are the specification for this project:
   \item INSERT, UPDATE, and DELETE commands with certain clauses not implemented
   \item Certain datatypes: INTEGER, SMALLINT, BIGINT, BOOLEAN, CHAR/VARCHAR, FLOAT, DATE, TIME, TIMESTAMP
   \item Column aggregate functions: MIN, MAX, AVG, COUNT, SUM, etc.
-  \item Table constraints: PRIMARY KEY, NOT NULL, DEFAULT, FOREIGN KEY, UNIQUE, AUTO_INCREMENT
+  \item Table constraints: PRIMARY KEY, NOT NULL, DEFAULT, FOREIGN KEY, UNIQUE, AUTO\_INCREMENT
   \item WHERE, ORDER BY, GROUP BY, IN, BETWEEN clauses with support for boolean expressions within them
   \item ODBC connector implementation
  \end{itemize}
@@ -726,9 +726,14 @@ An algorithm that has the non-blocking property ensures the system makes progres
 	\item \textit{Lock-free}: Ensures at least one thread makes progress in a finite amount of time.
 	\item \textit{Wait-free}: Ensures all threads make progress in a finite amount of time. 
 \end{itemize}
-In order to take advantage of modern processors, we implement a wait-free data store module. After some research, we have discovered that no current DBMS uses wait-free data structures, at most they are lock-free.
+In order to take advantage of modern processors, we implement a wait-free data store module. 
+After some research, we have discovered that no current DBMS uses wait-free data 
+structures, at most they are lock-free.
 \par\vspace{\baselineskip}
-From looking at the definitions, it is clear that wait-freedom grants much more powerful guarantees in regards to system progress. It is also easy to conclude that it is much harder to implement. In the next few sections we discuss this as well as the advantages and disadvantages of both. 
+From looking at the definitions, it is clear that wait-freedom grants much more 
+powerful guarantees in regards to system progress. It is also easy to conclude that 
+it is much harder to implement. In the next few sections we discuss this as well as the 
+advantages and disadvantages of both. 
 
 \subsubsection{Lock Freedom}
 \begin{quotation}
@@ -761,15 +766,13 @@ from a straight string into a format readable by the parser. This tokenizer is v
 similar to a generic compiler tokenizer though it's job is made considerably easier 
 by the importance of spaces in SQL queries/commands regarding token delineation.
 \par\vspace{\baselineskip}
-In an effort to reduce code duplication and facilitate rapid development, we chose
-to appropriate the tokenizer from the SQLite project. SQLite is a public domain
-SQL database library that integrates very cleanly into many applications big
-or small.
-\par\vspace{\baselineskip}
-SQLite is not entirely SQL compliant, as that is simply unreasonable to achieve
-given its use cases and problem domain. As such, changes to the tokenizer will be
-needed in order to make sure it can handle proper SQL queries/commands while 
-not supporting non-standard SQL tokens.
+We encountered issues directly adapting current open-source implementations of a
+SQL query/command tokenizer. As a tokenizer isn't a particuarly difficult piece of 
+code to replicate, we chose to implement our own tokenizer so that
+we can optimize for our use cases without worrying about breaking things later on.
+As most of the tokenizers were using C and we are using C++ we can also use C++-specific
+constructs such as iterators and ``for each'' loops which introduce certain safety guarantees 
+that simply aren't possible with pointers as used in C.
 
 \subsubsection{Parser}
 %author Mike McGee
@@ -781,10 +784,10 @@ was passed in the grammar specification file.
 \par\vspace{\baselineskip}
 The two parser generators that we found were "Lemon" and "YACC". PostgreSQL uses 
 "YACC", which stands for "Yet Another Compiler Compiler", while SQLite uses 
-"Lemon", which stands for "Lemon". Both tools will generate a C code parser for 
-your query language when provided a grammar specification file. According to the 
-tutorial provided by "Lemon" there are some vast differences between these 
-two parser generators. 
+"Lemon", which was created to be a simpler alternative to YACC. Both tools will
+generate a Look-Ahead Left-to-right Right-most-derivation (LALR) parser in C when
+given a grammar specification file. Both tools share a base syntax in their grammar files,
+but Lemon varies from YACC in some very important ways and enumerates those in its tutorial document.
 \par\vspace{\baselineskip}
 “It uses a different grammar syntax which is designed to reduce the number of coding
 errors. Lemon also uses a more sophisticated parsing engine that is faster than yacc and
@@ -854,11 +857,75 @@ the overall performance of the DBMS. The need for a query planner comes from the
 declarative nature of SQL queries, where the query doesn't tell you how to retrieve the
 data but instead tells you what to retrieve. This is similar to languages such as Prolog where
 a theorem solver is employed to determine how to solve the given problem. A large theorem 
-solver is impractical in a system with high-performance, low-latency environment such as 
+solver is impractical in a system with high-performance, low-latency requirements such as 
 a DBMS, so we must generate our own significantly stripped-down version that can handle a 
 specific set of query relations extremely fast.
+\par\vspace{\baselineskip}
+Luckily, due to the subset of features we are supporting in this project, we do not need to 
+implement a very strong or robust query planner with large amounts of optimizing or scheduling 
+capability. This is due to the fact that we have determined that the queries we are supporting
+can be decomposed into a series of predicates that then can be evaluated almost independently.
+These predicates are modeled in a way similar to the tree formed by boolean expressions, as shown
+in the graphic below.
+\includegraphics{boolean_expr_tree.png}
 
-\subsubsection{Code Generator}
+Therefore, we deduced that there are three different types of predicates that a given tree of
+boolean expressions can be reduced to. They are as follows:
+\begin{enumerate}
+ \item Value predicates
+ \item Column predicates
+ \item Nested predicates
+\end{enumerate}
+\par\vspace{\baselineskip}
+The value predicate is the core predicate when determining which rows to return to the client. 
+It performs a boolean operation on either two literal values or a column and a literal value.
+This is the general predicate that the other two specialize upon and is by far the most important
+in terms of implementing the WHERE clause as defined by the SQL standard.
+\par\vspace{\baselineskip}
+The column predicate is the predicate that is a true specialization of the value predicate that is
+needed to handle an edge case, namely the case when a query is comparing two different columns.
+This comparison requires extra information that cannot be contained within a normal value predicate
+so that a cross-reference between the two tables can be generated. Whether a row satisfies this 
+predicate is determined by whether or not the row exists within the cross-reference contained by
+the predicate. This predicate is particularly important as it implements a very foundational
+part of the relational model, the ability to point to a specific row or range of
+rows between tables (i.e. foreign keys).
+\par\vspace{\baselineskip}
+The nested predicate permits a boolean operation to be performed upon the results
+of two predicates that are considered its children in the tree of expressions to be
+evaluated. This predicate has a more limited subset of operators compared to
+the value and column predicates and is limited to the following operators:
+\begin{itemize}
+ \item AND
+ \item OR
+ \item XOR
+\end{itemize}
+This predicate enables complex boolean expressions to be evaluated as part of queries or 
+commands which then allows users to perform powerful and specific queries upon the database.
+\par\vspace{\baselineskip}
+As an example of the reduction of a query into a series of predicates, take a 
+typical statement that would be supported by OpenMemDB:
+\begin{lstlisting}
+ SELECT A.* 
+ FROM A,B 
+ WHERE A.x = B.x AND 
+       (B.y = 1 OR B.z = 2);
+\end{lstlisting}
+This query references two tables, A and B, and features a three-level boolean expression.
+Using the model defined previously, we are left with five predicates:
+\begin{enumerate}
+ \item An overarching nested predicate using the AND operator between its children, 2 and 3, that are defined below.
+ \item A column predicate checking the equality between A.x and B.x.
+ \item Another nested predicate that uses the OR operator between its children, 4 and 5, that are defined below.
+ \item A value predicate checking the equality between B.y and the literal value ``1''.
+ \item A value predicate checking the equality between B.z and the literal value ``2''.
+\end{enumerate}
+This model lends itself particularly well to a top-down evaluation model of this binary tree
+where a particularly large or complex subtree can then be given to a worker thread to be evaluated.
+Special care has be taken when handling truly large trees of predicates so that the entire 
+pool of worker threads is not exhausted by a single statement, but that is easily handled
+by a hard limit of workers per statement.
+
 
 \subsection{Related Works}
 	Over the last 30 years the there has been tremendous advancements in computing
@@ -871,7 +938,7 @@ specific set of query relations extremely fast.
 	single client thread is running."\cite{soares2015database}
    \par\vspace{\baselineskip}
   	There have been several attempts to solve this problem. Some of which will sacrifice
-  	some data consistency in order to achieve a higher better performance. Still others
+  	some data consistency in order to achieve better performance. Still others
   	remain fully ACID compliant and attempt to parallelize individual steps in the 
   	DBMS or solely use multiple threads when executing query plans. Then there are those
   	that attempt to implement some level of lock freedom into their DBMS.
@@ -1108,6 +1175,10 @@ specific set of query relations extremely fast.
     \includegraphics{graphics/libomdb_Diagrams/libomdb_Class.png}
     \caption{libomdb Class Diagram}
   \end{figure}
+  
+  \subsection{SQL Engine}
+  
+  \subsection{Work Manager}
 \newpage
 
 \section{Facilities and Equipment}
