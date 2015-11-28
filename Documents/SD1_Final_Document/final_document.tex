@@ -132,6 +132,41 @@ standards-defined technologies opens the door for later opportunities in cutting
 \newpage
 
 \section{Specification and Requirements}
+The requirements for this project as given to us by our sponsor, Dr. Dechev, are as follows:
+\begin{itemize}
+ \item A wait-free, massively parallel, in-memory database
+ \item Project must be open-source (MIT or BSD licensing)
+ \item The database must be able to run a simple benchmark showing its performance characteristics against
+ against both in-memory databases and conventional databases
+ \item A workshop paper that details the problems solved by wait-freedom and how we
+ implemented those solutions
+ \item In-depth documentation on both the design and implementation of our database
+\end{itemize}
+\par\vspace{\baselineskip}
+Dr. Dechev left the specifics of how we implement the database and interfaces to the database
+up to us. In the interest of being similar to the database management systems we are being
+tasked with competing with, we chose to implement the relational database model using SQL. This way we
+can directly compare our feature level to other databases. This also allows us to easily generate
+a shared test and benchmark suite to profile our project's performance characteristics as is needed
+to satisfy by our requirements.
+\par\vspace{\baselineskip}
+As such, the following are the specification for this project:
+\begin{itemize}
+ \item A wait-free data store that can be performant when handling large amounts
+ of memory without utilizing the hard disk
+ \item A minimalistic implementation of the SQL standard:
+ \begin{itemize}
+  \item CREATE TABLE, DROP TABLE commands
+  \item SELECT query, with qualifications such as lack of nested queries
+  \item INSERT, UPDATE, and DELETE commands with certain clauses not implemented
+  \item Certain datatypes: INTEGER, SMALLINT, BIGINT, BOOLEAN, CHAR/VARCHAR, FLOAT, DATE, TIME, TIMESTAMP
+  \item Column aggregate functions: MIN, MAX, AVG, COUNT, SUM, etc.
+  \item Table constraints: PRIMARY KEY, NOT NULL, DEFAULT, FOREIGN KEY, UNIQUE, AUTO_INCREMENT
+  \item WHERE, ORDER BY, GROUP BY, IN, BETWEEN clauses with support for boolean expressions within them
+  \item ODBC connector implementation
+ \end{itemize}
+\end{itemize}
+
 \newpage
 
 \section{Research}
