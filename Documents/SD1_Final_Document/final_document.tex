@@ -1165,16 +1165,80 @@ by a hard limit of workers per statement.
   libomdb is broken in to two main operations: connecting to a database, and performing
   operations on the database that you are connected to. In order to connect to the database
   the application developer will call the 
-  \lstinline[basicstyle=\ttfamily]connect()| method that is provided by the libomdb API. 
+  \lstinline[basicstyle=\ttfamily]|connect()| method that is provided by the libomdb API. 
   This method will return a \lstinline[basicstyle=\ttfamily]|Connection| object that can
   then be used to execute queries or commands to the database that was connected to. 
   \par\vspace{\baselineskip}
+  
   \begin{figure}
     \centering
     \textbf{Overall libomdb Class Architecture}
     \includegraphics{graphics/libomdb_Diagrams/libomdb_Class.png}
     \caption{libomdb Class Diagram}
   \end{figure}
+  
+  In order to connect to a database the application developer must provide the 
+  host-name of the server, the port the server is listening on, and the name of the
+  database that is being connected to. These are provided as arguments to the 
+  \lstinline[basicstyle=\ttfamily]|connect(host-name, port-number, database-name)|
+  method. 
+  \par\vspace{\baselineskip}  
+  The connection object returned to the application developer after making this method
+  call represents a connection to only the database that was passed in the call. If the 
+  application developer needs a connection to another database, they must create a new
+  connection object through a separate
+  \lstinline[basicstyle=\ttfamily]|connect()| call. 
+  \par\vspace{\baselineskip}
+  Once the connection is established, the returned connection object is then used for all
+  operations on the database. Queries can be made against the database by calling 
+  the \lstinline[basicstyle=\ttfamily]|executeQuery( query )|
+  method. This will return a \lstinline[basicstyle=\ttfamily]|Result| object, which can 
+  then be used to access the results of the query. Accessing the results of the query
+  through a \lstinline[basicstyle=\ttfamily]|Result| object is simple and can be done by 
+  by cycling through the rows in the result and accessing the data at the column that 
+  is desired. Contained in the \lstinline[basicstyle=\ttfamily]|Result| object is a 
+  \lstinline[basicstyle=\ttfamily]|ResultMetaData| object than can be used to obtain 
+  information about the \lstinline[basicstyle=\ttfamily]|Result| that was returned.
+  The \lstinline[basicstyle=\ttfamily]|ResultMetaData| object corresponding to the 
+  \lstinline[basicstyle=\ttfamily]|Result| object is obtained by calling the 
+  \lstinline[basicstyle=\ttfamily]|getMetaData()| method and contains
+  methods for accessing the number of columns in the 
+  \lstinline[basicstyle=\ttfamily]|Result| through the 
+  \lstinline[basicstyle=\ttfamily]|getColumnCount()| method, the
+  label of a specific column through the
+  \lstinline[basicstyle=\ttfamily]|getColumnLabel( index )|, 
+  and the data type of a specific column with the
+  \lstinline[basicstyle=\ttfamily]|getColumnType( index )| method.
+  \par\vspace{\baselineskip}
+  A sample of how to query for data and cycle through the results is: 
+  
+  \begin{lstlisting} 
+	Connection connection = 
+		Connection.connect("localhost", 3310, "users");
+		
+	Result result = 
+		connection.executeQuery("SELECT * FROM Employees");
+		
+	ResultMetaData metaData = result.getMetaData();	
+	
+	while (result.next()) {
+	  	// Access data
+	  	for (int i = 0, j = metaData.getColumnCount(); 
+	  					i < j; ++i) {
+	  				
+		  cout << result.getValue(i);	  	
+	  	}
+	}
+  \end{lstlisting}
+  \par\vspace{\baselineskip}
+  
+  \begin{figure}
+    \centering
+    \textbf{Sequence Diagram for Querying Data}
+    \includegraphics{graphics/libomdb_Diagrams/libomdb_query_activity.png}
+    \caption{Querying Database Sequence Diagram}
+  \end{figure}
+    
   
   \subsection{SQL Engine}
   
