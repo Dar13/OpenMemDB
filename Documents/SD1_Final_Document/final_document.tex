@@ -1267,7 +1267,7 @@ by a hard limit of workers per statement.
 		Connection.connect("localhost", 3310, "users");
 		
 	Result result = 
-		connection.executeQuery("SELECT * FROM Employees");
+		connection.executeQuery("SELECT * FROM Employees;");
 		
 	ResultMetaData metaData = result.getMetaData();	
 	
@@ -1288,8 +1288,81 @@ by a hard limit of workers per statement.
     \includegraphics{graphics/libomdb_Diagrams/libomdb_query_activity.png}
     \caption{Querying Database Sequence Diagram}
   \end{figure}
+  \par\vspace{\baselineskip}
     
+  An update command can be executed in much the same way as a query. First 
+  a connection needs to be established to the desired database using the 
+  \lstinline[basicstyle=\ttfamily]|Connection.connect()|
+  method. Then the desired non-query command is executed using the 
+  \lstinline[basicstyle=\ttfamily]|executeCommand( command )| method.
+  A \lstinline[basicstyle=\ttfamily]|CommandResult| will be returned from this call,
+  which is a struct that has two fields: a boolean field,
+  \lstinline[basicstyle=\ttfamily]|isSuccess|, and an integer field,
+  \lstinline[basicstyle=\ttfamily]|numAffected|, which represents the number of rows 
+  that were effected by the command.
+  \par\vspace{\baselineskip}
+  An example of a command executed against a database would be something like this:
+  \begin{lstlisting} 
+	Connection connection = 
+		Connection.connect("localhost", 3310, "users");
+		
+	CommandResult result = 
+		connection.executeCommand(
+			"UPDATE employees SET pay = pay + 1;"
+		);
+	
+	if (result.isSuccess) {
+		cout << "Rows affected: " << result.numAffected;	
+	}
+  \end{lstlisting}
+
+  \begin{figure}
+    \centering
+    \textbf{Sequence Diagram for Executing Command}
+    \includegraphics{graphics/libomdb_Diagrams/libomdb_command_activity.png}
+    \caption{Executing Command Sequence Diagram}
+  \end{figure}    
   
+  \par\vspace{\baselineskip}
+  
+  \subsubsection{Design}
+  There are two main classes used in the libomdb library: 
+  \lstinline[basicstyle=\ttfamily]|Connection| and
+  \lstinline[basicstyle=\ttfamily]|Result|.
+  The uses of these classes are obvious. 
+  \lstinline[basicstyle=\ttfamily]|Connection| is used to represent a connection to 
+  a specific database and 
+  \lstinline[basicstyle=\ttfamily]|Result| is used to hold the results of a 
+  query against the connected database. 
+  
+  \par\vspace{\baselineskip}
+  The \lstinline[basicstyle=\ttfamily]|Connection| class is made up of two private 
+  member fields \lstinline[basicstyle=\ttfamily]|m_socket_fd| and
+  \lstinline[basicstyle=\ttfamily]|m_metaData|. 
+  \lstinline[basicstyle=\ttfamily]|m_socket_fd| is the the socket file descriptor that is
+  used to communicate with the server hosting the database. 
+  \lstinline[basicstyle=\ttfamily]|m_metaData| is the related
+  \lstinline[basicstyle=\ttfamily]|ConnectionMetaData| object that contains some 
+  information about the connection represented by the 
+  \lstinline[basicstyle=\ttfamily]|Connection| object. Some of the information contained
+  in this \lstinline[basicstyle=\ttfamily]|ConnectionMetaData| object are 
+  the name of the database that the \lstinline[basicstyle=\ttfamily]|Connection| object
+  is connected to, and whether or not the connection is still active. The 
+  \lstinline[basicstyle=\ttfamily]|Connection| class also contains three public 
+  instance methods and two public static methods. The instance methods are:
+  \begin{itemize}
+    \item \lstinline[basicstyle=\ttfamily]|executeCommand( string command ): CommandResult|
+    \item \lstinline[basicstyle=\ttfamily]|executeQuery( string query ): Result|
+    \item \lstinline[basicstyle=\ttfamily]|getMetaData(): ConnectionMetaData| 
+  \end{itemize}   
+  The static methods contained in the \lstinline[basicstyle=\ttfamily]|Connection| class
+  are: 
+  \begin{itemize}
+  	\item \lstinline[basicstyle=\ttfamily]|Connection.connect(string hostname, uint16_t port, string db): Connection|
+  	\item \lstinline[basicstyle=\ttfamily]|Connection.disconnect(Connection connection)|
+  \end{itemize}    
+  
+  \newpage
   \subsection{SQL Engine}
   
   \subsection{Work Manager}
