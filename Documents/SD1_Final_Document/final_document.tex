@@ -6,6 +6,7 @@
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage[square,sort,comma,numbers]{natbib}
+\usepackage{mathtools}
 
 % Temporarily ignore graphics
 \renewcommand{\includegraphics}[2][]{\fbox{}}
@@ -716,10 +717,57 @@ increase m by 1, n increased by 1
 
 \
 \newpage
+
+\subsection{Parallelism}
+% Author: Jason
+% TODO: restructure this section to flow better
+With current strategies for processor research shifting paradigms from pure speed to cores, we must also adjust to reflect the changes. Parallelism has become more and more essential over the past few years to developing fast programs.
+
+\par\vspace{\baselineskip}
+
+It is important to take advantage of parallelization because processors have hit a wall of reasonable clock speed\citep{processorspeed}. The maximum consumer processor clock speed has hovered around 4GHz for many years now. Instead of increasing clock speed, processor manufacturers are starting to introduce more cores and new technologies such as hyperthreading to compensate for clock speed insufficiency. Processors just aren't getting faster fast enough. Adopting parallelism strategies is the easiest way to take advantage of these new technologies.
+
+\subsubsection{Code Speedup}
+Parallelism has massive potential for increasing performance. Parallelization of algorithms allows the processor to carry out many calculations simultaneously. In fact, if we can parallelize the entire algorithm, a theoretical speed up of {\bfseries n} times can be achieved where {\bfseries n} is the number of processors we can split the calculations on. Most modern computers today have at least 2 cores, and 4 cores being common. This means if we can parallelize every part of an algorithm, we can theoretically speed up performance by 2 or 4 times for 2 or 4 cores, respectively. 
+
+\par\vspace{\baselineskip}
+Of course, in reality the speed up is less than that. We have memory latency, IO, locks (more on that in the next section), "inter-processor communication and coordination"\citep[p. 13]{artofmulti}, and much more to worry about. Still, the gain from parallelization is often large enough to spend the time to implement. In order to decide whether or not it is worth it, we can make estimates of how much of the code can be parallelized.
+
+\par\vspace{\baselineskip}
+
+\newpage
+Consider the following situation: 
+\begin{quotation}
+	"Five friends who decide to paint a five-room house. If all the rooms are the same size, then it makes sense to assign one friend to paint one room, and as long as everyone paints at about the same rate, we would get a five-fold speed-up over the single-painter case. The task becomes more complicated if the rooms are of different sizes. For example, if one room is twice the size of the others, then the five painters will not achieve a five-fold speedup because the overall completion time is dominated by the one room that takes the longest to paint"\citep[p. 13]{artofmulti}.
+\end{quotation}
+
+We can use {\bfseries Ahmdal's Law} to approximate the speedup to be gained from painting the house with five friends, or in a real scenario, the estimated parallelizable code. 
+
+\begin{equation}
+	S = \frac{1}{1-p+\frac{p}{n}}
+\end{equation}
+
+Where:
+
+\begin{itemize}
+	\item {\bfseries S} is the potential speedup
+	\item {\bfseries n} is the number of concurrent processors
+	\item {\bfseries p} is the fraction of the code that can be executed in parallel
+\end{itemize} 
+
+In our example, we have 5 rooms, one of them being worth 2. So in total we have 5 painters for 6 rooms, so 
+{\bfseries p} = \(\frac{5}{6}\). 
+
+
+\begin{equation}
+	S = \frac{1}{1-p+\frac{p}{n}} = \frac{1}{1-\frac{5}{6}+\frac{\frac{5}{6}}{5}} = \frac{1}{\frac{1}{6}+\frac{1}{6}} = 3
+\end{equation}
+
+The potential speedup ends up being only 3 times faster with 5 painters. Even though a big section (5/6 or roughly 83\%) could have been done in parallel. It is clear that parallelizing as much code as is possible is very important to maintain high performance. 
+
 \subsection{Non-Blocking Properties}
 % Author: Jason
-% TODO: make a new section for multiprocessing?
-The core of OpenMemDB relies on non-blocking algorithms and data structures. Non-blocking properties ensure a massively parallelizable database architecture. It is important to take advantage of parallelization because processors have hit a wall of reasonable clock speed\citep{processorspeed}. The maximum consumer processor clock speed has hovered around 4GHz for many years now. Instead of increasing clock speed, processor manufacturers are starting to include more cores and new technologies such as hyperthreading to compensate for clock speed insufficiency. Processors just aren't getting faster fast enough.
+The core of OpenMemDB relies on non-blocking algorithms and data structures. Non-blocking properties ensure a massively parallelizable database architecture. 
 \par\vspace{\baselineskip}
 An algorithm that has the non-blocking property ensures the system makes progress. There are two types of non-blocking algorithms. These are defined as: 
 \begin{itemize}
@@ -739,6 +787,8 @@ advantages and disadvantages of both.
 \begin{quotation}
 	"A method is lock-free if it guarantees that infinitely often some method call finishes in a finite number of steps"\citep[p. 60]{artofmulti}.
 \end{quotation}
+
+Lock freedom 
 
 \subsubsection{Wait Freedom}
 \begin{quotation}
