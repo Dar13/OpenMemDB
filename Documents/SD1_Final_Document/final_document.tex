@@ -5,6 +5,7 @@
 \usepackage[pass,letterpaper]{geometry}
 \usepackage{graphicx}
 \usepackage{listings}
+\usepackage{color}
 \usepackage[square,sort,comma,numbers]{natbib}
 \usepackage{mathtools}
 
@@ -12,6 +13,22 @@
 \renewcommand{\includegraphics}[2][]{\fbox{}}
 
 \setlength{\parindent}{0cm}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codered}{rgb}{0.6,0,0}
+
+\lstdefinestyle{omdb_cpp}{
+keepspaces=true,
+showspaces=false,
+showstringspaces=false,
+showtabs=false,
+tabsize=2,
+basicstyle=\footnotesize,
+commentstyle=\color{codegreen},
+keywordstyle=\color{blue},
+stringstyle=\color{codered}
+}
+\lstset{style=omdb_cpp}
 
 \title{Non-Blocking In-Memory Database\thanks{Sponsor: Dr. Damian Dechev}}
 \author{Michael McGee, Robert Medina, Neil Moore, Jason Stavrinaky\\[2ex]
@@ -955,11 +972,11 @@ commands which then allows users to perform powerful and specific queries upon t
 \par\vspace{\baselineskip}
 As an example of the reduction of a query into a series of predicates, take a 
 typical statement that would be supported by OpenMemDB:
-\begin{lstlisting}
- SELECT A.* 
- FROM A,B 
- WHERE A.x = B.x AND 
-       (B.y = 1 OR B.z = 2);
+\begin{lstlisting}[language=SQL]
+SELECT A.* 
+FROM A,B 
+WHERE A.x = B.x AND 
+      (B.y = 1 OR B.z = 2);
 \end{lstlisting}
 This query references two tables, A and B, and features a three-level boolean expression.
 Using the model defined previously, we are left with five predicates:
@@ -1262,23 +1279,19 @@ by a hard limit of workers per statement.
   \par\vspace{\baselineskip}
   A sample of how to query for data and cycle through the results is: 
   
-  \begin{lstlisting} 
-	Connection connection = 
-		Connection.connect("localhost", 3310, "users");
+  \begin{lstlisting}[language=C++]
+Connection conn = Connection.connect("localhost", 3310, "users"); 
+
+Result result = conn.executeQuery("SELECT * FROM Employees;");
 		
-	Result result = 
-		connection.executeQuery("SELECT * FROM Employees;");
-		
-	ResultMetaData metaData = result.getMetaData();	
+ResultMetaData metaData = result.getMetaData();	
 	
-	while (result.next()) {
-	  	// Access data
-	  	for (int i = 0, j = metaData.getColumnCount(); 
-	  					i < j; ++i) {
-	  				
-		  cout << result.getValue(i);	  	
-	  	}
-	}
+while (result.next()) {
+  // Access data
+  for (int i = 0, j = metaData.getColumnCount(); i < j; ++i) {
+    cout << result.getValue(i);	  	
+  }
+}
   \end{lstlisting}
   \par\vspace{\baselineskip}
   
@@ -1302,18 +1315,15 @@ by a hard limit of workers per statement.
   that were effected by the command.
   \par\vspace{\baselineskip}
   An example of a command executed against a database would be something like this:
-  \begin{lstlisting} 
-	Connection connection = 
-		Connection.connect("localhost", 3310, "users");
-		
-	CommandResult result = 
-		connection.executeCommand(
-			"UPDATE employees SET pay = pay + 1;"
-		);
+  \begin{lstlisting}[language=C++]
+Connection conn = Connection.connect("localhost", 3310, "users");
+
+CommandResult result;
+result = conn.executeCommand("UPDATE employees SET pay = pay + 1;");
 	
-	if (result.isSuccess) {
-		cout << "Rows affected: " << result.numAffected;	
-	}
+if (result.isSuccess) {
+  cout << "Rows affected: " << result.numAffected;	
+}
   \end{lstlisting}
 
   \begin{figure}
@@ -1410,6 +1420,106 @@ by a hard limit of workers per statement.
   progress in evaluating the query will be made in such a way to satisfy our wait-freedom requirement.
   
   \subsection{Work Manager}
+  The Work Manager, as the module responsible for distributing the system's workload across the
+  pool of worker threads, wears many small but important hats. It is the entry point of the
+  process and functions as the main thread that spawns all other threads in the system. The Work
+  Manager also is the owner of the various TCP sockets and other system resources that OpenMemDB 
+  uses to communicate with clients. Communication between threads is also handled via the 
+  Work Manager using Tervel's queue data structure and various C++11 constructs. The need for this
+  jack-of-all-trades module is that many of these tasks cannot be easily split out into 
+  worker threads like the SQL Engine can and a couple act as a centralizing force, such as the
+  thread pool management and work distribution. Sharing sockets and connections across thread
+  boundaries also introduces complexity and the need for synchronization between threads which
+  can interfere with our core requirement to be non-blocking and wait-free.
+  \par\vspace{\baselineskip}
+  The specific task of managing network connections between OpenMemDB and its clients is a fairly
+  straightforward one as we don't have complex server-client interactions and relatively tame
+  throughput expectations. Linux in particular exposes a well-documented and mature C interface
+  to setup and use network or UNIX sockets which favors using C-style freestanding functions
+  rather than a more object-oriented approach, at least in the initial setup and initialization
+  of the socket. As such, we only created a class for the connection between the server and client
+  and is suitably named \lstinline[basicstyle=\ttfamily]|omdb::Connection|. This class holds
+  information about the client as well as the socket file descriptor that is needed to send
+  or receive data over the socket. Instances of the class are created when the server detects an 
+  incoming new connection and they persist until the client disconnects or network conditions 
+  prohibit further communication such as the Internet going down.
+  \par\vspace{\baselineskip}
+  The freestanding functions mentioned above abstract away the process of listening to a port
+  and accepting a connection. They are defined as:
+  \begin{lstlisting}[language=C++]
+omdb::NetworkStatus omdb::ListenToPort(uint16_t port_id, 
+				       uint32_t* socket_fd, 
+				       bool dont_block = true)
+
+omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
+					   uint32_t* conn_fd, 
+					   sockaddr_storage* conn_addr)
+  \end{lstlisting}
+  The \lstinline[basicstyle=\ttfamily]|omdb::NetworkStatus| datatype is used to return various 
+  possible error conditions and is internally used to classify whether the error is fatal 
+  or can be recovered from. Due to our goal of being non-blocking, we utilize various specially-defined
+  functions in the Linux network API such as \lstinline[basicstyle=\ttfamily]|accept4| and 
+  \lstinline[basicstyle=\ttfamily]|setsockopt| to coax Linux into making both non-blocking
+  sockets and non-blocking accepting of connections. This also has the interesting side effect of
+  changing certain error codes' meaning, specifically \lstinline[basicstyle=\ttfamily]|EAGAIN| and 
+  \lstinline[basicstyle=\ttfamily]|EWOULDBLOCK|. Those two codes' meaning is now one of success, or not 
+  failing, rather than failure. Our error-handling code reflects that, which makes for some initial 
+  confusion if you are not familiar with the rationale behind it.
+  \par\vspace{\baselineskip}
+  As for the Work Manager's task of managing the worker threads that do the actual work, via the 
+  SQL Engine, of fulfilling the client's commands or queries, we used a thread pool concept that
+  heavily relies on C++11 features. This thread pool is composed of three parts:
+  \begin{itemize}
+   \item A vector of \lstinline[]|std::future<Result>| objects
+   \item A map that relates a job number to a connection, defined as:\\
+	 \lstinline[]|std::map<uint32_t, omdb::Connection>|
+   \item A vector of \lstinline[]|WorkThreadData| objects
+  \end{itemize}
+  The first part, the vector of \lstinline[basicstyle=\ttfamily]|std::future<Result>| objects, is 
+  essential to retrieving query results from the worker threads in an asynchronous way. This way
+  we can continue to be non-blocking without needing to wait for a thread to finish which also
+  allows us to be wait-free, our overriding requirement. Forcing the \lstinline[basicstyle=\ttfamily]|std::future<Result>|
+  to be non-blocking when checking for a return value is currently clunky:
+  \begin{lstlisting}[language=C++]
+[&results] (std::future<Result>& res) -> bool
+{
+  auto time_out = std::chrono::seconds(0);
+  if(res.valid() &&
+     res.wait_for(time_out) == std::future_status::ready)
+  {
+    results.push_back(res.get());
+    return true;
+  }
+
+  return false;
+};
+  \end{lstlisting}
+  However, it does function in a way that is suitable for our reasons. Thankfully the rest of the thread
+  pool is much smoother.
+  \par\vspace{\baselineskip}
+  The second part, the mapping of a job number to a connection, is needed to get the correct query results
+  to its originating connection and thus the client that requested the data in the first place. While simple, 
+  implementing some sort of mapping or relationship similar to this makes a thread pool overly complicated
+  or could lead to putting reference to the connection within the query result object itself, introducing
+  complexity in that way.
+  \par\vspace{\baselineskip}
+  The vector of \lstinline[]|WorkThreadData| objects is the mechanism in 
+  which the Work Manager sends jobs, the queries or commands that a client sends to OpenMemDB, to the 
+  worker threads in the thread pool. The jobs are contained within a \lstinline[language=C++]|std::packaged_task<Result(int)>|
+  object which is a C++11 construct that can generate the previously mentioned \lstinline[basicstyle=\ttfamily]|std::future<Result>|.
+  The generated future object is stored in the afore-mentioned vector and the job is then passed to a selected
+  worker thread to be evaluated. The selection process for where this job is placed is the work load distribution
+  task that the Work Manager is responsible for. In order to do this accurately, the Work Manager implements
+  uses a heuristic algorithm that estimates the computation needed to fulfill that query or command
+  and then places the job in the thread pool in a way that balances overall system load.
+  \par\vspace{\baselineskip}
+  The heuristic used to guess the complexity of a given query or command is fairly simple as we need to
+  be performant rather than accurate. The primary cost in this heuristic is length of the query/command itself
+  as that is a relatively cheap operation, though some other costs could be the amount of parentheses
+  or the actual classification of the query/command itself (i.e. whether it is a SELECT, INSERT INTO, or DELETE statement).
+  This heuristic will be a source of heavy experimentation and testing as overloading a single core or thread
+  with work can negatively affect the ability of the system to be wait-free as the rest of system is 
+  starved for work.
 \newpage
 
 \section{Facilities and Equipment}
