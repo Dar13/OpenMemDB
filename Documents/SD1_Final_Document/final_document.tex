@@ -1364,6 +1364,50 @@ by a hard limit of workers per statement.
   
   \newpage
   \subsection{SQL Engine}
+  The core of any Database Management System(DBMS), particularly one that implements the SQL standard, is the
+  engine that drives the actual parsing, planning, and execution of SQL queries and commands.
+  The module in our DBMS that handles those tasks is the SQL engine and it is specially designed to 
+  be thread-safe, performant, and wait-free. Wait-freedom is the core requirement of the project
+  and it supersedes all other requirements, so it is imperative that this module is wait-free. Keeping
+  that requirement in mind, we utilized C++11 features and single-responsibility modeling to 
+  ensure that the various threads do not interact in ways that would require synchronization.
+  \par\vspace{\baselineskip}
+  One of those ways is utilizing a feature in the C++ memory model that was introduced in C++11, specifically
+  the \lstinline[basicstyle=\ttfamily]|thread_local| storage specifier. That specifier instructs the compiler
+  to create a copy of each variable for each individual thread, and ties that variable's lifetime
+  to the lifetime of the thread. While not used extensively, this feature removes the guesswork 
+  of whether a variable is safe to be made \lstinline[basicstyle=\ttfamily]|static| or whether a copy
+  would need to be made in each thread's initialization routine via dynamic memory (e.g.
+  \lstinline[basicstyle=\ttfamily]|new| or \lstinline[basicstyle=\ttfamily]|malloc|).
+  \par\vspace{\baselineskip}
+  Another decision in the design of the SQL engine that was important to maintaining wait-freedom and 
+  thread-safety was the adoption of the Lemon parser engine. Lemon was built to be thread-safe and 
+  reentrant without locks, meaning that each thread essentially has its own instance of the parser
+  and is independent of other threads. This cleanly avoids the need for costly, and forbidden
+  in our case, locks and other synchronization primitives. In addition, we have complete control over
+  the grammar from which Lemon generates its parser which gives us opportunity to ensure there
+  is no lack of progress made within the parsing of a query due to a poorly-constructed or ambiguous
+  grammar.
+  \par\vspace{\baselineskip}
+  The above decisions help guarantee wait-freedom within the parsing stage of the SQL engine, but there
+  is still the task of the planning and execution of SQL queries and commands. The strategies employed in
+  planning the execution of these queries has been detailed earlier in this document, so we will not 
+  revisit them in detail. As a refresher, we have devised a way to reduce a series of boolean expressions
+  into a tree of predicates that a table's records can then be evaluated against. In order for a record
+  to be in the result set of a query, it must satisfy the entire tree of predicates. Due to our reduced scope
+  when implementing the SQL standard, we can comfortably guarantee that there will always be some form 
+  of progress when devising the execution plan. This is mainly due to the fact that advanced joins and 
+  other SQL constructs like nested queries, that OpenMemDB will not be supporting, require a full-featured 
+  solver that may not be able to progress in a way that can be called wait-free.
+  \par\vspace{\baselineskip}
+  Execution of the query plan is also within the purview of the SQL engine and also must be guaranteed to be
+  wait-free as well as performant. As our use case puts us entirely within memory, we have the necessarily low
+  latencies to feel comfortable in performing full table scans in the most naive case with options to 
+  use indices and caches when available or reasonable. This will make us, in theory, faster than our disk-based
+  counterparts such as PostgreSQL or MySQL. This task within the SQL engine is the one that will actually
+  interact with the data store and actually performs operations upon the data stored there. We rely on the Tervel
+  data structures to guarantee us wait-freedom as we access the data, but otherwise we can verify that
+  progress in evaluating the query will be made in such a way to satisfy our wait-freedom requirement.
   
   \subsection{Work Manager}
 \newpage
