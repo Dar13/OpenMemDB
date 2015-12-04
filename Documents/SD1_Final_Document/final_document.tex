@@ -9,7 +9,7 @@
 \usepackage{listings}
 \usepackage{color}
 \usepackage[square,sort,comma,numbers]{natbib}
-\usepackage{mathtools}
+%\usepackage{mathtools}
 
 % Temporarily ignore graphics
 \renewcommand{\includegraphics}[2][]{\fbox{}}
@@ -1514,7 +1514,89 @@ if (result.isSuccess) {
   	\item \lstinline[basicstyle=\ttfamily]|Connection.connect(string hostname, uint16_t port, string db): Connection|
   	\item \lstinline[basicstyle=\ttfamily]|Connection.disconnect(Connection connection)|
   \end{itemize}    
+  As has been seen a number of times the \lstinline[basicstyle=\ttfamily]|connect()| 
+  static method is used  to establish a connection to a database, and the 
+  \lstinline[basicstyle=\ttfamily]|disconnect()| method is used to terminate a connection.
+  \lstinline[basicstyle=\ttfamily]|executeCommand()| in reality just sends a string of
+  text to across the socket connection represented by the 
+  \lstinline[basicstyle=\ttfamily]|Connection| object's 
+  \lstinline[basicstyle=\ttfamily]|m_socket_fd| to the database server where it will be 
+  parsed and executed. The \lstinline[basicstyle=\ttfamily]|executeQuery()| command
+  does nearly the exact same thing but will receive a different data structure from the 
+  database in return.
   
+  \begin{figure}
+    \centering
+    \textbf{Connection Class Layout}
+    \includegraphics{graphics/libomdb_Diagrams/connection_layout.png}
+	\caption{Connection layout}    
+  \end{figure}
+  \par\vspace{\baselineskip}
+  
+  The \lstinline[basicstyle=\ttfamily]|Result| class is made up of two private members:
+  \begin{itemize}
+    \item \lstinline[basicstyle=\ttfamily]|m_rows|
+    \item \lstinline[basicstyle=\ttfamily]|m_metaData|
+  \end{itemize}
+  \lstinline[basicstyle=\ttfamily]|m_rows| is a
+  \lstinline[basicstyle=\ttfamily]|vector<ResultRow>|, 
+  \lstinline[basicstyle=\ttfamily]|ResultRow| is a typedef for
+  a \lstinline[basicstyle=\ttfamily]|vector<DataValue>|, and 
+  \lstinline[basicstyle=\ttfamily]|DataValue| is a typedef for 
+  \lstinline[basicstyle=\ttfamily]|boost::variant<>|.
+  So with all typedefs removed \lstinline[basicstyle=\ttfamily]|m_rows| is
+  actually a
+  \lstinline[basicstyle=\ttfamily]|vector<vector<boost:variant<> > >|.
+  
+  \lstinline[basicstyle=\ttfamily]|m_metaData| is the 
+  \lstinline[basicstyle=\ttfamily]|ResultMetaData| object that describes the 
+  \lstinline[basicstyle=\ttfamily]|Result| object. The contents of the 
+  \lstinline[basicstyle=\ttfamily]|ResultMetaData| class will be covered later.
+  \par\vspace{\baselineskip}
+  The \lstinline[basicstyle=\ttfamily]|Result| class also contains thee instance methods:
+  \begin{itemize}
+    \item \lstinline[basicstyle=\ttfamily]|getMetaData(): ResultMetaData|
+    \item \lstinline[basicstyle=\ttfamily]|getValue(int index): DataValue|
+    \item \lstinline[basicstyle=\ttfamily]|next(): bool|
+  \end{itemize}
+  \lstinline[basicstyle=\ttfamily]|getMetaData()| is used to obtain the meta-data 
+  information about the \lstinline[basicstyle=\ttfamily]|Result|. 
+  \lstinline[basicstyle=\ttfamily]|getValue( index )| will return the 
+  \lstinline[basicstyle=\ttfamily]|DataValue| of the column at the specified index.
+  \lstinline[basicstyle=\ttfamily]|next()| moves the 
+  \lstinline[basicstyle=\ttfamily]|Result| forward one row, if there are still rows 
+  remaining in the \lstinline[basicstyle=\ttfamily]|Result|. If there is not, it does 
+  nothing and returns \lstinline[basicstyle=\ttfamily]|false|.
+  
+  \begin{figure}
+    \centering
+    \textbf{Result Class Layout}
+    \includegraphics{graphics/libomdb_Diagrams/result_layout.png}
+    \caption{Result Layout}
+  \end{figure}
+  \par\vspace{\baselineskip}
+  A quick overview of the the \lstinline[basicstyle=\ttfamily]|ResultMetaData| class 
+  is necessary to fully understand the how the 
+  \lstinline[basicstyle=\ttfamily]|Result| class is meant to work. 
+  The \lstinline[basicstyle=\ttfamily]|ResultMetaData| class contains only one 
+  private member, which is 
+  \lstinline[basicstyle=\ttfamily]|m_data|, a 
+  \lstinline[basicstyle=\ttfamily]|vector<MetaDataColumn>|. 
+  \lstinline[basicstyle=\ttfamily]|MetaDataColumn| is a struct that contains two fields: 
+  a \lstinline[basicstyle=\ttfamily]|string name| and a 
+  \lstinline[basicstyle=\ttfamily]|SQL_TYPE type|. \lstinline[basicstyle=\ttfamily]|name|
+  is the name of the column and \lstinline[basicstyle=\ttfamily]|type| is the 
+  \lstinline[basicstyle=\ttfamily]|SQL_TYPE| of the column, i.e. "VARCHAR", "DATE", etc.
+  
+  \begin{figure}
+    \centering
+    \textbf{ResultMetaData Class Layout}
+    \includegraphics{graphics/libomdb_Diagrams/resultMetaData_layout.png}
+    \caption{ResultMetaData Layout}
+  \end{figure}
+  
+  %% Starting here, talk about the use of boost::variant. 
+  %% Reasons for using it, how it is used, how to get value back from it.
   \newpage
   \subsection{SQL Engine}
   The core of any Database Management System(DBMS), particularly one that implements the SQL standard, is the
