@@ -782,6 +782,107 @@ In our example, we have 5 rooms, one of them being worth 2. So in total we have 
 
 The potential speedup ends up being only 3 times faster with 5 painters. Even though a big section (5/6 or roughly 83\%) could have been done in parallel. It is clear that parallelizing as much code as is possible is very important to maintain high performance. 
 
+\subsubsection{Caveats}
+
+Though parallelism is a great tool that certainly affects performance tremendously in a positive way, it also has it's own caveats. Imagine we have two threads, {\bfseries t1} and {\bfseries t2} working in parallel and that eventually there comes a point where both thread need to write to a value {\bfseries i}.
+
+
+\begin{table}[h]
+\centering
+\caption{Race Condition}
+\begin{tabular}{|l|l|l|}
+	\hline
+	& {\bfseries Thread t1} & {\bfseries Thread t2} \\
+	\hline
+	1 & Read Value i & Read Value i \\
+	\hline
+	2 & Add 1 to i & Add 1 to i \\
+	\hline
+	3 & Write back to i & Write back to i \\
+	\hline 
+\end{tabular}
+\end{table}
+
+Since execution of parallel threads does not guarantee that the above steps will occur in any specific order, a few possibilities occur. If thread t2 executes step 1 while t1 is any time between steps 1 and 3 or similarly if thread t1 executes step 1 while t2 is between 1 and 3, we will get wrong values. In this case, the threads race to get the value because no real order is established. Therefore, one of the threads can get the old value before it is updated. Let's take a look at a specific example. Assume {\bfseries i} is set to 2, then the following executes:
+
+\begin{table}[h]
+\centering
+\caption{Race Condition}
+\begin{tabular}{|l|l|l|}
+	\hline
+	& {\bfseries Thread t1} & {\bfseries Thread t2} \\
+	\hline
+	1 &  & Read Value i(2) \\
+	\hline
+	2 & Read Value i(2) & Add 1 to i \\
+	\hline
+	3 & Add 1 to i & Write back to i(3) \\
+	\hline
+	4 & Write back to i(3) &  \\
+	\hline 
+\end{tabular}
+\end{table}
+
+Due to the unpredictable order of execution, we end up with {\bfseries i} = 3, when in reality we should have gotten 4. How do we solve this problem? We can use {\bfseries mutual exclusion}. 
+
+\par\vspace{\baselineskip}
+
+{\bfseries Mutual exclusion} allows us to lock a piece of data to ensure no other thread can access  or edit it while it is locked. This ensures that we don't read a value before another thread writes to it, for example. Consider the updated scenario:
+
+\begin{table}[h]
+\centering
+\caption{Race Condition}
+\begin{tabular}{|l|l|l|}
+	\hline
+	& {\bfseries Thread t1} & {\bfseries Thread t2} \\
+	\hline
+	1 & Lock i & Lock i \\
+	\hline
+	2 & Read Value i & Read Value i\\
+	\hline
+	3 & Add 1 to i & Add 1 to i \\
+	\hline
+	4 & Write back to i & Write back to i \\
+	\hline
+	5 & Unlock i & Unlock i \\
+	\hline 
+\end{tabular}
+\end{table}
+
+Locking the variable allows a thread exclusive access to it. In this case, it doesn't matter if {\bfseries t1} or {\bfseries t2} gets it first, the thread that did not get the lock will be locked out until the lock is released. Lets take a look at our example with locks, assuming {\bfseries t1 got the lock first}:
+
+\begin{table}[h]
+\centering
+\caption{Race Condition}
+\begin{tabular}{|l|l|l|}
+	\hline
+	& {\bfseries Thread t1} & {\bfseries Thread t2} \\
+	\hline
+	1 & Lock i & See i is locked, wait \\
+	\hline
+	2 & Read Value i(2) & Wait\\
+	\hline
+	3 & Add 1 to i & Wait \\
+	\hline
+	4 & Write back to i(3) & Wait \\
+	\hline
+	5 & Unlock i & Wait \\
+	\hline 
+	6 &  & Lock i \\
+	\hline 
+	7 & & Read Value i(3)\\
+	\hline
+	8 & & Add 1 to i \\
+	\hline
+	9 & & Write back to i(4) \\
+	\hline
+	10 & & Unlock i\\
+	\hline 
+\end{tabular}
+\end{table}
+
+In this case, {\bfseries i} correctly gets assigned 4. 
+
 \subsection{Non-Blocking Properties}
 % Author: Jason
 The core of OpenMemDB relies on non-blocking algorithms and data structures. Non-blocking properties ensure a massively parallelizable database architecture. 
@@ -799,6 +900,7 @@ From looking at the definitions, it is clear that wait-freedom grants much more
 powerful guarantees in regards to system progress. It is also easy to conclude that 
 it is much harder to implement. In the next few sections we discuss this as well as the 
 advantages and disadvantages of both. 
+
 
 \subsubsection{Lock Freedom}
 \begin{quotation}
