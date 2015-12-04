@@ -1,6 +1,8 @@
 \documentclass[letterpaper, 12pt]{article}
 %\documentclass[letterpaper,10pt]{scrartcl}
 
+% TODO: Normilize our itemization template? (Periods at the end or not?)
+
 \usepackage[utf8]{inputenc}
 \usepackage[pass,letterpaper]{geometry}
 \usepackage{graphicx}
@@ -784,7 +786,7 @@ The potential speedup ends up being only 3 times faster with 5 painters. Even th
 
 \subsubsection{Caveats}
 
-Though parallelism is a great tool that certainly affects performance tremendously in a positive way, it also has it's own caveats. Imagine we have two threads, {\bfseries t1} and {\bfseries t2} working in parallel and that eventually there comes a point where both thread need to write to a value {\bfseries i}.
+Though parallelism is a great tool that certainly affects performance tremendously in a positive way, it also has it's own caveats. Imagine we have two threads, {\bfseries t1} and {\bfseries t2} working in parallel and that eventually there comes a point where both threads need to write a value {\bfseries i}.
 
 
 \begin{table}[h]
@@ -803,7 +805,7 @@ Though parallelism is a great tool that certainly affects performance tremendous
 \end{tabular}
 \end{table}
 
-Since execution of parallel threads does not guarantee that the above steps will occur in any specific order, a few possibilities occur. If thread t2 executes step 1 while t1 is any time between steps 1 and 3 or similarly if thread t1 executes step 1 while t2 is between 1 and 3, we will get wrong values. In this case, the threads race to get the value because no real order is established. Therefore, one of the threads can get the old value before it is updated. Let's take a look at a specific example. Assume {\bfseries i} is set to 2, then the following executes:
+Since execution of parallel threads does not guarantee that the above steps will occur in any specific order, a few possibilities occur. If thread t2 executes step 1 while t1 is any time between steps 1 and 3 or similarly if thread t1 executes step 1 while t2 is between 1 and 3, we will get wrong values. In this case, the threads race to get the value because no real order is established. Therefore, one of the threads can get the old value before it is updated. This is called a {\bfseries race condition}. Let's take a look at a specific example. Assume {\bfseries i} is set to 2, then the following executes:
 
 \begin{table}[h]
 \centering
@@ -827,7 +829,11 @@ Due to the unpredictable order of execution, we end up with {\bfseries i} = 3, w
 
 \par\vspace{\baselineskip}
 
-{\bfseries Mutual exclusion} allows us to lock a piece of data to ensure no other thread can access  or edit it while it is locked. This ensures that we don't read a value before another thread writes to it, for example. Consider the updated scenario:
+{\bfseries Mutual exclusion} allows us to lock a piece of data to ensure no other thread can access  or edit it while it is locked. This ensures that we don't read a value before another thread writes to it, for example. 
+
+\par\vspace{\baselineskip}
+
+Consider the updated scenario:
 
 \begin{table}[h]
 \centering
@@ -883,9 +889,42 @@ Locking the variable allows a thread exclusive access to it. In this case, it do
 
 In this case, {\bfseries i} correctly gets assigned 4. 
 
+\par\vspace{\baselineskip}
+
+The caveat there is that this slows down parallel execution. Threads have to wait for the variable to be unlocked, wasting valuable time. Of course, not all variables will need locks, otherwise parallelism would not be any faster than serial code execution.
+
+\par\vspace{\baselineskip}
+
+Locks can be very useful tools to prevent race conditions, however they should be used carefully. Using locks can cause a {\bfseries deadlock}. {\bfseries Deadlocks} can happen when a thread {\bfseries t1} holds a lock and is waiting on a piece of data that is locked by another thread {\bfseries t2}, while at the same time {\bfseries t2} is waiting on the lock from {\bfseries t1}. This causes a loop, and neither lock ever gets released. The next figure illustrates this example.
+%figure
+
+\par\vspace{\baselineskip}
+
+Not all threads are created equal. In reality some threads take up resources much more often than others.  "{\bfseries Starvation} describes a situation where a thread is unable to gain regular access to shared resources and is unable to make progress. This happens when shared resources are made unavailable for long periods by 'greedy' threads"\citep{oracleconcurrency}.
+
+\par\vspace{\baselineskip}
+
+%figure
+
+In \textit{The Art of Multiprocessor Programming \citep{artofmulti} } it is stated that a good lock algorithm should have:
+
+\begin{itemize}
+	\item {\bfseries Mutual Exclusion}: Critical sections of different threads do not overlap.
+	\item {\bfseries Freedom from Deadlock}: If some thread attempts to acquire the lock, them some thread will succeed in acquiring the lock.
+	\item {\bfseries Freedom from Starvation}: Every thread that attempts to acquire a lock will eventually succeed.
+\end{itemize}
+
+These guidelines are great for safe parallel programming by today's standards, but we can do better. We present our implementation of a DBMS without the use of locks, while still maintaining a highly parallelizable data structure core.
+
+\par\vspace{\baselineskip}
+
+It is important to understand that if we could remove locks, we would get a noticeable increase in performance. {\bfseries Non-blocking} algorithms help us solve this problem. We will talk about them in the next section.
+
 \subsection{Non-Blocking Properties}
 % Author: Jason
-The core of OpenMemDB relies on non-blocking algorithms and data structures. Non-blocking properties ensure a massively parallelizable database architecture. 
+
+Now that we have explained the traditional and most popular approaches to parallel programming, we introduce non-blocking algorithms.
+
 \par\vspace{\baselineskip}
 An algorithm that has the non-blocking property ensures the system makes progress. There are two types of non-blocking algorithms. These are defined as: 
 \begin{itemize}
@@ -894,8 +933,10 @@ An algorithm that has the non-blocking property ensures the system makes progres
 \end{itemize}
 In order to take advantage of modern processors, we implement a wait-free data store module. 
 After some research, we have discovered that no current DBMS uses wait-free data 
-structures, at most they are lock-free.
+structures, at most they are lock-free. The core of OpenMemDB relies on non-blocking algorithms and data structures. Non-blocking properties ensure a massively parallelizable database architecture. 
+
 \par\vspace{\baselineskip}
+
 From looking at the definitions, it is clear that wait-freedom grants much more 
 powerful guarantees in regards to system progress. It is also easy to conclude that 
 it is much harder to implement. In the next few sections we discuss this as well as the 
