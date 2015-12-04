@@ -485,8 +485,7 @@ the same scalable performance that a NoSQL DBMS can provide while still conformi
 the relational model. "Generally speaking, NewSQL data stores meet many of the 
 requirements for data management in cloud environments and also offer the benefits of 
 the well-known SQL standard"\cite{grolinger2013data}
-% Got errors here, commenting out for now
-%\par\vspace{\baselinskip}
+\par\vspace{\baselineskip}
 Since NewSQL is based on the relational model, every NewSQL DBMS must offer their clients
 a pure relational view of data. This means that the data is interacted in terms of tables
 and relations. This does not mean that the internal data representation is the same across
@@ -1231,7 +1230,7 @@ by a hard limit of workers per statement.
 	  MPP operates by allowing the data warehouse to leverage multiple servers 
 	  in a network cluster to process data simultaneously. 
 	  \par\vspace{\baselineskip}
-%%	\includegraphics{graphics/RelatedWorksArchitectures/dashDB_mpp_architecture.png}
+	\includegraphics{graphics/RelatedWorksArchitectures/dashDB_mpp_architecture.png}
 	  \cite{dashDB}
 	  \par\vspace{\baselineskip}
 	  Each server in this data warehouse utilizes a number of key technologies, including: 
@@ -1259,7 +1258,7 @@ by a hard limit of workers per statement.
 	  dashDB uses a highly parallelized infrastructure optimized for columnar data
 	  exchange that is organized as such:
 	  \par\vspace{\baselineskip}
-%%	\includegraphics{graphics/RelatedWorksArchitectures/dashDB_query_architecture.png}
+	\includegraphics{graphics/RelatedWorksArchitectures/dashDB_query_architecture.png}
 	  \cite{dashDB}
 	  \par\vspace{\baselineskip}
 	  \item eXtremeDB is the in-memory variant of the McObject family of data management
@@ -1274,7 +1273,7 @@ by a hard limit of workers per statement.
 	  transactions will complete together or the database will be rolled back to a 
 	  pre-transaction state.\cite{extremeDB}
 	  \par\vspace{\baselineskip}
-%%	\includegraphics{graphics/RelatedWorksArchitectures/extremeDB_dbms_architecture.jpg}
+	\includegraphics{graphics/RelatedWorksArchitectures/extremeDB_dbms_architecture.jpg}
 	  \cite{extremeDB}
 	  \par\vspace{\baselineskip}
 	  
@@ -1288,7 +1287,7 @@ by a hard limit of workers per statement.
 	  smart buffering to ensure messages move from node to node faster than what
 	  traditional messaging would provide."\cite{gemfire}
 	  \par\vspace{\baselineskip}
-%%	  \includegraphics{graphics/RelatedWorksArchitectures/gemfire_peer_architecture.png}
+	  \includegraphics{graphics/RelatedWorksArchitectures/gemfire_peer_architecture.png}
 	  \par\vspace{\baselineskip}
 	  
 	  \item Hekaton is Microsoft's database engine that is optimized for memory resident
@@ -1351,7 +1350,7 @@ by a hard limit of workers per statement.
 	  massively parallel in-memory architecture in order to eliminate the I/O bottleneck
 	  that slows disk backed database management systems.
 	  \par\vspace{\baselineskip} 
-%%	  \includegraphics{graphics/RelatedWorksArchitectures/sap_hana_dbms_architecture.png}
+	  \includegraphics{graphics/RelatedWorksArchitectures/sap_hana_dbms_architecture.png}
 	  \cite{saphana}
 	  \par\vspace{\baselineskip}
 	\end{itemize}	
