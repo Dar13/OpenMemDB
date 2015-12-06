@@ -39,6 +39,7 @@ openmemdb
 *.log
 *.pdf
 *.backup
+Documents/doxygen
 
 # Gedit backup file
 .*~
@@ -53,6 +54,9 @@ openmemdb
 
 # Graphics files
 *.png
+*.jpg
+*.gif
+*.pdf
 graphics
 
 #Latex intermidiate and compilation files

@@ -1543,7 +1543,8 @@ nable dashDB to maximize hardware performance.
   method. This will return a \lstinline[basicstyle=\ttfamily]|Result| object, which can 
   then be used to access the results of the query. Accessing the results of the query
   through a \lstinline[basicstyle=\ttfamily]|Result| object is simple and can be done by 
-  by cycling through the rows in the result and accessing the data at the column that 
+  by cycling through the rows in the
+  \lstinline[basicstyle=\ttfamily]|Result| and accessing the data at the column that 
   is desired. Contained in the \lstinline[basicstyle=\ttfamily]|Result| object is a 
   \lstinline[basicstyle=\ttfamily]|ResultMetaData| object than can be used to obtain 
   information about the \lstinline[basicstyle=\ttfamily]|Result| that was returned.
@@ -1724,6 +1725,21 @@ if (result.isSuccess) {
   \lstinline|SQL_TYPE type|. \lstinline|name|
   is the name of the column and \lstinline|type| is the 
   \lstinline|SQL_TYPE| of the column, i.e. "VARCHAR", "DATE", etc.
+  \par\vspace{\baselineskip}
+  The \lstinline|ResultMetaData| class also has 
+  three instance methods available:
+  \begin{itemize}
+    \item \lstinline|getColumnCount(): uint32_t|
+    \item \lstinline|getColumnLabel(int index): string|
+    \item \lstinline|getColumnType(int index): SQL_TYPE|
+  \end{itemize}
+
+  \lstinline|getColumnCount()| returns the number of 
+  columns contained in the \lstinline[basicstyle=\ttfamily]|Result|.
+  \lstinline|getColumnLabel(index)| returns the label of the 
+  column at the passed in index, and 
+  \lstinline|getColumnType(index)| returns the type of data that
+  is stored in the column specified by index.  
   
   \begin{figure}
     \centering
@@ -1905,6 +1921,17 @@ stress-test the system. The hardware used by each member:
   \item{\makebox[4cm]{Primary Hard Disk:\hfill} PNY Optima 240 GB SSD}
   \item{\makebox[4cm]{Total Available Storage:\hfill} 3 terabytes}
   \item{\makebox[4cm]{Operating System:\hfill} Arch Linux}
+ \end{itemize}
+ 
+ \item Mike McGee's personal machine
+ \begin{itemize}
+  \item{\makebox[4cm]{CPU:\hfill} Intel i7-4790K}
+  \item{\makebox[4cm]{RAM:\hfill} 32 GB DDR3}
+  \item{\makebox[4cm]{Motherboard:\hfill} GIGABYTE G1 Gaming G1.Sniper}
+  \item{\makebox[4cm]{GPU:\hfill} GeForce GTX 970}
+  \item{\makebox[4cm]{Primary Hard Disk:\hfill} Samsung 840 EVO 120GB SSD}
+  \item{\makebox[4cm]{Total Available Storage:\hfill} 2 terabytes}
+  \item{\makebox[4cm]{Operating System:\hfill} Windows 10 / Arch Linux VM}
  \end{itemize}
 \end{itemize}
 \par\vspace{\baselineskip}
