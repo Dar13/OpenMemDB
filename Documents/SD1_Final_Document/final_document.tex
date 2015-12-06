@@ -1424,7 +1424,8 @@ by a hard limit of workers per statement.
   method. This will return a \lstinline[basicstyle=\ttfamily]|Result| object, which can 
   then be used to access the results of the query. Accessing the results of the query
   through a \lstinline[basicstyle=\ttfamily]|Result| object is simple and can be done by 
-  by cycling through the rows in the result and accessing the data at the column that 
+  by cycling through the rows in the
+  \lstinline[basicstyle=\ttfamily]|Result| and accessing the data at the column that 
   is desired. Contained in the \lstinline[basicstyle=\ttfamily]|Result| object is a 
   \lstinline[basicstyle=\ttfamily]|ResultMetaData| object than can be used to obtain 
   information about the \lstinline[basicstyle=\ttfamily]|Result| that was returned.
@@ -1606,6 +1607,21 @@ if (result.isSuccess) {
   \lstinline[basicstyle=\ttfamily]|SQL_TYPE type|. \lstinline[basicstyle=\ttfamily]|name|
   is the name of the column and \lstinline[basicstyle=\ttfamily]|type| is the 
   \lstinline[basicstyle=\ttfamily]|SQL_TYPE| of the column, i.e. "VARCHAR", "DATE", etc.
+  \par\vspace{\baselineskip}
+  The \lstinline[basicstyle=\ttfamily]|ResultMetaData| class also has 
+  three instance methods available:
+  \begin{itemize}
+    \item \lstinline[basicstyle=\ttfamily]|getColumnCount(): uint32_t|
+    \item \lstinline[basicstyle=\ttfamily]|getColumnLabel(int index): string|
+    \item \lstinline[basicstyle=\ttfamily]|getColumnType(int index): SQL_TYPE|
+  \end{itemize}
+
+  \lstinline[basicstyle=\ttfamily]|getColumnCount()| returns the number of 
+  columns contained in the \lstinline[basicstyle=\ttfamily]|Result|.
+  \lstinline[basicstyle=\ttfamily]|getColumnLabel(index)| returns the label of the 
+  column at the passed in index, and 
+  \lstinline[basicstyle=\ttfamily]|getColumnType(index)| returns the type of data that
+  is stored in the column specified by index.  
   
   \begin{figure}
     \centering
