@@ -12,7 +12,7 @@
 \usepackage{mathtools}
 
 % Temporarily ignore graphics
-\renewcommand{\includegraphics}[2][]{\fbox{}}
+%\renewcommand{\includegraphics}[2][]{\fbox{}}
 
 \setlength{\parindent}{0cm}
 
@@ -33,8 +33,8 @@ stringstyle=\color{codered}
 \lstset{style=omdb_cpp}
 
 \title{Non-Blocking In-Memory Database\thanks{Sponsor: Dr. Damian Dechev}}
-\author{Michael McGee, Robert Medina, Neil Moore, Jason Stavrinaky\\[2ex]
-	\includegraphics{graphics/OpenMemDB_logo_transparency.png}\\[1ex]
+\author{Michael McGee, Robert Medina, Neil Moore, Jason Stavrinaky\\[1ex]
+	\includegraphics{graphics/OMDB_logo_notext_trans.png}\\[1ex]
 }
 \date{11/4/2015}
 
@@ -179,7 +179,14 @@ As such, the following are the specification for this project:
   \item CREATE TABLE, DROP TABLE commands
   \item SELECT query, with qualifications such as lack of nested queries
   \item INSERT, UPDATE, and DELETE commands with certain clauses not implemented
-  \item Certain datatypes: INTEGER, SMALLINT, BIGINT, BOOLEAN, CHAR/VARCHAR, FLOAT, DATE, TIME, TIMESTAMP
+  \item Certain datatypes:
+    \begin{itemize}
+      \item Integral types (e.g. INTEGER, SMALLINT, BIGINT)
+      \item Boolean types (e.g. BOOLEAN)
+      \item Character string types( e.g. CHAR,VARCHAR)
+      \item Floating-precision types (e.g. FLOAT)
+      \item Date and time types (e.g. DATE, TIME, TIMESTAMP)
+    \end{itemize}
   \item Column aggregate functions: MIN, MAX, AVG, COUNT, SUM, etc.
   \item Table constraints: PRIMARY KEY, NOT NULL, DEFAULT, FOREIGN KEY, UNIQUE, AUTO\_INCREMENT
   \item WHERE, ORDER BY, GROUP BY, IN, BETWEEN clauses with support for boolean expressions within them
@@ -207,9 +214,16 @@ As such, IDE choice is very important since they are essential to a stable, comf
 
 \subsubsection{Vim}
 
-Vim stands for Vi-improved. Stemming from the popular Unix text editor Vi, Vim provides an almost proper superset. Pretty much everything you can do in Vi you can do in Vim. Additionally, Vim adds many features on top of Vi that caused Vim to gain a huge following of programmers everywhere, plugin support being the main reason. We chose Vim for that reason as well as its customizability. It can tweaked to work exactly how we want it to work. With plugins, we can add essentially infinite functionality. In the figure below, we have Vim running with the powerline plugin as well as git integration. 
+Vim stands for Vi-improved. Stemming from the popular Unix text editor Vi, Vim 
+provides an almost proper superset. Pretty much everything you can do in Vi you 
+can do in Vim. Additionally, Vim adds many features on top of Vi that caused Vim 
+to gain a huge following of programmers everywhere, plugin support being the main 
+reason. We chose Vim for that reason as well as its customizability. It can tweaked 
+to work exactly how we want it to work. With plugins, we can add essentially infinite 
+functionality. In the figure below, we have Vim running with the powerline plugin as 
+well as git integration. 
 
-\includegraphics[scale=0.35]{vimide.png}
+%\includegraphics[scale=0.35]{graphics/vimide.png}
 
 \subsection{Database Management Systems}
 To begin researching a database management system you must first understand what a 
@@ -256,7 +270,7 @@ components, such as Structural, Integrity, and Manipulative parts."
 \begin{figure}
   \centering
   \textbf{Relational DBMS Structure}
-  \includegraphics{graphics/DBMS_Diagrams/dbms_RDBMS_structure.png}
+  \includegraphics[scale=.5]{graphics/dbms_RDBMS_structure.png}
   \caption{Represents a disk based RDBMS}
 \end{figure}
 The three components can be further broken down.
@@ -351,7 +365,7 @@ the 1960s.\cite{hierarchical_dbms_techopedia}
 \par\vspace{\baselineskip}
 \begin{figure}
   \centering
-  \includegraphics{graphics/DBMS_Diagrams/dbms_RDBMS_structure.png}
+  \includegraphics[scale=.5]{graphics/dbms_RDBMS_structure.png}
   \caption{Example structure for hierarchical database}
 \end{figure}
 
@@ -366,7 +380,7 @@ collection of data items. Each data item has a name and a value.
 \begin{figure}
   \centering
   \textbf{Network model record example}
-  \includegraphics{graphics/DBMS_Diagrams/dbms_network_model_record.gif}
+  \includegraphics{graphics/dbms_network_model_record.png}
   \caption{Example of network model record}
   \cite{network_model_coronet}
 \end{figure}
@@ -380,7 +394,7 @@ relationships.
  
 \begin{figure}
   \centering
-  \includegraphics{graphics/DBMS_Diagrams/dbms_network_data.gif}
+  \includegraphics{graphics/dbms_network_data.png}
   \caption{Network information model}
   \cite{network_model_coronet}
 \end{figure}
@@ -397,7 +411,7 @@ and a child. The "Data Set" has the following properties:
 
 \begin{figure}
   \centering
-  \includegraphics{graphics/network/relationship.gif}
+  \includegraphics{graphics/dbms_network_model_relationship.png}
   \caption{Example of network model relationship}
 \end{figure}
 
@@ -432,7 +446,7 @@ some observable change (eg. in a graphical user interface).
 
 \begin{figure}
   \centering
-  \includegraphics{graphics/DBMS_Diagrams/dbms_oodbms_example.png}
+  \includegraphics[scale=.5]{graphics/dbms_oodbms_example.png}
   \caption{An example of an object-oriented model}
 \end{figure}
 
@@ -494,7 +508,7 @@ more flexible"
 \begin{figure}
   \centering
   \textbf{Example NoSQL Architecture}
-  \includegraphics{graphics/DBMS_Diagrams/dbms_nosql_mongo_architecture.jpg}
+  \includegraphics[scale=.4]{graphics/dbms_nosql_mongo_architecture.jpg}
   \caption{Example NoSQL Architecture}
   \citep{mongodb_architecture}
 \end{figure}
@@ -518,8 +532,9 @@ RDBs are designed to scale vertically by means of adding more power to a single 
 server"\cite{grolinger2013data}
 
 \begin{figure}
+  \centering
   \textbf{Partitioning, replication, consistency, and concurrency control capabilities}
-  \includegraphics{graphics/DBMS_Diagrams/nosql_newsql_scalability_table.png}
+  \includegraphics[scale=.4]{graphics/nosql_newsql_scalability_table.png}
   \caption{NoSQL and NewSQL Data Modeling}
 \end{figure}
 
@@ -537,16 +552,16 @@ within the DBMS. Specifically, it is the:
 
 Work distribution between threads is done via a task-queue that each thread in the
 thread pool pulls work from. Tasks are C++11 lambda functions that are packaged up 
-via the standard library's \lstinline[basicstyle=\ttfamily]|std::packaged_task<>|
+via the standard library's \lstinline|std::packaged_task<>|
  class. 
-This class provides an interface that allows us to generate a \lstinline[basicstyle=\ttfamily]|std::future<>| 
+This class provides an interface that allows us to generate a \lstinline|std::future<>| 
 object that is a thread-safe interface to a thread's return value. The bulk of the 
 ideas behind this thread pool were found online \cite{stackoverflow1} though we substituted
-the command queue, that was initially implemented using a \lstinline[basicstyle=\ttfamily]|std::mutex|
-and \lstinline[basicstyle=\ttfamily]|std::queue<>|, with a Tervel queue that allows
+the command queue, that was initially implemented using a \lstinline|std::mutex|
+and \lstinline|std::queue<>|, with a Tervel queue that allows
 non-blocking and wait-free access and insertion into the command queue.
 \par\vspace{\baselineskip}
-The reference used mutual exclusion objects such as \lstinline[basicstyle=\ttfamily]|std::mutex|
+The reference used mutual exclusion objects such as \lstinline|std::mutex|
 which is contrary to our goal of a fully non-blocking and wait-free system. Using the Tervel
 queue as detailed above allows us to remain non-blocking and wait-free as long as Tervel
 is also considered non-blocking and wait-free. While the implementation uses condition variables,
@@ -651,13 +666,24 @@ and will be recorded pernamently. This is usually performed by backing up valid 
 
 \subsubsection{Indexing}
 %author Robert Medina
-Indexing allows for fast retrieval from a collection of data. There are many ways to accomplish this, and some ways are better suited depending on the constraints. Tree-based indexing and Hash-based indexing are two popular solutions for an implementation of a database. Given a set of data in memory, indexing takes a key data value and stores it into a data structure. Based off this key value, the indexing data structure will point to the file in memory or memory address, depending on how the data is stored. Based on this, a file scan of the database is now just reduced to scanning an index file. 
+Indexing allows for fast retrieval from a collection of data. There are many ways to accomplish this, 
+and some ways are better suited depending on the constraints. Tree-based indexing and Hash-based indexing 
+are two popular solutions for an implementation of a database. Given a set of data in memory, indexing takes 
+a key data value and stores it into a data structure. Based off this key value, the indexing data structure 
+will point to the file in memory or memory address, depending on how the data is stored. Based on this, a 
+file scan of the database is now just reduced to scanning an index file. 
 %\includegraphics{graphics/indexentry.png}
-However searching through an index file can still be a costly operation. Index files are smaller than the data it is referencing but it can still use a considerable about memory space. Therefore it would be reasonable to use a data structure for fast retrieval of data based on a range of values or based on the actual data value stored.
+However searching through an index file can still be a costly operation. Index files are smaller than the 
+data it is referencing but it can still use a considerable about memory space. Therefore it would be 
+reasonable to use a data structure for fast retrieval of data based on a range of values or based on 
+the actual data value stored.
 
 \subsubsection{Tree-based Indexing}
 %author Robert Medina
-Tree-based indexing is an index file structured into a variant of a binary search tree. The tree is based off the key value and references to where that key is stored. Indexing requires fast retrieval of data, low cost insertion and low cost deletion of data. There are two types of trees that are useful for this type of operation, ISAM and B+ Tree.
+Tree-based indexing is an index file structured into a variant of a binary search tree. The tree is based off 
+the key value and references to where that key is stored. Indexing requires fast retrieval of data, low cost 
+insertion and low cost deletion of data. There are two types of trees that are useful for this type of operation, 
+ISAM and B+ Tree.
 
 \subsubsection{B+ Tree}
 %author Robert Medina
@@ -674,7 +700,9 @@ B+ Trees are a variant of a B Tree. B Trees is an n-ary tree that splits data
 	All T(i) sub-trees are either non-empty or empty.
 	B Trees have a height of log(m)(N), m = number of children
 %\includegraphics{graphics/B_Tree_Example.png}
-B+ Tree differs slightly in the fact that B trees store their data (keys) within the internal nodes while B+ trees only points to the data. All the data in a B+ is stored in the leaves of tree. In addition, B+ Tree links all their leaves together with a doubly linked list.
+B+ Tree differs slightly in the fact that B trees store their data (keys) within the internal nodes while 
+B+ trees only points to the data. All the data in a B+ is stored in the leaves of tree. In addition, 
+B+ Tree links all their leaves together with a doubly linked list.
 %\includegraphics{graphics/B_B+_Tree_Difference.png}
 The runtime for a B+ Tree is the following:
 Searching is logm(n), m is index entries
@@ -684,26 +712,63 @@ Searching with range (logm(n) + k), m is index entries and k is number of data r
 Key Compression:
 The height of a B+ tree is log(m)(n), m = number of children, n = number of data entries.
 Tradiationally for databases on disk the number of data entries would be based on the size of the data and
-the size of the page. This is because tree nodes should fit on a single page, if B+ Tree leaves take up more memory than a page offers then B+ tree is resized to fit onto a page. Since the page can only fit so much data this is why the number of data entries is dependent on the size of data entries. So, it is reasonable to max the number of data entries by making the size of data smaller. This enures that more entires will fit on a page and the height of the B+ tree would remain small, thus keeping data retrevial performance fast.
+the size of the page. This is because tree nodes should fit on a single page, if B+ Tree leaves take up more 
+memory than a page offers then B+ tree is resized to fit onto a page. Since the page can only fit so much 
+data this is why the number of data entries is dependent on the size of data entries. So, it is reasonable 
+to max the number of data entries by making the size of data smaller. This enures that more entires will 
+fit on a page and the height of the B+ tree would remain small, thus keeping data retrevial performance fast.
 \subsubsection{Hash-based Indexing}
 %author Robert Medina
-	Hash-based Indexing references a key value to a data entry using a hash function. This can be used for indexing when there is an equal key value within the hash. Range operations using a key value is not possible with a hash function since it would simply be too costly of an operation. Hash-based indexing suffers from overflow chaining such as ISAM, which can hinder performance. There exists multiple hash-based indexing such as Static Hashing, Extendible Hashing, and Linear Hashing. 
+	Hash-based Indexing references a key value to a data entry using a hash function. This can be 
+	used for indexing when there is an equal key value within the hash. Range operations using 
+	a key value is not possible with a hash function since it would simply be too costly of an 
+	operation. Hash-based indexing suffers from overflow chaining such as ISAM, which can hinder 
+	performance. There exists multiple hash-based indexing such as Static Hashing, Extendible Hashing, 
+	and Linear Hashing. 
 \subsection{Hash Function}
 %author Robert Medina
 Hash Function:
-Good hash functions are deterministic, provide uniformity, and have variable range. Deterministic means that for any given key value it will generate the corrseponding index consistently. This is necessary to provide accurate data retrevial from a hash map. Uniformity means that a hash map will evenly distribute hash index values over its value range. Without this the performance will suffer greatly since the number of collisions will increase this hinders performance. 
+Good hash functions are deterministic, provide uniformity, and have variable range. Deterministic means 
+that for any given key value it will generate the corrseponding index consistently. This is 
+necessary to provide accurate data retrevial from a hash map. Uniformity means that a hash 
+map will evenly distribute hash index values over its value range. Without this the 
+performance will suffer greatly since the number of collisions will increase this hinders performance. 
 \subsubsection{Static Hashing}
 %author Robert Medina
-Static Hashing is a hash table based on a key value that maps to a bucket containing pages. These data entries may be sorted but it depends on the application. This data structure is static for the most part but it does allow for overflow page allocation. In the event of inserting beyond the memory allocated, this data entry is placed into a new page and the page is added to an overflow chain in the bucket.
+Static Hashing is a hash table based on a key value that maps to a bucket containing pages. These 
+data entries may be sorted but it depends on the application. This data structure is static 
+for the most part but it does allow for overflow page allocation. In the event of inserting 
+beyond the memory allocated, this data entry is placed into a new page and the page is added 
+to an overflow chain in the bucket.
 %\includegraphics{graphics/Static_Hashing_Abstract}
-A good hash function is imperative to uniformly distribute values over the collection of buckets. An example of a good hash would be hash(key) = (a*key + b), a and b are constants. Some problems of Static Hashing are the fact that it is static. When the index file is created bucket sizes are known at time of creation, so pages can be stored successively in the buckets. However as the index file continues to grow if the same key value is stored repeatedly then a long overflow chain develops. Since the number of buckets are static if the index file shrinks in size then there is wasted memory space. If the file grows too large then it results in poor performance. Otherwise, the performance for operations is very fast. The following is the runtimes:
-Search O(1) 1 I/O read
-Insertion O(1) 2 I/O read/write page
-Deletion O(1) 2 I/O read/write page
+A good hash function is imperative to uniformly distribute values over the collection of buckets. 
+An example of a good hash would be hash(key) = (a*key + b), a and b are constants. Some problems 
+of Static Hashing are the fact that it is static. When the index file is created bucket sizes 
+are known at time of creation, so pages can be stored successively in the buckets. However 
+as the index file continues to grow if the same key value is stored repeatedly then a long 
+overflow chain develops. Since the number of buckets are static if the index file shrinks 
+in size then there is wasted memory space. If the file grows too large then it results in 
+poor performance. Otherwise, the performance for operations is very fast. The following 
+is the runtimes:
+
+\par\vspace{\baselineskip}
+
+\begin{tabular}{l | c | c}
+  Operation & Runtime & Number of I/O reads and writes \\ \hline \hline
+  Search & O(1) & 1  \\ \hline
+  Insert & O(1) & 2  \\ \hline
+  Delete & O(1) & 2  \\ \hline
+\end{tabular}
+
+\par\vspace{\baselineskip}
+
 Runtimes with Overflow Chains:
-Search: O(n)
-Insert: O(1)
-Delete: O(n)
+\begin{tabular}{l | c}
+  Operation & Runtime \\ \hline \hline
+  Search & O(n) \\ \hline
+  Insert & O(1) \\ \hline
+  Delete & O(n) \\ \hline
+\end{tabular}
 
 If there are multiple collisions then the hashmap usefullness becomes impared. The hashmap devolves into a more
 of a linked list so having long chains can really hinder performance as you see above. Therefore static hashing
@@ -711,7 +776,10 @@ is not a reliable method for inserting new objects since the possiblity of overf
 ruin the property of a hashmap.
 
 Rehashing:
-Intuitively a simple hash table with a pointer to a page would make sense. However in the case of additional pages, without an overflow chain rehashing the table would be necessary. In this case rehashing the table would be a costly operation. Including that the data structure is unusable while rehashing is in progress. Dynamic hashing techniques solve this problem.
+Intuitively a simple hash table with a pointer to a page would make sense. However in the case of 
+additional pages, without an overflow chain rehashing the table would be necessary. In this 
+case rehashing the table would be a costly operation. Including that the data structure is unusable 
+while rehashing is in progress. Dynamic hashing techniques solve this problem.
 
 Extendible Hashing:
 Extendible Hashing is a hash map of pointers that maps to buckets with various levels of depth. This directory 
@@ -759,24 +827,47 @@ increase m by 1, n increased by 1
 \subsection{Parallelism}
 % Author: Jason
 % TODO: restructure this section to flow better
-With current strategies for processor research shifting paradigms from pure speed to cores, we must also adjust to reflect the changes. Parallelism has become more and more essential over the past few years to developing fast programs.
+With current strategies for processor research shifting paradigms from pure speed to cores, 
+we must also adjust to reflect the changes. Parallelism has become more and more essential 
+over the past few years to developing fast programs.
 
 \par\vspace{\baselineskip}
 
-It is important to take advantage of parallelization because processors have hit a wall of reasonable clock speed\citep{processorspeed}. The maximum consumer processor clock speed has hovered around 4GHz for many years now. Instead of increasing clock speed, processor manufacturers are starting to introduce more cores and new technologies such as hyperthreading to compensate for clock speed insufficiency. Processors just aren't getting faster fast enough. Adopting parallelism strategies is the easiest way to take advantage of these new technologies.
+It is important to take advantage of parallelization because processors have hit a wall of 
+reasonable clock speed\citep{processorspeed}. The maximum consumer processor clock speed has 
+hovered around 4GHz for many years now. Instead of increasing clock speed, processor 
+manufacturers are starting to introduce more cores and new technologies such as hyperthreading 
+to compensate for clock speed insufficiency. Processors just aren't getting faster fast enough. 
+Adopting parallelism strategies is the easiest way to take advantage of these new technologies.
 
 \subsubsection{Code Speedup}
-Parallelism has massive potential for increasing performance. Parallelization of algorithms allows the processor to carry out many calculations simultaneously. In fact, if we can parallelize the entire algorithm, a theoretical speed up of {\bfseries n} times can be achieved where {\bfseries n} is the number of processors we can split the calculations on. Most modern computers today have at least 2 cores, and 4 cores being common. This means if we can parallelize every part of an algorithm, we can theoretically speed up performance by 2 or 4 times for 2 or 4 cores, respectively. 
+Parallelism has massive potential for increasing performance. Parallelization of algorithms 
+allows the processor to carry out many calculations simultaneously. In fact, if we can 
+parallelize the entire algorithm, a theoretical speed up of {\bfseries n} times can be 
+achieved where {\bfseries n} is the number of processors we can split the calculations on. 
+Most modern computers today have at least 2 cores, and 4 cores being common. This means 
+if we can parallelize every part of an algorithm, we can theoretically speed up performance 
+by 2 or 4 times for 2 or 4 cores, respectively. 
 
 \par\vspace{\baselineskip}
-Of course, in reality the speed up is less than that. We have memory latency, IO, locks (more on that in the next section), "inter-processor communication and coordination"\citep[p. 13]{artofmulti}, and much more to worry about. Still, the gain from parallelization is often large enough to spend the time to implement. In order to decide whether or not it is worth it, we can make estimates of how much of the code can be parallelized.
+Of course, in reality the speed up is less than that. We have memory latency, IO, locks 
+(more on that in the next section), "inter-processor communication and coordination"\citep[p. 13]{artofmulti}, 
+and much more to worry about. Still, the gain from parallelization is often large enough to spend 
+the time to implement. In order to decide whether or not it is worth it, we can make estimates of 
+how much of the code can be parallelized.
 
 \par\vspace{\baselineskip}
 
 \newpage
 Consider the following situation: 
 \begin{quotation}
-	"Five friends who decide to paint a five-room house. If all the rooms are the same size, then it makes sense to assign one friend to paint one room, and as long as everyone paints at about the same rate, we would get a five-fold speed-up over the single-painter case. The task becomes more complicated if the rooms are of different sizes. For example, if one room is twice the size of the others, then the five painters will not achieve a five-fold speedup because the overall completion time is dominated by the one room that takes the longest to paint"\citep[p. 13]{artofmulti}.
+	"Five friends who decide to paint a five-room house. If all the rooms are the same size, 
+	then it makes sense to assign one friend to paint one room, and as long as everyone paints at 
+	about the same rate, we would get a five-fold speed-up over the single-painter case. 
+	The task becomes more complicated if the rooms are of different sizes. For example, if one 
+	room is twice the size of the others, then the five painters will not achieve a five-fold 
+	speedup because the overall completion time is dominated by the one room that takes the 
+	longest to paint"\citep[p. 13]{artofmulti}.
 \end{quotation}
 
 We can use {\bfseries Ahmdal's Law} to approximate the speedup to be gained from painting the house with five friends, or in a real scenario, the estimated parallelizable code. 
@@ -801,11 +892,15 @@ In our example, we have 5 rooms, one of them being worth 2. So in total we have 
 	S = \frac{1}{1-p+\frac{p}{n}} = \frac{1}{1-\frac{5}{6}+\frac{\frac{5}{6}}{5}} = \frac{1}{\frac{1}{6}+\frac{1}{6}} = 3
 \end{equation}
 
-The potential speedup ends up being only 3 times faster with 5 painters. Even though a big section (5/6 or roughly 83\%) could have been done in parallel. It is clear that parallelizing as much code as is possible is very important to maintain high performance. 
+The potential speedup ends up being only 3 times faster with 5 painters. Even though a big section 
+(5/6 or roughly 83\%) could have been done in parallel. It is clear that parallelizing as much 
+code as is possible is very important to maintain high performance. 
 
 \subsubsection{Caveats}
 
-Though parallelism is a great tool that certainly affects performance tremendously in a positive way, it also has it's own caveats. Imagine we have two threads, {\bfseries t1} and {\bfseries t2} working in parallel and that eventually there comes a point where both threads need to write a value {\bfseries i}.
+Though parallelism is a great tool that certainly affects performance tremendously in a positive way, 
+it also has it's own caveats. Imagine we have two threads, {\bfseries t1} and {\bfseries t2} 
+working in parallel and that eventually there comes a point where both threads need to write a value {\bfseries i}.
 
 
 \begin{table}[h]
@@ -824,7 +919,14 @@ Though parallelism is a great tool that certainly affects performance tremendous
 \end{tabular}
 \end{table}
 
-Since execution of parallel threads does not guarantee that the above steps will occur in any specific order, a few possibilities occur. If thread t2 executes step 1 while t1 is any time between steps 1 and 3 or similarly if thread t1 executes step 1 while t2 is between 1 and 3, we will get wrong values. In this case, the threads race to get the value because no real order is established. Therefore, one of the threads can get the old value before it is updated. This is called a {\bfseries race condition}. Let's take a look at a specific example. Assume {\bfseries i} is set to 2, then the following executes:
+Since execution of parallel threads does not guarantee that the above steps will occur in 
+any specific order, a few possibilities occur. If thread t2 executes step 1 while 
+t1 is any time between steps 1 and 3 or similarly if thread t1 executes step 1 while 
+t2 is between 1 and 3, we will get wrong values. In this case, the threads race 
+to get the value because no real order is established. Therefore, one of the 
+threads can get the old value before it is updated. This is called a {\bfseries race condition}. 
+Let's take a look at a specific example. Assume {\bfseries i} is set to 2, 
+then the following executes:
 
 \begin{table}[h]
 \centering
@@ -844,11 +946,15 @@ Since execution of parallel threads does not guarantee that the above steps will
 \end{tabular}
 \end{table}
 
-Due to the unpredictable order of execution, we end up with {\bfseries i} = 3, when in reality we should have gotten 4. How do we solve this problem? We can use {\bfseries mutual exclusion}. 
+Due to the unpredictable order of execution, we end up with {\bfseries i} = 3, 
+when in reality we should have gotten 4. How do we solve this problem? 
+We can use {\bfseries mutual exclusion}. 
 
 \par\vspace{\baselineskip}
 
-{\bfseries Mutual exclusion} allows us to lock a piece of data to ensure no other thread can access  or edit it while it is locked. This ensures that we don't read a value before another thread writes to it, for example. 
+{\bfseries Mutual exclusion} allows us to lock a piece of data to ensure no other thread can 
+access  or edit it while it is locked. This ensures that we don't read a value 
+before another thread writes to it, for example. 
 
 \par\vspace{\baselineskip}
 
@@ -874,7 +980,10 @@ Consider the updated scenario:
 \end{tabular}
 \end{table}
 
-Locking the variable allows a thread exclusive access to it. In this case, it doesn't matter if {\bfseries t1} or {\bfseries t2} gets it first, the thread that did not get the lock will be locked out until the lock is released. Lets take a look at our example with locks, assuming {\bfseries t1 got the lock first}:
+Locking the variable allows a thread exclusive access to it. In this case, it doesn't 
+matter if {\bfseries t1} or {\bfseries t2} gets it first, the thread that did 
+not get the lock will be locked out until the lock is released. Lets take a 
+look at our example with locks, assuming {\bfseries t1 got the lock first}:
 
 \begin{table}[h]
 \centering
@@ -910,16 +1019,25 @@ In this case, {\bfseries i} correctly gets assigned 4.
 
 \par\vspace{\baselineskip}
 
-The caveat there is that this slows down parallel execution. Threads have to wait for the variable to be unlocked, wasting valuable time. Of course, not all variables will need locks, otherwise parallelism would not be any faster than serial code execution.
+The caveat there is that this slows down parallel execution. Threads have to wait for 
+the variable to be unlocked, wasting valuable time. Of course, not all variables 
+will need locks, otherwise parallelism would not be any faster than serial code execution.
 
 \par\vspace{\baselineskip}
 
-Locks can be very useful tools to prevent race conditions, however they should be used carefully. Using locks can cause a {\bfseries deadlock}. {\bfseries Deadlocks} can happen when a thread {\bfseries t1} holds a lock and is waiting on a piece of data that is locked by another thread {\bfseries t2}, while at the same time {\bfseries t2} is waiting on the lock from {\bfseries t1}. This causes a loop, and neither lock ever gets released. The next figure illustrates this example.
+Locks can be very useful tools to prevent race conditions, however they should be used carefully. 
+Using locks can cause a {\bfseries deadlock}. {\bfseries Deadlocks} can happen when a thread 
+{\bfseries t1} holds a lock and is waiting on a piece of data that is locked by another thread 
+{\bfseries t2}, while at the same time {\bfseries t2} is waiting on the lock from {\bfseries t1}. 
+This causes a loop, and neither lock ever gets released. The next figure illustrates this example.
 %figure
 
 \par\vspace{\baselineskip}
 
-Not all threads are created equal. In reality some threads take up resources much more often than others.  "{\bfseries Starvation} describes a situation where a thread is unable to gain regular access to shared resources and is unable to make progress. This happens when shared resources are made unavailable for long periods by 'greedy' threads"\citep{oracleconcurrency}.
+Not all threads are created equal. In reality some threads take up resources much more often than others.  
+"{\bfseries Starvation} describes a situation where a thread is unable to gain regular access 
+to shared resources and is unable to make progress. This happens when shared resources are 
+made unavailable for long periods by 'greedy' threads"\citep{oracleconcurrency}.
 
 \par\vspace{\baselineskip}
 
@@ -933,11 +1051,13 @@ In \textit{The Art of Multiprocessor Programming \citep{artofmulti} } it is stat
 	\item {\bfseries Freedom from Starvation}: Every thread that attempts to acquire a lock will eventually succeed.
 \end{itemize}
 
-These guidelines are great for safe parallel programming by today's standards, but we can do better. We present our implementation of a DBMS without the use of locks, while still maintaining a highly parallelizable data structure core.
+These guidelines are great for safe parallel programming by today's standards, but we can do better. 
+We present our implementation of a DBMS without the use of locks, while still maintaining a highly parallelizable data structure core.
 
 \par\vspace{\baselineskip}
 
-It is important to understand that if we could remove locks, we would get a noticeable increase in performance. {\bfseries Non-blocking} algorithms help us solve this problem. We will talk about them in the next section.
+It is important to understand that if we could remove locks, we would get a noticeable increase in performance. 
+{\bfseries Non-blocking} algorithms help us solve this problem. We will talk about them in the next section.
 
 \subsection{Non-Blocking Properties}
 % Author: Jason
@@ -952,7 +1072,8 @@ An algorithm that has the non-blocking property ensures the system makes progres
 \end{itemize}
 In order to take advantage of modern processors, we implement a wait-free data store module. 
 After some research, we have discovered that no current DBMS uses wait-free data 
-structures, at most they are lock-free. The core of OpenMemDB relies on non-blocking algorithms and data structures. Non-blocking properties ensure a massively parallelizable database architecture. 
+structures, at most they are lock-free. The core of OpenMemDB relies on non-blocking algorithms and data 
+structures. Non-blocking properties ensure a massively parallelizable database architecture. 
 
 \par\vspace{\baselineskip}
 
@@ -1096,7 +1217,8 @@ capability. This is due to the fact that we have determined that the queries we 
 can be decomposed into a series of predicates that then can be evaluated almost independently.
 These predicates are modeled in a way similar to the tree formed by boolean expressions, as shown
 in the graphic below.
-\includegraphics{boolean_expr_tree.png}
+
+%\includegraphics{boolean_expr_tree.png}
 
 Therefore, we deduced that there are three different types of predicates that a given tree of
 boolean expressions can be reduced to. They are as follows:
@@ -1157,223 +1279,220 @@ by a hard limit of workers per statement.
 
 
 \subsection{Related Works}
-	Over the last 30 years the there has been tremendous advancements in computing
-	hardware. "Processors are thousands of times faster and memory is thousands of
-	times times larger"\cite{stonebraker2007end}. Most technologies have advanced 
-	along with hardware, however database management systems have struggled to improve
-	at a similar rate. This is mostly due to concurrency issues. "Existing studies show
-	that current database engines can spend more than 30\% of time in 
-	synchronization-related operations (e.g.locking and latching), even when only a 
-	single client thread is running."\cite{soares2015database}
-   \par\vspace{\baselineskip}
-  	There have been several attempts to solve this problem. Some of which will sacrifice
-  	some data consistency in order to achieve better performance. Still others
-  	remain fully ACID compliant and attempt to parallelize individual steps in the 
-  	DBMS or solely use multiple threads when executing query plans. Then there are those
-  	that attempt to implement some level of lock freedom into their DBMS.
-  	\par\vspace{\baselineskip}
-	\subsubsection{MemSQL and VoltDB}
-	MemSQL\footnote{MemSQL can be configured as a Columnstore that stores data on disk}
-	and VoltDB are both fully in memory DBMS as is OpenMemDB. This is where the
-	similarities end as far as OpenMemDB is concerned. MemSQL and VoltDB on the other 
-	hand both use distributed systems to achieve performance gains. MemSQL differs from 
-	VoltDB in a few ways, the most important being it's use of lock free data structures
-	for storing data and its storing of pre-compiled commonly used queries\cite{MemSQL}.
-	\begin{figure}
-	  \centering
-	  \textbf{MemSQL Two-tiered Architecture}
-	  \includegraphics{graphics/RelatedWorksArchitectures/memsql_dbms_architecture.png}
-	  \caption{MemSQL Architecture}
-	\end{figure}
-	VoltDB tries to make its performance gains by what they call "Concurreny through
-	scheduling"\cite{VoltDB}. This is the process of using a single-threaded pipeline 
-	that performs the task it was scheduled. This limits the need for locking during
-	transactions by intelligently scheduling the transactions so that locks are not
-	necessary.
-	\begin{figure}
-	  \centering
-	  \textbf{VoltDB Serialized Architecture}
-	  \includegraphics{graphics/RelatedWorksArchitectures/voltdb_serialized_architecture.png}
-	  \caption{VoltDB Serialized Processing}
-	\end{figure}
-	\par\vspace{\baselineskip}
-	OpenMemDB aims to take a different approach, one that is fully wait free. The goal is 
-	to use powerful wait free data structures that will allow for a massively parallel 
-	DBMS that can scale with the addition of processors and memory. It is our assumption 
-	that the achievement of a fully weight free DBMS will achieve the performance gains 
-	that have been lacking in the DBMS world while eliminating the complexity of 
-	distributed systems, all while retaining full ACID compliance.
-	
-	\subsubsection{Other Database Management Systems}
-	The two DBMS systems listed above are far from the only ones that exist. They were
-	researched more heavily because of there perceived similarities to our project and
-	because the documentation for them was thorough. However, there are numerous lesser
-	known and less well documented DBMS that are worthy of note.
+Over the last 30 years the there has been tremendous advancements in computing
+hardware. "Processors are thousands of times faster and memory is thousands of
+times times larger"\cite{stonebraker2007end}. Most technologies have advanced 
+along with hardware, however database management systems have struggled to improve
+at a similar rate. This is mostly due to concurrency issues. "Existing studies show
+that current database engines can spend more than 30\% of time in 
+synchronization-related operations (e.g.locking and latching), even when only a 
+single client thread is running."\cite{soares2015database}
+\par\vspace{\baselineskip}
+There have been several attempts to solve this problem. Some of which will sacrifice
+some data consistency in order to achieve better performance. Still others
+remain fully ACID compliant and attempt to parallelize individual steps in the 
+DBMS or solely use multiple threads when executing query plans. Then there are those
+that attempt to implement some level of lock freedom into their DBMS.
+\par\vspace{\baselineskip}
+\subsubsection{MemSQL and VoltDB}
+MemSQL\footnote{MemSQL can be configured as a Columnstore that stores data on disk}
+and VoltDB are both fully in memory DBMS as is OpenMemDB. This is where the
+similarities end as far as OpenMemDB is concerned. MemSQL and VoltDB on the other 
+hand both use distributed systems to achieve performance gains. MemSQL differs from 
+VoltDB in a few ways, the most important being it's use of lock free data structures
+for storing data and its storing of pre-compiled commonly used queries\cite{MemSQL}.
+\begin{figure}
+  \centering
+  \textbf{MemSQL Two-tiered Architecture}
+  \includegraphics[scale=.5]{graphics/memsql_dbms_architecture.png}
+  \caption{MemSQL Architecture}
+\end{figure}
+VoltDB tries to make its performance gains by what they call "Concurreny through
+scheduling"\cite{VoltDB}. This is the process of using a single-threaded pipeline 
+that performs the task it was scheduled. This limits the need for locking during
+transactions by intelligently scheduling the transactions so that locks are not
+necessary.
+\begin{figure}
+  \centering
+  \textbf{VoltDB Serialized Architecture}
+  \includegraphics[scale=.5]{graphics/voltdb_serialized_architecture.png}
+  \caption{VoltDB Serialized Processing}
+\end{figure}
+\par\vspace{\baselineskip}
+OpenMemDB aims to take a different approach, one that is fully wait free. The goal is 
+to use powerful wait free data structures that will allow for a massively parallel 
+DBMS that can scale with the addition of processors and memory. It is our assumption 
+that the achievement of a fully weight free DBMS will achieve the performance gains 
+that have been lacking in the DBMS world while eliminating the complexity of 
+distributed systems, all while retaining full ACID compliance.
 
-	\begin{itemize}
-	  \par\vspace{\baselineskip}
-	  \item Aerospike is an AGPL licensed NoSQL flash-optimized in memory 
-	  DBMS. Aerospike is an open source project that follows the similar pattern of 
-	  a distributed shared-nothing architecture that is appearing common among most
-	  in-memory DBMS. 
-	  \begin{quote}
-	  "Aerospike architecture is derived from its core principles – NoSQL scalability and
-	  flexibility, along with traditional database consistency, reliability and
-	  extensibility."
-	  \cite{aerospike}
-	  \end{quote}
-	  \par\vspace{\baselineskip}
-	  \begin{figure}
-	    \centering
-	    \includegraphics{graphics/RelatedWorksArchitectures/aerospike_dbms_architecture.png}
-	    \caption{Aerospike Architecture}
-	  \end{figure}
-	  \cite{aerospike}
-	  \par\vspace{\baselineskip}	
-	  \item Apache Geode is an Apache licensed distributed in-memory DBMS. Apache Geode is
-	  a brand new project and as such has very limited documentation. They claim on there
-	  github page to be 
-	  \begin{quote}
-	  "... a data management platform that provides real-time, consistent access to 
-	  data-intensive applications throughout widely distributed cloud architectures."
-	  \cite{aerospike}
-	  \end{quote}
-	  The specifics of their architecture is not listed. 
-	  \par\vspace{\baselineskip}
-	  \item dashDB is IBM's in-memory data warehouse. Self described as 
-	  \begin{quote}
-	  "a high performance, massively scalable cloud data warehouse service, 
-	  fully managed by IBM." \cite{dashDB}
-	  \end{quote}
-	  dashDB comes in a couple different configurations, the one that most resembles 
-	  our project is the MPP, "Massively Parallel Processing", configuration. 
-	  MPP operates by allowing the data warehouse to leverage multiple servers 
-	  in a network cluster to process data simultaneously. 
-	  \par\vspace{\baselineskip}
-	\includegraphics{graphics/RelatedWorksArchitectures/dashDB_mpp_architecture.png}
-	  \cite{dashDB}
-	  \par\vspace{\baselineskip}
-	  Each server in this data warehouse utilizes a number of key technologies, including: 
-	  \begin{itemize}
-	    \item Dynamic in-memory processing: Even when a dataset
-	    does not fit entirely in memory, dashDB still processes at
-	    lightning fast speeds using a series of patented algorithms
-	    that enable in-memory acceleration. While every workload
-	    is different, dashDB only requires RAM size to be 5 percent
-	    of the original pre-load source data size in order to run at
-        in-memory optimized speeds.
-        \item Actionable compression: dashDB performs a broad range
-	    of operations—including joins and predicate evaluations—
-	    directly on compressed data, therefore improving memory
-	    and cache bandwidth, and saving CPU costs.
-   	   \item Parallel vector processing: dashDB is CPU optimized
-	   and designed for the latest generation of microprocessors.
-	   Both multi-core parallelism and SIMD vector instructions
-       enable dashDB to maximize hardware performance.
-	   \item Data skipping: BLU enables dashDB to intelligently avoid
-	   scanning entire ranges of column data that don’t qualify for
-	   analysis, preserving time and resources.
-	 \end{itemize}
-	
-	  dashDB uses a highly parallelized infrastructure optimized for columnar data
-	  exchange that is organized as such:
-	  \par\vspace{\baselineskip}
-	\includegraphics{graphics/RelatedWorksArchitectures/dashDB_query_architecture.png}
-	  \cite{dashDB}
-	  \par\vspace{\baselineskip}
-	  \item eXtremeDB is the in-memory variant of the McObject family of data management
-	  projects.
-	  It stores its data entirely in main memory, eliminating the need for disk I/O. 
-	  eXtremeDB claims to have an "Ultra-small" footprint stating that through 
-	  streamlining of core database functions they are able to reduce their RAM footprint
-	  to around 100KB. They also do not translate the data they store in memory. They 
-	  store the data exactly how it will be used by the application. "No mapping a C data
-	  element to a relational representation"\cite{extremeDB} eXtremeDB claims to fully 
-	  support ACID properties. It does this by ensuring that operations grouped into
-	  transactions will complete together or the database will be rolled back to a 
-	  pre-transaction state.\cite{extremeDB}
-	  \par\vspace{\baselineskip}
-	\includegraphics{graphics/RelatedWorksArchitectures/extremeDB_dbms_architecture.jpg}
-	  \cite{extremeDB}
-	  \par\vspace{\baselineskip}
-	  
-	  \item GemFire is a distributed, in-memory, shared-nothing, NoSQL key-value store.
-	  GemFire is designed for working with operational data needed by real time 
-	  applications. It is not meant for working on very large quantities. In order to 
-	  achieve massive speeds GemFire relies on being primarily, not fully, 
-	  main memory based. " It uses highly-concurrent main-memory data structures to avoid
-	  lock contention and a data distribution
-	  layer that avoids redundant message copying, and it uses native serialization and
-	  smart buffering to ensure messages move from node to node faster than what
-	  traditional messaging would provide."\cite{gemfire}
-	  \par\vspace{\baselineskip}
-	  \includegraphics{graphics/RelatedWorksArchitectures/gemfire_peer_architecture.png}
-	  \par\vspace{\baselineskip}
-	  
-	  \item Hekaton is Microsoft's database engine that is optimized for memory resident
-	  OLTP data. Hekaton is fully implemented within SQL Server and can be utilized from
-	  within. 
-	  \begin{quote}
-	  "Hekaton is designed for high levels of concurrency but does not
-	  rely on partitioning to achieve this. Any thread can access any row
-	  in a table without acquiring latches or locks. The engine uses latchfree
-	  (lock-free) data structures to avoid physical interference
-	  among threads and a new optimistic, multiversion concurrency
-	  control technique to avoid interference among transactions"\cite{hekaton}
-	  \end{quote}
-	  Hekaton stores it's data in two different formats: a lock-free hash table and a 
-	  lock free B-tree called a Bw-tree. Data is always accessed with an index lookup.
-	  \par\vspace{\baselineskip}
-	  Hekaton's Architecture:
-	  \begin{itemize}
-	    \item The Hekaton storage engine manages user data and indexes.
-		It provides transactional operations on tables of records, hash
-		and range indexes on the tables, and base mechanisms for storage,
-		checkpointing, recovery and high-availability.
-		\item The Hekaton compiler takes an abstract tree representation of
-		a T-SQL stored procedure, including the queries within it, plus
-		table and index metadata and compiles the procedure into native
-		code designed to execute against tables and indexes managed
-		by the Hekaton storage engine.
-		\item The Hekaton runtime system is a relatively small component
-		that provides integration with SQL Server resources and
-		serves as a common library of additional functionality needed
-		by compiled stored procedures.
-		\item Metadata: Metadata about Hekaton tables, indexes, etc. is
-		stored in the regular SQL Server catalog. Users view and manage
-		them using exactly the same tools as regular tables and
-		indexes.
-		\item Query optimization: Queries embedded in compiled stored
-		procedures are optimized using the regular SQL Server optimizer.
-		The Hekaton compiler compiles the query plan into native
-		code.
-		\item Query interop: Hekaton provides operators for accessing data
-		in Hekaton tables that can be used in interpreted SQL Server
-		query plans. There is also an operator for inserting, deleting,
-		and updating data in Hekaton tables.
-		\item Transactions: A regular SQL Server transaction can access
-		and update data both in regular tables and Hekaton tables.
-		Commits and aborts are fully coordinated across the two engines.
-		\item High availability: Hekaton is integrated with AlwaysOn,
-		SQL Server’s high availability feature. Hekaton tables in a database
-		fail over in the same way as other tables and are also
-		readable on secondary servers.
-		\item Storage, log: Hekaton logs its updates to the regular SQL
-		Server transaction log. It uses SQL Server file streams for storing
-		checkpoints. Hekaton tables are automatically recovered
-		when a database is recovered. 
-	  \end{itemize} \cite{hekaton}
-	  
-	  \item SAP HANA
-	  is short for "High Performance Analytic Appliance" and is an in-memory,
-	  column-oriented, relational database management system. SAP HANA employs a
-	  massively parallel in-memory architecture in order to eliminate the I/O bottleneck
-	  that slows disk backed database management systems.
-	  \par\vspace{\baselineskip} 
-	  \includegraphics{graphics/RelatedWorksArchitectures/sap_hana_dbms_architecture.png}
-	  \cite{saphana}
-	  \par\vspace{\baselineskip}
-	\end{itemize}	
+\subsubsection{Other Database Management Systems}
+The two DBMS systems listed above are far from the only ones that exist. They were
+researched more heavily because of there perceived similarities to our project and
+because the documentation for them was thorough. However, there are numerous lesser
+known and less well documented DBMS that are worthy of note.
+
+\begin{itemize}
+  \par\vspace{\baselineskip}
+  \item Aerospike is an AGPL licensed NoSQL flash-optimized in memory 
+  DBMS. Aerospike is an open source project that follows the similar pattern of 
+  a distributed shared-nothing architecture that is appearing common among most
+  in-memory DBMS. 
+  \begin{quote}
+  "Aerospike architecture is derived from its core principles – NoSQL scalability and
+  flexibility, along with traditional database consistency, reliability and
+  extensibility."
+  \cite{aerospike}
+  \end{quote}
+  \par\vspace{\baselineskip}
+  \begin{figure}
+    \centering
+    \includegraphics[scale=.25]{graphics/aerospike_dbms_architecture.png}
+    \caption{Aerospike Architecture}
+  \end{figure}
+  \cite{aerospike}
+  \par\vspace{\baselineskip}	
+  \item Apache Geode is an Apache licensed distributed in-memory DBMS. Apache Geode is
+  a brand new project and as such has very limited documentation. They claim on there
+  github page to be 
+  \begin{quote}
+  "... a data management platform that provides real-time, consistent access to 
+  data-intensive applications throughout widely distributed cloud architectures."
+  \cite{aerospike}
+  \end{quote}
+  The specifics of their architecture is not listed. 
+  \par\vspace{\baselineskip}
+  \item dashDB is IBM's in-memory data warehouse. Self described as 
+  \begin{quote}
+  "a high performance, massively scalable cloud data warehouse service, 
+  fully managed by IBM." \cite{dashDB}
+  \end{quote}
+  dashDB comes in a couple different configurations, the one that most resembles 
+  our project is the MPP, "Massively Parallel Processing", configuration. 
+  MPP operates by allowing the data warehouse to leverage multiple servers 
+  in a network cluster to process data simultaneously. 
+  \par\vspace{\baselineskip}
+\includegraphics[scale=.45]{graphics/dashDB_mpp_architecture.png}
+  \cite{dashDB}
+  \par\vspace{\baselineskip}
+  Each server in this data warehouse utilizes a number of key technologies, including: 
+  \begin{itemize}
+    \item Dynamic in-memory processing: Even when a dataset
+    does not fit entirely in memory, dashDB still processes at
+    lightning fast speeds using a series of patented algorithms
+    that enable in-memory acceleration. While every workload
+    is different, dashDB only requires RAM size to be 5 percent
+    of the original pre-load source data size in order to run at
+in-memory optimized speeds.
+\item Actionable compression: dashDB performs a broad range
+    of operations—including joins and predicate evaluations—
+    directly on compressed data, therefore improving memory
+    and cache bandwidth, and saving CPU costs.
+   \item Parallel vector processing: dashDB is CPU optimized
+   and designed for the latest generation of microprocessors.
+   Both multi-core parallelism and SIMD vector instructions
+nable dashDB to maximize hardware performance.
+   \item Data skipping: BLU enables dashDB to intelligently avoid
+   scanning entire ranges of column data that don’t qualify for
+   analysis, preserving time and resources.
+ \end{itemize}
+
+  dashDB uses a highly parallelized infrastructure optimized for columnar data
+  exchange that is organized as such:
+  \par\vspace{\baselineskip}
+\includegraphics[scale=.45]{graphics/dashDB_query_architecture.png}
+\cite{dashDB}
+\par\vspace{\baselineskip}
+\item eXtremeDB is the in-memory variant of the McObject family of data management projects.
+  It stores its data entirely in main memory, eliminating the need for disk I/O. 
+  eXtremeDB claims to have an "Ultra-small" footprint stating that through 
+  streamlining of core database functions they are able to reduce their RAM footprint
+  to around 100KB. They also do not translate the data they store in memory. They 
+  store the data exactly how it will be used by the application. "No mapping a C data
+  element to a relational representation"\cite{extremeDB} eXtremeDB claims to fully 
+  support ACID properties. It does this by ensuring that operations grouped into
+  transactions will complete together or the database will be rolled back to a 
+  pre-transaction state.\cite{extremeDB}
+  \par\vspace{\baselineskip}
+\includegraphics[scale=.5]{graphics/extremeDB_dbms_architecture.jpg}
+  \cite{extremeDB}
+  \par\vspace{\baselineskip}
+  
+  \item GemFire is a distributed, in-memory, shared-nothing, NoSQL key-value store.
+  GemFire is designed for working with operational data needed by real time 
+  applications. It is not meant for working on very large quantities. In order to 
+  achieve massive speeds GemFire relies on being primarily, not fully, 
+  main memory based. " It uses highly-concurrent main-memory data structures to avoid
+  lock contention and a data distribution
+  layer that avoids redundant message copying, and it uses native serialization and
+  smart buffering to ensure messages move from node to node faster than what
+  traditional messaging would provide."\cite{gemfire}
+  \par\vspace{\baselineskip}
+  \includegraphics[scale=.5]{graphics/gemfire_peer_architecture.png}
+  \par\vspace{\baselineskip}
+  
+  \item Hekaton is Microsoft's database engine that is optimized for memory resident
+  OLTP data. Hekaton is fully implemented within SQL Server and can be utilized from
+  within. 
+  \begin{quote}
+  "Hekaton is designed for high levels of concurrency but does not
+  rely on partitioning to achieve this. Any thread can access any row
+  in a table without acquiring latches or locks. The engine uses latchfree
+  (lock-free) data structures to avoid physical interference
+  among threads and a new optimistic, multiversion concurrency
+  control technique to avoid interference among transactions"\cite{hekaton}
+  \end{quote}
+  Hekaton stores it's data in two different formats: a lock-free hash table and a 
+  lock free B-tree called a Bw-tree. Data is always accessed with an index lookup.
+  \par\vspace{\baselineskip}
+  Hekaton's Architecture:
+\begin{itemize}
+  \item The Hekaton storage engine manages user data and indexes.
+  It provides transactional operations on tables of records, hash
+  and range indexes on the tables, and base mechanisms for storage,
+  checkpointing, recovery and high-availability.
+  \item The Hekaton compiler takes an abstract tree representation of
+  a T-SQL stored procedure, including the queries within it, plus
+  table and index metadata and compiles the procedure into native
+  code designed to execute against tables and indexes managed
+  by the Hekaton storage engine.
+  \item The Hekaton runtime system is a relatively small component
+  that provides integration with SQL Server resources and
+  serves as a common library of additional functionality needed
+  by compiled stored procedures.
+  \item Metadata: Metadata about Hekaton tables, indexes, etc. is
+  stored in the regular SQL Server catalog. Users view and manage
+  them using exactly the same tools as regular tables and indexes.
+  \item Query optimization: Queries embedded in compiled stored
+  procedures are optimized using the regular SQL Server optimizer.
+  The Hekaton compiler compiles the query plan into native
+  code.
+  \item Query interop: Hekaton provides operators for accessing data
+  in Hekaton tables that can be used in interpreted SQL Server
+  query plans. There is also an operator for inserting, deleting,
+  and updating data in Hekaton tables.
+  \item Transactions: A regular SQL Server transaction can access
+  and update data both in regular tables and Hekaton tables.
+  Commits and aborts are fully coordinated across the two engines.
+  \item High availability: Hekaton is integrated with AlwaysOn,
+  SQL Server’s high availability feature. Hekaton tables in a database
+  fail over in the same way as other tables and are also
+  readable on secondary servers.
+  \item Storage, log: Hekaton logs its updates to the regular SQL
+  Server transaction log. It uses SQL Server file streams for storing
+  checkpoints. Hekaton tables are recovered when a database is recovered. 
+  \end{itemize} \cite{hekaton}
+  
+  \item SAP HANA
+  is short for "High Performance Analytic Appliance" and is an in-memory,
+  column-oriented, relational database management system. SAP HANA employs a
+  massively parallel in-memory architecture in order to eliminate the I/O bottleneck
+  that slows disk backed database management systems.
+  \par\vspace{\baselineskip} 
+  \includegraphics[scale=.5]{graphics/sap_hana_dbms_architecture.png}
+  \cite{saphana}
+  \par\vspace{\baselineskip}
+\end{itemize}	
 	
 \newpage
 
@@ -1402,7 +1521,7 @@ by a hard limit of workers per statement.
   \begin{figure}
     \centering
     \textbf{Overall libomdb Class Architecture}
-    \includegraphics{graphics/libomdb_Diagrams/libomdb_Class.png}
+    \includegraphics[scale=.5]{graphics/libomdb_Class.png}
     \caption{libomdb Class Diagram}
   \end{figure}
   
@@ -1460,17 +1579,16 @@ while (result.next()) {
   \begin{figure}
     \centering
     \textbf{Sequence Diagram for Querying Data}
-    \includegraphics{graphics/libomdb_Diagrams/libomdb_query_activity.png}
+    \includegraphics[scale=.5]{graphics/libomdb_query_activity.png}
     \caption{Querying Database Sequence Diagram}
   \end{figure}
   \par\vspace{\baselineskip}
     
   An update command can be executed in much the same way as a query. First 
   a connection needs to be established to the desired database using the 
-  \lstinline[basicstyle=\ttfamily]|Connection.connect()|
-  method. Then the desired non-query command is executed using the 
-  \lstinline[basicstyle=\ttfamily]|executeCommand( command )| method.
-  A \lstinline[basicstyle=\ttfamily]|CommandResult| will be returned from this call,
+  \lstinline|Connection.connect()| method. Then the desired non-query 
+  command is executed using the \lstinline|executeCommand( command )| method.
+  A \lstinline|CommandResult| will be returned from this call,
   which is a struct that has two fields: a boolean field,
   \lstinline[basicstyle=\ttfamily]|isSuccess|, and an integer field,
   \lstinline[basicstyle=\ttfamily]|numAffected|, which represents the number of rows 
@@ -1482,7 +1600,7 @@ Connection conn = Connection.connect("localhost", 3310, "users");
 
 CommandResult result;
 result = conn.executeCommand("UPDATE employees SET pay = pay + 1;");
-	
+
 if (result.isSuccess) {
   cout << "Rows affected: " << result.numAffected;	
 }
@@ -1491,7 +1609,7 @@ if (result.isSuccess) {
   \begin{figure}
     \centering
     \textbf{Sequence Diagram for Executing Command}
-    \includegraphics{graphics/libomdb_Diagrams/libomdb_command_activity.png}
+    \includegraphics[scale=.5]{graphics/libomdb_command_activity.png}
     \caption{Executing Command Sequence Diagram}
   \end{figure}    
   
@@ -1523,15 +1641,15 @@ if (result.isSuccess) {
   \lstinline[basicstyle=\ttfamily]|Connection| class also contains three public 
   instance methods and two public static methods. The instance methods are:
   \begin{itemize}
-    \item \lstinline[basicstyle=\ttfamily]|executeCommand( string command ): CommandResult|
-    \item \lstinline[basicstyle=\ttfamily]|executeQuery( string query ): Result|
-    \item \lstinline[basicstyle=\ttfamily]|getMetaData(): ConnectionMetaData| 
+    \item \lstinline|executeCommand( string command ): CommandResult|
+    \item \lstinline|executeQuery( string query ): Result|
+    \item \lstinline|getMetaData(): ConnectionMetaData| 
   \end{itemize}   
   The static methods contained in the \lstinline[basicstyle=\ttfamily]|Connection| class
   are: 
   \begin{itemize}
-  	\item \lstinline[basicstyle=\ttfamily]|Connection.connect(string hostname, uint16_t port, string db): Connection|
-  	\item \lstinline[basicstyle=\ttfamily]|Connection.disconnect(Connection connection)|
+  	\item \lstinline|Connection.connect(string hostname, uint16_t port, string db): Connection|
+  	\item \lstinline|Connection.disconnect(Connection connection)|
   \end{itemize}    
   As has been seen a number of times the \lstinline[basicstyle=\ttfamily]|connect()| 
   static method is used  to establish a connection to a database, and the 
@@ -1547,70 +1665,70 @@ if (result.isSuccess) {
   \begin{figure}
     \centering
     \textbf{Connection Class Layout}
-    \includegraphics{graphics/libomdb_Diagrams/connection_layout.png}
+    %\includegraphics{graphics/libomdb_connection_layout.png}
 	\caption{Connection layout}    
   \end{figure}
   \par\vspace{\baselineskip}
   
   The \lstinline[basicstyle=\ttfamily]|Result| class is made up of two private members:
   \begin{itemize}
-    \item \lstinline[basicstyle=\ttfamily]|m_rows|
-    \item \lstinline[basicstyle=\ttfamily]|m_metaData|
+    \item \lstinline|m_rows|
+    \item \lstinline|m_metaData|
   \end{itemize}
-  \lstinline[basicstyle=\ttfamily]|m_rows| is a
-  \lstinline[basicstyle=\ttfamily]|vector<ResultRow>|, 
-  \lstinline[basicstyle=\ttfamily]|ResultRow| is a typedef for
-  a \lstinline[basicstyle=\ttfamily]|vector<DataValue>|, and 
-  \lstinline[basicstyle=\ttfamily]|DataValue| is a typedef for 
-  \lstinline[basicstyle=\ttfamily]|boost::variant<>|.
-  So with all typedefs removed \lstinline[basicstyle=\ttfamily]|m_rows| is
+  \lstinline|m_rows| is a
+  \lstinline|vector<ResultRow>|, 
+  \lstinline|ResultRow| is a typedef for
+  a \lstinline|vector<DataValue>|, and 
+  \lstinline|DataValue| is a typedef for 
+  \lstinline|boost::variant<>|.
+  So with all typedefs removed \lstinline|m_rows| is
   actually a
-  \lstinline[basicstyle=\ttfamily]|vector<vector<boost:variant<> > >|.
+  \lstinline|vector<vector<boost:variant<> > >|.
   
-  \lstinline[basicstyle=\ttfamily]|m_metaData| is the 
-  \lstinline[basicstyle=\ttfamily]|ResultMetaData| object that describes the 
-  \lstinline[basicstyle=\ttfamily]|Result| object. The contents of the 
-  \lstinline[basicstyle=\ttfamily]|ResultMetaData| class will be covered later.
+  \lstinline|m_metaData| is the 
+  \lstinline|ResultMetaData| object that describes the 
+  \lstinline|Result| object. The contents of the 
+  \lstinline|ResultMetaData| class will be covered later.
   \par\vspace{\baselineskip}
   The \lstinline[basicstyle=\ttfamily]|Result| class also contains thee instance methods:
   \begin{itemize}
-    \item \lstinline[basicstyle=\ttfamily]|getMetaData(): ResultMetaData|
-    \item \lstinline[basicstyle=\ttfamily]|getValue(int index): DataValue|
-    \item \lstinline[basicstyle=\ttfamily]|next(): bool|
+    \item \lstinline|getMetaData(): ResultMetaData|
+    \item \lstinline|getValue(int index): DataValue|
+    \item \lstinline|next(): bool|
   \end{itemize}
-  \lstinline[basicstyle=\ttfamily]|getMetaData()| is used to obtain the meta-data 
+  \lstinline|getMetaData()| is used to obtain the meta-data 
   information about the \lstinline[basicstyle=\ttfamily]|Result|. 
-  \lstinline[basicstyle=\ttfamily]|getValue( index )| will return the 
-  \lstinline[basicstyle=\ttfamily]|DataValue| of the column at the specified index.
-  \lstinline[basicstyle=\ttfamily]|next()| moves the 
-  \lstinline[basicstyle=\ttfamily]|Result| forward one row, if there are still rows 
+  \lstinline|getValue( index )| will return the 
+  \lstinline|DataValue| of the column at the specified index.
+  \lstinline|next()| moves the 
+  \lstinline|Result| forward one row, if there are still rows 
   remaining in the \lstinline[basicstyle=\ttfamily]|Result|. If there is not, it does 
   nothing and returns \lstinline[basicstyle=\ttfamily]|false|.
   
   \begin{figure}
     \centering
     \textbf{Result Class Layout}
-    \includegraphics{graphics/libomdb_Diagrams/result_layout.png}
+    %\includegraphics{graphics/libomdb_result_layout.png}
     \caption{Result Layout}
   \end{figure}
   \par\vspace{\baselineskip}
-  A quick overview of the the \lstinline[basicstyle=\ttfamily]|ResultMetaData| class 
+  A quick overview of the the \lstinline|ResultMetaData| class 
   is necessary to fully understand the how the 
-  \lstinline[basicstyle=\ttfamily]|Result| class is meant to work. 
-  The \lstinline[basicstyle=\ttfamily]|ResultMetaData| class contains only one 
+  \lstinline|Result| class is meant to work. 
+  The \lstinline|ResultMetaData| class contains only one 
   private member, which is 
-  \lstinline[basicstyle=\ttfamily]|m_data|, a 
-  \lstinline[basicstyle=\ttfamily]|vector<MetaDataColumn>|. 
-  \lstinline[basicstyle=\ttfamily]|MetaDataColumn| is a struct that contains two fields: 
-  a \lstinline[basicstyle=\ttfamily]|string name| and a 
-  \lstinline[basicstyle=\ttfamily]|SQL_TYPE type|. \lstinline[basicstyle=\ttfamily]|name|
-  is the name of the column and \lstinline[basicstyle=\ttfamily]|type| is the 
-  \lstinline[basicstyle=\ttfamily]|SQL_TYPE| of the column, i.e. "VARCHAR", "DATE", etc.
+  \lstinline|m_data|, a 
+  \lstinline|vector<MetaDataColumn>|. 
+  \lstinline|MetaDataColumn| is a struct that contains two fields: 
+  a \lstinline|string name| and a 
+  \lstinline|SQL_TYPE type|. \lstinline|name|
+  is the name of the column and \lstinline|type| is the 
+  \lstinline|SQL_TYPE| of the column, i.e. "VARCHAR", "DATE", etc.
   
   \begin{figure}
     \centering
     \textbf{ResultMetaData Class Layout}
-    \includegraphics{graphics/libomdb_Diagrams/resultMetaData_layout.png}
+    %\includegraphics{graphics/libomdb_resultMetaData_layout.png}
     \caption{ResultMetaData Layout}
   \end{figure}
   
