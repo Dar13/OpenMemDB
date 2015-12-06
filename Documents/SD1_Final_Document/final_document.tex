@@ -149,6 +149,23 @@ standards-defined technologies opens the door for later opportunities in cutting
 \newpage
 
 \section{Broader Impacts}
+An open-source, in-memory and wait-free database would allow for startups or students to 
+experiment with extremely high-frequency applications that still need relational 
+models without dealing with proprietary software such as MemSQL. As the product 
+will be wait-free, scalability with additional hardware should be near-linear as each 
+additional hardware-backed thread allows more concurrent SQL queries to be processed. 
+The applications of such a technology are the same as any other database system, 
+though the speed and scalability of the system lends itself to high-frequency and 
+relatively low storage size databases.
+\par\vspace{\baselineskip}
+In addition to the commercial or practical impacts, this project can also influence the
+amount of research done by other companies or universities in this area, specifically the
+usage of wait-free data structures. This can then lead to unique or more efficient
+algorithms that then lead to better multi-threaded or multi-core programs. As most hardware,
+even in the embedded sector, is moving to multi-core architectures these benefits could
+then impact many areas within the technology sector. As a database that is quite decoupled 
+from its data structures this provides a unique test-case for stress-testing different wait-free
+algorithms and data-structures given that they implement a base set of features.
 \newpage
 
 \section{Specification and Requirements}
@@ -1591,8 +1608,8 @@ while (result.next()) {
   command is executed using the \lstinline|executeCommand( command )| method.
   A \lstinline|CommandResult| will be returned from this call,
   which is a struct that has two fields: a boolean field,
-  \lstinline[basicstyle=\ttfamily]|isSuccess|, and an integer field,
-  \lstinline[basicstyle=\ttfamily]|numAffected|, which represents the number of rows 
+  \lstinline|isSuccess|, and an integer field,
+  \lstinline|numAffected|, which represents the number of rows 
   that were effected by the command.
   \par\vspace{\baselineskip}
   An example of a command executed against a database would be something like this:
@@ -1600,7 +1617,7 @@ while (result.next()) {
 Connection conn = Connection.connect("localhost", 3310, "users");
 
 CommandResult result;
-result = conn.executeCommand("UPDATE employees SET pay = pay + 1;");
+result = conn.executeCommand("UPDATE employees SET pay=pay+1;");
 
 if (result.isSuccess) {
   cout << "Rows affected: " << result.numAffected;	
@@ -1617,49 +1634,46 @@ if (result.isSuccess) {
   \par\vspace{\baselineskip}
   
   \subsubsection{Design}
-  There are two main classes used in the libomdb library: 
-  \lstinline[basicstyle=\ttfamily]|Connection| and
-  \lstinline[basicstyle=\ttfamily]|Result|.
-  The uses of these classes are obvious. 
-  \lstinline[basicstyle=\ttfamily]|Connection| is used to represent a connection to 
-  a specific database and 
-  \lstinline[basicstyle=\ttfamily]|Result| is used to hold the results of a 
+  There are two main classes used in the libomdb library:  \\
+  \lstinline|Connection| and \lstinline|Result|. The uses of these classes 
+  are obvious. \lstinline|Connection| is used to represent a connection to 
+  a specific database and \lstinline|Result| is used to hold the results of a 
   query against the connected database. 
   
   \par\vspace{\baselineskip}
-  The \lstinline[basicstyle=\ttfamily]|Connection| class is made up of two private 
-  member fields \lstinline[basicstyle=\ttfamily]|m_socket_fd| and
-  \lstinline[basicstyle=\ttfamily]|m_metaData|. 
-  \lstinline[basicstyle=\ttfamily]|m_socket_fd| is the the socket file descriptor that is
+  The \lstinline|Connection| class is made up of two private 
+  member fields \lstinline|m_socket_fd| and
+  \lstinline|m_metaData|. 
+  \lstinline|m_socket_fd| is the the socket file descriptor that is
   used to communicate with the server hosting the database. 
-  \lstinline[basicstyle=\ttfamily]|m_metaData| is the related
-  \lstinline[basicstyle=\ttfamily]|ConnectionMetaData| object that contains some 
+  \lstinline|m_metaData| is the related
+  \lstinline|ConnectionMetaData| object that contains some 
   information about the connection represented by the 
-  \lstinline[basicstyle=\ttfamily]|Connection| object. Some of the information contained
-  in this \lstinline[basicstyle=\ttfamily]|ConnectionMetaData| object are 
-  the name of the database that the \lstinline[basicstyle=\ttfamily]|Connection| object
+  \lstinline|Connection| object. Some of the information contained
+  in this \lstinline|ConnectionMetaData| object are 
+  the name of the database that the \lstinline|Connection| object
   is connected to, and whether or not the connection is still active. The 
-  \lstinline[basicstyle=\ttfamily]|Connection| class also contains three public 
+  \lstinline|Connection| class also contains three public 
   instance methods and two public static methods. The instance methods are:
   \begin{itemize}
     \item \lstinline|executeCommand( string command ): CommandResult|
     \item \lstinline|executeQuery( string query ): Result|
     \item \lstinline|getMetaData(): ConnectionMetaData| 
   \end{itemize}   
-  The static methods contained in the \lstinline[basicstyle=\ttfamily]|Connection| class
+  The static methods contained in the \lstinline|Connection| class
   are: 
   \begin{itemize}
   	\item \lstinline|Connection.connect(string hostname, uint16_t port, string db): Connection|
   	\item \lstinline|Connection.disconnect(Connection connection)|
   \end{itemize}    
-  As has been seen a number of times the \lstinline[basicstyle=\ttfamily]|connect()| 
+  As has been seen a number of times the \lstinline|connect()| 
   static method is used  to establish a connection to a database, and the 
-  \lstinline[basicstyle=\ttfamily]|disconnect()| method is used to terminate a connection.
-  \lstinline[basicstyle=\ttfamily]|executeCommand()| in reality just sends a string of
+  \lstinline|disconnect()| method is used to terminate a connection.
+  \lstinline|executeCommand()| in reality just sends a string of
   text to across the socket connection represented by the 
-  \lstinline[basicstyle=\ttfamily]|Connection| object's 
-  \lstinline[basicstyle=\ttfamily]|m_socket_fd| to the database server where it will be 
-  parsed and executed. The \lstinline[basicstyle=\ttfamily]|executeQuery()| command
+  \lstinline|Connection| object's 
+  \lstinline|m_socket_fd| to the database server where it will be 
+  parsed and executed. The \lstinline|executeQuery()| command
   does nearly the exact same thing but will receive a different data structure from the 
   database in return.
   
@@ -1761,12 +1775,20 @@ if (result.isSuccess) {
   ensure that the various threads do not interact in ways that would require synchronization.
   \par\vspace{\baselineskip}
   One of those ways is utilizing a feature in the C++ memory model that was introduced in C++11, specifically
-  the \lstinline[basicstyle=\ttfamily]|thread_local| storage specifier. That specifier instructs the compiler
+  the \lstinline|thread_local| storage specifier. That specifier instructs the compiler
   to create a copy of each variable for each individual thread, and ties that variable's lifetime
   to the lifetime of the thread. While not used extensively, this feature removes the guesswork 
-  of whether a variable is safe to be made \lstinline[basicstyle=\ttfamily]|static| or whether a copy
+  of whether a variable is safe to be made \lstinline|static| or whether a copy
   would need to be made in each thread's initialization routine via dynamic memory (e.g.
-  \lstinline[basicstyle=\ttfamily]|new| or \lstinline[basicstyle=\ttfamily]|malloc|).
+  \lstinline|new| or \lstinline|malloc|).
+  \par\vspace{\baselineskip}
+  \begin{figure}
+   \centering
+   % C++ memory model diagram
+    \textbf{C++ Memory Model}
+    \includegraphics{graphics/cpp_memory_model.png}
+    \caption{Diagram of the C++11 memory model as used by OpenMemDB}
+  \end{figure}
   \par\vspace{\baselineskip}
   Another decision in the design of the SQL engine that was important to maintaining wait-freedom and 
   thread-safety was the adoption of the Lemon parser engine. Lemon was built to be thread-safe and 
@@ -1788,6 +1810,15 @@ if (result.isSuccess) {
   other SQL constructs like nested queries, that OpenMemDB will not be supporting, require a full-featured 
   solver that may not be able to progress in a way that can be called wait-free.
   \par\vspace{\baselineskip}
+  \begin{figure}
+   \centering
+   % SQL Engine generation of predicate tree activity diagram
+   \textbf{Predicate Tree Generation}
+   \includegraphics{graphics/sqlengine_predicate.png}
+   \caption{Diagram of the process used to generate the tree of predicates
+	    used within the SQL Engine component of OpenMemDB}
+  \end{figure}
+  \par\vspace{\baselineskip}
   Execution of the query plan is also within the purview of the SQL engine and also must be guaranteed to be
   wait-free as well as performant. As our use case puts us entirely within memory, we have the necessarily low
   latencies to feel comfortable in performing full table scans in the most naive case with options to 
@@ -1796,6 +1827,7 @@ if (result.isSuccess) {
   interact with the data store and actually performs operations upon the data stored there. We rely on the Tervel
   data structures to guarantee us wait-freedom as we access the data, but otherwise we can verify that
   progress in evaluating the query will be made in such a way to satisfy our wait-freedom requirement.
+  \par\vspace{\baselineskip}
   
   \subsection{Work Manager}
   The Work Manager, as the module responsible for distributing the system's workload across the
@@ -1853,15 +1885,17 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
 	 \lstinline[]|std::map<uint32_t, omdb::Connection>|
    \item A vector of \lstinline[]|WorkThreadData| objects
   \end{itemize}
-  The first part, the vector of \lstinline[basicstyle=\ttfamily]|std::future<Result>| objects, is 
+  The first part, the vector of \lstinline|std::future<Result>| objects, is 
   essential to retrieving query results from the worker threads in an asynchronous way. This way
   we can continue to be non-blocking without needing to wait for a thread to finish which also
-  allows us to be wait-free, our overriding requirement. Forcing the \lstinline[basicstyle=\ttfamily]|std::future<Result>|
+  allows us to be wait-free, our overriding requirement. Forcing the \lstinline|std::future<Result>|
   to be non-blocking when checking for a return value is currently clunky:
   \begin{lstlisting}[language=C++]
 [&results] (std::future<Result>& res) -> bool
 {
   auto time_out = std::chrono::seconds(0);
+  // Typically, wait() blocks the thread, 
+  // but if we wait for a time of 0 it returns immediately
   if(res.valid() &&
      res.wait_for(time_out) == std::future_status::ready)
   {
@@ -1884,7 +1918,7 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
   The vector of \lstinline[]|WorkThreadData| objects is the mechanism in 
   which the Work Manager sends jobs, the queries or commands that a client sends to OpenMemDB, to the 
   worker threads in the thread pool. The jobs are contained within a \lstinline[language=C++]|std::packaged_task<Result(int)>|
-  object which is a C++11 construct that can generate the previously mentioned \lstinline[basicstyle=\ttfamily]|std::future<Result>|.
+  object which is a C++11 construct that can generate the previously mentioned \lstinline|std::future<Result>|.
   The generated future object is stored in the afore-mentioned vector and the job is then passed to a selected
   worker thread to be evaluated. The selection process for where this job is placed is the work load distribution
   task that the Work Manager is responsible for. In order to do this accurately, the Work Manager implements
@@ -1898,6 +1932,62 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
   This heuristic will be a source of heavy experimentation and testing as overloading a single core or thread
   with work can negatively affect the ability of the system to be wait-free as the rest of system is 
   starved for work.
+  \par\vspace{\baselineskip}
+  \begin{figure}
+   \centering
+   % Connection class diagram
+   \textbf{Connection Class Diagram}
+   \includegraphics{graphics/workmanager_conn_class.png}
+   \caption{The class diagram of the Connection class as used by OpenMemDB's Work Manager module}
+  \end{figure}
+  \begin{figure}
+   \centering
+   % WorkManager class diagram
+   \textbf{WorkManager Class Diagram}
+   \includegraphics{graphics/workmanager_main_class.png}
+   \caption{The class diagram of the main WorkManager class within OpenMemDB's Work Manager module}
+  \end{figure}
+  
+  The flow of data from the client to the database and from there to the worker threads
+  is as follows:
+  \begin{figure}
+   \centering
+   % Data flow diagram (client -> wrk_mgr.assign_job)
+   \textbf{Data Flow from Client to SQL Engine}
+   \includegraphics{graphics/workmanager_dataflow_sqlengine.png}
+   \caption{Shows the flow of data from a client to the worker threads within OpenMemDB}
+  \end{figure}
+  
+  \subsection{Data Store}
+  
+  \subsection{Logger}
+  %author Neil Moore
+  Comprehensive logging is essential for any database that wants to be ACID, or
+  at the very least persistent in the event of unexpected shutdown. However, we
+  have a unique problem when implementing a logger in that we cannot access the
+  hard disk. This is due to the fact that writing to hard disk is slow enough to 
+  impact our wait-freedom within the database, which is something we cannot afford.
+  In order to be both non-blocking and persistent, at least in some rudimentary way, 
+  we are going to use a distributed model where queries that manipulate the data
+  stored within a table (such as INSERT INTO, UPDATE, or DELETE) will be immediately
+  sent back out over the network to a helper process.
+  \par\vspace{\baselineskip}
+  Although this doesn't entirely remove the problem, it does move it to an auxiliary
+  program that doesn't have the same stringent requirements. This would allow us to 
+  perform disk writes or reads as needed. The recovery from a crash in the main database
+  could be performed in much the same way that the logs were created. We would simply 
+  ``playback'' the queries contained within the log and that should lead us to the same 
+  state within the tables as it was when the database crashed.
+  % this is the interaction diagram between the main database and the logger
+  % should also include the interaction between database and client, just to be complete
+  \begin{figure}
+    \centering
+    \textbf{Client, Database, and Logger Interaction Diagram}
+    \includegraphics{graphics/logger_interaction.png}
+    \caption{The network interaction model employed by OpenMemDB to implement a 
+	     write-ahead-logger(WAL)}
+  \end{figure}
+
 \newpage
 
 \section{Facilities and Equipment}
@@ -1919,7 +2009,7 @@ stress-test the system. The hardware used by each member:
   \item{\makebox[4cm]{Motherboard:\hfill} Asus M5A99X EVO R2.0}
   \item{\makebox[4cm]{GPU:\hfill} AMD Radeon HD 7870}
   \item{\makebox[4cm]{Primary Hard Disk:\hfill} PNY Optima 240 GB SSD}
-  \item{\makebox[4cm]{Total Available Storage:\hfill} 3 terabytes}
+  \item{\makebox[4cm]{Total Storage:\hfill} 3 terabytes}
   \item{\makebox[4cm]{Operating System:\hfill} Arch Linux}
  \end{itemize}
  
@@ -1930,7 +2020,7 @@ stress-test the system. The hardware used by each member:
   \item{\makebox[4cm]{Motherboard:\hfill} GIGABYTE G1 Gaming G1.Sniper}
   \item{\makebox[4cm]{GPU:\hfill} GeForce GTX 970}
   \item{\makebox[4cm]{Primary Hard Disk:\hfill} Samsung 840 EVO 120GB SSD}
-  \item{\makebox[4cm]{Total Available Storage:\hfill} 2 terabytes}
+  \item{\makebox[4cm]{Total Storage:\hfill} 2 terabytes}
   \item{\makebox[4cm]{Operating System:\hfill} Windows 10 / Arch Linux VM}
  \end{itemize}
 \end{itemize}
