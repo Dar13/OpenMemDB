@@ -34,7 +34,7 @@ stringstyle=\color{codered}
 
 \title{Non-Blocking In-Memory Database\thanks{Sponsor: Dr. Damian Dechev}}
 \author{Michael McGee, Robert Medina, Neil Moore, Jason Stavrinaky\\[1ex]
-	\includegraphics{graphics/OMDB_logo_notext_trans.png}\\[1ex]
+	\includegraphics{graphics/OMDB_logo_text_trans.png}\\[1ex]
 }
 \date{11/4/2015}
 
@@ -227,7 +227,8 @@ As such, the following are the specification for this project:
 
 \subsection{IDEs}
 % Author: Jason
-When undertaking a big project, an often under-looked area is IDE research. IDEs provide invaluable tools that aid the programmer in one convenient package. A few of these tools include:
+When undertaking a big project, an often under-looked area is IDE research. IDEs provide 
+invaluable tools that aid the programmer in one convenient package. A few of these tools include:
 
 \begin{itemize}
 	\item Compilers
@@ -236,7 +237,8 @@ When undertaking a big project, an often under-looked area is IDE research. IDEs
 	\item Many, many more
 \end{itemize}
 
-As such, IDE choice is very important since they are essential to a stable, comfortable work-flow. The following sections describe the IDEs we chose.
+As such, IDE choice is very important since they are essential to a stable, comfortable 
+work-flow. The following sections describe the IDEs we chose.
 
 \subsubsection{Vim}
 
@@ -251,39 +253,52 @@ well as git integration.
 
 \begin{figure}
     \centering
-	\includegraphics[scale=0.35]{vimide.png}
+	\includegraphics[scale=0.25]{graphics/vimide.png}
     \caption{Vim}
 \end{figure}
 
 \newpage
 
 \subsubsection{Atom}
-We chose Github Atom for similar reasons we did Vim. Atom is highly configurable, and it comes with a built in package manager. Atom is basically a much more user friendly version of Vim. When making quick edits, Atom does the job perfectly. Also, for those of us who aren't too familiar with Vim. 
+We chose Github Atom for similar reasons we did Vim. Atom is highly configurable, and it 
+comes with a built in package manager. Atom is basically a much more user friendly 
+version of Vim. When making quick edits, Atom does the job perfectly. Also, for 
+those of us who aren't too familiar with Vim. 
 \begin{figure}
     \centering
-	\includegraphics[scale=0.35]{atomide.png}
+	\includegraphics[scale=0.25]{graphics/atomide.png}
     \caption{Atom}
 \end{figure}
 
 \newpage
 
 \subsubsection{Sublime Text}
-Sublime text is a great, versatile text editor that also provides incredible customizability. As competitor to Atom, Sublime Text has its advantages over Atom. Being older than Atom, Sublime Text has many more packages available that gives it the edge in versatility. In addition, Sublime has higher performance at the cost of CPU usage. While Atom uses less CPU and more RAM. In all, both editors have their uses and are great for different things, and as such we use them both. 
+Sublime text is a great, versatile text editor that also provides incredible customizability. 
+As competitor to Atom, Sublime Text has its advantages over Atom. Being older than Atom, 
+Sublime Text has many more packages available that gives it the edge in versatility. In 
+addition, Sublime has higher performance at the cost of CPU usage. While Atom uses less 
+CPU and more RAM. In all, both editors have their uses and are great for different things, 
+and as such we use them both. 
 
 \begin{figure}
     \centering
-	\includegraphics[scale=0.33]{sublimeide.png}
+	\includegraphics[scale=0.33]{graphics/sublimeide.png}
     \caption{Sublime Text}
 \end{figure}
 
 \newpage
 
 \subsubsection{Texmaker}
-When writing research papers, there is nothing better than LaTex. However it can be really inconvenient manually compiling and opening the pdf every time we want to see a change. Texmaker takes care of that. It integrates all the LaTex packages we need into one piece of software. It also has additional features such as preview windows, spell check, structure browser, and more. It has become very useful to us for writing all the papers for this project.
+When writing research papers, there is nothing better than LaTex. However it can be really 
+inconvenient manually compiling and opening the pdf every time we want to see a change. 
+Texmaker takes care of that. It integrates all the LaTex packages we need into one piece 
+of software. It also has additional features such as preview windows, spell check, 
+structure browser, and more. It has become very useful to us for writing all the 
+papers for this project.
 
 \begin{figure}
     \centering
-	\includegraphics[scale=0.35]{texstudioide.png}
+	\includegraphics[scale=0.25]{graphics/texstudioide.png}
     \caption{Texmaker/Texstudio}
 \end{figure}
 
@@ -292,11 +307,17 @@ When writing research papers, there is nothing better than LaTex. However it can
 \subsection{Other Tools}
 
 \subsubsection{Zeal}
-Undertaking a big project is a challenge. Not only is ample research required, but learning new things is a big part of the process. This is not an easy task as it is a lot of information to take in at once. Some say after learning a programming language, it is not hard to learn a new one with similar syntax and the hardest part is just memorizing the small changes. This is the case with us. Zeal is an offline documentation browser that lets us load in all the docsets of almost any language and search through all of it in an instant. This tool has become invaluable to our development process. 
+Undertaking a big project is a challenge. Not only is ample research required, but learning 
+new things is a big part of the process. This is not an easy task as it is a lot of information 
+to take in at once. Some say after learning a programming language, it is not hard to learn a 
+new one with similar syntax and the hardest part is just memorizing the small changes. This 
+is the case with us. Zeal is an offline documentation browser that lets us load in all 
+the docsets of almost any language and search through all of it in an instant. This tool 
+has become invaluable to our development process. 
 
 \begin{figure}
     \centering
-	\includegraphics[scale=0.35]{zealdoc.png}
+	\includegraphics[scale=0.25]{graphics/zealdoc.png}
     \caption{Zeal documentation browser}
 \end{figure}
 
@@ -1295,8 +1316,14 @@ capability. This is due to the fact that we have determined that the queries we 
 can be decomposed into a series of predicates that then can be evaluated almost independently.
 These predicates are modeled in a way similar to the tree formed by boolean expressions, as shown
 in the graphic below.
+\par\vspace{\baselineskip}
+\begin{figure}
+ \centering
+ \textbf{A Boolean Expression as a Binary Tree}
+ \includegraphics{graphics/boolean_expression_tree.png}
+ \caption{A typical boolean expression found within SQL decomposed into a binary tree}
+\end{figure}
 
-%\includegraphics{boolean_expr_tree.png}
 
 Therefore, we deduced that there are three different types of predicates that a given tree of
 boolean expressions can be reduced to. They are as follows:
@@ -1996,16 +2023,9 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
   \par\vspace{\baselineskip}
   \begin{figure}
    \centering
-   % Connection class diagram
-   \textbf{Connection Class Diagram}
-   \includegraphics{graphics/workmanager_conn_class.png}
-   \caption{The class diagram of the Connection class as used by OpenMemDB's Work Manager module}
-  \end{figure}
-  \begin{figure}
-   \centering
    % WorkManager class diagram
-   \textbf{WorkManager Class Diagram}
-   \includegraphics{graphics/workmanager_main_class.png}
+   \textbf{WorkManager Module Class Diagram}
+   \includegraphics[scale=.80]{graphics/WorkManager_class.png}
    \caption{The class diagram of the main WorkManager class within OpenMemDB's Work Manager module}
   \end{figure}
   
@@ -2015,7 +2035,7 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
    \centering
    % Data flow diagram (client -> wrk_mgr.assign_job)
    \textbf{Data Flow from Client to SQL Engine}
-   \includegraphics{graphics/workmanager_dataflow_sqlengine.png}
+   \includegraphics[scale=.8]{graphics/WorkManager_activity.png}
    \caption{Shows the flow of data from a client to the worker threads within OpenMemDB}
   \end{figure}
   
@@ -2044,7 +2064,7 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
   \begin{figure}
     \centering
     \textbf{Client, Database, and Logger Interaction Diagram}
-    \includegraphics{graphics/logger_interaction.png}
+    \includegraphics{graphics/Logger_interaction.png}
     \caption{The network interaction model employed by OpenMemDB to implement a 
 	     write-ahead-logger(WAL)}
   \end{figure}
