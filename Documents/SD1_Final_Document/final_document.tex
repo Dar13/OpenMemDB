@@ -816,6 +816,37 @@ memory than a page offers then B+ tree is resized to fit onto a page. Since the 
 data this is why the number of data entries is dependent on the size of data entries. So, it is reasonable 
 to max the number of data entries by making the size of data smaller. This enures that more entires will 
 fit on a page and the height of the B+ tree would remain small, thus keeping data retrevial performance fast.
+
+\subsubsection{ISAM}
+%author Robert Medina
+ISAM:
+Indexed Sequential Access Method is a variant of a B tree. In many ways it is similiar to a B+ tree however there are minor details about how memory is handled
+that makes ISAM a better method than B+ tree. Although this is usually not the case. ISAM follows the exact same rules for a B tree but it does not contain 
+data internally with in its nodes. All the data from an ISAM resides in its leaf pages.
+%\includegraphics{graphics/ISAM)abstract_diagram.png}
+All non-leaf pages contain pointers that reference to the data in a leaf page. It is common for ISAM to never change the reference of a pointer since ISAM
+allocates memory statically. At cretion ISAM statically creates a default number of leaf pages. Insertions and deletions change the data itself and not the
+leaf pages memory block. This static memory allocation in a sense can provide a better performance than a dynamic B+ tree depending on the situation. 
+At creation all leaf pages are allocated squentially and sorted on the search key value. The non-leaf pages are then allocated in memory. In the event that
+there is more data than ISAM can handle with its default leaf page count then those pages go into an overflow page. Here is how the ISAM memory allocation appears
+%\includegraphics{graphics/ISAM_page_allocation.png}
+Basic operations of insertion, deletion and search are very straightforward. An search starts at the root node and determines which subtree to search by comparing the
+value of the key value in the node with the search key value. This is standard in most tree data structures. Insertions and deletion are based off the search operation
+and will either insert a new data to the pointer reference in the leaf page or delete a data value from the reference of the pointer in the leaf page. None of the leaf
+pages de-allocate memory. In addition the overflow pages are linked to the end of a leaf page array. This way the overflow page will also be considered in the basic
+operations of ISAM.
+Runtimes:
+Search: log (f) N, where F = number of indexes in non-leaf pages, N = number of leaf pages
+Insert: Same as search but with the overhead for leaf-page and overflow pages
+Deletion: Same as insert, if empty overflow page exists it will de-allocate it
+%\includegraphics{graphics/ISAM_example.png}
+After inserting 23*, 48*, 41*, 42*
+%\includegraphics{graphics/ISAM_example_insertion.png}
+After deleting 42*, 51*, 97*
+%\includegraphics{graphics/ISAM_example_deletion.png}
+ISAM in an indexing solution for the very expensive binary search on a file. This solves this problem with consideration to the underlying memory devices in the system such
+as hard disks.
+
 \subsubsection{Hash-based Indexing}
 %author Robert Medina
 	Hash-based Indexing references a key value to a data entry using a hash function. This can be 
@@ -910,17 +941,49 @@ Delete: O(n)
 In practice however, the length of a bucket is much smaller than static hashing and has a uniform limit. This makes it more desirable
 in terms of performance on an average.
 
-Linear Hashing: *in progress*
+Linear Hashing:
+%author Robert Medina
 
-n = pointer that points to the bucket that will be split
-m = number of buckets
-split function = X > X if current items/total capacity of data entries is greater than some percentage then split
-bucket capacity = X, number of data entries
+Linear Hashing is a dynamic hashing technique that adjusts to inserts and deletes in a stable manner. Unlike Exttendible Hashing, Linear
+Hashing does not have a directory to where the data is stored. Linear Hashing deals with collisions naturally and contains a lot of flexibility
+with the timing of bucket splits. However if the data distribution is bery skewed overflow chains could cause Linear Hashing performance to be
+worse than Extendible Hashing.
+Linear Hashing utilizes a famiy of hash functions H(a), h(1), h(2), ... , h(n), with each function having the property that each function's
+range is twice of that of its predecessor. This means that if h(i) maps a data entry into one of M buckets then h(i+1) maps a data entry into one
+of 2M buckets. This family typically contains a hash function h(i) = value = h(value) mod (2^i N), where N is the initial number of buckets
+which normally is 2. If N is a power of 2 then the hash function h will look at the last d(i) bits. d(o) is the number of bits needed to represent
+N, and N can change as the number of buckets increase from splitting. d(i) is the next mod value, which is equal to d(i) = d(a)+i, for the next hash function
+in this family of hash functions.
+In the split operation, there exists a split policy that determines when spliting is the appropiate. This can occur in terms of rounds. During a round, represented
+as round number Level only hash functions h(level) and h(level+1) are in use. The buckets from first to last are split depending on the timing in a round. At any
+time there exists buckets that splited, yet to be split and new buckets that were created recently. 
+%\includegraphics{graphics/Linear_hashing_splitting}
+When a split occurs the data may not necessary reside in the newly split bucket. An overflow page is added to store the newly inserted data entry. However this is 
+not a big issue since bucket splitting occurs in a round robin fashion, eventually all buckets are split including overflow chains. This redistributes data into split
+buckets and each bucket is prevented from getting too large, including overflow chains.
+The counter level is used to indicate the current round number. The bucket to be split is called next and is initially the first bucket. The number of buckets is 
+denoted by level and Nlevel. N(o) is the number of buckets, also called N. A spliting policy can be a wide range of logic such as whenever overflow chains are created or 
+if a certain number of space is taken up with in a bucket and so forth. Whenever a split is triggered by the split policy then the Next containing the bucket will be 
+split and the hash function h(level+1) will redistributes the entries between the buckets to the newest created buckets. These definitions will be reflected in the 
+following figures below.
+Insertion of 43*, 43 mod (4) = 3 = (011)2 binary representation
+%\includegraphics{graphics/Linear_hashing_insertion}
+After the insertion, the bucket next is split into a new bucket. Each buckets between Next and Nlevel have not yet been split,
+using h(level) on a data entry the result is the bucket location where the data will be stored. 
+When Next is equal to Nlevel - 1 and a split is triggered, the last of the buckets are split. The number of buckets after the split is twice the number at the beginning
+of the round and a new round is started with a level incremented by 1 and next rest to 0. Since level is increased by one the number of potential keys to be hashed will
+be doubled. 
+%\includegraphics{graphics/Linear_hashing_level_increased}
+Notice that the number of bits increased as well, since d(i) = d(a) + i.
 
-expanding directory:
-increase m by 1, n increased by 1
+Linear Hashing compared to Extendible Hashing
+Extendible Hashing and Linear Hashing are very much alike to each other in terms of their operations and how each data structure handle these operations. 
+When Linear Hashing splitting occurs in a round. The number of buckets to be split is up to the last bucket in the range N. This is essentially the same principle with
+respect to Extendible Hashing but occurs more frequently. The hashing functions are very similar to Exttendible Hashing, in a sense that the hashing function relates to
+a family of hashing functions. Linear Hashing with uniform distributions can have a lower average cost for equality selections since the directory level hiearachy is 
+eliminated but for skewed data distributions this can result in empty buckets which is is allocated in memory. This can lead to poor performance when compared to
+Extendible Hashing. 
 
-\
 \newpage
 
 \subsection{Parallelism}
@@ -1197,6 +1260,164 @@ Lock freedom
 
 \newpage
 
+\subsection{DataStore}
+%author Robert Medina
+data store design:
+Write about boost
+	Introduction:
+	Boost variant library focuses on typesafe storage and retrieval of a bounded set of types that is 
+	of discriminated unions. A variant data type exposes an interface independent of the current value's type.
+	The user define the set of types that are allowed in a variant and this can contain any number of disparate
+	variant instructions. Two ways to retrieve a type from the value that is held in a variant is either the program
+	must store this type or use boost visitor mechanism. This variant data type is stored as a stack instead of a heap
+	to avoid expensive memory allocations. 
+	Using Boost variant:
+	Whenever a boost::variant object is created the default constructor makes the first type its first bounded type.
+	A discriminated union container is defined by instantiating the boost::variant with the desired argument types.
+	These types are called bounded types and derive from the BoundedType concept. In order to limit the different
+	types that bounded types can accept the BOOST_VARIANT_LIMIT_TYPES must be manipulated to reflect this. 
+	
+Write about types
+	Data Store has multiple types predefined that allow for a variant of types that tables can be
+	comprosided of. There are over seven data types that are used to make up data store. One of which
+	uses data types that the query planner will used. This is how the query planner and the data store
+	interact with one another. 
+1.) DataVariant made up of SQL data types with a boost variant vector 
+2.)	TervDataVariant is TervWrapper around an exisiting data variant.
+3.)	DataTableRecord is a vector of a tervel data variant. This makes up one row in 
+	a table.
+4.)	DataTable is a vector of a data table record. This makes up a table that contains multiple rows.
+	This is how a table will be represented in data store. Each table will be registered into lookup table
+	for data access.
+5.)	TableSchema is a boost variant vector that stores the table schema
+6.)	SchemaTablePair is a pair that bundles table nested vector with the table schema
+7.)	TableMap is a hashmap that stores the location of schematablepair with the table name. This
+	allows for easy fast instant access retrevial of tables.
+	
+Write about classes written
+	Data Store is made up of one class called data_store that i responsible of retrieving
+	data from the main memory. 
+write about functions
+	Data Store is made up of multiple functions that create data tables and returns specific data. 
+1.) createRow:
+		createRow takes in a DataVariant row and a tablename in order to find the specific table
+		you want to insert the row into. The DataVariant row is checked by checkSchema function in 
+		order to see if the table schema registered into the lookup_table hashmap exists and whether 
+		or not the new row data type fits into the table schema.
+2.) createTable
+		createTable takes in a char array tablename and a TableSchema schema argument in order to add
+		the string to the hashmap lookup_table as well as the table schema. This is added as a pair
+		into the lookup table and now the table is registered into the lookup_table and memory is allocated
+		for that table.
+3.) checkSchema
+		checkSchema takes in a char array tablename and checks whether or not if the table exists in the 
+		hashmap lookup_table. If it does exisit then it checks whether the TableSchema schema matches the 
+		schema from the lookup_table. If it does match up then it returns true otherwise false.
+4.) getRow:
+		getRow takes in a char array tablename and an int rowID in order to find the table in the lookup_table
+		and finds the row based on the rowID index. It then returns the row pointer it found.
+5.) getTable
+		getTable takes in a char array tablename and finds the table from the lookup_table. If it finds the table
+		then it returns the table pointer.
+
+write about what is being passed in
+*done so by diagrams and expanded by functions*
+write about data structs
+	Nested vectors are used to represent tables. Each table is stored into a hashmap called lookup_table to refer to
+	tables. A pair is used to group up table schema boost variant vector and the data table itself. Nested vectors
+	are used since it most is the most efficent way to represent memory. A hashmap is used to refer tables because each
+	table contains a unique identifier char array. A hashmap provides instant access table lookup. A pair is used to group 
+	up the table with its schema. Each table have their own unique schema and it is retrievable from the table lookup hashmap.
+write about performance of data structs
+	Nested vectors are instant access O(1), if you have the index of the column or row. This makes data retrieval
+	linear time O(n). In the case of a full table scan, it is only necessary to find the columns desired, then each other row
+	column data can be retrieved by using the column index. If a full table scan with all columns are desired then this is O(n^2).
+	A pair is fairly easy to retrieve data from since it is only two pointers or objects grouped together in an object. In the case
+	for a hashmap, it provides instant access O(1), until the hashmap becomes more filled up and collisions being to happen. Normally hashmaps
+	become reindex whenever they are around half full but it may be more advantageous to use dynamic hashing. This is something that will be determine
+	based on performance testing on a training data set.
+write about memory allocation (dynamic, not preprocessor)
+1.) Memory management in C++
+	Memory in a C++ program is divded into two parts, the stack and the heap. The stack contains all the variables
+	declared inside the function and will take up memory from the stack. While the heap is responsible for all unused memory 
+	of the program. This memory can be allocated dynammically when the program runs but the program must also insure that this
+	memory gets cleaned up after it is done with it.
+	*diagram for stack and heap*
+	Programs cannot predicte how much memory will be required at run time. This memory can be allocated by the new operator and 
+	is referenced by the address of the space allocated. This memory can also be deleted by the delete operator. This is used
+	when memory is no longer used purposely. If it is not cleaned up then it creates garbage memory that could otheriwse be used
+	resourcefully. 
+	There are other ways to dynammically allocate memory, such as malloc(), calloc(), and realloc(). There are major differences between
+	the new operator and the other memory allocation functions. 
+	
+	Delete and Free do not MIX
+	The delete() function works for the new() function but it causes undefined behavior when used on a malloc(). If the free() function is used on
+	a new() object then the same thing occurs. When deallocating memory for new or malloc it is necessary to apply the correct functions to free up
+	memory. This can usually occur when user-defined functions are applied instead of the STL, standard template library for C++. This can vary from
+	system to system but also from compiler to compiler. When the delete operation is called to delete the new object the compiler generates the following
+	code.
+	%includegraphics{graphics/new_delete_example}
+	If the only function the programmer desire is to handle the raw uninitalized memory then new and delete operators should not be considered. Instead
+	the operator new and operator delete should be used to allocate memory and deallocate. This is essentially the same as malloc and free.
+	%includegraphics{graphics/new_operator_bypass}
+	
+	New and malloc mixed
+	If a placement new is used to create an object in memory, not the new function but placement new used to store already allocated data from malloc() function
+	then delete should not be used because like in the previous example, the delete function calls the operator delete to deallocate memory but the memory contained
+	was not allocated by the operator new. This placement new just returns the pointer passed to it. So in general, if raw memory was passed to placement new and this
+	memory was dynammically allocated then still memory must be deallocated to prevent a memory leak.
+	%includegraphics{graphics/new_placement}
+	
+	New operator
+	There is a difference between the new operator and operator new. The new operator does two things.
+	First, it allocates enough memory to hold an object of the type inputed. Secondly, it calls a constructor to initialize an object of the type defined. This operator's
+	behavior cannot be changed in ay way. The way the memory is allocated can be changed however. The new operator calls a function to perform the memory allocation. This
+	can be overloaded to change the bahvior. The function at allocates memory for the new operator is "operator new". 
+	%includegraphics{graphics/operator_new_header}
+	The operator new returns a void pointer to raw, uninitialized memory. The parameter, size_t, specifices how much memory to allocate. Whenever the programmer needs to call
+	raw memory it is called by operator new like so.
+	%includegraphics{graphics/operator_new_raw_memory}
+	This line of code will return a raw chuck of meaningless memory.
+	
+	Placement new
+	Sometimes there exists raw memory that was allocated dynammically but does not have a constructor to be linked up to. Invoking a constructor on an existing object is not 
+	logical. Constructors exist to initialize objects and objects can only be initialized once. Therefore there must be a way to call a constructor directly so it can be linked
+	to already allocated memory. Placement new allows the programmer to directly work with a constructor.
+	Here is an example of how placement new might be used.
+	%includegraphics{graphics/placement_new_example}
+	In the function constructWidgetInBuffer, the expressed return is a new operator that returns the location of the constructor by using an overloaded operator new function.
+	%includegraphics{graphics/operator_new_overload}
+	
+	Error Handling
+	By default if new() cannot find memory it calls a pointer to function called _new_handler()
+	%includegraphics{graphics/operator_new_function}
+	if _new_handler() can somehow supply memory for malloc() then everything is good otherwise an exception is thrown.
+	
+	New and malloc()
+	The new operator creates an object that refers to the memory occupted. Malloc on the other hand will simply call a memory block with no object
+	reference to the memory.
+	Memory Corruption
+		There exist two reasons that memory corruption could occur in a program. The source of the memory corruption and its manifestation may be far apart. This makes it difficult
+		to finding the cause of the memory corruption in relation to its effect. The second reason is that symptoms occuring during bizzare conditions which make them significantly
+		harder to replicate.
+		Memory Corruption Errors can be categorized into four categories. One of the more common errors is using uninitialized memory. This refers to the contents of uninitialized memory
+		are treated as garbage values. The usage of such garbage values can lead to unpredictable program behavior. Second error is using none-owned memory. It is common that pointers are 
+		used to access and modify memory. Whenever this pointer is a null pointer also known as a dangling pointer, or to a memory location outside of current stack or heap bounds, it is
+		referring to memory that is not possessed by the program. Using these pointers causes serious flaws. Accessing such memory usually cause OS exceptions, that commonly leads to program
+		crashes. Third, using memory beyond the memory that was allocated also known as a buffer overflow. For example, an array that is inside a loop contains a incorrect terminating condition
+		then memory that is accessed beyond the bounds of the array may be manipulated that was otherwise not supposed to. Lastly, the four category that causes memory corruption is fauly heap
+ 		memory management. Memory leaks and freeing non-heap or un-allocated memory are the most frequen erros caused by fault heap memory management. Since C++ gives so much freedom to allocate 
+		any amount of memory the program needs it can lead to such errors when the program does not clean yourself.
+		More specifically memory leaks is allocated memory but are not released. This causes the program to consume memory and reduce the available memory in the heap. 
+
+/* cannot talk about such things, need research */		
+write about possible cache coherent
+write about multiprocessor compliant
+write an example of a table being stored into memory
+write about the memory used to create a single table
+write about data types
+write about what it returns
+write about query planner using logic instead of data store
 
 \subsection{SQL Engine}
 %author Mike McGee
