@@ -156,6 +156,19 @@ but also memory management.  In addition, creating an open source solution to
 memSQL sounds like an exciting challenge to undertake while also contributing
 to the programming community.
 
+\subsubsection{Robert Medina}
+One of the best things about this project is the process of making a database from scratch.
+I am currently taking a database systems course and when Dr. Dechev pitched the idea of
+creating a non-blocking database it was simply one of the projects I had to be apart of.
+I consider multicore programming a necessary skill to learn since new emerging technologies
+in hardware are utilizing more and more processors. This project also gives me a chance to
+learn more about outside coursework on higher level theroy such as non-blocking algorithms
+and efficent data retrevial. I know that after completing this project I will have learn
+more about database management systems, non-blocking algortihms and multicore programming.
+It is also something that others with in the university or anyone really can work and improve
+on. This is a project that I hope will have a long lasting effect on future students who
+intend to work and contribute towards this program.
+
 \newpage
 
 \section{Broader Impacts}
@@ -703,22 +716,20 @@ will be stored in a table hashmap to allow for easy table lookup. Each table con
 schema for the type of data each column can accept. This is represented as a pair in the table
 lookup hashmap.
 
-%\includegraphics{graphics/Table_In_Memory.png}
+\includegraphics{graphics/Table_In_Memory.png}
 
 Nested vectors are stored as row store architecture and column store architecture.
 
 Row Store Architecture stores the memory of a row in a vector of multiple types as such
-%\includegraphics{graphics/row_store_example.png}
+\includegraphics{graphics/row_store_example.png}
 Column Store Architecture stores the memory of a row in a vector of one type
 %\includegraphics{graphics/column_store_example.png}
 
 Side by Side Difference between row and column store
-%\includegraphics{graphics/row_store_and_column_example.png}
+\includegraphics{graphics/row_store_and_column_example.png}
 
 Whenever a data request inquires about a table or more the data store will return a subset of that
 data in the form of nested vectors.
-
-%\includegraphics{graphics/row_store_and_column_example.png}
 
 Row Store vs Column Store
 Column Store:
@@ -734,7 +745,7 @@ The advantages of row based tables are easy row inserts into tables, and easy ro
 wants to manipulate the entire row data instead of a few columns. In column store this would require multiple column vectors
 being rewritten and maniuplated which would be a costly operation to perform.
 
-%\includegraphics{graphics/query_of_table_example.png}
+\includegraphics{graphics/row_store_column_accessing_data}
 
 Seeing in the row store and column store figure previously, it would be
 difficult to find the sales column in a row store column, and it is easily
@@ -774,7 +785,9 @@ are two popular solutions for an implementation of a database. Given a set of da
 a key data value and stores it into a data structure. Based off this key value, the indexing data structure
 will point to the file in memory or memory address, depending on how the data is stored. Based on this, a
 file scan of the database is now just reduced to scanning an index file.
-%\includegraphics{graphics/indexentry.png}
+
+\includegraphics{graphics/indexentry.png}
+
 However searching through an index file can still be a costly operation. Index files are smaller than the
 data it is referencing but it can still use a considerable about memory space. Therefore it would be
 reasonable to use a data structure for fast retrieval of data based on a range of values or based on
@@ -801,11 +814,14 @@ B+ Trees are a variant of a B Tree. B Trees is an n-ary tree that splits data
 		T(j) sub-tree have keys k(j) where k(j) < k(j)
 	All T(i) sub-trees are either non-empty or empty.
 	B Trees have a height of log(m)(N), m = number of children
-%\includegraphics{graphics/B_Tree_Example.png}
+
+\includegraphics{graphics/B_Tree_Example.png}
 B+ Tree differs slightly in the fact that B trees store their data (keys) within the internal nodes while
 B+ trees only points to the data. All the data in a B+ is stored in the leaves of tree. In addition,
 B+ Tree links all their leaves together with a doubly linked list.
-%\includegraphics{graphics/B_B+_Tree_Difference.png}
+
+\includegraphics{graphics/B_B+_Tree_Difference.png}
+
 The runtime for a B+ Tree is the following:
 Searching is logm(n), m is index entries
 Insertion is same as searching
@@ -829,9 +845,9 @@ data internally with in its nodes. All the data from an ISAM resides in its leaf
 
 \begin{figure}
   \centering
-  \textbf{INSERT TEXT}
+  \textbf{Abstract Diagram of ISAM structure}
   \includegraphics[scale=.8]{graphics/ISAM_abstract_diagram.png}
-  \caption{INSERT TEXT}
+  \caption{Behavior similiar to B+ Tree Structure}
 \end{figure}
 
 All non-leaf pages contain pointers that reference to the data in a leaf page. It is common for
@@ -847,9 +863,9 @@ allocation appears
 
 \begin{figure}
   \centering
-  \textbf{INSERT TEXT}
+  \textbf{Page Allocation for ISAM}
   \includegraphics{graphics/ISAM_page_allocation.png}
-  \caption{INSERT TEXT}
+  \caption{The order of which memory gets allocated on the page}
 \end{figure}
 
 Basic operations of insertion, deletion and search are very straightforward. An search starts at the
@@ -873,9 +889,9 @@ This way the overflow page will also be considered in the basic operations of IS
 
 \begin{figure}
   \centering
-  \textbf{INSERT TEXT}
+  \textbf{Example of an ISAM structure}
   \includegraphics[scale=.75]{graphics/ISAM_example.png}
-  \caption{INSERT TEXT}
+  \caption{Some exisiting data that is already inserted}
 \end{figure}
 
 \begin{figure}
@@ -981,14 +997,14 @@ entries each bucket can hold.
   \centering
   \textbf{Extendible Hashmap}
   \includegraphics{graphics/ExtendibleHashing_Depth_2.png}
-  \caption{INSERT TEXT}
+  \caption{Example of Extendible Hashing at Depth 2}
 \end{figure}
 
 \begin{figure}
   \centering
   \textbf{Spliting Occurs}
   \includegraphics{graphics/ExtendibleHashing_Spliting.png}
-  \caption{INSERT TEXT}
+  \caption{New bucket is made}
 \end{figure}
 
 
@@ -1026,22 +1042,15 @@ stored. Linear Hashing deals with collisions naturally and contains a lot of fle
 the timing of bucket splits. However if the data distribution is bery skewed overflow chains could cause Linear Hashing performance to be
 worse than Extendible Hashing.
 \par\vspace{\baselineskip}
-Linear Hashing utilizes a famiy of hash functions H(a), h(1), h(2), ... , h(n), with each function having the property that each function's
-range is twice of that of its predecessor. This means that if h(i) maps a data entry into one of M buckets then h(i+1) maps a data entry into one
-of 2M buckets. This family typically contains a hash function $ h(i) = value = h(value) modulo (2^i N) $, where N is the initial number of buckets
-which normally is 2. If N is a power of 2 then the hash function h will look at the last d(i) bits. d(o) is the number of bits needed to represent
-N, and N can change as the number of buckets increase from splitting. d(i) is the next mod value, which is equal to d(i) = d(a)+i, for the next hash function
-in this family of hash functions.
+Linear Hashing utilizes a famiy of hash functions H(a), h(1), h(2), ... , h(n), with each function having the property that each function's range is twice of that of its predecessor. This means that if h(i) maps a data entry into one of M buckets then h(i+1) maps a data entry into one of 2M buckets. This family typically contains a hash function $ h(i) = value = h(value) modulo (2^i N) $, where N is the initial number of buckets which normally is 2. If N is a power of 2 then the hash function h will look at the last d(i) bits. d(o) is the number of bits needed to represent N, and N can change as the number of buckets increase from splitting. d(i) is the next mod value, which is equal to d(i) = d(a)+i, for the next hash function in this family of hash functions.
 \par\vspace{\baselineskip}
-In the split operation, there exists a split policy that determines when spliting is the appropiate. This can occur in terms of rounds. During a round, represented
-as round number Level only hash functions h(level) and h(level+1) are in use. The buckets from first to last are split depending on the timing in a round. At any
-time there exists buckets that splited, yet to be split and new buckets that were created recently.
+In the split operation, there exists a split policy that determines when spliting is the appropiate. This can occur in terms of rounds. During a round, represented as round number Level only hash functions h(level) and h(level+1) are in use. The buckets from first to last are split depending on the timing in a round. At any time there exists buckets that splited, yet to be split and new buckets that were created recently.
 \par\vspace{\baselineskip}
 \begin{figure}
   \centering
-  \textbf{INSERT TEXT}
+  \textbf{Splitting Occurs}
   \includegraphics{graphics/Linear_hashing_splitting}
-  \caption{INSERT TEXT}
+  \caption{Abstract view of bucket splitting}
 \end{figure}
 
 When a split occurs the data may not necessary reside in the newly split bucket. An overflow page is
@@ -1063,7 +1072,7 @@ figures.
   \centering
   \textbf{Insertion of 43*, 43 mod (4) = 3 = (011)2 binary representation}
   \includegraphics{graphics/Linear_hashing_insertion}
-  \caption{INSERT TEXT}
+  \caption{Overflowing occurs}
 \end{figure}
 
 \par\vspace{\baselineskip}
@@ -1076,7 +1085,7 @@ of potential keys to be hashed will be doubled.
 \par\vspace{\baselineskip}
 \begin{figure}
   \centering
-  \textbf{INSERT TEXT}
+  \textbf{Linear Hashing level increased due to maximum capacity}
   \includegraphics{graphics/Linear_hashing_level_increased}
   \caption{Notice that the number of bits increased as well, since $d(i) = d(a) + i$.}
 \end{figure}
@@ -1138,7 +1147,7 @@ Those symbol weights are the following:
 \begin{figure}
   \centering
   \includegraphics{graphics/huffman_example_symbol_freq.png}
-  \caption{INSERT TEXT}
+  \caption{Symbols with frequencies as weights data set}
 \end{figure}
 
 Once the data set is prepared it is inserted into a priority queue. In this example the priority 
@@ -1148,7 +1157,7 @@ queue sets the least frequency symbol counter to be of the highest priority.
 \begin{figure}
   \centering
   \includegraphics{graphics/huffman_example_initial.png}
-  \caption{INSERT TEXT}
+  \caption{Data set inserted into a priority queue}
 \end{figure}
 
 The process begins with the leaf nodes turning into a new node with children whose symbol weight is smaller than
@@ -1175,14 +1184,14 @@ weight is the sum of the two children nodes. This is shown in Figures~\ref{fig:h
 \begin{figure}
   \centering
   \includegraphics[scale=.65]{graphics/huffman_example_internal_node.png}
-  \caption{INSERT TEXT}
+  \caption{Highest priority on queue is merged together}
   \label{fig:huffman_ex_int_1}
 \end{figure}
 
 \begin{figure}
   \centering
   \includegraphics[scale=.63]{graphics/huffman_example_internal_node_added.png}
-  \caption{INSERT TEXT}
+  \caption{New node inserted into queue}
   \label{fig:huffman_ex_int_2}
 \end{figure}
 
@@ -1192,7 +1201,7 @@ This continues repeatedly until one tree is created from the data set.
 \begin{figure}
   \centering
   \includegraphics[scale=.75]{graphics/huffman_example_end.png}
-  \caption{INSERT TEXT}
+  \caption{Complete Huffman Tree from priority queue}
 \end{figure}
 
 The last node in the queue contains the root to the Huffman tree. This Huffman tree
@@ -1207,7 +1216,7 @@ Figure~\ref{fig:huffman_prefix_table}.
 \begin{figure}
   \centering
   \includegraphics[scale=.67]{graphics/huffman_example_prefix_table}
-  \caption{INSERT TEXT}
+  \caption{Prefix Code Table derived from Huffman Tree}
   \label{fig:huffman_prefix_table}
 \end{figure}
 
@@ -1218,7 +1227,7 @@ data for this data set as shown in Figure~\ref{fig:huffman_compressed}.
 \begin{figure}
   \centering
   \includegraphics[scale=.75]{graphics/huffman_example_compressed_result}
-  \caption{INSERT TEXT}
+  \caption{Prefix code representation of original data set.}
   \label{fig:huffman_compressed}
 \end{figure}
 
@@ -1250,7 +1259,7 @@ variable pair, (offset, length of match, codeword for symbol).
 \begin{figure}
   \centering
   \includegraphics{graphics/LZ77_compression_code}
-  \caption{INSERT TEXT}
+  \caption{Psuedo Algorithm for encoding processes for look-ahead and search buffer}
 \end{figure}
 
 \begin{figure}
@@ -1864,9 +1873,9 @@ data value in a \lstinline|boost::variant| object that matches with that data ty
 \par\vspace{\baselineskip}
 \begin{figure}
   \centering
-  \textbf{INSERT TEXT}
+  \textbf{Template for boost variant}
   \includegraphics{graphics/boost_variant_get_header.png}
-  \caption{INSERT TEXT}
+  \caption{Describes the type of data variant will accept}
 \end{figure}
 
 While \lstinline|boost::get<T>| is an acceptable means for value retrieval it suffers from several flaws.
@@ -1880,9 +1889,9 @@ via \lstinline|boost::apply_visitor|. Visitation requires the program to explici
 
 \begin{figure}
   \centering
-  \textbf{INSERT TEXT}
+  \textbf{Visitation example}
   \includegraphics[scale=.5]{graphics/boost_variant_visitation.png}
-  \caption{INSERT TEXT}
+  \caption{Improvement on data retrevial, betterthan get function since types are not predefined}
 \end{figure}
 
 This provides the same functionality as get but now this code allows the program to write
@@ -1913,9 +1922,9 @@ however not all compilers are able to this function.
 
 \begin{figure}
   \centering
-  \textbf{INSERT TEXT}
+  \textbf{Under the hood for variant implementation}
   \includegraphics[scale=.5]{graphics/boost_variant_type_sequence.png}
-  \caption{INSERT TEXT}
+  \caption{Allows the program to create their own type sequence without using variant constructor}
 \end{figure}
 
 Extending Visitation Even Further:
@@ -1925,9 +1934,9 @@ extends this by allowing simultaneous visitation of content of two different var
 
 \begin{figure}
   \centering
-  \textbf{INSERT TEXT}
+  \textbf{Example code using binary visitation}
   \includegraphics[scale=.5]{graphics/boost_variant_binary_visitation.png}
-  \caption{INSERT TEXT}
+  \caption{Compares two variant objects}
 \end{figure}
 
 Multi visitation:
@@ -1937,9 +1946,9 @@ multiple compares between variants objects with in tables.
 
 \begin{figure}
   \centering
-  \textbf{INSERT TEXT}
+  \textbf{Example code for multi visitation}
   \includegraphics{graphics/boost_variant_multi_visitation.png}
-  \caption{INSERT TEXT}
+  \caption{Compares three or more variant objects}
 \end{figure}
 
 Boost variant over boost any:
@@ -1954,7 +1963,7 @@ variant was choosen for its highly customable type storage. The user-specificed 
 is something that was highly sought for our data structures.
 \par\vspace{\baselineskip}
 
-Write about types
+\subsubsubsection{Data Types}
 	Data Store has multiple types predefined that allow for a variant of types that tables can be
 	comprosided of. There are over seven data types that are used to make up data store. One of which
 	uses data types that the query planner will used. This is how the query planner and the data store
@@ -1971,9 +1980,8 @@ Write about types
 7.)	TableMap is a hashmap that stores the location of schematablepair with the table name. This
 	allows for easy fast instant access retrevial of tables.
 
-Write about classes written
-	Data Store is made up of one class called data\_store that i responsible of retrieving
-	data from the main memory.
+\subsubsubsection{Functions}
+	Data Store is made up of multiple functions that takes in multiple arguments in order to reference tables in memory and return the references that point to the memory to the query planner for further modification. Data store primary objective is to allocate memory and assure that this is done using non-blocking techniques. It is important to note that in order to de-allocate memory from the heap it is possible to do so when data store returns the pointers . The reasoning behind this is that data store should not perform any logic operations just as parsing inputs, etc, etc. Data store primary objective is to allocate memory and send references on where that memory can be located, in order words data storage and data retrevial. 
 write about functions
 	Data Store is made up of multiple functions that create data tables and returns specific data.
 1.) createRow:
@@ -1996,77 +2004,58 @@ write about functions
 5.) getTable
 		getTable takes in a char array tablename and finds the table from the lookup\_table. If it finds the table
 		then it returns the table pointer.
-
-write about what is being passed in
-*done so by diagrams and expanded by functions*
-
 write about data structs
+\subsubsubsection{Data Structures}
 	Nested vectors are used to represent tables. Each table is stored into a hashmap called lookup_table to refer to
 	tables. A pair is used to group up table schema boost variant vector and the data table itself. Nested vectors
 	are used since it most is the most efficent way to represent memory. A hashmap is used to refer tables because each
 	table contains a unique identifier char array. A hashmap provides instant access table lookup. A pair is used to group
 	up the table with its schema. Each table have their own unique schema and it is retrievable from the table lookup hashmap.
 
-write about performance of data structs
+\subsubsubsection{Accessing Data Performance}
 	Nested vectors are instant access O(1), if you have the index of the column or row. This makes data retrieval
 	linear time O(n). In the case of a full table scan, it is only necessary to find the columns desired, then each other row
-	column data can be retrieved by using the column index. If a full table scan with all columns are desired then this is O(n^2).
-	A pair is fairly easy to retrieve data from since it is only two pointers or objects grouped together in an object. In the case
-	for a hashmap, it provides instant access O(1), until the hashmap becomes more filled up and collisions being to happen. Normally hashmaps
-	become reindex whenever they are around half full but it may be more advantageous to use dynamic hashing. This is something that will be determine based on performance testing on a training data set.
+	column data can be retrieved by using the column index. If a full table scan with all columns are desired then this is O(n^2). A pair is fairly easy to retrieve data from since it is only two pointers or objects grouped together in an object. In the case for a hashmap, it provides instant access O(1), until the hashmap becomes more filled up and collisions being to happen. Normally hashmaps become reindex whenever they are around half full but it may be more advantageous to use dynamic hashing. This is something that will be determine based on performance testing on a training data set.
 
-write about memory allocation (dynamic, not preprocessor)
-1.) Memory management in C++
+\subsubsubsection{Dynamic Memory Allocation}
+Memory management in C++
 	Memory in a C++ program is divded into two parts, the stack and the heap. The stack contains all the variables
-	declared inside the function and will take up memory from the stack. While the heap is responsible for all unused memory
-	of the program. This memory can be allocated dynammically when the program runs but the program must also insure that this
-	memory gets cleaned up after it is done with it.
-	*diagram for stack and heap*
-	Programs cannot predicte how much memory will be required at run time. This memory can be allocated by the new operator 			and is referenced by the address of the space allocated. This memory can also be deleted by the delete operator. This is used 			when memory is no longer used purposely. If it is not cleaned up then it creates garbage memory that could otheriwse be used 		resourcefully. There are other ways to dynammically allocate memory, such as malloc(), calloc(), and realloc(). There are major 		differences between the new operator and the other memory allocation functions.
+	declared inside the function and will take up memory from the stack. While the heap is responsible for all unused memory 
+	of the program. This memory can be allocated dynammically when the program runs but the program must also insure that this memory gets cleaned up after it is done with it.
+	\includegraphics{graphics/c++_memory_heirarchy.png}
+	Programs cannot predicte how much memory will be required at run time. This memory can be allocated by the new operator and is referenced by the address of the space allocated. This memory can also be deleted by the delete operator. This is used when memory is no longer used purposely. If it is not cleaned up then it creates garbage memory that could otheriwse be used resourcefully. There are other ways to dynammically allocate memory, such as malloc(), calloc(), and realloc(). There are major differences between the new operator and the other memory allocation functions.  The following are some useful concepts and guidelines to keep in mind when using these functions. It is imparative to learn about these guidelines otherwise potential problems could occur such as memory corruption.
 
-	Delete and Free do not MIX
+1.) Delete and Free do not MIX
 	The delete() function works for the new() function but it causes undefined behavior when used on a malloc(). If the free() function is used on a new() object then the same thing occurs. When deallocating memory for new or malloc it is necessary to apply the correct functions to free up memory. This can usually occur when user-defined functions are applied instead of the STL, standard template library for C++. This can vary from system to system but also from compiler to compiler. When the delete operation is called to delete the new object the compiler generates the following code.
-	%includegraphics{graphics/new_delete_example}
+	\includegraphics{graphics/new_delete_example.png}
 	If the only function the programmer desire is to handle the raw uninitalized memory then new and delete operators should not be considered. Instead the operator new and operator delete should be used to allocate memory and deallocate. This is essentially the same as malloc and free.
-	%includegraphics{graphics/new_operator_bypass}
+	\includegraphics{graphics/new_operator_bypass.png}
 
-	New and malloc mixed
+2.) New and malloc mixed
 	If a placement new is used to create an object in memory, not the new function but placement new used to store already allocated data from malloc() function then delete should not be used because like in the previous example, the delete function calls the operator delete to deallocate memory but the memory contained was not allocated by the operator new. This placement new just returns the pointer passed to it. So in general, if raw memory was passed to placement new and this memory was dynammically allocated then still memory must be deallocated to prevent a memory leak.
-	%includegraphics{graphics/new_placement}
+	\includegraphics{graphics/new_placement.png}
 
-	New operator
+3.) New operator
 	There is a difference between the new operator and operator new. The new operator does two things.
-	First, it allocates enough memory to hold an object of the type inputed. Secondly, it calls a constructor to initialize an object of 		the type defined. This operator's behavior cannot be changed in ay way. The way the memory is allocated can be changed 			however. The new operator calls a function to perform the memory allocation. This can be overloaded to change the bahvior. 			The function at allocates memory for the new operator is "operator new".
-	%includegraphics{graphics/operator_new_header}
+	First, it allocates enough memory to hold an object of the type inputed. Secondly, it calls a constructor to initialize an object of the type defined. This operator's behavior cannot be changed in ay way. The way the memory is allocated can be changed however. The new operator calls a function to perform the memory allocation. This can be overloaded to change the bahvior. The function at allocates memory for the new operator is "operator new". 
+	\includegraphics{graphics/operator_new_header.png}
 	The operator new returns a void pointer to raw, uninitialized memory. The parameter, size_t, specifices how much memory to allocate. Whenever the programmer needs to call raw memory it is called by operator new like so.
-	%includegraphics{graphics/operator_new_raw_memory}
+	\includegraphics{graphics/operator_new_raw_memory.png}
 	This line of code will return a raw chuck of meaningless memory.
 
-	Placement new
+4.) Placement new
 	Sometimes there exists raw memory that was allocated dynammically but does not have a constructor to be linked up to. Invoking a constructor on an existing object is not logical. Constructors exist to initialize objects and objects can only be initialized once. Therefore there must be a way to call a constructor directly so it can be linked to already allocated memory. Placement new allows the programmer to directly work with a constructor. Here is an example of how placement new might be used.
-	%includegraphics{graphics/placement_new_example}
+	\includegraphics{graphics/placement_new_example.png}
 	In the function constructWidgetInBuffer, the expressed return is a new operator that returns the location of the constructor by using an overloaded operator new function.
-	%includegraphics{graphics/operator_new_overload}
+	\includegraphics{graphics/operator_new_overload.png}
 
-	Error Handling
+5.) Error Handling
 	By default if new() cannot find memory it calls a pointer to function called _new_handler()
-	%includegraphics{graphics/operator_new_function}
+	\includegraphics{graphics/operator_new_function.png}
 	if _new_handler() can somehow supply memory for malloc() then everything is good otherwise an exception is thrown.
 
-	New and malloc()
-	The new operator creates an object that refers to the memory occupted. Malloc on the other hand will simply call a memory block with no object reference to the memory.
-
-	Memory Corruption
+6.) Memory Corruption
 		There exist two reasons that memory corruption could occur in a program. The source of the memory corruption and its manifestation may be far apart. This makes it difficult to finding the cause of the memory corruption in relation to its effect. The second reason is that symptoms occuring during bizzare conditions which make them significantly harder to replicate. Memory Corruption Errors can be categorized into four categories. One of the more common errors is using uninitialized memory. This refers to the contents of uninitialized memory are treated as garbage values. The usage of such garbage values can lead to unpredictable program behavior. Second error is using none-owned memory. It is common that pointers are used to access and modify memory. Whenever this pointer is a null pointer also known as a dangling pointer, or to a memory location outside of current stack or heap bounds, it is referring to memory that is not possessed by the program. Using these pointers causes serious flaws. Accessing such memory usually cause OS exceptions, that commonly leads to program crashes. Third, using memory beyond the memory that was allocated also known as a buffer overflow. For example, an array that is inside a loop contains a incorrect terminating condition then memory that is accessed beyond the bounds of the array may be manipulated that was otherwise not supposed to. Lastly, the four category that causes memory corruption is fauly heap memory management. Memory leaks and freeing non-heap or un-allocated memory are the most frequen erros caused by fault heap memory management. Since C++ gives so much freedom to allocate any amount of memory the program needs it can lead to such errors when the program does not clean yourself. More specifically memory leaks is allocated memory but are not released. This causes the program to consume memory and reduce the available memory in the heap.
-
-/* cannot talk about such things, need research */
-write about possible cache coherent
-write about multiprocessor compliant
-write an example of a table being stored into memory
-write about the memory used to create a single table
-write about data types
-write about what it returns
-write about query planner using logic instead of data store
 
 \subsection{SQL Engine}
 %author Mike McGee
