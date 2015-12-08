@@ -282,7 +282,7 @@ and as such we use them both.
 
 \begin{figure}
     \centering
-	\includegraphics[scale=0.33]{graphics/sublimeide.png}
+	\includegraphics[scale=0.25]{graphics/sublimeide.png}
     \caption{Sublime Text}
 \end{figure}
 
@@ -807,7 +807,7 @@ The runtime for a B+ Tree is the following:
 Searching is logm(n), m is index entries
 Insertion is same as searching
 Deletion is same as searching
-Searching with range (logm(n) + k), m is index entries and k is number of data records
+Searching with range $( log_m n + k) $, m is index entries and k is number of data records
 Key Compression:
 The height of a B+ tree is log(m)(n), m = number of children, n = number of data entries.
 Tradiationally for databases on disk the number of data entries would be based on the size of the data and
@@ -823,38 +823,83 @@ ISAM:
 Indexed Sequential Access Method is a variant of a B tree. In many ways it is similiar to a B+ tree however there are minor details about how memory is handled
 that makes ISAM a better method than B+ tree. Although this is usually not the case. ISAM follows the exact same rules for a B tree but it does not contain 
 data internally with in its nodes. All the data from an ISAM resides in its leaf pages.
-%\includegraphics{graphics/ISAM)abstract_diagram.png}
-All non-leaf pages contain pointers that reference to the data in a leaf page. It is common for ISAM to never change the reference of a pointer since ISAM
-allocates memory statically. At cretion ISAM statically creates a default number of leaf pages. Insertions and deletions change the data itself and not the
-leaf pages memory block. This static memory allocation in a sense can provide a better performance than a dynamic B+ tree depending on the situation. 
-At creation all leaf pages are allocated squentially and sorted on the search key value. The non-leaf pages are then allocated in memory. In the event that
-there is more data than ISAM can handle with its default leaf page count then those pages go into an overflow page. Here is how the ISAM memory allocation appears
-%\includegraphics{graphics/ISAM_page_allocation.png}
-Basic operations of insertion, deletion and search are very straightforward. An search starts at the root node and determines which subtree to search by comparing the
-value of the key value in the node with the search key value. This is standard in most tree data structures. Insertions and deletion are based off the search operation
-and will either insert a new data to the pointer reference in the leaf page or delete a data value from the reference of the pointer in the leaf page. None of the leaf
-pages de-allocate memory. In addition the overflow pages are linked to the end of a leaf page array. This way the overflow page will also be considered in the basic
-operations of ISAM.
-Runtimes:
-Search: log (f) N, where F = number of indexes in non-leaf pages, N = number of leaf pages
-Insert: Same as search but with the overhead for leaf-page and overflow pages
-Deletion: Same as insert, if empty overflow page exists it will de-allocate it
-%\includegraphics{graphics/ISAM_example.png}
-After inserting 23*, 48*, 41*, 42*
-%\includegraphics{graphics/ISAM_example_insertion.png}
-After deleting 42*, 51*, 97*
-%\includegraphics{graphics/ISAM_example_deletion.png}
-ISAM in an indexing solution for the very expensive binary search on a file. This solves this problem with consideration to the underlying memory devices in the system such
-as hard disks.
+
+\begin{figure}
+  \centering
+  \textbf{INSERT TEXT}
+  \includegraphics{graphics/ISAM)abstract_diagram.png}
+  \caption{INSERT TEXT}
+\end{figure}
+
+All non-leaf pages contain pointers that reference to the data in a leaf page. It is common for 
+ISAM to never change the reference of a pointer since ISAM allocates memory statically. At creation 
+ISAM statically creates a default number of leaf pages. Insertions and deletions change the data 
+itself and not the leaf pages memory block. This static memory allocation in a sense can 
+provide a better performance than a dynamic B+ tree depending on the situation. At creation all 
+leaf pages are allocated squentially and sorted on the search key value. The non-leaf pages 
+are then allocated in memory. In the event that there is more data than ISAM can handle with its 
+default leaf page count then those pages go into an overflow page. Here is how the ISAM memory 
+allocation appears
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \textbf{INSERT TEXT}
+  \includegraphics{graphics/ISAM_page_allocation.png}
+  \caption{INSERT TEXT}
+\end{figure}
+
+Basic operations of insertion, deletion and search are very straightforward. An search starts at the 
+root node and determines which subtree to search by comparing the value of the key value in the node 
+with the search key value. This is standard in most tree data structures. Insertions and deletion are 
+based off the search operation and will either insert a new data to the pointer reference in the leaf 
+page or delete a data value from the reference of the pointer in the leaf page. None of the leaf
+pages de-allocate memory. In addition the overflow pages are linked to the end of a leaf page array. 
+This way the overflow page will also be considered in the basic operations of ISAM.
+\par\vspace{\baselineskip}
+
+\begin{center}
+\begin{tabular}{l | c}
+  \hline
+  Operation & Runtime \\ \hline \hline
+  Search & $ log_f N $ \\ \hline
+  Insert & $ log_f N $ \footnote{There is some overhead for leaf-page and overflow pages} \\ \hline
+  Deletion & $ log_f N $\footnote{If an empty overflow exists it will be de-allocated} \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{figure}
+  \centering
+  \textbf{INSERT TEXT}
+  \includegraphics{graphics/ISAM_example.png}
+  \caption{INSERT TEXT}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \textbf{After inserting 23*, 48*, 41*, 42*}
+  \includegraphics{graphics/ISAM_example_insertion.png}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \textbf{After deleting 42*, 51*, 97*}
+  \includegraphics{graphics/ISAM_example_deletion.png}
+\end{figure}
+
+\par\vspace{\baselineskip}
+
+ISAM in an indexing solution for the very expensive binary search on a file. This solves this 
+problem with consideration to the underlying memory devices in the system such as hard disks.
 
 \subsubsection{Hash-based Indexing}
 %author Robert Medina
-	Hash-based Indexing references a key value to a data entry using a hash function. This can be 
-	used for indexing when there is an equal key value within the hash. Range operations using 
-	a key value is not possible with a hash function since it would simply be too costly of an 
-	operation. Hash-based indexing suffers from overflow chaining such as ISAM, which can hinder 
-	performance. There exists multiple hash-based indexing such as Static Hashing, Extendible Hashing, 
-	and Linear Hashing. 
+Hash-based Indexing references a key value to a data entry using a hash function. This can be 
+used for indexing when there is an equal key value within the hash. Range operations using 
+a key value is not possible with a hash function since it would simply be too costly of an 
+operation. Hash-based indexing suffers from overflow chaining such as ISAM, which can hinder 
+performance. There exists multiple hash-based indexing such as Static Hashing, Extendible Hashing, 
+and Linear Hashing. 
 \subsection{Hash Function}
 %author Robert Medina
 Hash Function:
@@ -870,9 +915,14 @@ data entries may be sorted but it depends on the application. This data structur
 for the most part but it does allow for overflow page allocation. In the event of inserting 
 beyond the memory allocated, this data entry is placed into a new page and the page is added 
 to an overflow chain in the bucket.
-%\includegraphics{graphics/Static_Hashing_Abstract}
+\par\vspace{\baselineskip}
+\begin{figure}
+  \centering
+  \includegraphics[scale=.75]{graphics/Static_Hashing_Abstract}
+\end{figure}
+
 A good hash function is imperative to uniformly distribute values over the collection of buckets. 
-An example of a good hash would be hash(key) = (a*key + b), a and b are constants. Some problems 
+An example of a good hash would be \[hash(key) = (a*key + b)\], a and b are constants. Some problems 
 of Static Hashing are the fact that it is static. When the index file is created bucket sizes 
 are known at time of creation, so pages can be stored successively in the buckets. However 
 as the index file continues to grow if the same key value is stored repeatedly then a long 
@@ -883,45 +933,63 @@ is the runtimes:
 
 \par\vspace{\baselineskip}
 
+\begin{center}
 \begin{tabular}{l | c | c}
+  \hline
   Operation & Runtime & Number of I/O reads and writes \\ \hline \hline
   Search & O(1) & 1  \\ \hline
   Insert & O(1) & 2  \\ \hline
   Delete & O(1) & 2  \\ \hline
 \end{tabular}
+\end{center}
 
 \par\vspace{\baselineskip}
 
 Runtimes with Overflow Chains:
+\par\vspace{\baselineskip}
+\begin{center}
 \begin{tabular}{l | c}
+  \hline
   Operation & Runtime \\ \hline \hline
   Search & O(n) \\ \hline
   Insert & O(1) \\ \hline
   Delete & O(n) \\ \hline
 \end{tabular}
+\end{center}
 
 If there are multiple collisions then the hashmap usefullness becomes impared. The hashmap devolves into a more
 of a linked list so having long chains can really hinder performance as you see above. Therefore static hashing
 is not a reliable method for inserting new objects since the possiblity of overflow chains and re-indexing can
 ruin the property of a hashmap.
+\par\vspace{\baselineskip}
 
 Rehashing:
 Intuitively a simple hash table with a pointer to a page would make sense. However in the case of 
 additional pages, without an overflow chain rehashing the table would be necessary. In this 
 case rehashing the table would be a costly operation. Including that the data structure is unusable 
 while rehashing is in progress. Dynamic hashing techniques solve this problem.
+\par\vspace{\baselineskip}
 
 Extendible Hashing:
 Extendible Hashing is a hash map of pointers that maps to buckets with various levels of depth. This directory 
-is based on an index value using X mod 2\^(global depth). The global depth is the number of bits for the binary
+is based on an index value using $ X\ modulo\ 2\textsuperscript{global depth} $. The global depth is the number of bits for the binary
 representation of that index value. Each bucket in the directory has a shared data entry limit for the number of 
 entries each bucket can hold.
 
-Extendible Hashmap
-%\includegraphics{graphics/ExtendibleHashing_Depth_2}
+\begin{figure}
+  \centering
+  \textbf{Extendible Hashmap}
+  \includegraphics{graphics/ExtendibleHashing_Depth_2}
+  \caption{INSERT TEXT}
+\end{figure}
 
-Spliting Occurs
-%\includegraphics{graphics/ExtendibleHashing_Spliting}
+\begin{figure}
+  \centering
+  \textbf{Spliting Occurs}
+  \includegraphics{graphics/ExtendibleHashing_Spliting}
+  \caption{INSERT TEXT}
+\end{figure}
+
 
 Whenever a data entry is inserted, the local depth of that bucket is compared with the global depth. If the local depth
 is equal to the global depth then the directory is doubled and each pointer in the newly allocated memory is mapped to the
@@ -930,51 +998,86 @@ bit values. When this overflow occurs the maximum bucket gets split up into two 
 second one at this new index value. This new index value holds the data entry and it's local depth is increased by one, along with
 the original bucket local depth value.
 
-Directory Doubles and Global Depth increases to 3
-%\includegraphics{graphics/ExtendibleHashing_Depth_3}
+\begin{figure}
+  \textbf{Directory Doubling}
+  \includegraphics{graphics/ExtendibleHashing_Depth_3.png}
+  \caption{Directory doubles and the global depth increases to three.}
+\end{figure}
 
-Runtimes:
-Search: O(n)
-Insert: O(1)
-Delete: O(n)
+\begin{center}
+\begin{tabular}{l | c }
+  \hline
+  Operation & Runtime \\ \hline \hline
+  Search & O(n) \\ \hline
+  Insert & O(1) \\ \hline
+  Delete & O(n) \\ \hline
+\end{tabular}
+\end{center}
 
-In practice however, the length of a bucket is much smaller than static hashing and has a uniform limit. This makes it more desirable
-in terms of performance on an average.
+In practice however, the length of a bucket is much smaller than static hashing and has 
+a uniform limit. This makes it more desirable in terms of performance on an average.
 
 Linear Hashing:
 %author Robert Medina
 
-Linear Hashing is a dynamic hashing technique that adjusts to inserts and deletes in a stable manner. Unlike Exttendible Hashing, Linear
-Hashing does not have a directory to where the data is stored. Linear Hashing deals with collisions naturally and contains a lot of flexibility
-with the timing of bucket splits. However if the data distribution is bery skewed overflow chains could cause Linear Hashing performance to be
+Linear Hashing is a dynamic hashing technique that adjusts to inserts and deletes in a stable manner. 
+Unlike Exttendible Hashing, Linear Hashing does not have a directory to where the data is 
+stored. Linear Hashing deals with collisions naturally and contains a lot of flexibility with 
+the timing of bucket splits. However if the data distribution is bery skewed overflow chains could cause Linear Hashing performance to be
 worse than Extendible Hashing.
+\par\vspace{\baselineskip}
 Linear Hashing utilizes a famiy of hash functions H(a), h(1), h(2), ... , h(n), with each function having the property that each function's
 range is twice of that of its predecessor. This means that if h(i) maps a data entry into one of M buckets then h(i+1) maps a data entry into one
-of 2M buckets. This family typically contains a hash function h(i) = value = h(value) mod (2^i N), where N is the initial number of buckets
+of 2M buckets. This family typically contains a hash function $ h(i) = value = h(value) modulo (2^i N) $, where N is the initial number of buckets
 which normally is 2. If N is a power of 2 then the hash function h will look at the last d(i) bits. d(o) is the number of bits needed to represent
 N, and N can change as the number of buckets increase from splitting. d(i) is the next mod value, which is equal to d(i) = d(a)+i, for the next hash function
 in this family of hash functions.
+\par\vspace{\baselineskip}
 In the split operation, there exists a split policy that determines when spliting is the appropiate. This can occur in terms of rounds. During a round, represented
 as round number Level only hash functions h(level) and h(level+1) are in use. The buckets from first to last are split depending on the timing in a round. At any
 time there exists buckets that splited, yet to be split and new buckets that were created recently. 
-%\includegraphics{graphics/Linear_hashing_splitting}
-When a split occurs the data may not necessary reside in the newly split bucket. An overflow page is added to store the newly inserted data entry. However this is 
-not a big issue since bucket splitting occurs in a round robin fashion, eventually all buckets are split including overflow chains. This redistributes data into split
-buckets and each bucket is prevented from getting too large, including overflow chains.
-The counter level is used to indicate the current round number. The bucket to be split is called next and is initially the first bucket. The number of buckets is 
-denoted by level and Nlevel. N(o) is the number of buckets, also called N. A spliting policy can be a wide range of logic such as whenever overflow chains are created or 
-if a certain number of space is taken up with in a bucket and so forth. Whenever a split is triggered by the split policy then the Next containing the bucket will be 
-split and the hash function h(level+1) will redistributes the entries between the buckets to the newest created buckets. These definitions will be reflected in the 
+\par\vspace{\baselineskip}
+\begin{figure}
+  \centering
+  \textbf{INSERT TEXT}
+  \includegraphics{graphics/Linear_hashing_splitting}
+  \caption{INSERT TEXT}
+\end{figure}
+
+When a split occurs the data may not necessary reside in the newly split bucket. An overflow page is 
+added to store the newly inserted data entry. However this is not a big issue since bucket splitting 
+occurs in a round robin fashion, eventually all buckets are split including overflow chains. 
+This redistributes data into split buckets and each bucket is prevented from getting too large, 
+including overflow chains.
+\par\vspace{\baselineskip}
+The counter level is used to indicate the current round number. The bucket to be split is called 
+next and is initially the first bucket. The number of buckets is denoted by level and Nlevel. 
+N(o) is the number of buckets, also called N. A spliting policy can be a wide range of logic 
+such as whenever overflow chains are created or if a certain number of space is taken up with 
+in a bucket and so forth. Whenever a split is triggered by the split policy then the Next containing 
+the bucket will be split and the hash function h(level+1) will redistributes the entries 
+between the buckets to the newest created buckets. These definitions will be reflected in the 
 following figures below.
-Insertion of 43*, 43 mod (4) = 3 = (011)2 binary representation
-%\includegraphics{graphics/Linear_hashing_insertion}
+
+\begin{figure}
+  \centering
+  \textbf{Insertion of 43*, 43 mod (4) = 3 = (011)2 binary representation}
+  \includegraphics{graphics/Linear_hashing_insertion}
+  \caption{INSERT TEXT}
+\end{figure}
+
+\par\vspace{\baselineskip}
 After the insertion, the bucket next is split into a new bucket. Each buckets between Next and Nlevel have not yet been split,
 using h(level) on a data entry the result is the bucket location where the data will be stored. 
 When Next is equal to Nlevel - 1 and a split is triggered, the last of the buckets are split. The number of buckets after the split is twice the number at the beginning
 of the round and a new round is started with a level incremented by 1 and next rest to 0. Since level is increased by one the number of potential keys to be hashed will
 be doubled. 
-%\includegraphics{graphics/Linear_hashing_level_increased}
-Notice that the number of bits increased as well, since d(i) = d(a) + i.
+\begin{figure}
+  \centering
+  \textbf{INSERT TEXT}
+  \includegraphics{graphics/Linear_hashing_level_increased}
+  \caption{Notice that the number of bits increased as well, since d(i) = d(a) + i.}
+\end{figure}
 
 Linear Hashing compared to Extendible Hashing
 Extendible Hashing and Linear Hashing are very much alike to each other in terms of their operations and how each data structure handle these operations. 
@@ -1273,9 +1376,9 @@ Write about boost
 	to avoid expensive memory allocations. 
 	Using Boost variant:
 	Whenever a boost::variant object is created the default constructor makes the first type its first bounded type.
-	A discriminated union container is defined by instantiating the boost::variant with the desired argument types.
+	A discriminated union container is defined by instantiating the \lstinline|boost::variant| with the desired argument types.
 	These types are called bounded types and derive from the BoundedType concept. In order to limit the different
-	types that bounded types can accept the BOOST_VARIANT_LIMIT_TYPES must be manipulated to reflect this. 
+	types that bounded types can accept the \lstinline|BOOST_VARIANT_LIMIT_TYPES| must be manipulated to reflect this. 
 	
 Write about types
 	Data Store has multiple types predefined that allow for a variant of types that tables can be
