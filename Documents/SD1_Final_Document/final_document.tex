@@ -1448,71 +1448,153 @@ Lock freedom
 %author Robert Medina
 data store design:
 Write about boost
-	Introduction:
-	Boost variant library focuses on typesafe storage and retrieval of a bounded set of types that is 
-	of discriminated unions. A variant data type exposes an interface independent of the current value's type.
-	The user define the set of types that are allowed in a variant and this can contain any number of disparate
-	variant instructions. Two ways to retrieve a type from the value that is held in a variant is either the program
-	must store this type or use boost visitor mechanism. This variant data type is stored as a stack instead of a heap
-	to avoid expensive memory allocations. 
-	
-	BoundedType:
-	Every type that is specified as a template argument to variant must satisfy the above requirements. In addition certain 
-	features of variant are available if its bounded types meet certain additional requirements. The minimun requirements for
-	a type to be accepted in a boost variant object are
-	1) CopyConstructible or MoveConstructible
-	2) Destructor upholds the no-throw exception-safety guarantee
-	3) Complete at the point of variant template instantiation
-	Additional Features are
-	1) Assignable: variant is itself Assignable if and only if every one of its bounded types meets the requirements of the concept. 		(Note that top-level const-qualified types and reference types do not meet these requirements.)
-	2) MoveAssignable: variant is itself MoveAssignable if and only if every one of its bounded types meets the requirements of 			the concept. (Note that top-level const-qualified types and reference types do not meet these requirements.)
-	3) DefaultConstructible [20.1.4]: variant is itself DefaultConstructible if and only if its first bounded type (i.e., T1) meets the 			requirements of the concept.
-	4) EqualityComparable: variant is itself EqualityComparable if and only if every one of its bounded types meets the 				requirements of the concept.
-	5) LessThanComparable: variant is itself LessThanComparable if and only if every one of its bounded types meets the 				requirements of the concept.
-	6) OutputStreamable: variant is itself OutputStreamable if and only if every one of its bounded types meets the requirements 			of the concept.
-	7) Hashable: variant is itself Hashable if and only if every one of its bounded types meets the requirements of the concept.
-	CopyConstructible is a type that can be constructed from a value or reference of the same type. Move constructible type is a 			type that can be constructed from an rvalue reference of its type.
-	No-throw guarantee, also known as failure transparency are operations that are guaranteed to succedd and satisfy all 				requirements even in bizarre situations. Should an exception
-	occur, it will be handled internally and not by the programmer. 
-	
-	Using Boost variant:
-	Whenever a boost::variant object is created the default constructor makes the first type its first bounded type.
-	A discriminated union container is defined by instantiating the boost::variant with the desired argument types.
-	These types are called bounded types and derive from the BoundedType concept. In order to limit the different
-	types that bounded types can accept the BOOST_VARIANT_LIMIT_TYPES must be manipulated to reflect this. 
-	In order to retrieve data types from boost::variant there are multiple functions available in order to accomplish this task.
-	Value retrieval can be accomplish by using the get function. Get takes in a type as an argument and returns the first 
-	data value in a boost::variant object that matches with that data type.
-	\includegraphics{graphics/boost_variant_get_header}
-	While get is an acceptable means for value retrieval it suffers from several flaws. The get function can only work for one
-	static type of boost::variant, the heterogenous data variant at declaration. If boost::variant object changes its data type
-	then get will lead to logical errors that were not considered. Thus boost variant needs a more robust un-static function 
-	to retrieve data from a boost::variant object. The variant library offers a compile-time visitation via apply_visitor. 
-	Visitation requires the program to explicity handle or ignore bounded types. 
-	\includegraphics{graphics/boost_variant_visitation}
-	This provides the same functionality as get but now this code allows the program to write generic visitors at compile-time.
-	Apply_visitor also contains one more benefit for value retrieval. Delayed visitation is a type of apply_visitor that returns
-	a function object that operates on any variant given to it. This is useful when operating on a sequence of variant types.
-	Preprocessor macros:
-	The variant class greatly simplifies use for specific instructions of the template but it significantly complicates use for
-	generic instructions. When creating a variant instruction it is very easy to declare an variant object but it is less clear
-	on how such types are accepted into a function. The Preprocessor library provides a powerful solution to this dilemma.
-	The boost variant library provides its own macro BOOST_VARIANT_ENUM_PARAMS that simplifies the process for the user of 			declaring variant types in function templates or other things of such nature. 
-	It is possible to use a type sequence to specify bounded types instead of using boost variant default function. Essentially a 
-	type sequence performs the same functionality of boost variant but if the program for whatever needs must edit and create 			specific types of type sequences it is possible with make_variant_over function. As shown below make_variant_over creates a 		type sequence that is customizable. Problems with the variant class template is parameter list is limiting in two factors. There 			must be a implementation maximum limit of the types available and the nature of parameter lists makes compile-time 				manipulation of the list excessively difficult.
-	This is where editing a type sequence on your own would be helpful in these two aspects however not all compilers are able to         
- this function. 
-	\includegraphics{graphics/boost_variant_type_sequence}
-	Extending Visitation Even Further:
-	Visitation is a powerful mechanism for manipulating a boost variant object content. Binear visitation extends this by allowing 			simultaneous visitation of content of two different variant objects. 
-	\includegraphics{graphics/boost_variant_binary_visitation}
-	Multi visitation:
-	Multi vistation is like binary visitation with respect to functionality except that it allows for three or more boost variant objects to be compared. This maybe an useful tool when used for multiple compares between variants objects with in tables.
-	\includegraphics{graphics/boost_variant_multi_visitation}
-	Boost variant over boost any:
-	Boost variant contains several advantages over boost any such as guaranting the type of its content is a user-specificed set
-	of types. Boost variant provides compile-time checked visitation of its content, before run-time. This allows for safer type storage. Boost variant enables generic visitation of its content and offers an efficient stack-based storage scheme that avoids the overhead of dynamic allocation. Boost any had some advantages over variant such as virtually any type for its template argument content, no-throw guarantee of exception safety for swap operation and less expensive compile-time processor/memory demands. Overall boost variant was choosen for its highly customable type storage. The user-specificed set of types is something that was highly sought for our data structures.
-	
+Introduction:
+Boost variant library focuses on typesafe storage and retrieval of a bounded set of types that is 
+of discriminated unions. A variant data type exposes an interface independent of the current value's type.
+The user define the set of types that are allowed in a variant and this can contain any number of disparate
+variant instructions. Two ways to retrieve a type from the value that is held in a variant is either the program
+must store this type or use boost visitor mechanism. This variant data type is stored as a stack instead of a heap
+to avoid expensive memory allocations.
+\par\vspace{\baselineskip}
+
+BoundedType:
+Every type that is specified as a template argument to variant must satisfy the above requirements. In addition certain 
+features of variant are available if its bounded types meet certain additional requirements. The minimun requirements for
+a type to be accepted in a boost variant object are:
+\begin{enumerate}
+ \item CopyConstructible or MoveConstructible
+ \item Destructor upholds the no-throw exception-safety guarantee
+ \item Complete at the point of variant template instantiation
+\end{enumerate}
+
+Additional Features are:
+\begin{enumerate}
+ \item Assignable: variant is itself Assignable if and only if every one of its bounded 
+ types meets the requirements of the concept. (Note that top-level const-qualified 
+ types and reference types do not meet these requirements.)
+ \item MoveAssignable: variant is itself MoveAssignable if and only if every one of its 
+ bounded types meets the requirements of the concept. (Note that top-level const-qualified 
+ types and reference types do not meet these requirements.)
+ \item DefaultConstructible [20.1.4]: variant is itself DefaultConstructible if and only 
+ if its first bounded type (i.e., T1) meets the requirements of the concept.
+ \item EqualityComparable: variant is itself EqualityComparable if and only if every one 
+ of its bounded types meets the requirements of the concept.
+ \item LessThanComparable: variant is itself LessThanComparable if and only if every one 
+ of its bounded types meets the requirements of the concept.
+ \item OutputStreamable: variant is itself OutputStreamable if and only if every one of 
+ its bounded types meets the requirements of the concept.
+ \item Hashable: variant is itself Hashable if and only if every one of its bounded types 
+ meets the requirements of the concept.
+\end{enumerate}
+
+CopyConstructible is a type that can be constructed from a value or reference of the same 
+type. Move constructible type is a type that can be constructed from an rvalue reference of its type.
+No-throw guarantee, also known as failure transparency are operations that are guaranteed to 
+succedd and satisfy all requirements even in bizarre situations. Should an exception
+occur, it will be handled internally and not by the programmer.
+\par\vspace{\baselineskip}
+
+Using Boost variant:
+Whenever a \lstinline|boost::variant| object is created the default constructor makes the first type its first bounded type.
+A discriminated union container is defined by instantiating the \lstinline|boost::variant| with the desired argument types.
+These types are called bounded types and derive from the BoundedType concept. In order to limit the different
+types that bounded types can accept the \lstinline|BOOST_VARIANT_LIMIT_TYPES| must be manipulated to reflect this. 
+In order to retrieve data types from \lstinline|boost::variant| there are multiple functions available in order to accomplish this task.
+Value retrieval can be accomplish by using the get function. Get takes in a type as an argument and returns the first 
+data value in a \lstinline|boost::variant| object that matches with that data type.
+\par\vspace{\baselineskip}
+\begin{figure}
+  \centering
+  \textbf{INSERT TEXT}
+  \includegraphics{graphics/boost_variant_get_header.png}
+  \caption{INSERT TEXT}
+\end{figure}
+
+While \lstinline|boost::get<T>| is an acceptable means for value retrieval it suffers from several flaws. 
+The get function can only work for one static type of \lstinline|boost::variant|, 
+the heterogenous data variant at declaration. If \lstinline|boost::variant| object 
+changes its data type then get will lead to logical errors that were not considered. 
+Thus boost variant needs a more robust un-static function to retrieve 
+data from a \lstinline|boost::variant| object. The variant library offers a compile-time visitation 
+via \lstinline|boost::apply_visitor|. Visitation requires the program to explicity handle or ignore bounded types. 
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \textbf{INSERT TEXT}
+  \includegraphics{graphics/boost_variant_visitation.png}
+  \caption{INSERT TEXT}
+\end{figure}
+
+This provides the same functionality as get but now this code allows the program to write
+generic visitors at compile-time. \lstinline|boost::apply_visitor| also contains one more benefit for 
+value retrieval. Delayed visitation is a type of \lstinline|boost::apply_visitor| that returns 
+a function object that operates on any variant given to it. This is useful when operating on a sequence of
+variant types.
+\par\vspace{\baselineskip}
+
+Preprocessor macros:
+The variant class greatly simplifies use for specific instructions of the template but it 
+significantly complicates use for generic instructions. When creating a variant instruction 
+it is very easy to declare an variant object but it is less clear on how such types are 
+accepted into a function. The Preprocessor library provides a powerful solution to this dilemma.
+The Boost.Variant library provides a macro \lstinline|BOOST_VARIANT_ENUM_PARAMS| that 
+simplifies the process for the user of declaring variant types in function templates or 
+other things of such nature. It is possible to use a type sequence to specify bounded types 
+instead of using boost variant default function. Essentially a type sequence performs the 
+same functionality of Boost.Variant but if the program for whatever needs must edit and 
+create specific types of type sequences it is possible with \lstinline|make_variant_over| 
+function. As shown below \lstinline|boost::make_variant_over| creates a type sequence that 
+is customizable. Problems with the variant class template is parameter list is limiting in 
+two factors. There must be a implementation maximum limit of the types available and the 
+nature of parameter lists makes compile-time manipulation of the list excessively difficult. 
+This is where editing a type sequence on your own would be helpful in these two aspects 
+however not all compilers are able to this function. 
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \textbf{INSERT TEXT}
+  \includegraphics{graphics/boost_variant_type_sequence.png}
+  \caption{INSERT_TEXT}
+\end{figure}
+
+Extending Visitation Even Further:
+Visitation is a powerful mechanism for manipulating a boost variant object content. Binear visitation 
+extends this by allowing simultaneous visitation of content of two different variant objects. 
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \textbf{INSERT TEXT}
+  \includegraphics{graphics/boost_variant_binary_visitation}
+  \caption{INSERT TEXT}
+\end{figure}
+
+Multi visitation:
+Multi vistation is like binary visitation with respect to functionality except that it allows for 
+three or more boost variant objects to be compared. This maybe an useful tool when used for 
+multiple compares between variants objects with in tables.
+
+\begin{figure}
+  \centering
+  \textbf{INSERT TEXT}
+  \includegraphics{graphics/boost_variant_multi_visitation}
+  \caption{INSERT TEXT}
+\end{figure}
+
+Boost variant over boost any:
+Boost variant contains several advantages over boost any such as guaranting the type of its 
+content is a user-specificed set of types. Boost variant provides compile-time checked 
+visitation of its content, before run-time. This allows for safer type storage. Boost variant 
+enables generic visitation of its content and offers an efficient stack-based storage scheme 
+that avoids the overhead of dynamic allocation. Boost any had some advantages over variant such 
+as virtually any type for its template argument content, no-throw guarantee of exception safety 
+for swap operation and less expensive compile-time processor/memory demands. Overall boost 
+variant was choosen for its highly customable type storage. The user-specificed set of types 
+is something that was highly sought for our data structures.
+\par\vspace{\baselineskip}
+
 Write about types
 	Data Store has multiple types predefined that allow for a variant of types that tables can be
 	comprosided of. There are over seven data types that are used to make up data store. One of which
@@ -1663,7 +1745,12 @@ language and transforming those commands into an internal representation that ca
 executed by the DBMS. The SQL Engine often consists of three pieces: the tokenizer, the
 parser, and the code generator.
 
-%\includegraphics{graphics/SQLEngine_activity_overview.png}
+\begin{figure}
+  \centering
+  \textbf{SQL Engine UML Activity Diagram}
+  \includegraphics{graphics/SQLEngine_activity_overview.png}
+  \caption{Diagram showing how the SQL engine handles and executes a SQL statement}
+\end{figure}
 
 \subsubsection{Tokenizer}
 %initial author Neil Moore
