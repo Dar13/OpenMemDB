@@ -1810,253 +1810,6 @@ wait free is next, then wait free bounded, and finally wait free population obli
 \end{itemize}
 
 \newpage
-
-
-\subsection{DataStore}
-%author Robert Medina
-data store design:
-Write about boost
-Introduction:
-Boost variant library focuses on typesafe storage and retrieval of a bounded set of types that is
-of discriminated unions. A variant data type exposes an interface independent of the current value's type.
-The user define the set of types that are allowed in a variant and this can contain any number of disparate
-variant instructions. Two ways to retrieve a type from the value that is held in a variant is either the program
-must store this type or use boost visitor mechanism. This variant data type is stored as a stack instead of a heap
-to avoid expensive memory allocations.
-\par\vspace{\baselineskip}
-
-BoundedType:
-Every type that is specified as a template argument to variant must satisfy the above requirements. In addition certain
-features of variant are available if its bounded types meet certain additional requirements. The minimum requirements for
-a type to be accepted in a boost variant object are:
-\begin{enumerate}
- \item CopyConstructible or MoveConstructible
- \item Destructor upholds the no-throw exception-safety guarantee
- \item Complete at the point of variant template instantiation
-\end{enumerate}
-
-Additional Features are:
-\begin{enumerate}
- \item Assignable: variant is itself Assignable if and only if every one of its bounded
- types meets the requirements of the concept. (Note that top-level const-qualified
- types and reference types do not meet these requirements.)
- \item MoveAssignable: variant is itself MoveAssignable if and only if every one of its
- bounded types meets the requirements of the concept. (Note that top-level const-qualified
- types and reference types do not meet these requirements.)
- \item DefaultConstructible [20.1.4]: variant is itself DefaultConstructible if and only
- if its first bounded type (i.e., T1) meets the requirements of the concept.
- \item EqualityComparable: variant is itself EqualityComparable if and only if every one
- of its bounded types meets the requirements of the concept.
- \item LessThanComparable: variant is itself LessThanComparable if and only if every one
- of its bounded types meets the requirements of the concept.
- \item OutputStreamable: variant is itself OutputStreamable if and only if every one of
- its bounded types meets the requirements of the concept.
- \item Hashable: variant is itself Hashable if and only if every one of its bounded types
- meets the requirements of the concept.
-\end{enumerate}
-
-CopyConstructible is a type that can be constructed from a value or reference of the same
-type. Move constructible type is a type that can be constructed from an rvalue reference of its type.
-No-throw guarantee, also known as failure transparency are operations that are guaranteed to
-succedd and satisfy all requirements even in bizarre situations. Should an exception
-occur, it will be handled internally and not by the programmer.
-\par\vspace{\baselineskip}
-
-Using Boost variant:
-Whenever a \lstinline|boost::variant| object is created the default constructor makes the first type its first bounded type.
-A discriminated union container is defined by instantiating the \lstinline|boost::variant| with the desired argument types.
-These types are called bounded types and derive from the BoundedType concept. In order to limit the different
-types that bounded types can accept the \lstinline|BOOST_VARIANT_LIMIT_TYPES| must be manipulated to reflect this.
-In order to retrieve data types from \lstinline|boost::variant| there are multiple functions available in order to accomplish this task.
-Value retrieval can be accomplish by using the get function. Get takes in a type as an argument and returns the first
-data value in a \lstinline|boost::variant| object that matches with that data type.
-\par\vspace{\baselineskip}
-\begin{figure}
-  \centering
-  \textbf{Template for boost variant}
-  \includegraphics{graphics/boost_variant_get_header.png}
-  \caption{Describes the type of data variant will accept}
-\end{figure}
-
-While \lstinline|boost::get<T>| is an acceptable means for value retrieval it suffers from several flaws.
-The get function can only work for one static type of \lstinline|boost::variant|,
-the heterogenous data variant at declaration. If \lstinline|boost::variant| object
-changes its data type then get will lead to logical errors that were not considered.
-Thus boost variant needs a more robust un-static function to retrieve
-data from a \lstinline|boost::variant| object. The variant library offers a compile-time visitation
-via \lstinline|boost::apply_visitor|. Visitation requires the program to explicity handle or ignore bounded types.
-\par\vspace{\baselineskip}
-
-\begin{figure}
-  \centering
-  \textbf{Visitation example}
-  \includegraphics[scale=.5]{graphics/boost_variant_visitation.png}
-  \caption{Improvement on data retrevial, betterthan get function since types are not predefined}
-\end{figure}
-
-This provides the same functionality as get but now this code allows the program to write
-generic visitors at compile-time. \lstinline|boost::apply_visitor| also contains one more benefit for
-value retrieval. Delayed visitation is a type of \lstinline|boost::apply_visitor| that returns
-a function object that operates on any variant given to it. This is useful when operating on a sequence of
-variant types.
-\par\vspace{\baselineskip}
-
-Preprocessor macros:
-The variant class greatly simplifies use for specific instructions of the template but it
-significantly complicates use for generic instructions. When creating a variant instruction
-it is very easy to declare an variant object but it is less clear on how such types are
-accepted into a function. The Preprocessor library provides a powerful solution to this dilemma.
-The Boost.Variant library provides a macro \lstinline|BOOST_VARIANT_ENUM_PARAMS| that
-simplifies the process for the user of declaring variant types in function templates or
-other things of such nature. It is possible to use a type sequence to specify bounded types
-instead of using boost variant default function. Essentially a type sequence performs the
-same functionality of Boost.Variant but if the program for whatever needs must edit and
-create specific types of type sequences it is possible with \lstinline|make_variant_over|
-function. As shown below \lstinline|boost::make_variant_over| creates a type sequence that
-is customizable. Problems with the variant class template is parameter list is limiting in
-two factors. There must be a implementation maximum limit of the types available and the
-nature of parameter lists makes compile-time manipulation of the list excessively difficult.
-This is where editing a type sequence on your own would be helpful in these two aspects
-however not all compilers are able to this function.
-\par\vspace{\baselineskip}
-
-\begin{figure}
-  \centering
-  \textbf{Under the hood for variant implementation}
-  \includegraphics[scale=.5]{graphics/boost_variant_type_sequence.png}
-  \caption{Allows the program to create their own type sequence without using variant constructor}
-\end{figure}
-
-Extending Visitation Even Further:
-Visitation is a powerful mechanism for manipulating a boost variant object content. Binear visitation
-extends this by allowing simultaneous visitation of content of two different variant objects.
-\par\vspace{\baselineskip}
-
-\begin{figure}
-  \centering
-  \textbf{Example code using binary visitation}
-  \includegraphics[scale=.5]{graphics/boost_variant_binary_visitation.png}
-  \caption{Compares two variant objects}
-\end{figure}
-
-Multi visitation:
-Multi vistation is like binary visitation with respect to functionality except that it allows for
-three or more boost variant objects to be compared. This maybe an useful tool when used for
-multiple compares between variants objects with in tables.
-
-\begin{figure}
-  \centering
-  \textbf{Example code for multi visitation}
-  \includegraphics{graphics/boost_variant_multi_visitation.png}
-  \caption{Compares three or more variant objects}
-\end{figure}
-
-Boost variant over boost any:
-Boost variant contains several advantages over boost any such as guaranting the type of its
-content is a user-specificed set of types. Boost variant provides compile-time checked
-visitation of its content, before run-time. This allows for safer type storage. Boost variant
-enables generic visitation of its content and offers an efficient stack-based storage scheme
-that avoids the overhead of dynamic allocation. Boost any had some advantages over variant such
-as virtually any type for its template argument content, no-throw guarantee of exception safety
-for swap operation and less expensive compile-time processor/memory demands. Overall boost
-variant was choosen for its highly customable type storage. The user-specificed set of types
-is something that was highly sought for our data structures.
-\par\vspace{\baselineskip}
-
-\subsubsubsection{Data Types}
-	Data Store has multiple types predefined that allow for a variant of types that tables can be
-	comprosided of. There are over seven data types that are used to make up data store. One of which
-	uses data types that the query planner will used. This is how the query planner and the data store
-	interact with one another.
-1.) DataVariant made up of SQL data types with a boost variant vector
-2.)	TervDataVariant is TervWrapper around an exisiting data variant.
-3.)	DataTableRecord is a vector of a tervel data variant. This makes up one row in
-	a table.
-4.)	DataTable is a vector of a data table record. This makes up a table that contains multiple rows.
-	This is how a table will be represented in data store. Each table will be registered into lookup table
-	for data access.
-5.)	TableSchema is a boost variant vector that stores the table schema
-6.)	SchemaTablePair is a pair that bundles table nested vector with the table schema
-7.)	TableMap is a hashmap that stores the location of schematablepair with the table name. This
-	allows for easy fast instant access retrevial of tables.
-
-\subsubsubsection{Functions}
-	Data Store is made up of multiple functions that takes in multiple arguments in order to reference tables in memory and return the references that point to the memory to the query planner for further modification. Data store primary objective is to allocate memory and assure that this is done using non-blocking techniques. It is important to note that in order to de-allocate memory from the heap it is possible to do so when data store returns the pointers . The reasoning behind this is that data store should not perform any logic operations just as parsing inputs, etc, etc. Data store primary objective is to allocate memory and send references on where that memory can be located, in order words data storage and data retrevial. 
-write about functions
-	Data Store is made up of multiple functions that create data tables and returns specific data.
-1.) createRow:
-		createRow takes in a DataVariant row and a tablename in order to find the specific table
-		you want to insert the row into. The DataVariant row is checked by checkSchema function in
-		order to see if the table schema registered into the lookup\_table hashmap exists and whether
-		or not the new row data type fits into the table schema.
-2.) createTable
-		createTable takes in a char array tablename and a TableSchema schema argument in order to add
-		the string to the hashmap lookup_table as well as the table schema. This is added as a pair
-		into the lookup table and now the table is registered into the lookup\_table and memory is allocated
-		for that table.
-3.) checkSchema
-		checkSchema takes in a char array tablename and checks whether or not if the table exists in the
-		hashmap lookup_table. If it does exisit then it checks whether the TableSchema schema matches the
-		schema from the lookup\_table. If it does match up then it returns true otherwise false.
-4.) getRow:
-		getRow takes in a char array tablename and an int rowID in order to find the table in the lookup_table
-		and finds the row based on the rowID index. It then returns the row pointer it found.
-5.) getTable
-		getTable takes in a char array tablename and finds the table from the lookup\_table. If it finds the table
-		then it returns the table pointer.
-write about data structs
-\subsubsubsection{Data Structures}
-	Nested vectors are used to represent tables. Each table is stored into a hashmap called lookup_table to refer to
-	tables. A pair is used to group up table schema boost variant vector and the data table itself. Nested vectors
-	are used since it most is the most efficent way to represent memory. A hashmap is used to refer tables because each
-	table contains a unique identifier char array. A hashmap provides instant access table lookup. A pair is used to group
-	up the table with its schema. Each table have their own unique schema and it is retrievable from the table lookup hashmap.
-
-\subsubsubsection{Accessing Data Performance}
-	Nested vectors are instant access O(1), if you have the index of the column or row. This makes data retrieval
-	linear time O(n). In the case of a full table scan, it is only necessary to find the columns desired, then each other row
-	column data can be retrieved by using the column index. If a full table scan with all columns are desired then this is O(n^2). A pair is fairly easy to retrieve data from since it is only two pointers or objects grouped together in an object. In the case for a hashmap, it provides instant access O(1), until the hashmap becomes more filled up and collisions being to happen. Normally hashmaps become reindex whenever they are around half full but it may be more advantageous to use dynamic hashing. This is something that will be determine based on performance testing on a training data set.
-
-\subsubsubsection{Dynamic Memory Allocation}
-Memory management in C++
-	Memory in a C++ program is divded into two parts, the stack and the heap. The stack contains all the variables
-	declared inside the function and will take up memory from the stack. While the heap is responsible for all unused memory 
-	of the program. This memory can be allocated dynammically when the program runs but the program must also insure that this memory gets cleaned up after it is done with it.
-	\includegraphics{graphics/c++_memory_heirarchy.png}
-	Programs cannot predicte how much memory will be required at run time. This memory can be allocated by the new operator and is referenced by the address of the space allocated. This memory can also be deleted by the delete operator. This is used when memory is no longer used purposely. If it is not cleaned up then it creates garbage memory that could otheriwse be used resourcefully. There are other ways to dynammically allocate memory, such as malloc(), calloc(), and realloc(). There are major differences between the new operator and the other memory allocation functions.  The following are some useful concepts and guidelines to keep in mind when using these functions. It is imparative to learn about these guidelines otherwise potential problems could occur such as memory corruption.
-
-1.) Delete and Free do not MIX
-	The delete() function works for the new() function but it causes undefined behavior when used on a malloc(). If the free() function is used on a new() object then the same thing occurs. When deallocating memory for new or malloc it is necessary to apply the correct functions to free up memory. This can usually occur when user-defined functions are applied instead of the STL, standard template library for C++. This can vary from system to system but also from compiler to compiler. When the delete operation is called to delete the new object the compiler generates the following code.
-	\includegraphics{graphics/new_delete_example.png}
-	If the only function the programmer desire is to handle the raw uninitalized memory then new and delete operators should not be considered. Instead the operator new and operator delete should be used to allocate memory and deallocate. This is essentially the same as malloc and free.
-	\includegraphics{graphics/new_operator_bypass.png}
-
-2.) New and malloc mixed
-	If a placement new is used to create an object in memory, not the new function but placement new used to store already allocated data from malloc() function then delete should not be used because like in the previous example, the delete function calls the operator delete to deallocate memory but the memory contained was not allocated by the operator new. This placement new just returns the pointer passed to it. So in general, if raw memory was passed to placement new and this memory was dynammically allocated then still memory must be deallocated to prevent a memory leak.
-	\includegraphics{graphics/new_placement.png}
-
-3.) New operator
-	There is a difference between the new operator and operator new. The new operator does two things.
-	First, it allocates enough memory to hold an object of the type inputed. Secondly, it calls a constructor to initialize an object of the type defined. This operator's behavior cannot be changed in ay way. The way the memory is allocated can be changed however. The new operator calls a function to perform the memory allocation. This can be overloaded to change the bahvior. The function at allocates memory for the new operator is "operator new". 
-	\includegraphics{graphics/operator_new_header.png}
-	The operator new returns a void pointer to raw, uninitialized memory. The parameter, size_t, specifices how much memory to allocate. Whenever the programmer needs to call raw memory it is called by operator new like so.
-	\includegraphics{graphics/operator_new_raw_memory.png}
-	This line of code will return a raw chuck of meaningless memory.
-
-4.) Placement new
-	Sometimes there exists raw memory that was allocated dynammically but does not have a constructor to be linked up to. Invoking a constructor on an existing object is not logical. Constructors exist to initialize objects and objects can only be initialized once. Therefore there must be a way to call a constructor directly so it can be linked to already allocated memory. Placement new allows the programmer to directly work with a constructor. Here is an example of how placement new might be used.
-	\includegraphics{graphics/placement_new_example.png}
-	In the function constructWidgetInBuffer, the expressed return is a new operator that returns the location of the constructor by using an overloaded operator new function.
-	\includegraphics{graphics/operator_new_overload.png}
-
-5.) Error Handling
-	By default if new() cannot find memory it calls a pointer to function called _new_handler()
-	\includegraphics{graphics/operator_new_function.png}
-	if _new_handler() can somehow supply memory for malloc() then everything is good otherwise an exception is thrown.
-
-6.) Memory Corruption
-		There exist two reasons that memory corruption could occur in a program. The source of the memory corruption and its manifestation may be far apart. This makes it difficult to finding the cause of the memory corruption in relation to its effect. The second reason is that symptoms occuring during bizzare conditions which make them significantly harder to replicate. Memory Corruption Errors can be categorized into four categories. One of the more common errors is using uninitialized memory. This refers to the contents of uninitialized memory are treated as garbage values. The usage of such garbage values can lead to unpredictable program behavior. Second error is using none-owned memory. It is common that pointers are used to access and modify memory. Whenever this pointer is a null pointer also known as a dangling pointer, or to a memory location outside of current stack or heap bounds, it is referring to memory that is not possessed by the program. Using these pointers causes serious flaws. Accessing such memory usually cause OS exceptions, that commonly leads to program crashes. Third, using memory beyond the memory that was allocated also known as a buffer overflow. For example, an array that is inside a loop contains a incorrect terminating condition then memory that is accessed beyond the bounds of the array may be manipulated that was otherwise not supposed to. Lastly, the four category that causes memory corruption is fauly heap memory management. Memory leaks and freeing non-heap or un-allocated memory are the most frequen erros caused by fault heap memory management. Since C++ gives so much freedom to allocate any amount of memory the program needs it can lead to such errors when the program does not clean yourself. More specifically memory leaks is allocated memory but are not released. This causes the program to consume memory and reduce the available memory in the heap.
-
 \subsection{SQL Engine}
 %author Mike McGee
 One of the most important pieces of a Database Management System is the SQL Engine.
@@ -2904,7 +2657,248 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
   \end{figure}
 
   \subsection{Data Store}
+	%author Robert Medina
+Introduction:
+Boost variant library focuses on typesafe storage and retrieval of a bounded set of types that is
+of discriminated unions. A variant data type exposes an interface independent of the current value's type.
+The user define the set of types that are allowed in a variant and this can contain any number of disparate
+variant instructions. Two ways to retrieve a type from the value that is held in a variant is either the program
+must store this type or use boost visitor mechanism. This variant data type is stored as a stack instead of a heap
+to avoid expensive memory allocations.
+\par\vspace{\baselineskip}
 
+BoundedType:
+Every type that is specified as a template argument to variant must satisfy the above requirements. In addition certain
+features of variant are available if its bounded types meet certain additional requirements. The minimum requirements for
+a type to be accepted in a boost variant object are:
+\begin{enumerate}
+ \item CopyConstructible or MoveConstructible
+ \item Destructor upholds the no-throw exception-safety guarantee
+ \item Complete at the point of variant template instantiation
+\end{enumerate}
+
+Additional Features are:
+\begin{enumerate}
+ \item Assignable: variant is itself Assignable if and only if every one of its bounded
+ types meets the requirements of the concept. (Note that top-level const-qualified
+ types and reference types do not meet these requirements.)
+ \item MoveAssignable: variant is itself MoveAssignable if and only if every one of its
+ bounded types meets the requirements of the concept. (Note that top-level const-qualified
+ types and reference types do not meet these requirements.)
+ \item DefaultConstructible [20.1.4]: variant is itself DefaultConstructible if and only
+ if its first bounded type (i.e., T1) meets the requirements of the concept.
+ \item EqualityComparable: variant is itself EqualityComparable if and only if every one
+ of its bounded types meets the requirements of the concept.
+ \item LessThanComparable: variant is itself LessThanComparable if and only if every one
+ of its bounded types meets the requirements of the concept.
+ \item OutputStreamable: variant is itself OutputStreamable if and only if every one of
+ its bounded types meets the requirements of the concept.
+ \item Hashable: variant is itself Hashable if and only if every one of its bounded types
+ meets the requirements of the concept.
+\end{enumerate}
+
+CopyConstructible is a type that can be constructed from a value or reference of the same
+type. Move constructible type is a type that can be constructed from an rvalue reference of its type.
+No-throw guarantee, also known as failure transparency are operations that are guaranteed to
+succedd and satisfy all requirements even in bizarre situations. Should an exception
+occur, it will be handled internally and not by the programmer.
+\par\vspace{\baselineskip}
+
+Using Boost variant:
+Whenever a \lstinline|boost::variant| object is created the default constructor makes the first type its first bounded type.
+A discriminated union container is defined by instantiating the \lstinline|boost::variant| with the desired argument types.
+These types are called bounded types and derive from the BoundedType concept. In order to limit the different
+types that bounded types can accept the \lstinline|BOOST_VARIANT_LIMIT_TYPES| must be manipulated to reflect this.
+In order to retrieve data types from \lstinline|boost::variant| there are multiple functions available in order to accomplish this task.
+Value retrieval can be accomplish by using the get function. Get takes in a type as an argument and returns the first
+data value in a \lstinline|boost::variant| object that matches with that data type.
+\par\vspace{\baselineskip}
+\begin{figure}
+  \centering
+  \textbf{Template for boost variant}
+  \includegraphics{graphics/boost_variant_get_header.png}
+  \caption{Describes the type of data variant will accept}
+\end{figure}
+
+While \lstinline|boost::get<T>| is an acceptable means for value retrieval it suffers from several flaws.
+The get function can only work for one static type of \lstinline|boost::variant|,
+the heterogenous data variant at declaration. If \lstinline|boost::variant| object
+changes its data type then get will lead to logical errors that were not considered.
+Thus boost variant needs a more robust un-static function to retrieve
+data from a \lstinline|boost::variant| object. The variant library offers a compile-time visitation
+via \lstinline|boost::apply_visitor|. Visitation requires the program to explicity handle or ignore bounded types.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \textbf{Visitation example}
+  \includegraphics[scale=.5]{graphics/boost_variant_visitation.png}
+  \caption{Improvement on data retrevial, betterthan get function since types are not predefined}
+\end{figure}
+
+This provides the same functionality as get but now this code allows the program to write
+generic visitors at compile-time. \lstinline|boost::apply_visitor| also contains one more benefit for
+value retrieval. Delayed visitation is a type of \lstinline|boost::apply_visitor| that returns
+a function object that operates on any variant given to it. This is useful when operating on a sequence of
+variant types.
+\par\vspace{\baselineskip}
+
+Preprocessor macros:
+The variant class greatly simplifies use for specific instructions of the template but it
+significantly complicates use for generic instructions. When creating a variant instruction
+it is very easy to declare an variant object but it is less clear on how such types are
+accepted into a function. The Preprocessor library provides a powerful solution to this dilemma.
+The Boost.Variant library provides a macro \lstinline|BOOST_VARIANT_ENUM_PARAMS| that
+simplifies the process for the user of declaring variant types in function templates or
+other things of such nature. It is possible to use a type sequence to specify bounded types
+instead of using boost variant default function. Essentially a type sequence performs the
+same functionality of Boost.Variant but if the program for whatever needs must edit and
+create specific types of type sequences it is possible with \lstinline|make_variant_over|
+function. As shown below \lstinline|boost::make_variant_over| creates a type sequence that
+is customizable. Problems with the variant class template is parameter list is limiting in
+two factors. There must be a implementation maximum limit of the types available and the
+nature of parameter lists makes compile-time manipulation of the list excessively difficult.
+This is where editing a type sequence on your own would be helpful in these two aspects
+however not all compilers are able to this function.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \textbf{Under the hood for variant implementation}
+  \includegraphics[scale=.5]{graphics/boost_variant_type_sequence.png}
+  \caption{Allows the program to create their own type sequence without using variant constructor}
+\end{figure}
+
+Extending Visitation Even Further:
+Visitation is a powerful mechanism for manipulating a boost variant object content. Binear visitation
+extends this by allowing simultaneous visitation of content of two different variant objects.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \textbf{Example code using binary visitation}
+  \includegraphics[scale=.5]{graphics/boost_variant_binary_visitation.png}
+  \caption{Compares two variant objects}
+\end{figure}
+
+Multi visitation:
+Multi vistation is like binary visitation with respect to functionality except that it allows for
+three or more boost variant objects to be compared. This maybe an useful tool when used for
+multiple compares between variants objects with in tables.
+
+\begin{figure}
+  \centering
+  \textbf{Example code for multi visitation}
+  \includegraphics{graphics/boost_variant_multi_visitation.png}
+  \caption{Compares three or more variant objects}
+\end{figure}
+
+Boost variant over boost any:
+Boost variant contains several advantages over boost any such as guaranting the type of its
+content is a user-specificed set of types. Boost variant provides compile-time checked
+visitation of its content, before run-time. This allows for safer type storage. Boost variant
+enables generic visitation of its content and offers an efficient stack-based storage scheme
+that avoids the overhead of dynamic allocation. Boost any had some advantages over variant such
+as virtually any type for its template argument content, no-throw guarantee of exception safety
+for swap operation and less expensive compile-time processor/memory demands. Overall boost
+variant was choosen for its highly customable type storage. The user-specificed set of types
+is something that was highly sought for our data structures.
+\par\vspace{\baselineskip}
+
+\subsubsubsection{Data Types}
+	Data Store has multiple types predefined that allow for a variant of types that tables can be
+	comprosided of. There are over seven data types that are used to make up data store. One of which
+	uses data types that the query planner will used. This is how the query planner and the data store
+	interact with one another.
+1.) DataVariant made up of SQL data types with a boost variant vector
+2.)	TervDataVariant is TervWrapper around an exisiting data variant.
+3.)	DataTableRecord is a vector of a tervel data variant. This makes up one row in
+	a table.
+4.)	DataTable is a vector of a data table record. This makes up a table that contains multiple rows.
+	This is how a table will be represented in data store. Each table will be registered into lookup table
+	for data access.
+5.)	TableSchema is a boost variant vector that stores the table schema
+6.)	SchemaTablePair is a pair that bundles table nested vector with the table schema
+7.)	TableMap is a hashmap that stores the location of schematablepair with the table name. This
+	allows for easy fast instant access retrevial of tables.
+
+\subsubsubsection{Functions}
+	Data Store is made up of multiple functions that takes in multiple arguments in order to reference tables in memory and return the references that point to the memory to the query planner for further modification. Data store primary objective is to allocate memory and assure that this is done using non-blocking techniques. It is important to note that in order to de-allocate memory from the heap it is possible to do so when data store returns the pointers . The reasoning behind this is that data store should not perform any logic operations just as parsing inputs, etc, etc. Data store primary objective is to allocate memory and send references on where that memory can be located, in order words data storage and data retrevial. 
+write about functions
+	Data Store is made up of multiple functions that create data tables and returns specific data.
+1.) createRow:
+		createRow takes in a DataVariant row and a tablename in order to find the specific table
+		you want to insert the row into. The DataVariant row is checked by checkSchema function in
+		order to see if the table schema registered into the lookup\_table hashmap exists and whether
+		or not the new row data type fits into the table schema.
+2.) createTable
+		createTable takes in a char array tablename and a TableSchema schema argument in order to add
+		the string to the hashmap lookup_table as well as the table schema. This is added as a pair
+		into the lookup table and now the table is registered into the lookup\_table and memory is allocated
+		for that table.
+3.) checkSchema
+		checkSchema takes in a char array tablename and checks whether or not if the table exists in the
+		hashmap lookup_table. If it does exisit then it checks whether the TableSchema schema matches the
+		schema from the lookup\_table. If it does match up then it returns true otherwise false.
+4.) getRow:
+		getRow takes in a char array tablename and an int rowID in order to find the table in the lookup_table
+		and finds the row based on the rowID index. It then returns the row pointer it found.
+5.) getTable
+		getTable takes in a char array tablename and finds the table from the lookup\_table. If it finds the table
+		then it returns the table pointer.
+
+\subsubsubsection{Data Structures}
+	Nested vectors are used to represent tables. Each table is stored into a hashmap called lookup_table to refer to
+	tables. A pair is used to group up table schema boost variant vector and the data table itself. Nested vectors
+	are used since it most is the most efficent way to represent memory. A hashmap is used to refer tables because each
+	table contains a unique identifier char array. A hashmap provides instant access table lookup. A pair is used to group
+	up the table with its schema. Each table have their own unique schema and it is retrievable from the table lookup hashmap.
+
+\subsubsubsection{Accessing Data Performance}
+	Nested vectors are instant access O(1), if you have the index of the column or row. This makes data retrieval
+	linear time O(n). In the case of a full table scan, it is only necessary to find the columns desired, then each other row
+	column data can be retrieved by using the column index. If a full table scan with all columns are desired then this is O(n^2). A pair is fairly easy to retrieve data from since it is only two pointers or objects grouped together in an object. In the case for a hashmap, it provides instant access O(1), until the hashmap becomes more filled up and collisions being to happen. Normally hashmaps become reindex whenever they are around half full but it may be more advantageous to use dynamic hashing. This is something that will be determine based on performance testing on a training data set.
+
+\subsubsubsection{Dynamic Memory Allocation}
+Memory management in C++
+	Memory in a C++ program is divded into two parts, the stack and the heap. The stack contains all the variables
+	declared inside the function and will take up memory from the stack. While the heap is responsible for all unused memory 
+	of the program. This memory can be allocated dynammically when the program runs but the program must also insure that this memory gets cleaned up after it is done with it.
+	\includegraphics{graphics/c++_memory_heirarchy.png}
+	Programs cannot predicte how much memory will be required at run time. This memory can be allocated by the new operator and is referenced by the address of the space allocated. This memory can also be deleted by the delete operator. This is used when memory is no longer used purposely. If it is not cleaned up then it creates garbage memory that could otheriwse be used resourcefully. There are other ways to dynammically allocate memory, such as malloc(), calloc(), and realloc(). There are major differences between the new operator and the other memory allocation functions.  The following are some useful concepts and guidelines to keep in mind when using these functions. It is imparative to learn about these guidelines otherwise potential problems could occur such as memory corruption.
+
+1.) Delete and Free do not MIX
+	The delete() function works for the new() function but it causes undefined behavior when used on a malloc(). If the free() function is used on a new() object then the same thing occurs. When deallocating memory for new or malloc it is necessary to apply the correct functions to free up memory. This can usually occur when user-defined functions are applied instead of the STL, standard template library for C++. This can vary from system to system but also from compiler to compiler. When the delete operation is called to delete the new object the compiler generates the following code.
+	\includegraphics{graphics/new_delete_example.png}
+	If the only function the programmer desire is to handle the raw uninitalized memory then new and delete operators should not be considered. Instead the operator new and operator delete should be used to allocate memory and deallocate. This is essentially the same as malloc and free.
+	\includegraphics{graphics/new_operator_bypass.png}
+
+2.) New and malloc mixed
+	If a placement new is used to create an object in memory, not the new function but placement new used to store already allocated data from malloc() function then delete should not be used because like in the previous example, the delete function calls the operator delete to deallocate memory but the memory contained was not allocated by the operator new. This placement new just returns the pointer passed to it. So in general, if raw memory was passed to placement new and this memory was dynammically allocated then still memory must be deallocated to prevent a memory leak.
+	\includegraphics{graphics/new_placement.png}
+
+3.) New operator
+	There is a difference between the new operator and operator new. The new operator does two things.
+	First, it allocates enough memory to hold an object of the type inputed. Secondly, it calls a constructor to initialize an object of the type defined. This operator's behavior cannot be changed in ay way. The way the memory is allocated can be changed however. The new operator calls a function to perform the memory allocation. This can be overloaded to change the bahvior. The function at allocates memory for the new operator is "operator new". 
+	\includegraphics{graphics/operator_new_header.png}
+	The operator new returns a void pointer to raw, uninitialized memory. The parameter, size_t, specifices how much memory to allocate. Whenever the programmer needs to call raw memory it is called by operator new like so.
+	\includegraphics{graphics/operator_new_raw_memory.png}
+	This line of code will return a raw chuck of meaningless memory.
+
+4.) Placement new
+	Sometimes there exists raw memory that was allocated dynammically but does not have a constructor to be linked up to. Invoking a constructor on an existing object is not logical. Constructors exist to initialize objects and objects can only be initialized once. Therefore there must be a way to call a constructor directly so it can be linked to already allocated memory. Placement new allows the programmer to directly work with a constructor. Here is an example of how placement new might be used.
+	\includegraphics{graphics/placement_new_example.png}
+	In the function constructWidgetInBuffer, the expressed return is a new operator that returns the location of the constructor by using an overloaded operator new function.
+	\includegraphics{graphics/operator_new_overload.png}
+
+5.) Error Handling
+	By default if new() cannot find memory it calls a pointer to function called _new_handler()
+	\includegraphics{graphics/operator_new_function.png}
+	if _new_handler() can somehow supply memory for malloc() then everything is good otherwise an exception is thrown.
+
+6.) Memory Corruption
+		There exist two reasons that memory corruption could occur in a program. The source of the memory corruption and its manifestation may be far apart. This makes it difficult to finding the cause of the memory corruption in relation to its effect. The second reason is that symptoms occuring during bizzare conditions which make them significantly harder to replicate. Memory Corruption Errors can be categorized into four categories. One of the more common errors is using uninitialized memory. This refers to the contents of uninitialized memory are treated as garbage values. The usage of such garbage values can lead to unpredictable program behavior. Second error is using none-owned memory. It is common that pointers are used to access and modify memory. Whenever this pointer is a null pointer also known as a dangling pointer, or to a memory location outside of current stack or heap bounds, it is referring to memory that is not possessed by the program. Using these pointers causes serious flaws. Accessing such memory usually cause OS exceptions, that commonly leads to program crashes. Third, using memory beyond the memory that was allocated also known as a buffer overflow. For example, an array that is inside a loop contains a incorrect terminating condition then memory that is accessed beyond the bounds of the array may be manipulated that was otherwise not supposed to. Lastly, the four category that causes memory corruption is fauly heap memory management. Memory leaks and freeing non-heap or un-allocated memory are the most frequen erros caused by fault heap memory management. Since C++ gives so much freedom to allocate any amount of memory the program needs it can lead to such errors when the program does not clean yourself. More specifically memory leaks is allocated memory but are not released. This causes the program to consume memory and reduce the available memory in the heap.
+	
   \subsection{Logger}
   %author Neil Moore
   Comprehensive logging is essential for any database that wants to be ACID, or
