@@ -284,7 +284,7 @@ and as such we use them both.
 
 \begin{figure}
     \centering
-	\includegraphics[scale=0.3]{graphics/sublimeide.png}
+	\includegraphics[scale=0.25]{graphics/sublimeide.png}
     \caption{Sublime Text}
 \end{figure}
 
@@ -830,7 +830,7 @@ data internally with in its nodes. All the data from an ISAM resides in its leaf
 \begin{figure}
   \centering
   \textbf{INSERT TEXT}
-  \includegraphics{graphics/ISAM)abstract_diagram.png}
+  \includegraphics[scale=.8]{graphics/ISAM_abstract_diagram.png}
   \caption{INSERT TEXT}
 \end{figure}
 
@@ -874,20 +874,20 @@ This way the overflow page will also be considered in the basic operations of IS
 \begin{figure}
   \centering
   \textbf{INSERT TEXT}
-  \includegraphics{graphics/ISAM_example.png}
+  \includegraphics[scale=.75]{graphics/ISAM_example.png}
   \caption{INSERT TEXT}
 \end{figure}
 
 \begin{figure}
   \centering
   \textbf{After inserting 23*, 48*, 41*, 42*}
-  \includegraphics{graphics/ISAM_example_insertion.png}
+  \includegraphics[scale=.75]{graphics/ISAM_example_insertion.png}
 \end{figure}
 
 \begin{figure}
   \centering
   \textbf{After deleting 42*, 51*, 97*}
-  \includegraphics{graphics/ISAM_example_deletion.png}
+  \includegraphics[scale=.7]{graphics/ISAM_example_deletion.png}
 \end{figure}
 
 \par\vspace{\baselineskip}
@@ -966,14 +966,12 @@ is not a reliable method for inserting new objects since the possiblity of overf
 ruin the property of a hashmap.
 \par\vspace{\baselineskip}
 
-Rehashing:
 Intuitively a simple hash table with a pointer to a page would make sense. However in the case of
 additional pages, without an overflow chain rehashing the table would be necessary. In this
 case rehashing the table would be a costly operation. Including that the data structure is unusable
 while rehashing is in progress. Dynamic hashing techniques solve this problem.
 \par\vspace{\baselineskip}
 
-Extendible Hashing:
 Extendible Hashing is a hash map of pointers that maps to buckets with various levels of depth. This directory
 is based on an index value using $ X\ modulo\ 2\textsuperscript{global depth} $. The global depth is the number of bits for the binary
 representation of that index value. Each bucket in the directory has a shared data entry limit for the number of
@@ -1020,7 +1018,6 @@ the original bucket local depth value.
 In practice however, the length of a bucket is much smaller than static hashing and has
 a uniform limit. This makes it more desirable in terms of performance on an average.
 
-Linear Hashing:
 %author Robert Medina
 
 Linear Hashing is a dynamic hashing technique that adjusts to inserts and deletes in a stable manner.
@@ -1059,8 +1056,8 @@ N(o) is the number of buckets, also called N. A spliting policy can be a wide ra
 such as whenever overflow chains are created or if a certain number of space is taken up with
 in a bucket and so forth. Whenever a split is triggered by the split policy then the Next containing
 the bucket will be split and the hash function h(level+1) will redistributes the entries
-between the buckets to the newest created buckets. These definitions will be reflected in the
-following figures below.
+between the buckets to the newest created buckets. These definitions will be reflected in the following
+figures.
 
 \begin{figure}
   \centering
@@ -1072,137 +1069,209 @@ following figures below.
 \par\vspace{\baselineskip}
 After the insertion, the bucket next is split into a new bucket. Each buckets between Next and Nlevel have not yet been split,
 using h(level) on a data entry the result is the bucket location where the data will be stored.
-When Next is equal to Nlevel - 1 and a split is triggered, the last of the buckets are split. The number of buckets after the split is twice the number at the beginning
-of the round and a new round is started with a level incremented by 1 and next rest to 0. Since level is increased by one the number of potential keys to be hashed will
-be doubled.
+When Next is equal to Nlevel - 1 and a split is triggered, the last of the buckets are split. The 
+number of buckets after the split is twice the number at the beginning of the round and a new round is 
+started with a level incremented by 1 and next rest to 0. Since level is increased by one the number 
+of potential keys to be hashed will be doubled.
+\par\vspace{\baselineskip}
 \begin{figure}
   \centering
   \textbf{INSERT TEXT}
   \includegraphics{graphics/Linear_hashing_level_increased}
-  \caption{Notice that the number of bits increased as well, since d(i) = d(a) + i.}
+  \caption{Notice that the number of bits increased as well, since $d(i) = d(a) + i$.}
 \end{figure}
 
-Linear Hashing compared to Extendible Hashing
-Extendible Hashing and Linear Hashing are very much alike to each other in terms of their operations and how each data structure handle these operations.
-When Linear Hashing splitting occurs in a round. The number of buckets to be split is up to the last bucket in the range N. This is essentially the same principle with
-respect to Extendible Hashing but occurs more frequently. The hashing functions are very similar to Exttendible Hashing, in a sense that the hashing function relates to
-a family of hashing functions. Linear Hashing with uniform distributions can have a lower average cost for equality selections since the directory level hiearachy is
-eliminated but for skewed data distributions this can result in empty buckets which is is allocated in memory. This can lead to poor performance when compared to
-Extendible Hashing.
+Extendible Hashing and Linear Hashing are very much alike to each other in terms of their operations and 
+how each data structure handle these operations. When Linear Hashing splitting occurs in a round. The 
+number of buckets to be split is up to the last bucket in the range N. This is essentially the same 
+principle with respect to Extendible Hashing but occurs more frequently. The hashing functions are 
+very similar to Extendible Hashing, in a sense that the hashing function relates to a family of 
+hashing functions. Linear Hashing with uniform distributions can have a lower average cost for 
+equality selections since the directory level hierarchy is eliminated but for skewed data 
+distributions this can result in empty buckets which is is allocated in memory. This can lead 
+to poor performance when compared to Extendible Hashing.
 
 \subsection{Data Compression}
 %author Robert Medina
-Data Compression:
-	Lossless data compression is a type of data compression algorithm that allows
-	the original data to be perfectly reconstructed from the compressed data. When
-	compared to lossy compression, these algorithms are a type of classification that
-	allows for an approximation of the orignal data to be recovered from compress data.
-	Loseless data compression is useful for any type of application when memory space is
-	necessary to be conserved. In the case of loseless data compression there are three
-	popular algorithms, run-length encoding, huffman coding, and LZ77/78.
-Run-Length encoding:
-	Run-length encoding is a very simple form of loseless data compression that is sequences
-	in which the same data value occur in many consecutive data elements are not stored as a
-	single data value and counter instead of the duplicate form. In other words, this algorithm
-	replaces large sequences of repeating data with only one item with a counter. When considering
-	that an data primitive for ints are four bytes and a characater is 1 byte. It would be useful
-	to represent multiple characters as a counter instead of multiple characters. The same principle
-	continues for multiple integers and other data primitives.
-	For example if a string line contain, "WWWWWWWWBWWWWWWWWB" then "8W1B8W" size would be considerably
-	smaller than the first data input. In the case of the uncompressed data it took over 20 bytes to
-	represent that input while run-length encoding took 6 bytes. This can be a huge impact on memory
-	allocation in areas where memory is size sensitve such as main memory, cahce, or pages.
-	This compression may not have the same impact in all applications since it requires data to be
-	in a sequence and contain repeating data. In soe applications this may not occur as often as one would
-	hope for but nonetheless it is a useful compression algorithm for repeating data sets.
-Huffman coding:
-	Huffman coding is a type of prefix code that is used for lossless data compression. Prefix code is a type
-	of code system that is only distinguished by its possession of a prefix proferty. This prefix property requires
-	that no code word in the system that is a prefix of any other code word in the system. Therefore each code word
-	must be unique to their own scopes. The output from Huffman's algortihm is a variable length code table for encoding
-	a symbol into a prefix.
-	Huffman's Algorithm:
-	Based on a given set of sybols with weights, Huffman's Algortihm determines the minimalistic required prefix coding
-	table in order to represent the data set. This algorithm starts by creating a binary tree of nodes. These nodes
-	are stored in a regular array which size depends on the symbol placed into the node. Initally all nodes are leaf
-	nodes and all those nodes contain the symbol and the weight of the symbol. Internal nodes contain a symbol weight
-	and links to two child nodes. Here is an example of a text that is initalized into Huffman's algorithm with the
-	frequency of the characters being used as the weight of the symbol.
-	"Eerie eyes seen near lake" translated into the following symbols "E e r i [space] y s n a r l k ."
-	Those symbol weights are the following:
-	\includegraphics{graphics/huffman_example_symbol_freq}
-	Once the data set is prepared it is inserted into a priority queue. In this example the priority queue sets the least
-	frequency symbol counter to be of the highest priority.
-	\includegraphics{graphics/huffman_example_initial}
-	The process begins with the leaf nodes turning into a new node with children whose symbol weight is smaller than
-	the parent node. This is continued until all the nodes on the queue become attached to one big Huffman tree.
-	Algorithmic Steps:
-	Using a priority queue where the node with the lowest probability is given the highest priority.
-	1.) Create a leaf node for each symbol and add it to the priority queue.
-	2.) While there is more than one node in the queue
-		3.) Remove the two nodes of the highest priority from the queue.
-		4.) Create a new internal node with these two nodes as children and with the probability equal to
-		the sum of the two nodes' probabilities.
-		5.) Add the new node to the queue
-	6.) The remaining node is the root node and the tree is complete.
+Lossless data compression is a type of data compression algorithm that allows
+the original data to be perfectly reconstructed from the compressed data. When
+compared to lossy compression, these algorithms are a type of classification that
+allows for an approximation of the orignal data to be recovered from compress data.
+Loseless data compression is useful for any type of application when memory space is
+necessary to be conserved. In the case of loseless data compression there are three
+popular algorithms, run-length encoding, huffman coding, and LZ77/78.
+\par\vspace{\baselineskip}
+\subsubsection{Run-Length encoding}
+Run-length encoding is a very simple form of loseless data compression that is sequences
+in which the same data value occur in many consecutive data elements are not stored as a
+single data value and counter instead of the duplicate form. In other words, this algorithm
+replaces large sequences of repeating data with only one item with a counter. When considering
+that an data primitive for ints are four bytes and a characater is 1 byte. It would be useful
+to represent multiple characters as a counter instead of multiple characters. The same principle
+continues for multiple integers and other data primitives.
+\par\vspace{\baselineskip}
+For example if a string line contains ``WWWWWWWWBWWWWWWWB'' then ``8W1B7W'' size would be considerably
+smaller than the first data input. In the case of the uncompressed data it took over 20 bytes to
+represent that input while run-length encoding took 6 bytes. This can be a huge impact on memory
+allocation in areas where memory is size sensitve such as main memory, cahce, or pages.
+This compression may not have the same impact in all applications since it requires data to be
+in a sequence and contain repeating data. In soe applications this may not occur as often as one would
+hope for but nonetheless it is a useful compression algorithm for repeating data sets.
+\subsubsection{Huffman coding}
+Huffman coding is a type of prefix code that is used for lossless data compression. Prefix code is a type
+of code system that is only distinguished by its possession of a prefix proferty. This prefix property requires
+that no code word in the system that is a prefix of any other code word in the system. Therefore each code word
+must be unique to their own scopes. The output from Huffman's algortihm is a variable length code table for encoding
+a symbol into a prefix.
+\par\vspace{\baselineskip}
+Based on a given set of sybols with weights, Huffman's Algortihm determines the minimalistic required prefix coding
+table in order to represent the data set. This algorithm starts by creating a binary tree of nodes. These nodes
+are stored in a regular array which size depends on the symbol placed into the node. Initally all nodes are leaf
+nodes and all those nodes contain the symbol and the weight of the symbol. Internal nodes contain a symbol weight
+and links to two child nodes. Here is an example of a text that is initalized into Huffman's algorithm with the
+frequency of the characters being used as the weight of the symbol.
+\par\vspace{\baselineskip}
+As an example, ``Eerie eyes seen near lake'' translates into the following symbols ``E e r i [space] y s n a r l k .''
+Those symbol weights are the following:
+\par\vspace{\baselineskip}
 
-	Continuing with the example, the first two leaf nodes are added as children to a parent node whose
-	weight is the sum of the two children nodes
-	\includegraphics{graphics/huffman_example_internal_node}
-	\includegraphics{graphics/huffman_example_internal_node_added}
+\begin{figure}
+  \centering
+  \includegraphics{graphics/huffman_example_symbol_freq.png}
+  \caption{INSERT TEXT}
+\end{figure}
 
-	This continues repeatedly until one tree is created from the data set.
-	\includegraphics{graphics/huffman_example_end}
+Once the data set is prepared it is inserted into a priority queue. In this example the priority 
+queue sets the least frequency symbol counter to be of the highest priority.
+\par\vspace{\baselineskip}
 
-	The last node in the queue contains the root to the Huffman tree. This Huffman tree
-	contains the new code words for each character. This new prefix code will allow for easy
-	data representation for the text and obviously any data set with a symbol and an weight can
-	be applied to this algorithm and can be compressed into a prefix code symbol table.
-	Assuming that going left is 0 and going right is 1 on the tranversal of this tree, one complete
-	word can be found after a tranversal of its symbol into the Huffman tree.
-	\includegraphics{graphics/huffman_example_prefix_table}
-	After the prefix table is applied to the original data set the following result is the compressed
-	data for this data set.
-	\includegraphics{graphics/huffman_example_compressed_result}
-	Considering that the original size of the set in ASCII would take 8*26 = 208 bits, when compared to
-	the newly compressed data the new compressed data size is 73 bits.
+\begin{figure}
+  \centering
+  \includegraphics{graphics/huffman_example_initial.png}
+  \caption{INSERT TEXT}
+\end{figure}
 
-	The unique prefix property must be maintain in order for the Huffman property to remain a valid prefix
-	data symbol table. No code is a prefix to any other code in a system as described initially.
-LZ77/78:
-	LZ77/78 are two lossless data compression algorithms. LZ77 algorithms achieves compression by replacing
-	occurences of data with references to a single copy of that data existing earlier in the uncompressed
-	data stream. Length-distance pair is a pair numbers that are used primarily for enconding matches. In order
-	to spot matches the encoder tracks a small subset of data of the most recent data. This structure in which
-	the most recent data is stored is called a sliding window. LZ77 also known as sliding window compression is
-	a compression algorithm for sequential data compression. The sliding window consists of two parts, a search
-	buffer and a look-ahead buffer. The search buffer contains a portion of recently encoded sequence data and
-	the look-ahead buffer contains the next portion of data to be encoded.
-	Encoding Algorithm:
-	In order for the data in the look-ahead buffer to be encoded the encoder searches back through the
-	search buffer until it finds a match to the first symbol in the look-ahead buffer. This distance between
-	the pointer from look-ahead is called the offset. Once a match is found for the first symbol then the encoder
-	determines whether or not the symbol matches with the symbol from the look-ahead buffer. The number of
-	consecutive symbols in the search buffer that match consecutive symbols in the look-ahead buffer is called
-	the length of the match. Now the encode encodes this longest match symbol into a type of format of triple
-	variable pair, (offset, length of match, codeword for symbol).
-	\includegraphics{graphics/LZ77_compression_code}
-	The format is more clearly defined with in this example.
-	\includegraphics{graphics/LZ77_example_window}
+The process begins with the leaf nodes turning into a new node with children whose symbol weight is smaller than
+the parent node. This is continued until all the nodes on the queue become attached to one big Huffman tree.
+Algorithmic Steps:
+Using a priority queue where the node with the lowest probability is given the highest priority.
+\begin{enumerate}
+ \item Create a leaf node for each symbol and add it to the priority queue.
+ \item While there is more than one node in the queue
+ \begin{enumerate}
+    \item Remove the two nodes of the highest priority from the queue.
+    \item Create a new internal node with these two nodes as children and with the probability equal to
+	  the sum of the two nodes' probabilities.
+    \item Add the new node to the queue
+  \end{enumerate}
+  \item The remaining node is the root node and the tree is complete.
+\end{enumerate}
 
-	Limitations of LZ77:
-	A clear limitation of LZ77 algorithm is that the window only can allocate enough memory for the dictionary. At
-	larger window sizes performance begins to dwindle. A smaller window size also means that valuable dictionary data
-	encoding is being toss away because they are removed from the dictionary to make room for the newly encoded data sets
-	from the look-ahead buffer.
-LZ78:
-	Much like LZ77 the LZ78 lossless data compression algorithm replicates many of the LZ77 compression features however
-	LZ78 attempts to address some of the more underlying problems with LZ77 such as a finite amount of memory for
-	the dictionary. With LZ78, the dictionary is an unlimited collection of seen phrases. LZ78 schemes work by inputing
-	phrases into a dictionary and then when a repeated occurance of that phrase is found, the output of the format for
-	the search buffer match will now be an index to the dictionary referencing to the search buffer format stored in
-	the dictionary also known as phrase. LZ78 is only a slight modification of LZ77 and the compression algorithm is still
-	the same format as LZ77 as well as the encoder.
+Continuing with the example, the first two leaf nodes are added as children to a parent node whose
+weight is the sum of the two children nodes. This is shown in Figures~\ref{fig:huffman_ex_int_1} and
+~\ref{fig:huffman_ex_int_2}.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=.65]{graphics/huffman_example_internal_node.png}
+  \caption{INSERT TEXT}
+  \label{fig:huffman_ex_int_1}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=.63]{graphics/huffman_example_internal_node_added.png}
+  \caption{INSERT TEXT}
+  \label{fig:huffman_ex_int_2}
+\end{figure}
+
+This continues repeatedly until one tree is created from the data set.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=.75]{graphics/huffman_example_end.png}
+  \caption{INSERT TEXT}
+\end{figure}
+
+The last node in the queue contains the root to the Huffman tree. This Huffman tree
+contains the new code words for each character. This new prefix code will allow for easy
+data representation for the text and obviously any data set with a symbol and an weight can
+be applied to this algorithm and can be compressed into a prefix code symbol table.
+Assuming that going left is 0 and going right is 1 on the tranversal of this tree, one complete
+word can be found after a tranversal of its symbol into the Huffman tree. This is shown in
+Figure~\ref{fig:huffman_prefix_table}.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=.67]{graphics/huffman_example_prefix_table}
+  \caption{INSERT TEXT}
+  \label{fig:huffman_prefix_table}
+\end{figure}
+
+\par\vspace{\baselineskip}
+After the prefix table is applied to the original data set the following result is the compressed
+data for this data set as shown in Figure~\ref{fig:huffman_compressed}.
+\par\vspace{\baselineskip}
+\begin{figure}
+  \centering
+  \includegraphics[scale=.75]{graphics/huffman_example_compressed_result}
+  \caption{INSERT TEXT}
+  \label{fig:huffman_compressed}
+\end{figure}
+
+Considering that the original size of the set in ASCII would take 8*26 = 208 bits, when compared to
+the newly compressed data the new compressed data size is 73 bits.
+\par\vspace{\baselineskip}
+The unique prefix property must be maintain in order for the Huffman property to remain a valid prefix
+data symbol table. No code is a prefix to any other code in a system as described initially.
+\par\vspace{\baselineskip}
+
+\subsubsection{LZ77/78}
+LZ77/78 are two lossless data compression algorithms. LZ77 algorithms achieves compression by replacing
+occurences of data with references to a single copy of that data existing earlier in the uncompressed
+data stream. Length-distance pair is a pair numbers that are used primarily for enconding matches. In order
+to spot matches the encoder tracks a small subset of data of the most recent data. This structure in which
+the most recent data is stored is called a sliding window. LZ77 also known as sliding window compression is
+a compression algorithm for sequential data compression. The sliding window consists of two parts, a search
+buffer and a look-ahead buffer. The search buffer contains a portion of recently encoded sequence data and
+the look-ahead buffer contains the next portion of data to be encoded.
+\par\vspace{\baselineskip}
+In order for the data in the look-ahead buffer to be encoded, the encoder searches back through the
+search buffer until it finds a match to the first symbol in the look-ahead buffer. This distance between
+the pointer from look-ahead is called the offset. Once a match is found for the first symbol then the encoder
+determines whether or not the symbol matches with the symbol from the look-ahead buffer. The number of
+consecutive symbols in the search buffer that match consecutive symbols in the look-ahead buffer is called
+the length of the match. Now the encode encodes this longest match symbol into a type of format of triple
+variable pair, (offset, length of match, codeword for symbol).
+\par\vspace{\baselineskip}
+\begin{figure}
+  \centering
+  \includegraphics{graphics/LZ77_compression_code}
+  \caption{INSERT TEXT}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=.5]{graphics/LZ77_example_window}
+  \caption{The format is more clearly defined with in this example.}
+\end{figure}
+\newpage
+
+A clear limitation of LZ77 algorithm is that the window only can allocate enough memory for the dictionary. At
+larger window sizes performance begins to dwindle. A smaller window size also means that valuable dictionary data
+encoding is being toss away because they are removed from the dictionary to make room for the newly encoded data sets
+from the look-ahead buffer.
+\par\vspace{\baselineskip}
+Much like LZ77 the LZ78 lossless data compression algorithm replicates many of the LZ77 compression features however
+LZ78 attempts to address some of the more underlying problems with LZ77 such as a finite amount of memory for
+the dictionary. With LZ78, the dictionary is an unlimited collection of seen phrases. LZ78 schemes work by inputing
+phrases into a dictionary and then when a repeated occurance of that phrase is found, the output of the format for
+the search buffer match will now be an index to the dictionary referencing to the search buffer format stored in
+the dictionary also known as phrase. LZ78 is only a slight modification of LZ77 and the compression algorithm is still
+the same format as LZ77 as well as the encoder.
 
 \newpage
 
@@ -1412,6 +1481,7 @@ Using locks can cause a {\bfseries deadlock}. {\bfseries Deadlocks} can happen w
 {\bfseries t1} holds a lock and is waiting on a piece of data that is locked by another thread
 {\bfseries t2}, while at the same time {\bfseries t2} is waiting on the lock from {\bfseries t1}.
 This causes a loop, and neither lock ever gets released. The next figure illustrates this example.
+
 %figure
 
 \par\vspace{\baselineskip}
@@ -1434,7 +1504,8 @@ In \textit{The Art of Multiprocessor Programming \citep{artofmulti} } it is stat
 \end{itemize}
 
 These guidelines are great for safe parallel programming by today's standards, but we can do better.
-We present our implementation of a DBMS without the use of locks, while still maintaining a highly parallelizable data structure core.
+We present our implementation of a DBMS without the use of locks, while still maintaining a highly 
+parallelizable data structure core.
 
 \par\vspace{\baselineskip}
 
@@ -1447,7 +1518,8 @@ It is important to understand that if we could remove locks, we would get a noti
 Now that we have explained the traditional and most popular approaches to parallel programming, we introduce non-blocking algorithms.
 
 \par\vspace{\baselineskip}
-An algorithm that has the non-blocking property ensures the system makes progress. There are two types of non-blocking algorithms. These are defined as:
+An algorithm that has the non-blocking property ensures the system makes progress. There are 
+two types of non-blocking algorithms. These are defined as:
 \begin{itemize}
 	\item \textit{Lock-free}: Ensures at least one thread makes progress in a finite amount of time.
 	\item \textit{Wait-free}: Ensures all threads make progress in a finite amount of time.
@@ -1461,10 +1533,10 @@ structures. Non-blocking properties ensure a massively parallelizable database a
 
 From looking at the definitions, it is clear that wait-freedom grants much more
 powerful guarantees in regards to system progress. It is also easy to conclude that
-it is much harder to implement. In the next few sections we discuss this, other parallel programming algorithm categories, as well as the advantages and disadvantages each of them.
+it is much harder to implement. In the next few sections we discuss this, other parallel 
+programming algorithm categories, as well as the advantages and disadvantages each of them.
 
 We will talk about:
-
 
 \begin{itemize}
 	\item Blocking
@@ -1482,44 +1554,55 @@ We will talk about:
 
 \newpage
 
-Before we continue, it's important to define {\bfseries fairness}. {\bfseries Fairness} is done to avoid starvation. It prevents one thread from holding a lock for too long, disallowing other threads to execute their {\bfseries critical section}(the part of their execution that cannot be done concurrently).
+Before we continue, it's important to define {\bfseries fairness}. {\bfseries Fairness} 
+is done to avoid starvation. It prevents one thread from holding a lock for too long, 
+disallowing other threads to execute their {\bfseries critical section}(the part of 
+their execution that cannot be done concurrently).
+
 \subsubsection{Blocking}
-A blocking algorithm is the most common of the list. Pretty much anything that uses locks is blocking. Consider the following example:
+A blocking algorithm is the most common of the list. Pretty much anything that uses locks is 
+blocking. Consider the following example:
 
 \begin{lstlisting}[language=Java]
+Lock lock = new Lock();
 
-	Lock lock = new Lock();
-
-	public void method1(){
-
-		lock.lock();
-		dowork();
-		lock.unlock();
-
-	}
+public void method1(){
+  lock.lock();
+  dowork();
+  lock.unlock();
+}
 
 \end{lstlisting}
 
 
-The code above simply creates a obtains a lock by calling lock.lock(). While it is locked, the thread will do some work with dowork() and when it's done it will unlock it via lock.unlock(). If for example, another thread wanted to acquire the lock, it would not be able to until method1() unlocks it. The thread would just wait until it can acquire the lock, otherwise doing nothing until then.
+The code above simply creates a obtains a lock by calling lock.lock(). While it is locked, 
+the thread will do some work with dowork() and when it's done it will unlock it via 
+lock.unlock(). If for example, another thread wanted to acquire the lock, it would not be 
+able to until method1() unlocks it. The thread would just wait until it can acquire the 
+lock, otherwise doing nothing until then.
 
 \par\vspace{\baselineskip}
 
 {\bfseries Advantage}\newline
-The advantage to this is that it is very easy to code. There is no worry about two threads accessing a piece of data at the same time, it just wouldn't be possible.
+The advantage to this is that it is very easy to code. There is no worry about two threads 
+accessing a piece of data at the same time, it just wouldn't be possible.
 \par\vspace{\baselineskip}
 
 {\bfseries Disadvantage}\newline
-This is the slowest way of parallel programming. Whenever a lock is needed, one gives up almost all benefits of multiple threads.
+This is the slowest way of parallel programming. Whenever a lock is needed, one gives up 
+almost all benefits of multiple threads.
 
 \newpage
 \subsubsection{Starvation Free}
 
 \begin{quotation}
-"As long as one thread is in the critical section, then some other thread that wants to enter in the critical section will eventually succeed (even if the thread in the critical section has halted)." \citep{artofmulti}.
+"As long as one thread is in the critical section, then some other thread that wants 
+to enter in the critical section will eventually succeed (even if the thread in the 
+critical section has halted)." \citep{artofmulti}.
 \end{quotation}
 
-An example of a Starvation Free algorithm would be some code with a very strict fairness policy. This allows all threads to be able to execute their critical sections.
+An example of a Starvation Free algorithm would be some code with a very strict fairness 
+policy. This allows all threads to be able to execute their critical sections.
 
 {\bfseries Advantage}\newline
 Allows all threads to have a change to execute its critical section.
@@ -1531,10 +1614,15 @@ Not much faster than Blocking, it just guarantees more threads will execute thei
 \subsubsection{Obstruction Free}
 
 \begin{quotation}
-"A synchronization technique is obstruction-free if it  guarantees progress for any thread that  eventually executes  in  isolation. Even  though other  threads  may  be  in the  midst  of  executing operations,  a  thread  is  considered to execute in isolation as long as the other threads do not take any steps." \citep{obsfree}
+"A synchronization technique is obstruction-free if it  guarantees progress for any 
+thread that  eventually executes  in  isolation. Even  though other  threads  may  be  
+in the  midst  of  executing operations,  a  thread  is  considered to execute in 
+isolation as long as the other threads do not take any steps." \citep{obsfree}
 \end{quotation}
 
-Obstruction freedom basically states that a threads makes progress only if it doesn't encounter any resistance from any other threads. In simpler terms: when a thread executes in isolation, it finishes in a finite number of steps\citep{artofmulti}.
+Obstruction freedom basically states that a threads makes progress only if it doesn't encounter 
+any resistance from any other threads. In simpler terms: when a thread executes in isolation, 
+it finishes in a finite number of steps\citep{artofmulti}.
 
 \par\vspace{\baselineskip}
 {\bfseries Advantage}\newline
@@ -1549,10 +1637,13 @@ In all, Obstruction Free is a nice in-between solution
 
 \subsubsection{Lock Free}
 \begin{quotation}
-	"A method is lock-free if it guarantees that infinitely often some method call finishes in a finite number of steps"\citep[p. 60]{artofmulti}.
+	"A method is lock-free if it guarantees that infinitely often some method call finishes 
+	in a finite number of steps"\citep[p. 60]{artofmulti}.
 \end{quotation}
 
-Lock freedom simply says that at all times, at least one thread is making progress. It might take infinitely many steps, but it always makes progress. The chart on this page shows an easy to follow process to figuring out if an algorithm is lock free. 
+Lock freedom simply says that at all times, at least one thread is making progress. It might 
+take infinitely many steps, but it always makes progress. The chart on this page shows 
+an easy to follow process to figuring out if an algorithm is lock free. 
 
 \begin{figure}
     \centering
@@ -1564,22 +1655,23 @@ Lock freedom simply says that at all times, at least one thread is making progre
 The following is an example of a lock free algorithm.
 \citep{concurrencyfreaks}
 \begin{lstlisting}[language=Java]
+AtomicInteger atomicVar = new AtomicInteger(0);
 
-	AtomicInteger atomicVar = new AtomicInteger(0);
+public void funcLockFree() {
+  int localVar = atomicVar.get();
 
-	public void funcLockFree() {
-
-        int localVar = atomicVar.get();
-
-        while (!atomicVar.compareAndSet(localVar, localVar+1)) {
-               localVar = atomicVar.get();
-        }
-
+  while (!atomicVar.compareAndSet(localVar, localVar+1)) {
+    localVar = atomicVar.get();
+  }
 }
 \end{lstlisting} 
-In this case, we are incrementing an atomic integer in a loop. This guarantees that some thread is always working. If the compare and swap operation fails on some thread, that just means another thread is making progress and working on their compare and swap.
+In this case, we are incrementing an atomic integer in a loop. This guarantees that 
+some thread is always working. If the compare and swap operation fails on some thread, 
+that just means another thread is making progress and working on their compare and swap.
 
-Lock free programming isn't easy, there are many problems that can be faced. Each problem requires a unique technique to solve. Some can't even be solved. The next figure shows a variety of these problems and some proposed solutions.
+Lock free programming isn't easy, there are many problems that can be faced. Each 
+problem requires a unique technique to solve. Some can't even be solved. The next 
+figure shows a variety of these problems and some proposed solutions.
 
 \begin{figure}
     \centering
@@ -1590,10 +1682,18 @@ Lock free programming isn't easy, there are many problems that can be faced. Eac
 
 \newpage
 
-{\bfseries Atomic operations} are ones that happen without the possibility of another thread messing with it. In other words, atomic operations happen in a single step. Atomic operations are immensely helpful in implementing lock-free and wait-free algorithms; since most processors already have built in support for many atomic operations. 
+{\bfseries Atomic operations} are ones that happen without the possibility of another thread 
+messing with it. In other words, atomic operations happen in a single step. Atomic operations 
+are immensely helpful in implementing lock-free and wait-free algorithms; since most 
+processors already have built in support for many atomic operations. 
 
 \par\vspace{\baselineskip}
-One set of atomic operations that is particularly useful are{\bfseries read-modify-write (RMW)} operations. These allow us to read and write to a new memory location simultaneously. In general, they help us out because they allow for multiple threads writing to memory at the same time. If a few of these threads happen to collide and want to write to the same location for example, the threads will just execute one at a time. This guarantees that the system as a whole can move forward, making progress (though individual thread starvation is still possible).  
+One set of atomic operations that is particularly useful are{\bfseries read-modify-write (RMW)} 
+operations. These allow us to read and write to a new memory location simultaneously. In general, 
+they help us out because they allow for multiple threads writing to memory at the same time. 
+If a few of these threads happen to collide and want to write to the same location for example, 
+the threads will just execute one at a time. This guarantees that the system as a whole can move 
+forward, making progress (though individual thread starvation is still possible).  
 
 \par\vspace{\baselineskip}
 
@@ -1613,58 +1713,63 @@ Starvation is still possible. Does not guarantee thread level progress.
 	in a finite number of steps"\citep[p. 59]{artofmulti}.
 \end{quotation}
 
-Wait freedom holds the strongest guarantee of system progress. It is so complex that it is even divided into categories itself, the categories are as follow:
+Wait freedom holds the strongest guarantee of system progress. It is so complex that it is 
+even divided into categories itself, the categories are as follows:
 
-	\begin{itemize}
-		\item Unbounded
-		\item Bounded
-		\item Population Oblivious
-	\end{itemize}
+\begin{itemize}
+  \item Unbounded
+  \item Bounded
+  \item Population Oblivious
+\end{itemize}
 \newpage
 
 {\bfseries Unbounded Wait Freedom}, or just wait freedom, corresponds to the definition above. There is no bound on how many steps a method can take. 
 
 \par\vspace{\baselineskip}
 
-{\bfseries Bounded Wait Freedom} limits the number of steps a method call can take. "This bound may depend on the number of threads"\citep[p. 59]{artofmulti}. Let's take a look at a piece of code. \citep{concurrencyfreaks}
+{\bfseries Bounded Wait Freedom} limits the number of steps a method call can take. "This bound 
+may depend on the number of threads"\citep[p. 59]{artofmulti}. Let's take a look at a 
+piece of code. \citep{concurrencyfreaks}
 
 \begin{lstlisting}[language=Java]
-	
+AtomicIntegerArray arr = new AtomicIntegerArray(MAX_THREADS);
 
-	AtomicIntegerArray intArray = new AtomicIntegerArray(MAX_THREADS);
-	
-	public void funcWaitFreeBounded() {
-
-         	for (int i = 0; i < MAX_THREADS ; i++) {
-
-        	        intArray.set(i, 1);
-    	    }
-	}
-
+public void funcWaitFreeBounded() {
+  for (int i = 0; i < MAX_THREADS ; i++) {
+    arr.set(i, 1);
+  }
+}
 \end{lstlisting} 
 
-In this case, we are writign to an array that depends on the number of threads. Notice that this can't be population oblivious because the array depends on the number of threads, a dependency that is not true in population oblivious wait freedom.
+In this case, we are writign to an array that depends on the number of threads. Notice that this can't be 
+population oblivious because the array depends on the number of threads, a dependency that is not 
+true in population oblivious wait freedom.
 
 \par\vspace{\baselineskip}
-Finally, in {\bfseries Population Oblivious} wait freedom, "performance does not depend on the number of active threads" \citep{p. 59]{artofmulti}. Let's take a look at a piece of code. \citep{concurrencyfreaks}
+Finally, in {\bfseries Population Oblivious} wait freedom, "performance does not depend on the 
+number of active threads" \citep[p. 59]{artofmulti}. Let's take a look at a piece of code. \citep{concurrencyfreaks}
 
 \begin{lstlisting}[language=C++]
-	
-	atomic<int> counter;
-	
-	void funcWaitFreeBoundedPopulationOblivious() {
-   	
-   	 counter.fetch_add(1);
-	}
+atomic<int> counter;
+
+void funcWaitFreeBoundedPopulationOblivious() {
+  counter.fetch_add(1);
+}
 \end{lstlisting} 
 
-Simply incrementing a variable using the fetch-and-add atomic operation. It can be seen here, that no matter how many or how little threads we have, the performance isn't any better or any worse. It is simply doing one operation with no complex sub operations.
+Simply incrementing a variable using the fetch-and-add atomic operation. It can be seen here, that no 
+matter how many or how little threads we have, the performance isn't any better or any worse. 
+It is simply doing one operation with no complex sub operations.
 
 \par\vspace{\baselineskip}
 
-As we can see, the definitions the more and more specific and with such specification, it becomes harder to implement. However it also becomes a stronger guarantee of progress. In the case of wait free algorithms, progress is guaranteed at the thread level. Starvation is not possible.
+As we can see, the definitions the more and more specific and with such specification, it becomes 
+harder to implement. However it also becomes a stronger guarantee of progress. In the case of 
+wait free algorithms, progress is guaranteed at the thread level. Starvation is not possible.
 
-These algorithms form a hierarchy, a wait free population oblivious algorithm is also wait free bounded, and wait free, and lock free. The following diagram better illustrates this hierarchy.
+These algorithms form a hierarchy, a wait free population oblivious algorithm is also wait 
+free bounded, and wait free, and lock free. The following diagram better illustrates 
+this hierarchy.
 
 \begin{figure}
     \centering
@@ -1674,7 +1779,8 @@ These algorithms form a hierarchy, a wait free population oblivious algorithm is
 \end{figure}
 
 
-As we can see, lock free is the most general and provides the least guarantee. Then wait free is next, then wait free bounded, and finally wait free population oblivious.
+As we can see, lock free is the most general and provides the least guarantee. Then 
+wait free is next, then wait free bounded, and finally wait free population oblivious.
 
 
 {\bfseries Advantage}
@@ -1712,7 +1818,7 @@ to avoid expensive memory allocations.
 
 BoundedType:
 Every type that is specified as a template argument to variant must satisfy the above requirements. In addition certain
-features of variant are available if its bounded types meet certain additional requirements. The minimun requirements for
+features of variant are available if its bounded types meet certain additional requirements. The minimum requirements for
 a type to be accepted in a boost variant object are:
 \begin{enumerate}
  \item CopyConstructible or MoveConstructible
@@ -1775,7 +1881,7 @@ via \lstinline|boost::apply_visitor|. Visitation requires the program to explici
 \begin{figure}
   \centering
   \textbf{INSERT TEXT}
-  \includegraphics{graphics/boost_variant_visitation.png}
+  \includegraphics[scale=.5]{graphics/boost_variant_visitation.png}
   \caption{INSERT TEXT}
 \end{figure}
 
@@ -1808,7 +1914,7 @@ however not all compilers are able to this function.
 \begin{figure}
   \centering
   \textbf{INSERT TEXT}
-  \includegraphics{graphics/boost_variant_type_sequence.png}
+  \includegraphics[scale=.5]{graphics/boost_variant_type_sequence.png}
   \caption{INSERT TEXT}
 \end{figure}
 
@@ -1820,7 +1926,7 @@ extends this by allowing simultaneous visitation of content of two different var
 \begin{figure}
   \centering
   \textbf{INSERT TEXT}
-  \includegraphics{graphics/boost_variant_binary_visitation}
+  \includegraphics[scale=.5]{graphics/boost_variant_binary_visitation.png}
   \caption{INSERT TEXT}
 \end{figure}
 
@@ -1832,7 +1938,7 @@ multiple compares between variants objects with in tables.
 \begin{figure}
   \centering
   \textbf{INSERT TEXT}
-  \includegraphics{graphics/boost_variant_multi_visitation}
+  \includegraphics{graphics/boost_variant_multi_visitation.png}
   \caption{INSERT TEXT}
 \end{figure}
 
