@@ -1552,16 +1552,17 @@ In all, Obstruction Free is a nice in-between solution
 	"A method is lock-free if it guarantees that infinitely often some method call finishes in a finite number of steps"\citep[p. 60]{artofmulti}.
 \end{quotation}
 
-Lock freedom simply says that at all times, at least one thread is making progress. It might take infinitely many steps, but it always makes progress. The chart on this page shows an easy to follow process to figuring out if an algorithm is lock free.
+Lock freedom simply says that at all times, at least one thread is making progress. It might take infinitely many steps, but it always makes progress. The chart on this page shows an easy to follow process to figuring out if an algorithm is lock free. 
 
 \begin{figure}
     \centering
 	\includegraphics[scale=0.65]{graphics/lockfreechart.png}
     \caption{Is it lock free?}
+    \citep{introlockfree}
 \end{figure}
 
 The following is an example of a lock free algorithm.
-
+\citep{concurrencyfreaks}
 \begin{lstlisting}[language=Java]
 
 	AtomicInteger atomicVar = new AtomicInteger(0);
@@ -1575,8 +1576,7 @@ The following is an example of a lock free algorithm.
         }
 
 }
-
-\end{lstlisting} \citep{concurrencyfreaks}
+\end{lstlisting} 
 In this case, we are incrementing an atomic integer in a loop. This guarantees that some thread is always working. If the compare and swap operation fails on some thread, that just means another thread is making progress and working on their compare and swap.
 
 Lock free programming isn't easy, there are many problems that can be faced. Each problem requires a unique technique to solve. Some can't even be solved. The next figure shows a variety of these problems and some proposed solutions.
@@ -1584,27 +1584,116 @@ Lock free programming isn't easy, there are many problems that can be faced. Eac
 \begin{figure}
     \centering
 	\includegraphics[scale=0.7]{graphics/techniques.png}
-
+	\caption{Techniques}
+	\citep{introlockfree}
 \end{figure}
 
 \newpage
+
+{\bfseries Atomic operations} are ones that happen without the possibility of another thread messing with it. In other words, atomic operations happen in a single step. Atomic operations are immensely helpful in implementing lock-free and wait-free algorithms; since most processors already have built in support for many atomic operations. 
+
+\par\vspace{\baselineskip}
+One set of atomic operations that is particularly useful are{\bfseries read-modify-write (RMW)} operations. These allow us to read and write to a new memory location simultaneously. In general, they help us out because they allow for multiple threads writing to memory at the same time. If a few of these threads happen to collide and want to write to the same location for example, the threads will just execute one at a time. This guarantees that the system as a whole can move forward, making progress (though individual thread starvation is still possible).  
+
+\par\vspace{\baselineskip}
+
+{\bfseries Advantage} \par\vspace{\baselineskip}
+Guarantees system level progress, the system is always doing something useful.
+
+
+{\bfseries Disadvantage} 
+\par\vspace{\baselineskip}
+Starvation is still possible. Does not guarantee thread level progress. 
+
+\par\vspace{\baselineskip}
+
 \subsubsection{Wait Free}
 \begin{quotation}
 	"A method is wait-free if it guarantees that every call finishes its execution
 	in a finite number of steps"\citep[p. 59]{artofmulti}.
 \end{quotation}
 
+Wait freedom holds the strongest guarantee of system progress. It is so complex that it is even divided into categories itself, the categories are as follow:
+
+	\begin{itemize}
+		\item Unbounded
+		\item Bounded
+		\item Population Oblivious
+	\end{itemize}
 \newpage
+
+{\bfseries Unbounded Wait Freedom}, or just wait freedom, corresponds to the definition above. There is no bound on how many steps a method can take. 
+
+\par\vspace{\baselineskip}
+
+{\bfseries Bounded Wait Freedom} limits the number of steps a method call can take. "This bound may depend on the number of threads"\citep[p. 59]{artofmulti}. Let's take a look at a piece of code. \citep{concurrencyfreaks}
+
+\begin{lstlisting}[language=Java]
+	
+
+	AtomicIntegerArray intArray = new AtomicIntegerArray(MAX_THREADS);
+	
+	public void funcWaitFreeBounded() {
+
+         	for (int i = 0; i < MAX_THREADS ; i++) {
+
+        	        intArray.set(i, 1);
+    	    }
+	}
+
+\end{lstlisting} 
+
+In this case, we are writign to an array that depends on the number of threads. Notice that this can't be population oblivious because the array depends on the number of threads, a dependency that is not true in population oblivious wait freedom.
+
+\par\vspace{\baselineskip}
+Finally, in {\bfseries Population Oblivious} wait freedom, "performance does not depend on the number of active threads" \citep{p. 59]{artofmulti}. Let's take a look at a piece of code. \citep{concurrencyfreaks}
+
+\begin{lstlisting}[language=C++]
+	
+	atomic<int> counter;
+	
+	void funcWaitFreeBoundedPopulationOblivious() {
+   	
+   	 counter.fetch_add(1);
+	}
+\end{lstlisting} 
+
+Simply incrementing a variable using the fetch-and-add atomic operation. It can be seen here, that no matter how many or how little threads we have, the performance isn't any better or any worse. It is simply doing one operation with no complex sub operations.
+
+\par\vspace{\baselineskip}
+
+As we can see, the definitions the more and more specific and with such specification, it becomes harder to implement. However it also becomes a stronger guarantee of progress. In the case of wait free algorithms, progress is guaranteed at the thread level. Starvation is not possible.
 
 These algorithms form a hierarchy, a wait free population oblivious algorithm is also wait free bounded, and wait free, and lock free. The following diagram better illustrates this hierarchy.
 
 \begin{figure}
     \centering
 	\includegraphics[scale=0.25]{graphics/paralleltypes.png}
+	\caption{Hierarchy}
+	\citep{concurrencyfreaks}
 \end{figure}
 
 
 As we can see, lock free is the most general and provides the least guarantee. Then wait free is next, then wait free bounded, and finally wait free population oblivious.
+
+
+{\bfseries Advantage}
+\par\vspace{\baselineskip}
+\begin{itemize}
+
+	\item Guarantees thread level progress, no thread can starve
+	\item It has been proven that every algorithm can be written wait free
+\end{itemize}
+
+
+{\bfseries Disadvantage}
+\par\vspace{\baselineskip}
+\begin{itemize}
+
+	\item Very hard to implement properly
+	\item Though it has been proven that every algorithm can be written wait free, not all implementations are fast
+\end{itemize}
+
 \newpage
 
 
