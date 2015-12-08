@@ -12,7 +12,7 @@
 \usepackage{mathtools}
 
 % Temporarily ignore graphics
-%\renewcommand{\includegraphics}[2][]{\fbox{}}
+% \renewcommand{\includegraphics}[2][]{\fbox{}}
 
 \setlength{\parindent}{0cm}
 
@@ -251,9 +251,15 @@ to work exactly how we want it to work. With plugins, we can add essentially inf
 functionality. In the figure below, we have Vim running with the powerline plugin as 
 well as git integration. 
 
+%\begin{figure}
+    %\centering
+	%\includegraphics[scale=0.25]{graphics/vimide.png}
+ %   \caption{Vim}
+%\end{figure}
+
 \begin{figure}
     \centering
-	\includegraphics[scale=0.25]{graphics/vimide.png}
+	\includegraphics[scale=0.25]{vimide.png}
     \caption{Vim}
 \end{figure}
 
@@ -264,9 +270,15 @@ We chose Github Atom for similar reasons we did Vim. Atom is highly configurable
 comes with a built in package manager. Atom is basically a much more user friendly 
 version of Vim. When making quick edits, Atom does the job perfectly. Also, for 
 those of us who aren't too familiar with Vim. 
+%\begin{figure}
+    %\centering
+	%\includegraphics[scale=0.25]{graphics/atomide.png}
+ %   \caption{Atom}
+%\end{figure}
+
 \begin{figure}
     \centering
-	\includegraphics[scale=0.25]{graphics/atomide.png}
+	\includegraphics[scale=0.25]{atomide.png}
     \caption{Atom}
 \end{figure}
 
@@ -280,11 +292,18 @@ addition, Sublime has higher performance at the cost of CPU usage. While Atom us
 CPU and more RAM. In all, both editors have their uses and are great for different things, 
 and as such we use them both. 
 
+%\begin{figure}
+%    \centering
+%	\includegraphics[scale=0.33]{graphics/sublimeide.png}
+  %  \caption{Sublime Text}
+%\end{figure}
+
 \begin{figure}
     \centering
-	\includegraphics[scale=0.33]{graphics/sublimeide.png}
+	\includegraphics[scale=0.33]{sublimeide.png}
     \caption{Sublime Text}
 \end{figure}
+
 
 \newpage
 
@@ -296,12 +315,17 @@ of software. It also has additional features such as preview windows, spell chec
 structure browser, and more. It has become very useful to us for writing all the 
 papers for this project.
 
+%\begin{figure}
+    %\centering
+	%\includegraphics[scale=0.25]{graphics/texstudioide.png}
+ %   \caption{Texmaker/Texstudio}
+%\end{figure}
+
 \begin{figure}
     \centering
-	\includegraphics[scale=0.25]{graphics/texstudioide.png}
+	\includegraphics[scale=0.25]{texstudioide.png}
     \caption{Texmaker/Texstudio}
 \end{figure}
-
 \newpage
 
 \subsection{Other Tools}
@@ -315,9 +339,15 @@ is the case with us. Zeal is an offline documentation browser that lets us load 
 the docsets of almost any language and search through all of it in an instant. This tool 
 has become invaluable to our development process. 
 
+%\begin{figure}
+%    \centering
+%	\includegraphics[scale=0.25]{graphics/zealdoc.png}
+ %   \caption{Zeal documentation browser}
+%\end{figure}
+
 \begin{figure}
     \centering
-	\includegraphics[scale=0.25]{graphics/zealdoc.png}
+	\includegraphics[scale=0.25]{zealdoc.png}
     \caption{Zeal documentation browser}
 \end{figure}
 
@@ -1241,24 +1271,168 @@ structures. Non-blocking properties ensure a massively parallelizable database a
 
 From looking at the definitions, it is clear that wait-freedom grants much more 
 powerful guarantees in regards to system progress. It is also easy to conclude that 
-it is much harder to implement. In the next few sections we discuss this as well as the 
-advantages and disadvantages of both. 
+it is much harder to implement. In the next few sections we discuss this, other parallel programming algorithm categories, as well as the advantages and disadvantages each of them.
+
+We will talk about:
+	
+
+\begin{itemize}
+	\item Blocking
+	\begin{itemize}
+		\item Starvation Free
+	\end{itemize}
+	\item Obstruction Free
+	\item Lock Free
+	\item Wait Free
+	\begin{itemize}
+		\item Bounded
+		\item Population Oblivious
+	\end{itemize}
+\end{itemize}
+
+\newpage
+
+Before we continue, it's important to define {\bfseries fairness}. {\bfseries Fairness} is done to avoid starvation. It prevents one thread from holding a lock for too long, disallowing other threads to execute their {\bfseries critical section}(the part of their execution that cannot be done concurrently).
+\subsubsection{Blocking}
+A blocking algorithm is the most common of the list. Pretty much anything that uses locks is blocking. Consider the following example:
+
+\begin{lstlisting}[language=Java]
+	
+	Lock lock = new Lock();
+	
+	public void method1(){
+			
+		lock.lock();
+		dowork();
+		lock.unlock();		
+					
+	}
+
+\end{lstlisting}
 
 
-\subsubsection{Lock Freedom}
+The code above simply creates a obtains a lock by calling lock.lock(). While it is locked, the thread will do some work with dowork() and when it's done it will unlock it via lock.unlock(). If for example, another thread wanted to acquire the lock, it would not be able to until method1() unlocks it. The thread would just wait until it can acquire the lock, otherwise doing nothing until then.
+
+\par\vspace{\baselineskip}
+
+{\bfseries Advantage}\newline
+The advantage to this is that it is very easy to code. There is no worry about two threads accessing a piece of data at the same time, it just wouldn't be possible. 
+\par\vspace{\baselineskip}
+
+{\bfseries Disadvantage}\newline
+This is the slowest way of parallel programming. Whenever a lock is needed, one gives up almost all benefits of multiple threads. 
+
+\newpage
+\subsubsection{Starvation Free}
+
+\begin{quotation}
+"As long as one thread is in the critical section, then some other thread that wants to enter in the critical section will eventually succeed (even if the thread in the critical section has halted)." \citep{artofmulti}.
+\end{quotation}
+
+An example of a Starvation Free algorithm would be some code with a very strict fairness policy. This allows all threads to be able to execute their critical sections.	
+
+{\bfseries Advantage}\newline
+Allows all threads to have a change to execute its critical section.
+\par\vspace{\baselineskip}
+
+{\bfseries Disadvantage}\newline
+Not much faster than Blocking, it just guarantees more threads will execute their critical section.
+ 
+\subsubsection{Obstruction Free}
+
+\begin{quotation}
+"A synchronization technique is obstruction-free if it  guarantees progress for any thread that  eventually executes  in  isolation. Even  though other  threads  may  be  in the  midst  of  executing operations,  a  thread  is  considered to execute in isolation as long as the other threads do not take any steps." \citep{obsfree}
+\end{quotation}
+
+Obstruction freedom basically states that a threads makes progress only if it doesn't encounter any resistance from any other threads. In simpler terms: when a thread executes in isolation, it finishes in a finite number of steps\citep{artofmulti}.
+
+\par\vspace{\baselineskip}
+{\bfseries Advantage}\newline
+Slightly more guarantees than Blocking.
+\par\vspace{\baselineskip}
+
+{\bfseries Disadvantage}\newline
+Though it is stronger than Blocking, this is an even weaker guarantee than lock freedom.
+
+\par\vspace{\baselineskip}
+In all, Obstruction Free is a nice in-between solution
+
+\subsubsection{Lock Free}
 \begin{quotation}
 	"A method is lock-free if it guarantees that infinitely often some method call finishes in a finite number of steps"\citep[p. 60]{artofmulti}.
 \end{quotation}
 
-Lock freedom 
+Lock freedom simply says that at all times, at least one thread is making progress. It might take infinitely many steps, but it always makes progress. The chart on this page shows an easy to follow process to figuring out if an algorithm is lock free.
 
-\subsubsection{Wait Freedom}
+\begin{figure}
+    \centering
+	\includegraphics[scale=0.7]{lockfreechart.png}
+    \caption{Is it lock free?}
+\end{figure}
+%\begin{figure}
+%    \centering
+%	\includegraphics[scale=0.7]{graphics/lockfreechart.png}
+    
+%\end{figure}
+
+The following is an example of a lock free algorithm.
+
+\begin{lstlisting}[language=Java]
+	
+	AtomicInteger atomicVar = new AtomicInteger(0);
+	
+	public void funcLockFree() {
+	
+        int localVar = atomicVar.get();
+        
+        while (!atomicVar.compareAndSet(localVar, localVar+1)) {
+               localVar = atomicVar.get();
+        }
+        
+}
+
+\end{lstlisting} \citep{concurrencyfreaks}
+In this case, we are incrementing an atomic integer in a loop. This guarantees that some thread is always working. If the compare and swap operation fails on some thread, that just means another thread is making progress and working on their compare and swap.
+
+Lock free programming isn't easy, there are many problems that can be faced. Each problem requires a unique technique to solve. Some can't even be solved. The next figure shows a variety of these problems and some proposed solutions. 
+
+\begin{figure}[H]
+    \centering
+	\includegraphics[scale=0.7]{techniques.png}
+    \caption{Techniques}
+\end{figure}
+%\begin{figure}
+%    \centering
+%	\includegraphics[scale=0.7]{graphics/techniques.png}
+    
+%\end{figure}
+
+\newpage
+\subsubsection{Wait Free}
 \begin{quotation}
 	"A method is wait-free if it guarantees that every call finishes its execution
 	in a finite number of steps"\citep[p. 59]{artofmulti}.
 \end{quotation}
 
 \newpage
+
+These algorithms form a hierarchy, a wait free population oblivious algorithm is also wait free bounded, and wait free, and lock free. The following diagram better illustrates this hierarchy.
+
+\begin{figure}
+    \centering
+	\includegraphics[scale=0.25]{paralleltypes.png}
+    
+\end{figure}
+%\begin{figure}
+%    \centering
+%	\includegraphics[scale=0.25]{graphics/paralleltypes.png}
+    
+%\end{figure}
+
+
+As we can see, lock free is the most general and provides the least guarantee. Then wait free is next, then wait free bounded, and finally wait free population oblivious.
+\newpage
+
 
 \subsection{DataStore}
 %author Robert Medina
