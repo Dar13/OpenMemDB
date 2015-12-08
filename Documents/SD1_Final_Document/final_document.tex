@@ -1087,6 +1087,87 @@ a family of hashing functions. Linear Hashing with uniform distributions can hav
 eliminated but for skewed data distributions this can result in empty buckets which is is allocated in memory. This can lead to poor performance when compared to
 Extendible Hashing. 
 
+\subsection{Data Compression}
+%author Robert Medina
+Data Compression:
+	Lossless data compression is a type of data compression algorithm that allows
+	the original data to be perfectly reconstructed from the compressed data. When
+	compared to lossy compression, these algorithms are a type of classification that
+	allows for an approximation of the orignal data to be recovered from compress data.
+	Loseless data compression is useful for any type of application when memory space is
+	necessary to be conserved. In the case of loseless data compression there are three 
+	popular algorithms, run-length encoding, huffman coding, and LZ77/78. 
+Run-Length encoding:
+	Run-length encoding is a very simple form of loseless data compression that is sequences
+	in which the same data value occur in many consecutive data elements are not stored as a
+	single data value and counter instead of the duplicate form. In other words, this algorithm 
+	replaces large sequences of repeating data with only one item with a counter. When considering
+	that an data primitive for ints are four bytes and a characater is 1 byte. It would be useful
+	to represent multiple characters as a counter instead of multiple characters. The same principle
+	continues for multiple integers and other data primitives.
+	For example if a string line contain, "WWWWWWWWBWWWWWWWWB" then "8W1B8W" size would be considerably
+	smaller than the first data input. In the case of the uncompressed data it took over 20 bytes to 
+	represent that input while run-length encoding took 6 bytes. This can be a huge impact on memory 
+	allocation in areas where memory is size sensitve such as main memory, cahce, or pages.
+	This compression may not have the same impact in all applications since it requires data to be 
+	in a sequence and contain repeating data. In soe applications this may not occur as often as one would
+	hope for but nonetheless it is a useful compression algorithm for repeating data sets.
+Huffman coding:
+	Huffman coding is a type of prefix code that is used for lossless data compression. Prefix code is a type
+	of code system that is only distinguished by its possession of a prefix proferty. This prefix property requires
+	that no code word in the system that is a prefix of any other code word in the system. Therefore each code word
+	must be unique to their own scopes. The output from Huffman's algortihm is a variable length code table for encoding
+	a symbol into a prefix. 
+	Huffman's Algorithm:
+	Based on a given set of sybols with weights, Huffman's Algortihm determines the minimalistic required prefix coding
+	table in order to represent the data set. This algorithm starts by creating a binary tree of nodes. These nodes 
+	are stored in a regular array which size depends on the symbol placed into the node. Initally all nodes are leaf
+	nodes and all those nodes contain the symbol and the weight of the symbol. Internal nodes contain a symbol weight
+	and links to two child nodes. Here is an example of a text that is initalized into Huffman's algorithm with the 
+	frequency of the characters being used as the weight of the symbol.
+	"Eerie eyes seen near lake" translated into the following symbols "E e r i [space] y s n a r l k ."
+	Those symbol weights are the following:
+	\includegraphics{graphics/huffman_example_symbol_freq}
+	Once the data set is prepared it is inserted into a priority queue. In this example the priority queue sets the least
+	frequency symbol counter to be of the highest priority.
+	\includegraphics{graphics/huffman_example_initial}
+	The process begins with the leaf nodes turning into a new node with children whose symbol weight is smaller than 
+	the parent node. This is continued until all the nodes on the queue become attached to one big Huffman tree.
+	Algorithmic Steps:
+	Using a priority queue where the node with the lowest probability is given the highest priority. 
+	1.) Create a leaf node for each symbol and add it to the priority queue. 
+	2.) While there is more than one node in the queue 
+		3.) Remove the two nodes of the highest priority from the queue.
+		4.) Create a new internal node with these two nodes as children and with the probability equal to
+		the sum of the two nodes' probabilities. 
+		5.) Add the new node to the queue
+	6.) The remaining node is the root node and the tree is complete.
+	
+	Continuing with the example, the first two leaf nodes are added as children to a parent node whose
+	weight is the sum of the two children nodes
+	\includegraphics{graphics/huffman_example_internal_node}
+	\includegraphics{graphics/huffman_example_internal_node_added}
+	
+	This continues repeatedly until one tree is created from the data set. 
+	\includegraphics{graphics/huffman_example_end}
+	
+	The last node in the queue contains the root to the Huffman tree. This Huffman tree
+	contains the new code words for each character. This new prefix code will allow for easy 
+	data representation for the text and obviously any data set with a symbol and an weight can 
+	be applied to this algorithm and can be compressed into a prefix code symbol table. 
+	Assuming that going left is 0 and going right is 1 on the tranversal of this tree, one complete 
+	word can be found after a tranversal of its symbol into the Huffman tree.
+	\includegraphics{graphics/huffman_example_prefix_table}
+	After the prefix table is applied to the original data set the following result is the compressed
+	data for this data set.
+	\includegraphics{graphics/huffman_example_compressed_result}
+	Considering that the original size of the set in ASCII would take 8*26 = 208 bits, when compared to
+	the newly compressed data the new compressed data size is 73 bits. 
+
+	The unique prefix property must be maintain in order for the Huffman property to remain a valid prefix
+	data symbol table. No code is a prefix to any other code in a system as described initially.
+LZ77/78:
+	
 \newpage
 
 \subsection{Parallelism}
@@ -1374,11 +1455,63 @@ Write about boost
 	variant instructions. Two ways to retrieve a type from the value that is held in a variant is either the program
 	must store this type or use boost visitor mechanism. This variant data type is stored as a stack instead of a heap
 	to avoid expensive memory allocations. 
+	
+	BoundedType:
+	Every type that is specified as a template argument to variant must satisfy the above requirements. In addition certain 
+	features of variant are available if its bounded types meet certain additional requirements. The minimun requirements for
+	a type to be accepted in a boost variant object are
+	1) CopyConstructible or MoveConstructible
+	2) Destructor upholds the no-throw exception-safety guarantee
+	3) Complete at the point of variant template instantiation
+	Additional Features are
+	1) Assignable: variant is itself Assignable if and only if every one of its bounded types meets the requirements of the concept. 		(Note that top-level const-qualified types and reference types do not meet these requirements.)
+	2) MoveAssignable: variant is itself MoveAssignable if and only if every one of its bounded types meets the requirements of 			the concept. (Note that top-level const-qualified types and reference types do not meet these requirements.)
+	3) DefaultConstructible [20.1.4]: variant is itself DefaultConstructible if and only if its first bounded type (i.e., T1) meets the 			requirements of the concept.
+	4) EqualityComparable: variant is itself EqualityComparable if and only if every one of its bounded types meets the 				requirements of the concept.
+	5) LessThanComparable: variant is itself LessThanComparable if and only if every one of its bounded types meets the 				requirements of the concept.
+	6) OutputStreamable: variant is itself OutputStreamable if and only if every one of its bounded types meets the requirements 			of the concept.
+	7) Hashable: variant is itself Hashable if and only if every one of its bounded types meets the requirements of the concept.
+	CopyConstructible is a type that can be constructed from a value or reference of the same type. Move constructible type is a 			type that can be constructed from an rvalue reference of its type.
+	No-throw guarantee, also known as failure transparency are operations that are guaranteed to succedd and satisfy all 				requirements even in bizarre situations. Should an exception
+	occur, it will be handled internally and not by the programmer. 
+	
 	Using Boost variant:
 	Whenever a boost::variant object is created the default constructor makes the first type its first bounded type.
-	A discriminated union container is defined by instantiating the \lstinline|boost::variant| with the desired argument types.
+	A discriminated union container is defined by instantiating the boost::variant with the desired argument types.
 	These types are called bounded types and derive from the BoundedType concept. In order to limit the different
-	types that bounded types can accept the \lstinline|BOOST_VARIANT_LIMIT_TYPES| must be manipulated to reflect this. 
+	types that bounded types can accept the BOOST_VARIANT_LIMIT_TYPES must be manipulated to reflect this. 
+	In order to retrieve data types from boost::variant there are multiple functions available in order to accomplish this task.
+	Value retrieval can be accomplish by using the get function. Get takes in a type as an argument and returns the first 
+	data value in a boost::variant object that matches with that data type.
+	\includegraphics{graphics/boost_variant_get_header}
+	While get is an acceptable means for value retrieval it suffers from several flaws. The get function can only work for one
+	static type of boost::variant, the heterogenous data variant at declaration. If boost::variant object changes its data type
+	then get will lead to logical errors that were not considered. Thus boost variant needs a more robust un-static function 
+	to retrieve data from a boost::variant object. The variant library offers a compile-time visitation via apply_visitor. 
+	Visitation requires the program to explicity handle or ignore bounded types. 
+	\includegraphics{graphics/boost_variant_visitation}
+	This provides the same functionality as get but now this code allows the program to write generic visitors at compile-time.
+	Apply_visitor also contains one more benefit for value retrieval. Delayed visitation is a type of apply_visitor that returns
+	a function object that operates on any variant given to it. This is useful when operating on a sequence of variant types.
+	Preprocessor macros:
+	The variant class greatly simplifies use for specific instructions of the template but it significantly complicates use for
+	generic instructions. When creating a variant instruction it is very easy to declare an variant object but it is less clear
+	on how such types are accepted into a function. The Preprocessor library provides a powerful solution to this dilemma.
+	The boost variant library provides its own macro BOOST_VARIANT_ENUM_PARAMS that simplifies the process for the user of 			declaring variant types in function templates or other things of such nature. 
+	It is possible to use a type sequence to specify bounded types instead of using boost variant default function. Essentially a 
+	type sequence performs the same functionality of boost variant but if the program for whatever needs must edit and create 			specific types of type sequences it is possible with make_variant_over function. As shown below make_variant_over creates a 		type sequence that is customizable. Problems with the variant class template is parameter list is limiting in two factors. There 			must be a implementation maximum limit of the types available and the nature of parameter lists makes compile-time 				manipulation of the list excessively difficult.
+	This is where editing a type sequence on your own would be helpful in these two aspects however not all compilers are able to         
+ this function. 
+	\includegraphics{graphics/boost_variant_type_sequence}
+	Extending Visitation Even Further:
+	Visitation is a powerful mechanism for manipulating a boost variant object content. Binear visitation extends this by allowing 			simultaneous visitation of content of two different variant objects. 
+	\includegraphics{graphics/boost_variant_binary_visitation}
+	Multi visitation:
+	Multi vistation is like binary visitation with respect to functionality except that it allows for three or more boost variant objects to be compared. This maybe an useful tool when used for multiple compares between variants objects with in tables.
+	\includegraphics{graphics/boost_variant_multi_visitation}
+	Boost variant over boost any:
+	Boost variant contains several advantages over boost any such as guaranting the type of its content is a user-specificed set
+	of types. Boost variant provides compile-time checked visitation of its content, before run-time. This allows for safer type storage. Boost variant enables generic visitation of its content and offers an efficient stack-based storage scheme that avoids the overhead of dynamic allocation. Boost any had some advantages over variant such as virtually any type for its template argument content, no-throw guarantee of exception safety for swap operation and less expensive compile-time processor/memory demands. Overall boost variant was choosen for its highly customable type storage. The user-specificed set of types is something that was highly sought for our data structures.
 	
 Write about types
 	Data Store has multiple types predefined that allow for a variant of types that tables can be
