@@ -1814,8 +1814,6 @@ wait free is next, then wait free bounded, and finally wait free population obli
 
 \subsection{DataStore}
 %author Robert Medina
-data store design:
-Write about boost
 Introduction:
 Boost variant library focuses on typesafe storage and retrieval of a bounded set of types that is
 of discriminated unions. A variant data type exposes an interface independent of the current value's type.
@@ -2004,7 +2002,7 @@ write about functions
 5.) getTable
 		getTable takes in a char array tablename and finds the table from the lookup\_table. If it finds the table
 		then it returns the table pointer.
-write about data structs
+
 \subsubsubsection{Data Structures}
 	Nested vectors are used to represent tables. Each table is stored into a hashmap called lookup_table to refer to
 	tables. A pair is used to group up table schema boost variant vector and the data table itself. Nested vectors
