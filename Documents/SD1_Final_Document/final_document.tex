@@ -1167,7 +1167,40 @@ Huffman coding:
 	The unique prefix property must be maintain in order for the Huffman property to remain a valid prefix
 	data symbol table. No code is a prefix to any other code in a system as described initially.
 LZ77/78:
+	LZ77/78 are two lossless data compression algorithms. LZ77 algorithms achieves compression by replacing 
+	occurences of data with references to a single copy of that data existing earlier in the uncompressed
+	data stream. Length-distance pair is a pair numbers that are used primarily for enconding matches. In order
+	to spot matches the encoder tracks a small subset of data of the most recent data. This structure in which
+	the most recent data is stored is called a sliding window. LZ77 also known as sliding window compression is
+	a compression algorithm for sequential data compression. The sliding window consists of two parts, a search
+	buffer and a look-ahead buffer. The search buffer contains a portion of recently encoded sequence data and
+	the look-ahead buffer contains the next portion of data to be encoded. 
+	Encoding Algorithm:
+	In order for the data in the look-ahead buffer to be encoded the encoder searches back through the 
+	search buffer until it finds a match to the first symbol in the look-ahead buffer. This distance between 
+	the pointer from look-ahead is called the offset. Once a match is found for the first symbol then the encoder
+	determines whether or not the symbol matches with the symbol from the look-ahead buffer. The number of 
+	consecutive symbols in the search buffer that match consecutive symbols in the look-ahead buffer is called
+	the length of the match. Now the encode encodes this longest match symbol into a type of format of triple
+	variable pair, (offset, length of match, codeword for symbol).
+	\includegraphics{graphics/LZ77_compression_code}
+	The format is more clearly defined with in this example.
+	\includegraphics{graphics/LZ77_example_window}
 	
+	Limitations of LZ77:
+	A clear limitation of LZ77 algorithm is that the window only can allocate enough memory for the dictionary. At
+	larger window sizes performance begins to dwindle. A smaller window size also means that valuable dictionary data
+	encoding is being toss away because they are removed from the dictionary to make room for the newly encoded data sets
+	from the look-ahead buffer. 
+LZ78:
+	Much like LZ77 the LZ78 lossless data compression algorithm replicates many of the LZ77 compression features however
+	LZ78 attempts to address some of the more underlying problems with LZ77 such as a finite amount of memory for 
+	the dictionary. With LZ78, the dictionary is an unlimited collection of seen phrases. LZ78 schemes work by inputing 
+	phrases into a dictionary and then when a repeated occurance of that phrase is found, the output of the format for 
+	the search buffer match will now be an index to the dictionary referencing to the search buffer format stored in
+	the dictionary also known as phrase. LZ78 is only a slight modification of LZ77 and the compression algorithm is still
+	the same format as LZ77 as well as the encoder. 
+
 \newpage
 
 \subsection{Parallelism}
@@ -1558,20 +1591,22 @@ write about functions
 
 write about what is being passed in
 *done so by diagrams and expanded by functions*
+
 write about data structs
 	Nested vectors are used to represent tables. Each table is stored into a hashmap called lookup_table to refer to
 	tables. A pair is used to group up table schema boost variant vector and the data table itself. Nested vectors
 	are used since it most is the most efficent way to represent memory. A hashmap is used to refer tables because each
 	table contains a unique identifier char array. A hashmap provides instant access table lookup. A pair is used to group 
 	up the table with its schema. Each table have their own unique schema and it is retrievable from the table lookup hashmap.
+
 write about performance of data structs
 	Nested vectors are instant access O(1), if you have the index of the column or row. This makes data retrieval
 	linear time O(n). In the case of a full table scan, it is only necessary to find the columns desired, then each other row
 	column data can be retrieved by using the column index. If a full table scan with all columns are desired then this is O(n^2).
 	A pair is fairly easy to retrieve data from since it is only two pointers or objects grouped together in an object. In the case
 	for a hashmap, it provides instant access O(1), until the hashmap becomes more filled up and collisions being to happen. Normally hashmaps
-	become reindex whenever they are around half full but it may be more advantageous to use dynamic hashing. This is something that will be determine
-	based on performance testing on a training data set.
+	become reindex whenever they are around half full but it may be more advantageous to use dynamic hashing. This is something that will be determine based on performance testing on a training data set.
+
 write about memory allocation (dynamic, not preprocessor)
 1.) Memory management in C++
 	Memory in a C++ program is divded into two parts, the stack and the heap. The stack contains all the variables
@@ -1579,47 +1614,28 @@ write about memory allocation (dynamic, not preprocessor)
 	of the program. This memory can be allocated dynammically when the program runs but the program must also insure that this
 	memory gets cleaned up after it is done with it.
 	*diagram for stack and heap*
-	Programs cannot predicte how much memory will be required at run time. This memory can be allocated by the new operator and 
-	is referenced by the address of the space allocated. This memory can also be deleted by the delete operator. This is used
-	when memory is no longer used purposely. If it is not cleaned up then it creates garbage memory that could otheriwse be used
-	resourcefully. 
-	There are other ways to dynammically allocate memory, such as malloc(), calloc(), and realloc(). There are major differences between
-	the new operator and the other memory allocation functions. 
-	
+	Programs cannot predicte how much memory will be required at run time. This memory can be allocated by the new operator 			and is referenced by the address of the space allocated. This memory can also be deleted by the delete operator. This is used 			when memory is no longer used purposely. If it is not cleaned up then it creates garbage memory that could otheriwse be used 		resourcefully. There are other ways to dynammically allocate memory, such as malloc(), calloc(), and realloc(). There are major 		differences between the new operator and the other memory allocation functions. 
+
 	Delete and Free do not MIX
-	The delete() function works for the new() function but it causes undefined behavior when used on a malloc(). If the free() function is used on
-	a new() object then the same thing occurs. When deallocating memory for new or malloc it is necessary to apply the correct functions to free up
-	memory. This can usually occur when user-defined functions are applied instead of the STL, standard template library for C++. This can vary from
-	system to system but also from compiler to compiler. When the delete operation is called to delete the new object the compiler generates the following
-	code.
+	The delete() function works for the new() function but it causes undefined behavior when used on a malloc(). If the free() function is used on a new() object then the same thing occurs. When deallocating memory for new or malloc it is necessary to apply the correct functions to free up memory. This can usually occur when user-defined functions are applied instead of the STL, standard template library for C++. This can vary from system to system but also from compiler to compiler. When the delete operation is called to delete the new object the compiler generates the following code.
 	%includegraphics{graphics/new_delete_example}
-	If the only function the programmer desire is to handle the raw uninitalized memory then new and delete operators should not be considered. Instead
-	the operator new and operator delete should be used to allocate memory and deallocate. This is essentially the same as malloc and free.
+	If the only function the programmer desire is to handle the raw uninitalized memory then new and delete operators should not be considered. Instead the operator new and operator delete should be used to allocate memory and deallocate. This is essentially the same as malloc and free.
 	%includegraphics{graphics/new_operator_bypass}
 	
 	New and malloc mixed
-	If a placement new is used to create an object in memory, not the new function but placement new used to store already allocated data from malloc() function
-	then delete should not be used because like in the previous example, the delete function calls the operator delete to deallocate memory but the memory contained
-	was not allocated by the operator new. This placement new just returns the pointer passed to it. So in general, if raw memory was passed to placement new and this
-	memory was dynammically allocated then still memory must be deallocated to prevent a memory leak.
+	If a placement new is used to create an object in memory, not the new function but placement new used to store already allocated data from malloc() function then delete should not be used because like in the previous example, the delete function calls the operator delete to deallocate memory but the memory contained was not allocated by the operator new. This placement new just returns the pointer passed to it. So in general, if raw memory was passed to placement new and this memory was dynammically allocated then still memory must be deallocated to prevent a memory leak.
 	%includegraphics{graphics/new_placement}
 	
 	New operator
 	There is a difference between the new operator and operator new. The new operator does two things.
-	First, it allocates enough memory to hold an object of the type inputed. Secondly, it calls a constructor to initialize an object of the type defined. This operator's
-	behavior cannot be changed in ay way. The way the memory is allocated can be changed however. The new operator calls a function to perform the memory allocation. This
-	can be overloaded to change the bahvior. The function at allocates memory for the new operator is "operator new". 
+	First, it allocates enough memory to hold an object of the type inputed. Secondly, it calls a constructor to initialize an object of 		the type defined. This operator's behavior cannot be changed in ay way. The way the memory is allocated can be changed 			however. The new operator calls a function to perform the memory allocation. This can be overloaded to change the bahvior. 			The function at allocates memory for the new operator is "operator new". 
 	%includegraphics{graphics/operator_new_header}
-	The operator new returns a void pointer to raw, uninitialized memory. The parameter, size_t, specifices how much memory to allocate. Whenever the programmer needs to call
-	raw memory it is called by operator new like so.
+	The operator new returns a void pointer to raw, uninitialized memory. The parameter, size_t, specifices how much memory to allocate. Whenever the programmer needs to call raw memory it is called by operator new like so.
 	%includegraphics{graphics/operator_new_raw_memory}
 	This line of code will return a raw chuck of meaningless memory.
 	
 	Placement new
-	Sometimes there exists raw memory that was allocated dynammically but does not have a constructor to be linked up to. Invoking a constructor on an existing object is not 
-	logical. Constructors exist to initialize objects and objects can only be initialized once. Therefore there must be a way to call a constructor directly so it can be linked
-	to already allocated memory. Placement new allows the programmer to directly work with a constructor.
-	Here is an example of how placement new might be used.
+	Sometimes there exists raw memory that was allocated dynammically but does not have a constructor to be linked up to. Invoking a constructor on an existing object is not logical. Constructors exist to initialize objects and objects can only be initialized once. Therefore there must be a way to call a constructor directly so it can be linked to already allocated memory. Placement new allows the programmer to directly work with a constructor. Here is an example of how placement new might be used.
 	%includegraphics{graphics/placement_new_example}
 	In the function constructWidgetInBuffer, the expressed return is a new operator that returns the location of the constructor by using an overloaded operator new function.
 	%includegraphics{graphics/operator_new_overload}
@@ -1630,21 +1646,10 @@ write about memory allocation (dynamic, not preprocessor)
 	if _new_handler() can somehow supply memory for malloc() then everything is good otherwise an exception is thrown.
 	
 	New and malloc()
-	The new operator creates an object that refers to the memory occupted. Malloc on the other hand will simply call a memory block with no object
-	reference to the memory.
+	The new operator creates an object that refers to the memory occupted. Malloc on the other hand will simply call a memory block with no object reference to the memory.
+
 	Memory Corruption
-		There exist two reasons that memory corruption could occur in a program. The source of the memory corruption and its manifestation may be far apart. This makes it difficult
-		to finding the cause of the memory corruption in relation to its effect. The second reason is that symptoms occuring during bizzare conditions which make them significantly
-		harder to replicate.
-		Memory Corruption Errors can be categorized into four categories. One of the more common errors is using uninitialized memory. This refers to the contents of uninitialized memory
-		are treated as garbage values. The usage of such garbage values can lead to unpredictable program behavior. Second error is using none-owned memory. It is common that pointers are 
-		used to access and modify memory. Whenever this pointer is a null pointer also known as a dangling pointer, or to a memory location outside of current stack or heap bounds, it is
-		referring to memory that is not possessed by the program. Using these pointers causes serious flaws. Accessing such memory usually cause OS exceptions, that commonly leads to program
-		crashes. Third, using memory beyond the memory that was allocated also known as a buffer overflow. For example, an array that is inside a loop contains a incorrect terminating condition
-		then memory that is accessed beyond the bounds of the array may be manipulated that was otherwise not supposed to. Lastly, the four category that causes memory corruption is fauly heap
- 		memory management. Memory leaks and freeing non-heap or un-allocated memory are the most frequen erros caused by fault heap memory management. Since C++ gives so much freedom to allocate 
-		any amount of memory the program needs it can lead to such errors when the program does not clean yourself.
-		More specifically memory leaks is allocated memory but are not released. This causes the program to consume memory and reduce the available memory in the heap. 
+		There exist two reasons that memory corruption could occur in a program. The source of the memory corruption and its manifestation may be far apart. This makes it difficult to finding the cause of the memory corruption in relation to its effect. The second reason is that symptoms occuring during bizzare conditions which make them significantly harder to replicate. Memory Corruption Errors can be categorized into four categories. One of the more common errors is using uninitialized memory. This refers to the contents of uninitialized memory are treated as garbage values. The usage of such garbage values can lead to unpredictable program behavior. Second error is using none-owned memory. It is common that pointers are used to access and modify memory. Whenever this pointer is a null pointer also known as a dangling pointer, or to a memory location outside of current stack or heap bounds, it is referring to memory that is not possessed by the program. Using these pointers causes serious flaws. Accessing such memory usually cause OS exceptions, that commonly leads to program crashes. Third, using memory beyond the memory that was allocated also known as a buffer overflow. For example, an array that is inside a loop contains a incorrect terminating condition then memory that is accessed beyond the bounds of the array may be manipulated that was otherwise not supposed to. Lastly, the four category that causes memory corruption is fauly heap memory management. Memory leaks and freeing non-heap or un-allocated memory are the most frequen erros caused by fault heap memory management. Since C++ gives so much freedom to allocate any amount of memory the program needs it can lead to such errors when the program does not clean yourself. More specifically memory leaks is allocated memory but are not released. This causes the program to consume memory and reduce the available memory in the heap. 
 
 /* cannot talk about such things, need research */		
 write about possible cache coherent
