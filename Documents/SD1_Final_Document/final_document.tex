@@ -251,15 +251,9 @@ to work exactly how we want it to work. With plugins, we can add essentially inf
 functionality. In the figure below, we have Vim running with the powerline plugin as
 well as git integration.
 
-%\begin{figure}
-    %\centering
-	%\includegraphics[scale=0.25]{graphics/vimide.png}
- %   \caption{Vim}
-%\end{figure}
-
 \begin{figure}
     \centering
-	\includegraphics[scale=0.25]{vimide.png}
+	\includegraphics[scale=0.25]{graphics/vimide.png}
     \caption{Vim}
 \end{figure}
 
@@ -270,17 +264,13 @@ We chose Github Atom for similar reasons we did Vim. Atom is highly configurable
 comes with a built in package manager. Atom is basically a much more user friendly
 version of Vim. When making quick edits, Atom does the job perfectly. Also, for
 those of us who aren't too familiar with Vim.
-%\begin{figure}
-    %\centering
-	%\includegraphics[scale=0.25]{graphics/atomide.png}
- %   \caption{Atom}
-%\end{figure}
 
 \begin{figure}
     \centering
-	\includegraphics[scale=0.25]{atomide.png}
+	\includegraphics[scale=0.25]{graphics/atomide.png}
     \caption{Atom}
 \end{figure}
+
 
 \newpage
 
@@ -292,16 +282,9 @@ addition, Sublime has higher performance at the cost of CPU usage. While Atom us
 CPU and more RAM. In all, both editors have their uses and are great for different things,
 and as such we use them both.
 
-%\begin{figure}
-%    \centering
-%	\includegraphics[scale=0.33]{graphics/sublimeide.png}
-  %  \caption{Sublime Text}
-%\end{figure}
-
 \begin{figure}
     \centering
-	%\includegraphics[scale=0.33]{sublimeide.png}
-	\includegraphics[scale=0.25]{graphics/sublimeide.png}
+	\includegraphics[scale=0.3]{graphics/sublimeide.png}
     \caption{Sublime Text}
 \end{figure}
 
@@ -316,17 +299,12 @@ of software. It also has additional features such as preview windows, spell chec
 structure browser, and more. It has become very useful to us for writing all the
 papers for this project.
 
-%\begin{figure}
-    %\centering
-	%\includegraphics[scale=0.25]{graphics/texstudioide.png}
- %   \caption{Texmaker/Texstudio}
-%\end{figure}
-
 \begin{figure}
     \centering
-	\includegraphics[scale=0.25]{texstudioide.png}
+	\includegraphics[scale=0.25]{graphics/texstudioide.png}
     \caption{Texmaker/Texstudio}
 \end{figure}
+
 \newpage
 
 \subsection{Other Tools}
@@ -340,15 +318,9 @@ is the case with us. Zeal is an offline documentation browser that lets us load 
 the docsets of almost any language and search through all of it in an instant. This tool
 has become invaluable to our development process.
 
-%\begin{figure}
-%    \centering
-%	\includegraphics[scale=0.25]{graphics/zealdoc.png}
- %   \caption{Zeal documentation browser}
-%\end{figure}
-
 \begin{figure}
     \centering
-	\includegraphics[scale=0.25]{zealdoc.png}
+	\includegraphics[scale=0.25]{graphics/zealdoc.png}
     \caption{Zeal documentation browser}
 \end{figure}
 
@@ -1010,14 +982,14 @@ entries each bucket can hold.
 \begin{figure}
   \centering
   \textbf{Extendible Hashmap}
-  \includegraphics{graphics/ExtendibleHashing_Depth_2}
+  \includegraphics{graphics/ExtendibleHashing_Depth_2.png}
   \caption{INSERT TEXT}
 \end{figure}
 
 \begin{figure}
   \centering
   \textbf{Spliting Occurs}
-  \includegraphics{graphics/ExtendibleHashing_Spliting}
+  \includegraphics{graphics/ExtendibleHashing_Spliting.png}
   \caption{INSERT TEXT}
 \end{figure}
 
@@ -1584,14 +1556,9 @@ Lock freedom simply says that at all times, at least one thread is making progre
 
 \begin{figure}
     \centering
-	\includegraphics[scale=0.7]{lockfreechart.png}
+	\includegraphics[scale=0.65]{graphics/lockfreechart.png}
     \caption{Is it lock free?}
 \end{figure}
-%\begin{figure}
-%    \centering
-%	\includegraphics[scale=0.7]{graphics/lockfreechart.png}
-
-%\end{figure}
 
 The following is an example of a lock free algorithm.
 
@@ -1614,16 +1581,11 @@ In this case, we are incrementing an atomic integer in a loop. This guarantees t
 
 Lock free programming isn't easy, there are many problems that can be faced. Each problem requires a unique technique to solve. Some can't even be solved. The next figure shows a variety of these problems and some proposed solutions.
 
-\begin{figure}[H]
+\begin{figure}
     \centering
-	\includegraphics[scale=0.7]{techniques.png}
-    \caption{Techniques}
-\end{figure}
-%\begin{figure}
-%    \centering
-%	\includegraphics[scale=0.7]{graphics/techniques.png}
+	\includegraphics[scale=0.7]{graphics/techniques.png}
 
-%\end{figure}
+\end{figure}
 
 \newpage
 \subsubsection{Wait Free}
@@ -1638,14 +1600,8 @@ These algorithms form a hierarchy, a wait free population oblivious algorithm is
 
 \begin{figure}
     \centering
-	\includegraphics[scale=0.25]{paralleltypes.png}
-
+	\includegraphics[scale=0.25]{graphics/paralleltypes.png}
 \end{figure}
-%\begin{figure}
-%    \centering
-%	\includegraphics[scale=0.25]{graphics/paralleltypes.png}
-
-%\end{figure}
 
 
 As we can see, lock free is the most general and provides the least guarantee. Then wait free is next, then wait free bounded, and finally wait free population oblivious.
@@ -1764,7 +1720,7 @@ however not all compilers are able to this function.
   \centering
   \textbf{INSERT TEXT}
   \includegraphics{graphics/boost_variant_type_sequence.png}
-  \caption{INSERT_TEXT}
+  \caption{INSERT TEXT}
 \end{figure}
 
 Extending Visitation Even Further:
@@ -1821,29 +1777,29 @@ Write about types
 	allows for easy fast instant access retrevial of tables.
 
 Write about classes written
-	Data Store is made up of one class called data_store that i responsible of retrieving
+	Data Store is made up of one class called data\_store that i responsible of retrieving
 	data from the main memory.
 write about functions
 	Data Store is made up of multiple functions that create data tables and returns specific data.
 1.) createRow:
 		createRow takes in a DataVariant row and a tablename in order to find the specific table
 		you want to insert the row into. The DataVariant row is checked by checkSchema function in
-		order to see if the table schema registered into the lookup_table hashmap exists and whether
+		order to see if the table schema registered into the lookup\_table hashmap exists and whether
 		or not the new row data type fits into the table schema.
 2.) createTable
 		createTable takes in a char array tablename and a TableSchema schema argument in order to add
 		the string to the hashmap lookup_table as well as the table schema. This is added as a pair
-		into the lookup table and now the table is registered into the lookup_table and memory is allocated
+		into the lookup table and now the table is registered into the lookup\_table and memory is allocated
 		for that table.
 3.) checkSchema
 		checkSchema takes in a char array tablename and checks whether or not if the table exists in the
 		hashmap lookup_table. If it does exisit then it checks whether the TableSchema schema matches the
-		schema from the lookup_table. If it does match up then it returns true otherwise false.
+		schema from the lookup\_table. If it does match up then it returns true otherwise false.
 4.) getRow:
 		getRow takes in a char array tablename and an int rowID in order to find the table in the lookup_table
 		and finds the row based on the rowID index. It then returns the row pointer it found.
 5.) getTable
-		getTable takes in a char array tablename and finds the table from the lookup_table. If it finds the table
+		getTable takes in a char array tablename and finds the table from the lookup\_table. If it finds the table
 		then it returns the table pointer.
 
 write about what is being passed in
