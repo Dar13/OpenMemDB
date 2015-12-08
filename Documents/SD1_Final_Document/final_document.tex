@@ -3013,7 +3013,93 @@ any additional funds outside of normal maintenance each team member performed on
 machines.
 \newpage
 
+\section{System Test Plan}
+In order to verify the accuracy and performance characteristics required of a Database Management System,
+a holistic testing plan is needed. However, specific modules must be tested as well in order to 
+verify that they meet their individual requirements as well. All of these tests will require 
+the use of libomdb, so that part of the system will be tested exhaustively.
+\subsection{Data Store}
+As the module on which all others rely on to store the actual data, the testing for this
+module must be comprehensive. The tests we are going to perform are:
+\begin{itemize}
+ \item Access speed benchmark (regression test)
+ \item Query evaluation speed benchmark
+ \item Throughput on contested tables
+ \begin{itemize}
+  \item Many readers and writers on a single table
+  \item Effectively a stress-test for Tervel's ability to manage many threads on the same
+	structure.
+ \end{itemize}
+ \item Cache coherency/efficiency benchmark 
+ \item Data consistency/determinism tests
+\end{itemize}
+
+These tests should allow a comprehensive test suite for the Data Store module.
+
+\subsection{Work Manager}
+This module is broad with many moving parts, requiring special attention be paid to the individual
+pieces within it as well as the integration of those pieces. The tests we will implement will be:
+\begin{itemize}
+ \item Microbenchmarks of hotspots
+ \begin{itemize}
+  \item Connection management
+  \item Heuristic performance and job assignment
+ \end{itemize}
+ \item Heuristic accuracy analysis
+ \item Network stress tests
+ \begin{itemize}
+  \item Many connections (short-lived and long-lived)
+  \item Many packets
+  \item Both of the above
+ \end{itemize}
+\end{itemize}
+
+\subsection{SQL Engine}
+This module is relatively straightforward to test in breadth, as it only has a single execution path
+and feature set to implement. This is however the primary piece in OpenMemDB's SQL implementation
+so tests here are important as well. The list of tests we will perform on the SQL Engine module are
+as follows:
+\begin{itemize}
+ \item Tokenizer/parser accuracy test (regression test)
+ \item Parser speed benchmark
+ \item Query planner output analyzer
+ \item Query execution benchmark (regression test)
+\end{itemize}
+
+\subsection{System}
+In addition to the individual modules, the overall system must also be tested in order to verify certain
+properties we are required to have such as wait-freedom. Also, these tests can find issues in the interoperation
+of the various modules within the larger system. The list of tests we will perform on the overall system are
+as follows:
+\begin{itemize}
+ \item Overall system load stress test
+ \begin{itemize}
+  \item Many connections
+  \item Many statements to execute
+  \item Large data set
+  \item Many related tables within data set
+ \end{itemize}
+ \item Accuracy tests, specifically regarding determinism in edge cases
+ \item Contested resources
+ \begin{itemize}
+  \item I/O heavy background threads or processes
+  \item Reduced memory availability
+ \end{itemize}
+ \item Program execution over time
+ \begin{itemize}
+  \item Determine whether the system still perform within specifications after a \\ relatively long time
+ \end{itemize}
+ \item End-to-End latency benchmark
+ \begin{itemize}
+  \item Determine which workloads the database excels at, and find which workload factor increases latency
+	the most
+ \end{itemize}
+\end{itemize}
+
+\newpage
+
 \section{Project Summary}
+
 \newpage
 
 \bibliography{final_document}
