@@ -2658,12 +2658,11 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
 
   \subsection{Data Store}
 	%author Robert Medina
-data store design:
 Introduction:
 Boost variant library focuses on typesafe storage and retrieval of a bounded set of types that is
 of discriminated unions. A variant data type exposes an interface independent of the current value's type.
-The user defines the set of types that are allowed in a variant and this can contain any number of disparate
-variant instructions. Two ways to retrieve a type from the value that is held in a variant are either the program
+The user define the set of types that are allowed in a variant and this can contain any number of disparate
+variant instructions. Two ways to retrieve a type from the value that is held in a variant is either the program
 must store this type or use boost visitor mechanism. This variant data type is stored as a stack instead of a heap
 to avoid expensive memory allocations.
 \par\vspace{\baselineskip}
@@ -2847,7 +2846,7 @@ write about functions
 5.) getTable
 		getTable takes in a char array tablename and finds the table from the lookup\_table. If it finds the table
 		then it returns the table pointer.
-write about data structs
+
 \subsubsubsection{Data Structures}
 	Nested vectors are used to represent tables. Each table is stored into a hashmap called lookup_table to refer to
 	tables. A pair is used to group up table schema boost variant vector and the data table itself. Nested vectors
@@ -2899,7 +2898,6 @@ Memory management in C++
 
 6.) Memory Corruption
 		There exist two reasons that memory corruption could occur in a program. The source of the memory corruption and its manifestation may be far apart. This makes it difficult to finding the cause of the memory corruption in relation to its effect. The second reason is that symptoms occuring during bizzare conditions which make them significantly harder to replicate. Memory Corruption Errors can be categorized into four categories. One of the more common errors is using uninitialized memory. This refers to the contents of uninitialized memory are treated as garbage values. The usage of such garbage values can lead to unpredictable program behavior. Second error is using none-owned memory. It is common that pointers are used to access and modify memory. Whenever this pointer is a null pointer also known as a dangling pointer, or to a memory location outside of current stack or heap bounds, it is referring to memory that is not possessed by the program. Using these pointers causes serious flaws. Accessing such memory usually cause OS exceptions, that commonly leads to program crashes. Third, using memory beyond the memory that was allocated also known as a buffer overflow. For example, an array that is inside a loop contains a incorrect terminating condition then memory that is accessed beyond the bounds of the array may be manipulated that was otherwise not supposed to. Lastly, the four category that causes memory corruption is fauly heap memory management. Memory leaks and freeing non-heap or un-allocated memory are the most frequen erros caused by fault heap memory management. Since C++ gives so much freedom to allocate any amount of memory the program needs it can lead to such errors when the program does not clean yourself. More specifically memory leaks is allocated memory but are not released. This causes the program to consume memory and reduce the available memory in the heap.
-
 	
   \subsection{Logger}
   %author Neil Moore
