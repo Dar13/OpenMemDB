@@ -797,8 +797,7 @@ is already partition into seperate columns so each column can be processed by it
 The advantages of row based tables are easy row inserts into tables, and easy row access. This is useful when a query
 wants to manipulate the entire row data instead of a few columns. In column store this would require multiple column vectors
 being rewritten and maniuplated which would be a costly operation to perform.
-\includegraphics{graphics/row_store_column_accessing_data.png}
-\cite{rowstorefigure}
+\par\vspace{\baselineskip}
 
 Figure~\ref{fig:row_col_access_data} shows that it would be 
 difficult to find the sales column in a row store column, and it is easily
@@ -809,7 +808,7 @@ access to multiple column vectors.
 \begin{figure}
   \centering
   \includegraphics[scale=.5]{graphics/row_store_column_accessing_data.png}
-  \caption{INSERT TEXT}
+  \caption{A visualization of accessing the same data in a row store versus a column store.}
   \label{fig:row_col_access_data}
 \end{figure}
 
@@ -2709,16 +2708,6 @@ if (result.isSuccess) {
   does nearly the exact same thing but will receive a different data structure from the
   database in return.
   \par\vspace{\baselineskip}
-  A detailed description of the methods contained in the \inlinecode{Connection} class 
-  can be seen in Figure~\ref{fig:connection_methods}.
-  \begin{figure}
-    \centering
-    \label{fig:connection_methods}
-    \textbf{Connection Class Layout}
-    \includegraphics{graphics/libomdb_connection_layout.png}
-	\caption{Connection layout}
-  \end{figure}
-  \par\vspace{\baselineskip}
 
   The \inlinecode{Result} class is made up of two private members:
   \begin{itemize}
@@ -3316,14 +3305,14 @@ stress-test the system. The hardware used by each member:
  \end{itemize}
 
  \item Robert Medina's personal machine
-+ \begin{itemize}
-+  \item{\makebox[4cm]{CPU:\hfill} Intel Duo SU7300}
-+  \item{\makebox[4cm]{RAM:\hfill} 4 GB DDR3}
-+  \item{\makebox[4cm]{Motherboard:\hfill} ASUS UL50VT}
-+  \item{\makebox[4cm]{GPU:\hfill} GeForce G210M}
-+  \item{\makebox[4cm]{Primary Hard Disk:\hfill} Seagate 465 GB}
-+  \item{\makebox[4cm]{Operating System:\hfill} Windows 7}
-+ \end{itemize}
+ \begin{itemize}
+  \item{\makebox[4cm]{CPU:\hfill} Intel Duo SU7300}
+  \item{\makebox[4cm]{RAM:\hfill} 4 GB DDR3}
+  \item{\makebox[4cm]{Motherboard:\hfill} ASUS UL50VT}
+  \item{\makebox[4cm]{GPU:\hfill} GeForce G210M}
+  \item{\makebox[4cm]{Primary Hard Disk:\hfill} Seagate 465 GB}
+  \item{\makebox[4cm]{Operating System:\hfill} Windows 7}
+ \end{itemize}
 
 \end{itemize}
 \par\vspace{\baselineskip}
