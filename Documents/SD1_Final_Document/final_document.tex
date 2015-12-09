@@ -769,8 +769,7 @@ a table would be composed of a vector of those rows as shown in Figure~\ref{fig:
 \begin{figure}[H]
   \centering
   \includegraphics[scale=.6]{graphics/row_store_example.png}
-  \cite{rowstore}
-  \caption{An example of a row store architecture. \copyright Oracle LEarning Library 2014, reprinted with permission}
+  \caption{An example of a row store architecture. \copyright Oracle Learning Library 2014, reprinted with permission.\cite{rowstore}}
   \label{fig:row_store_ex}
 \end{figure}
 
@@ -781,8 +780,7 @@ creates another vector that holds those vectors as shown in Figure~\ref{fig:colu
 \begin{figure}
   \centering
   \includegraphics[scale=.6]{graphics/column_store_example.png}
-  \cite{rowstore}
-  \caption{An example of a column store architecture. \copyright Oracle Learning Library 2014, reprinted with permission}
+  \caption{An example of a column store architecture. \copyright Oracle Learning Library 2014, reprinted with permission.\cite{rowstore}}
   \label{fig:column_store_ex}
 \end{figure}
 
@@ -792,7 +790,7 @@ A side-by-side difference between row and column store architectures is shown in
 \begin{figure}
   \centering
   \includegraphics[scale=.6]{graphics/row_store_and_column_example.png}
-  \caption{A row store and column store side-by-side comparison. \copyright Oracle Learning Library 2014, Reprinted with permission.\cite{rowstore}}
+  \caption{A row store and column store side-by-side comparison. \copyright Oracle Learning Library 2014, reprinted with permission.\cite{rowstore}}
   \label{fig:row_column_diff}
 \end{figure}
 
@@ -822,8 +820,7 @@ access to multiple column vectors.
 \begin{figure}[H]
   \centering
   \includegraphics[scale=.5]{graphics/row_store_column_accessing_data.png}
-  \cite{saphana}
-  \caption{A visualization of accessing the same data in a row store versus a column store. \copyright SAP HANA 2015, reprinted with permission}
+  \caption{A visualization of accessing the same data in a row store versus a column store. \copyright SAP HANA 2015, reprinted with permission.\cite{saphana}}
   \label{fig:row_col_access_data}
 \end{figure}
 
@@ -870,8 +867,7 @@ a typical index layout.
 \begin{figure}
   \centering
   \includegraphics{graphics/indexentry.png}
-  \cite{ramakrishnan2000database}
-  \caption{Index key abstract concept for keys and data relations \copyright Ramakrishnan 2000, reprinted with permission}
+  \caption{Index key abstract concept for keys and data relations \newline \copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
   \label{fig:index_entry}
 \end{figure}
 
@@ -907,11 +903,10 @@ By definition a B-tree is a tree with the following properties:
 \end{itemize}
 An example of a B-tree can be seen in Figure~\ref{fig:b_tree_ex}.
 
-\begin{figure}
+\begin{figure}[H]
   \centering
-  \includegraphics[scale=.5]{graphics/B_Tree_Example.png}
-  \cite{b+tree}
-  \caption{Example of a B Tree with symbols \copyright Morris 1998, reprinted with permission}
+  \includegraphics[scale=.55]{graphics/B_Tree_Example.png}
+  \caption{Example of a B Tree with symbols \copyright Morris 1998, reprinted with permission.\cite{b+tree}}
   \label{fig:b_tree_ex}
 \end{figure}
 
@@ -921,29 +916,28 @@ B+ trees link all their leaves together with a doubly linked list. Figure~\ref{f
 the difference between the two types of tree data structures visually.
 \par\vspace{\baselineskip}
 
-\begin{figure}
+\begin{figure}[H]
   \centering
-  \includegraphics[scale=.5]{graphics/B_B+_Tree_Difference.png}
-  \cite{b+tree}
-  \caption{A graphic depicting the differences between a B-tree and a B+ tree. \copyright Perrone 2012, reprinted with permission}
+  \includegraphics[scale=.75]{graphics/B_B+_Tree_Difference.png}
+  \caption{A graphic depicting the differences between a B-tree and a B+ tree. \copyright Perrone 2012, reprinted with permission.\cite{b+tree}}
   \label{fig:b_b+_tree_diff}
 \end{figure}
 
 The runtime for the various operations possible when using a B+ tree is shown
 in Figure~\ref{fig:b+_tree_runtimes}.
 
-\begin{figure}
+\begin{figure}[H]
   \centering
   \begin{tabular}{l | c}
     Operation & Runtime \\ \hline \hline
     Search & $log_m(n)$ \\ \hline
-    Search with range & $log_m(n) + k$ \\
+    Search with range & $log_m(n) + k$ \\ \hline
     Insert & $log_m(n)$ \\ \hline
     Delete & $log_m(n)$ \\ \hline
   \end{tabular}
-  \label{fig:b+_tree_runtimes}
   \caption{The Big-O notation for various operations done on B+ trees. Where $m$ is the 
 	   number of index entries and $k$ is the number of data records. \copyright Ramakrishnan 2000, reprinted with permission}
+  \label{fig:b+_tree_runtimes}
 \end{figure}
 
 The height of a B+ tree is $log_m(n)$, where $m$ is the number of children and $n$ is the number of data entries.
@@ -956,7 +950,7 @@ fit on a page and the height of the B+ tree would remain small, thus keeping dat
 \par\vspace{\baselineskip}
 
 %author Robert Medina
-The Indexed Sequential Access Method(ISAM) is a variant of a B tree. In many ways it is similiar to a B+ tree 
+The Indexed Sequential Access Method(ISAM) tree is a variant of a B tree. In many ways it is similiar to a B+ tree 
 however there are minor details about how memory is handled that makes ISAM a better method than B+ tree. 
 Although this is usually not the case due to the further optimizations done in B+ tree implementations. 
 ISAM follows the exact same rules for a B tree but it does not contain data internally with in its nodes. 
@@ -964,12 +958,11 @@ All the data from an ISAM resides in its leaf pages. Figure~\ref{fig:isam_visual
 looks like.
 \par\vspace{\baselineskip}
 
-\begin{figure}
+\begin{figure}[H]
   \centering
   \textbf{Abstract Diagram of ISAM structure}
   \includegraphics[scale=.8]{graphics/ISAM_abstract_diagram.png}
-  \cite{ramakrishnan2000database}
-  \caption{Behavior similiar to B+ Tree Structure \copyright Ramakrishnan 2000, reprinted with permission}
+  \caption{Behavior similiar to B+ Tree Structure \copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
   \label{fig:isam_visual}
 \end{figure}
 
@@ -984,12 +977,12 @@ default leaf page count then those pages go into an overflow page. Figure~\ref{f
 how ISAM memory allocation occurs.
 \par\vspace{\baselineskip}
 
-\begin{figure}
+\begin{figure}[H]
   \centering
-  \textbf{Page Allocation for ISAM}
+  %\textbf{Page Allocation for ISAM}
   \includegraphics{graphics/ISAM_page_allocation.png}
-  \cite{ramakrishnan2000database}
-  \caption{The order of which memory gets allocated on the page \copyright Ramakrishnan 2000, reprinted with permission}
+  \caption{The order of which memory gets allocated on the page \newline \copyright Ramakrishnan 2000, 
+  reprinted with permission.\cite{ramakrishnan2000database}}
   \label{fig:isam_memory}
 \end{figure}
 
@@ -1003,7 +996,7 @@ This way the overflow page will also be considered in the basic operations of IS
 gives the specific runtimes of the various operations.
 \par\vspace{\baselineskip}
 
-\begin{figure}
+\begin{figure}[H]
   \centering
   \begin{tabular}{l | c | l}
   \hline
@@ -1012,38 +1005,43 @@ gives the specific runtimes of the various operations.
   Insert & $ log_f N $ & \begin{tabular}{@{}l@{}}There is some overhead for leaf-page\\and overflow pages\end{tabular} \\ \hline
   Deletion & $ log_f N $ & If an empty overflow exists it will be de-allocated \\ \hline
   \end{tabular}
-  \label{fig:isam_runtimes}
   \caption{The runtimes of common operations done on an ISAM tree \copyright Ramakrishnan 2000, reprinted with permission}
+  \label{fig:isam_runtimes}
 \end{figure}
+
+Figures~\ref{fig:isam_example_vis},~\ref{fig:isam_example_insert}, and~\ref{fig:isam_example_delete} show a populated ISAM
+tree, an insert operation on that tree, and a delete operation on that tree, respectively.
+\par\vspace{\baselineskip}
+
+ISAM is an indexing solution for the very expensive binary search on a file. This modification to the 
+B-tree attempts to solve this problem with consideration to the underlying memory devices in the 
+system such as hard disks.
+\par\vspace{\baselineskip}
 
 \begin{figure}
   \centering
   \textbf{Example of an ISAM structure}
   \includegraphics[scale=.75]{graphics/ISAM_example.png}
-  \cite{ramakrishnan2000database}
-  \caption{Some exisiting data that is already inserted}
+  
+  \caption{Some exisiting data that is already inserted.\copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
+  \label{fig:isam_example_vis}
 \end{figure}
 
 \begin{figure}
   \centering
   \textbf{After inserting 23*, 48*, 41*, 42*}
   \includegraphics[scale=.75]{graphics/ISAM_example_insertion.png}
-  \cite{ramakrishnan2000database}
-  \caption{ISAM insertion \copyright Ramakrishnan 2000, reprinted with permission}
+  \caption{ISAM insertion operation \copyright Ramakrishnan 2000, reprinted \newline with permission.\cite{ramakrishnan2000database}}
+  \label{fig:isam_example_insert}
 \end{figure}
 
 \begin{figure}
   \centering
   \textbf{After deleting 42*, 51*, 97*}
   \includegraphics[scale=.7]{graphics/ISAM_example_deletion.png}
-  \cite{ramakrishnan2000database}
-  \caption{ISAM deletion \copyright Ramakrishnan 2000, reprinted with permission}
+  \caption{ISAM deletion operation \copyright Ramakrishnan 2000, reprinted \newline with permission.\cite{ramakrishnan2000database}}
+  \label{fig:isam_example_delete}
 \end{figure}
-
-\par\vspace{\baselineskip}
-
-ISAM in an indexing solution for the very expensive binary search on a file. This solves this
-problem with consideration to the underlying memory devices in the system such as hard disks.
 
 \subsubsection{Hash-based Indexing}
 %author Robert Medina
@@ -1051,11 +1049,10 @@ Hash-based Indexing references a key value to a data entry using a hash function
 used for indexing when there is an equal key value within the hash. Range operations using
 a key value is not possible with a hash function since it would simply be too costly of an
 operation. Hash-based indexing suffers from overflow chaining such as ISAM, which can hinder
-performance. There exists multiple hash-based indexing such as Static Hashing, Extendible Hashing,
-and Linear Hashing.
+performance. There exists multiple hash-based indexing strategies such as static hashing, extendible hashing,
+and linear hashing.
 \subsection{Hash Function}
 %author Robert Medina
-Hash Function:
 Good hash functions are deterministic, provide uniformity, and have variable range. Deterministic means
 that for any given key value it will generate the corrseponding index consistently. This is
 necessary to provide accurate data retrevial from a hash map. Uniformity means that a hash
@@ -1063,32 +1060,38 @@ map will evenly distribute hash index values over its value range. Without this 
 performance will suffer greatly since the number of collisions will increase this hinders performance.
 \subsubsection{Static Hashing}
 %author Robert Medina
-Static Hashing is a hash table based on a key value that maps to a bucket containing pages. These
+Static hashing a technique usually reserved for hash tables that uses a key value and maps to a bucket containing pages. These
 data entries may be sorted but it depends on the application. This data structure is static
 for the most part but it does allow for overflow page allocation. In the event of inserting
 beyond the memory allocated, this data entry is placed into a new page and the page is added
-to an overflow chain in the bucket.
+to an overflow chain in the bucket. An abstract view of a static hashing data structure is given in 
+Figure~\ref{fig:static_abstract}.
 \par\vspace{\baselineskip}
-\begin{figure}
+
+\begin{figure}[H]
   \centering
-  \includegraphics[scale=.75]{graphics/Static_Hashing_Abstract}
-  \caption{Abtract data structure representation of static hashing \copyright Ramakrishnan 2000, reprinted with permission}
-  \cite{ramakrishnan2000database}
+  \includegraphics[scale=.75]{graphics/Static_Hashing_Abstract.png}
+  \caption{Abtract data structure representation of static hashing \newline \copyright Ramakrishnan 2000, 
+  reprinted with permission.\cite{ramakrishnan2000database}}
+  \label{fig:static_abstract}
 \end{figure}
 
 A good hash function is imperative to uniformly distribute values over the collection of buckets.
-An example of a good hash would be \[hash(key) = (a*key + b)\], a and b are constants. Some problems
-of Static Hashing are the fact that it is static. When the index file is created bucket sizes
+An example of a good hash would be $hash(key) = (a*key + b)$, where $a$ and $b$ are constants. Some problems
+of static hashing are the fact that it is static. When the index file is created bucket sizes
 are known at time of creation, so pages can be stored successively in the buckets. However
 as the index file continues to grow if the same key value is stored repeatedly then a long
 overflow chain develops. Since the number of buckets are static if the index file shrinks
 in size then there is wasted memory space. If the file grows too large then it results in
-poor performance. Otherwise, the performance for operations is very fast. The following
-is the runtimes:
-
+poor performance. Otherwise, the performance for operations is very fast. The runtimes
+for data structures that don't utilitize overflow chains can be found in Figure~\ref{fig:static_hash_runtimes}
+while the runtimes for data structures that use overflow chains can be found in
+Figure~\ref{fig:static_hash_runtimes_overflow}.
 \par\vspace{\baselineskip}
 
-\begin{center}
+\begin{figure}[H]
+\centering
+\textbf{Runtimes without overflow chains}
 \begin{tabular}{l | c | c}
   \hline
   Operation & Runtime & Number of I/O reads and writes \\ \hline \hline
@@ -1096,13 +1099,14 @@ is the runtimes:
   Insert & O(1) & 2  \\ \hline
   Delete & O(1) & 2  \\ \hline
 \end{tabular}
-\end{center}
+\caption{The Big-O runtimes of common operations done when using static hashing}
+\label{fig:static_hash_runtimes}
+\end{figure}
 
-\par\vspace{\baselineskip}
-
-Runtimes with Overflow Chains:
-\par\vspace{\baselineskip}
-\begin{center}
+\begin{figure}[H]
+\centering
+\textbf{Runtimes with Overflow Chains}
+\\
 \begin{tabular}{l | c}
   \hline
   Operation & Runtime \\ \hline \hline
@@ -1110,7 +1114,10 @@ Runtimes with Overflow Chains:
   Insert & O(1) \\ \hline
   Delete & O(n) \\ \hline
 \end{tabular}
-\end{center}
+\caption{The Big-O runtimes of common operations done when using static hashing
+when overflow chains are added to the data structure}
+\label{fig:static_hash_runtimes_overflow}
+\end{figure}
 
 If there are multiple collisions then the hashmap usefullness becomes impared. The hashmap devolves into a more
 of a linked list so having long chains can really hinder performance as you see above. Therefore static hashing
