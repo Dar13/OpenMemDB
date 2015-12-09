@@ -2371,6 +2371,21 @@ nable dashDB to maximize hardware performance.
 \newpage
 
 \section{Design Summary}
+OpenMemDB is a SQL compliant database that utilizes multiprocessor techniques and non-blocking
+data structures to offer high scalability and thread wide progress. In order to accomplish this
+multiple components are necessary to meet the technical requirements layout. OpenMemDB is 
+comprised of an application GUI, SQL Engine, Data Storage, Work Manager, and a Connector. 
+It is necessary for the client to be able to communicate with the database through the Connector
+and the application GUI. On the server side since the client is using SQL in order to provide
+logical operations to the database a SQL Engine is necessary to correctly and efficently parse
+such syntax into a type of representation that the database can understand. It is also important
+that certain syntax be processed in an organized methodology. More specifically, the Work Manager
+will be responsible for distributing the system's workload pool of worker threads. The Connector API
+will provide a way to connect to the database and execute meaniful commands to the database. The
+SQL Engine will be responsible for parsing SQL syntax, determing the order in which the SQL queries 
+are ordered and the actual execution of these queries. Data Store will allocate memory for SQL
+operations and return any data references so data can be modified or changed. Efficent data storage,
+data retrevial and memory management are the primary responsibilities for Data Store. 
 %% A summary describing the overall architecture should go here. Followed by subsections
 %% for each major piece.
   \subsection{libomdb: The Connection API}
@@ -2847,6 +2862,15 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
 
   \subsection{Data Store}
 	%author Robert Medina
+Data Store is responsible for allocating memory and referening memory locations from the database. The 
+memory allocation is based on a shared memory model therefore it is necessary that the functions used by
+Data Store is multiprocessor friendly. It is imperative that Data Store offers data correctness, efficent data
+retrevial, efficent data storage and effect memory management. Data Store utilized the Boost Library in
+order to allocate heterogenous data structures and the STL, standard template library to dynamically
+allocate memory for these data structures. It is significant to provide the least overhead to provide
+efficent data storage and data retrevial of such data structures and editing such functions can lead
+to memory mismanagement. These functions must be correctly used otherwise unnecessary overhead
+on garbage memory and memory corruption can affect these operations.
 Introduction:
 Boost variant library focuses on typesafe storage and retrieval of a bounded set of types that is
 of discriminated unions. A variant data type exposes an interface independent of the current value's type.
