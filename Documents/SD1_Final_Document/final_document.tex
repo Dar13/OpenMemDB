@@ -47,7 +47,7 @@ stringstyle=\color{codered}
   /Author   (Michael McGee, Robert Medina, Neil Moore, Jason Stavrinaky)
   /Creator  (Neil Moore)
   /Producer ()
-  /Subject  (Final Document for COP4934)
+  /Subject  (Final Design Document for COP4934)
   /Keywords ()
 }
 
@@ -143,13 +143,13 @@ become more mature. Experience working with high-performance, memory-intensive, 
 standards-defined technologies opens the door for later opportunities in cutting-edge technologies.
 
 \subsubsection{Michael McGee}
-  My motivation for choosing this project is simply a desire to learn. I have always been
-  interested in database systems as well concurrent programming. Nowhere do these issues
-  more converge than in the project that Dr. Dechev proposed. I hope to gain from this
-  project, a greater understanding of the underlying principles of database system design,
-  as well as discover broader applications for lock-free and wait-free data structures. I
-  know that throughout the course of this project I will learn a great deal and come out
-  as a much improved software developer and computer scientist.
+My motivation for choosing this project is simply a desire to learn. I have always been
+interested in database systems as well concurrent programming. Nowhere do these issues
+more converge than in the project that Dr. Dechev proposed. I hope to gain from this
+project, a greater understanding of the underlying principles of database system design,
+as well as discover broader applications for lock-free and wait-free data structures. I
+know that throughout the course of this project I will learn a great deal and come out
+as a much improved software developer and computer scientist.
 
 \subsubsection{Jason Stavrinaky}
 I have always been interested in multiprocessor programming.  Considering the
@@ -763,8 +763,8 @@ creates another vector that holds those vectors as shown in Figure~\ref{fig:colu
   \caption{An example of a column store architecture.}
 \end{figure}
 
-A side-by-side difference between row and column store architectures is shown in Figure~\ref{fig:row_column_diff}
-this 
+A side-by-side difference between row and column store architectures is shown in Figure~\ref{fig:row_column_diff}.
+
 \par\vspace{\baselineskip}
 \begin{figure}
   \centering
@@ -776,53 +776,62 @@ this
 
 Whenever a data request inquires about a table or more the data store will return a subset of that
 data in the form of nested vectors.
+\par\vspace{\baselineskip}
 
-Row Store vs Column Store
-Column Store:
 The advantage of column based tables are faster data access, better compression, and better parallel processing.
 In order to change a column from a row store architecture, each row in the table must be search in order to find the
 column and then it requires to change the value. This makes it slow to check for integrity constraints. Column store
 is a simply search through one vector row or column. Column vectors are very similar to each other value, which allows
 for easy compression of data, unlike row vectors which could contain many different data types. In column store, data
 is already partition into seperate columns so each column can be processed by itself.
+\par\vspace{\baselineskip}
 
-Row Store:
 The advantages of row based tables are easy row inserts into tables, and easy row access. This is useful when a query
 wants to manipulate the entire row data instead of a few columns. In column store this would require multiple column vectors
 being rewritten and maniuplated which would be a costly operation to perform.
-
 \includegraphics{graphics/row_store_column_accessing_data.png}
 \cite{rowstorefigure}
 
-Seeing in the row store and column store figure previously, it would be
+Figure~\ref{fig:row_col_access_data} shows that it would be 
 difficult to find the sales column in a row store column, and it is easily
 noticeable to see how adding a new row in column store would require multiple
 access to multiple column vectors.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=.5]{graphics/row_store_column_accessing_data.png}
+  \caption{INSERT TEXT}
+  \label{fig:row_col_access_data}
+\end{figure}
 
 \subsubsection{ACID}
 %author Robert Medina
-
-ACID:
 Properties of a reliable database is outline as ACID. In order to guarantee that
 database transactions are processed reliably a database must have atomicity, consistency,
 isolation and durability.
+\par\vspace{\baselineskip}
 
 Atomicity refers to the ability of a database to guarantee that all transactions
 are performed or none of them are. Transactions that abort operations midway leaves
 for data inconsistency. In the event that a transaction is aborted then the database
 returns to the last commited transaction state.
+\par\vspace{\baselineskip}
 
 Consistency refers to the ability of a transaction to take the database from one valid state
 to another. Before a transaction and after a transaction the database must remain in a valid state.
 Any data written to the database must be valid according to any constraints, cascades and triggers.
+\par\vspace{\baselineskip}
 
 Isolation refers to the level of visibility of transactions to other users or systems. In other words,
 transactions from two users cannot interact with one another and if two concurrent transactions occur then
 those changes to the state of the database are not reflected to each other user. If those transactions occur
 concurrently and rely on each other then locking will occur.
+\par\vspace{\baselineskip}
 
 Durability means that once a transaction is commited then those changes on the database will be reflected to the user
 and will be recorded pernamently. This is usually performed by backing up valid states of the database.
+\par\vspace{\baselineskip}
 
 \subsubsection{Indexing}
 %author Robert Medina
@@ -831,15 +840,23 @@ and some ways are better suited depending on the constraints. Tree-based indexin
 are two popular solutions for an implementation of a database. Given a set of data in memory, indexing takes
 a key data value and stores it into a data structure. Based off this key value, the indexing data structure
 will point to the file in memory or memory address, depending on how the data is stored. Based on this, a
-file scan of the database is now just reduced to scanning an index file.
+file scan of the database is now just reduced to scanning an index file. Figure~\ref{fig:index_entry} shows
+a typical index layout.
+\par\vspace{\baselineskip}
 
-\includegraphics{graphics/indexentry.png}
-\cite{ramakrishnan2000database}
+\begin{figure}
+  \centering
+  \includegraphics{graphics/indexentry.png}
+  \cite{ramakrishnan2000database}
+  \caption{INSERT TEXT}
+  \label{fig:index_entry}
+\end{figure}
 
 However searching through an index file can still be a costly operation. Index files are smaller than the
-data it is referencing but it can still use a considerable about memory space. Therefore it would be
+data it is referencing but it can still use a considerable amount of memory space. Therefore it would be
 reasonable to use a data structure for fast retrieval of data based on a range of values or based on
 the actual data value stored.
+\par\vspace{\baselineskip}
 
 \subsubsection{Tree-based Indexing}
 %author Robert Medina
@@ -847,30 +864,43 @@ Tree-based indexing is an index file structured into a variant of a binary searc
 the key value and references to where that key is stored. Indexing requires fast retrieval of data, low cost
 insertion and low cost deletion of data. There are two types of trees that are useful for this type of operation,
 ISAM and B+ Tree.
+\par\vspace{\baselineskip}
 
-\subsubsection{B+ Tree}
-%author Robert Medina
-B+ Trees are a variant of a B Tree. B Trees is an n-ary tree that splits data
-	based on a key value into nodes with T(j) subtrees and K(j) nodes, where j = (1<j<m).
-	By definition a B tree is a tree with the following properties:
-	Each node consists of T(i) subtrees and K(i) keys, where i = (0,...,j)
-	There is a single root that contains a range of m children, 2<= m < j
-	Each node contains a range of m children, (m/2) <= m < j
-	For each sub-tree T(i) where i = (0,...,j) each sub-tree contains keys k(j) such that:
-		T(0) sub-tree have keys k(0) where k(0) < k(i)
-		T(i) sub-tree have keys k(i), i = (1, ..., j-1) where k(0) <= k(i) <= k(j)
-		T(j) sub-tree have keys k(j) where k(j) < k(j)
-	All T(i) sub-trees are either non-empty or empty.
-	B Trees have a height of log(m)(N), m = number of children
+B+ trees are a variant of a B-tree. A B-tree is an $n$-ary tree that splits data
+based on a key value into nodes with $T(j)$ subtrees and $K(j)$ nodes, where $j = (1<j<m)$.
+By definition a B-tree is a tree with the following properties:
+\begin{itemize}
+  \item Each node consists of $T(i)$ subtrees and $K(i)$ keys, where $i = (0,...,j)$
+  \item There is a single root that contains a range of $m$ children, $2<= m < j$
+  \item Each node contains a range of $m$ children, $(m/2) <= m < j$
+  \item For each sub-tree $T(i)$ where $i = (0,...,j)$ each sub-tree contains keys $k(j)$ such that:
+  \begin{itemize}
+    \item The $T(0)$ sub-tree have keys $k(0)$ where $k(0) < k(i)$
+    \item The $T(i)$ sub-trees have keys $k(i)$, where $i = (1, ..., j-1)$ and $k(0) <= k(i) <= k(j)$
+    \item The $T(j)$ sub-tree have keys $k(j)$ where $k(j) < k(j)$
+    \item All $T(i)$ sub-trees are either non-empty or empty.
+  \end{itemize}
+  \item B Trees have a height of $log_m(N)$, where $m$ is the number of children
+\end{itemize}
 
-\includegraphics{graphics/B_Tree_Example.png}
-\cite{b+tree}
+\begin{figure}
+  \centering
+  \includegraphics{graphics/B_Tree_Example.png}
+  \cite{b+tree}
+  \caption{INSERT TEXT}
+  \label{fig:b_tree_ex}
+\end{figure}
+
 B+ Tree differs slightly in the fact that B trees store their data (keys) within the internal nodes while
 B+ trees only points to the data. All the data in a B+ is stored in the leaves of tree. In addition,
 B+ Tree links all their leaves together with a doubly linked list.
 
-\includegraphics{graphics/B_B+_Tree_Difference.png}
-\cite{btree}
+\begin{figure}
+  \centering
+  \includegraphics{graphics/B_B+_Tree_Difference.png}
+  \cite{b+tree}
+  \label{fig:b_b+_tree_diff}
+\end{figure}
 
 The runtime for a B+ Tree is the following:
 Searching is logm(n), m is index entries
@@ -1096,7 +1126,7 @@ a uniform limit. This makes it more desirable in terms of performance on an aver
 %author Robert Medina
 
 Linear Hashing is a dynamic hashing technique that adjusts to inserts and deletes in a stable manner.
-Unlike Exttendible Hashing, Linear Hashing does not have a directory to where the data is
+Unlike Extendible Hashing, Linear Hashing does not have a directory to where the data is
 stored. Linear Hashing deals with collisions naturally and contains a lot of flexibility with
 the timing of bucket splits. However if the data distribution is bery skewed overflow chains could cause Linear Hashing performance to be
 worse than Extendible Hashing.
@@ -1120,13 +1150,14 @@ This redistributes data into split buckets and each bucket is prevented from get
 including overflow chains.
 \par\vspace{\baselineskip}
 The counter level is used to indicate the current round number. The bucket to be split is called
-next and is initially the first bucket. The number of buckets is denoted by level and Nlevel.
-N(o) is the number of buckets, also called N. A spliting policy can be a wide range of logic
+next and is initially the first bucket. The number of buckets is denoted by $level$ and $Nlevel$.
+$N(o)$ is the number of buckets, also called $N$. A spliting policy can be a wide range of logic
 such as whenever overflow chains are created or if a certain number of space is taken up with
 in a bucket and so forth. Whenever a split is triggered by the split policy then the Next containing
-the bucket will be split and the hash function h(level+1) will redistributes the entries
+the bucket will be split and the hash function $h(level+1)$ will redistributes the entries
 between the buckets to the newest created buckets. These definitions will be reflected in the following
-figures.
+figures. A typical inserting using linear hashing is shown in Figure~\ref{fig:linear_hash_insert}.
+\par\vspace{\baselineskip}
 
 \begin{figure}
   \centering
@@ -1134,15 +1165,15 @@ figures.
   \includegraphics{graphics/Linear_hashing_insertion}
   \cite{ramakrishnan2000database}
   \caption{Overflowing occurs}
+  \label{fig:linear_hash_insert}
 \end{figure}
 
-\par\vspace{\baselineskip}
-After the insertion, the bucket next is split into a new bucket. Each buckets between Next and Nlevel have not yet been split,
-using h(level) on a data entry the result is the bucket location where the data will be stored.
-When Next is equal to Nlevel - 1 and a split is triggered, the last of the buckets are split. The 
+After the insertion, the bucket next is split into a new bucket. Each buckets between $Next$ and $Nlevel$ have not yet been split,
+using $h(level)$ on a data entry the result is the bucket location where the data will be stored.
+When $Next = Nlevel - 1$ and a split is triggered, the last of the buckets are split. The 
 number of buckets after the split is twice the number at the beginning of the round and a new round is 
 started with a level incremented by 1 and next rest to 0. Since level is increased by one the number 
-of potential keys to be hashed will be doubled.
+of potential keys to be hashed will be doubled as Figure~\ref{fig:linear_hash_level_inc} shows.
 \par\vspace{\baselineskip}
 \begin{figure}
   \centering
@@ -1150,17 +1181,18 @@ of potential keys to be hashed will be doubled.
   \includegraphics{graphics/Linear_hashing_level_increased}
   \cite{ramakrishnan2000database}
   \caption{Notice that the number of bits increased as well, since $d(i) = d(a) + i$.}
+  \label{fig:linear_hash_level_inc}
 \end{figure}
 
-Extendible Hashing and Linear Hashing are very much alike to each other in terms of their operations and 
-how each data structure handle these operations. When Linear Hashing splitting occurs in a round. The 
+Extendible hashing and linear hashing are very much alike to each other in terms of their operations and 
+how each data structure handle these operations. When linear hashing splitting occurs in a round. The 
 number of buckets to be split is up to the last bucket in the range N. This is essentially the same 
-principle with respect to Extendible Hashing but occurs more frequently. The hashing functions are 
-very similar to Extendible Hashing, in a sense that the hashing function relates to a family of 
-hashing functions. Linear Hashing with uniform distributions can have a lower average cost for 
+principle with respect to extendible hashing but occurs more frequently. The hashing functions are 
+very similar to extendible hashing, in a sense that the hashing function relates to a family of 
+hashing functions. Linear hashing with uniform distributions can have a lower average cost for 
 equality selections since the directory level hierarchy is eliminated but for skewed data 
 distributions this can result in empty buckets which is is allocated in memory. This can lead 
-to poor performance when compared to Extendible Hashing.
+to poor performance when compared to extendible hashing.
 
 \subsection{Data Compression}
 %author Robert Medina
@@ -1172,6 +1204,7 @@ Loseless data compression is useful for any type of application when memory spac
 necessary to be conserved. In the case of loseless data compression there are three
 popular algorithms, run-length encoding, huffman coding, and LZ77/78.
 \par\vspace{\baselineskip}
+
 \subsubsection{Run-Length encoding}
 Run-length encoding is a very simple form of loseless data compression that is sequences
 in which the same data value occur in many consecutive data elements are not stored as a
@@ -2093,22 +2126,28 @@ similarities end as far as OpenMemDB is concerned. MemSQL and VoltDB on the othe
 hand both use distributed systems to achieve performance gains. MemSQL differs from
 VoltDB in a few ways, the most important being it's use of lock free data structures
 for storing data and its storing of pre-compiled commonly used queries\cite{MemSQL}.
+\par\vspace{\baselineskip}
+An sample overview of MemSQL architecture can be seen in Figure~\ref{fig:memsql_architecture}
 \begin{figure}
   \centering
+  \label{fig:memsql_architecture}
   \textbf{MemSQL Two-tiered Architecture}
   \includegraphics[scale=.5]{graphics/memsql_dbms_architecture.png}
-  \caption{MemSQL Architecture}
+  \caption{MemSQL Architecture \copyright memsql \cite{MemSQL}}
 \end{figure}
 VoltDB tries to make its performance gains by what they call "Concurreny through
 scheduling"\cite{VoltDB}. This is the process of using a single-threaded pipeline
 that performs the task it was scheduled. This limits the need for locking during
 transactions by intelligently scheduling the transactions so that locks are not
 necessary.
+\par\vspace{\baselineskip}
+VoltDB's serialized processing architecture can be seen in Figure~\ref{fig:voltdb_serialized}
 \begin{figure}
   \centering
+  \label{fig:voltdb_serialized}
   \textbf{VoltDB Serialized Architecture}
   \includegraphics[scale=.5]{graphics/voltdb_serialized_architecture.png}
-  \caption{VoltDB Serialized Processing}
+  \caption{VoltDB Serialized Processing \copyright VoltDB \cite{VoltDB}}
 \end{figure}
 \par\vspace{\baselineskip}
 OpenMemDB aims to take a different approach, one that is fully wait free. The goal is
@@ -2137,10 +2176,12 @@ known and less well documented DBMS that are worthy of note.
   \cite{aerospike}
   \end{quote}
   \par\vspace{\baselineskip}
+  An illustration of Aerospikes architecture can be seen in Figure~\ref{fig:aerospike_architecture}
   \begin{figure}
     \centering
+    \label{fig:aerospike_architecture}
     \includegraphics[scale=.25]{graphics/aerospike_dbms_architecture.png}
-    \caption{Aerospike Architecture}
+    \caption{Aerospike Architecture \copyright 2015 Aerospike, Inc. \cite{aerospike}}
   \end{figure}
   \cite{aerospike}
   \par\vspace{\baselineskip}
@@ -2164,8 +2205,13 @@ known and less well documented DBMS that are worthy of note.
   MPP operates by allowing the data warehouse to leverage multiple servers
   in a network cluster to process data simultaneously.
   \par\vspace{\baselineskip}
-\includegraphics[scale=.45]{graphics/dashDB_mpp_architecture.png}
-  \cite{dashDB}
+  An example of dashDB's MPP architecture can be seen in Figure~\ref{fig:dashdb_mpp}
+  \begin{figure}
+    \centering
+    \label{fig:dashdb_mpp}
+    \includegraphics[scale=.45]{graphics/dashDB_mpp_architecture.png}
+    \caption{Example of dashDB MPP Architecture \copyright 2015 dashDB \cite{dashDB}}
+  \end{figure}
   \par\vspace{\baselineskip}
   Each server in this data warehouse utilizes a number of key technologies, including:
   \begin{itemize}
@@ -2192,8 +2238,13 @@ nable dashDB to maximize hardware performance.
   dashDB uses a highly parallelized infrastructure optimized for columnar data
   exchange that is organized as such:
   \par\vspace{\baselineskip}
-\includegraphics[scale=.45]{graphics/dashDB_query_architecture.png}
-\cite{dashDB}
+  A example of dasDB's query architecture can be seen in Figure~\ref{fig:dashdb_query}
+  \begin{figure}
+ 	\centering
+ 	\label{fig:dashdb_query} 
+ 	\includegraphics[scale=.45]{graphics/dashDB_query_architecture.png}
+	\caption{Example of dashDB Query Architecture \copyright dashDB \cite{dashDB}}
+  \end{figure}
 \par\vspace{\baselineskip}
 \item eXtremeDB is the in-memory variant of the McObject family of data management projects.
   It stores its data entirely in main memory, eliminating the need for disk I/O.
@@ -2206,8 +2257,13 @@ nable dashDB to maximize hardware performance.
   transactions will complete together or the database will be rolled back to a
   pre-transaction state.\cite{extremeDB}
   \par\vspace{\baselineskip}
-\includegraphics[scale=.5]{graphics/extremeDB_dbms_architecture.jpg}
-  \cite{extremeDB}
+  An illustration of extremeDB's architecture can be seen in Figure~\ref{fig:extremedb_architecture}
+  \begin{figure}
+	\centering
+	\label{fig:extremedb_architecture}  
+	\includegraphics[scale=.5]{graphics/extremeDB_dbms_architecture.jpg}
+	\caption{extremeDB architecture \copyright 2014 McObject LLC \cite{extremeDB}}
+  \end{figure}
   \par\vspace{\baselineskip}
 
   \item GemFire is a distributed, in-memory, shared-nothing, NoSQL key-value store.
@@ -2220,7 +2276,13 @@ nable dashDB to maximize hardware performance.
   smart buffering to ensure messages move from node to node faster than what
   traditional messaging would provide."\cite{gemfire}
   \par\vspace{\baselineskip}
-  \includegraphics[scale=.5]{graphics/gemfire_peer_architecture.png}
+  An illustration of GemFire's peer architecture can be seen in Figure~\ref{fig:gemfire_peer}
+  \begin{figure}
+  	\centering
+  	\label{fig:gemfire_peer}
+  	\includegraphics[scale=.5]{graphics/gemfire_peer_architecture.png}
+  	\caption{GemFire peer architecture \copyright GemStone Systems, Inc. 2006 \cite{gemfire}}
+  \end{figure}
   \par\vspace{\baselineskip}
 
   \item Hekaton is Microsoft's database engine that is optimized for memory resident
@@ -2281,8 +2343,13 @@ nable dashDB to maximize hardware performance.
   massively parallel in-memory architecture in order to eliminate the I/O bottleneck
   that slows disk backed database management systems.
   \par\vspace{\baselineskip}
-  \includegraphics[scale=.5]{graphics/sap_hana_dbms_architecture.png}
-  \cite{saphana}
+  An example of a massively parallel layout can be seen in Figure~\ref{fig:saphana_architecture}
+  \begin{figure}
+	\centering
+	\label{fig:saphana_architecture}	
+	\includegraphics[scale=.5]{graphics/sap_hana_dbms_architecture.png}
+    \caption{SAP HANA Massively Parallel Architecture \copyright 2015 SAP \citep{saphana}}
+  \end{figure}
   \par\vspace{\baselineskip}
 \end{itemize}
 
