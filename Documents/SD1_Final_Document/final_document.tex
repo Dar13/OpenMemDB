@@ -6,6 +6,8 @@
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{color}
+\usepackage{float}
+\usepackage{bigfoot}
 \usepackage[square,sort,comma,numbers]{natbib}
 \usepackage{titling}
 %\usepackage{mathtools}
@@ -503,7 +505,7 @@ An example of a Hierarchical DBMS structure can be seen in Figure~\ref{fig:hiera
 \begin{figure}
   \centering
   \label{fig:hierarchicalDBMS_structure}
-  \includegraphics[scale=.5]{graphics/dbms_RDBMS_structure.png}
+  \includegraphics[scale=.5]{graphics/Hierarchical_Model.png}
   \caption{Example structure for hierarchical database. This work is in the public domain in the United States because it is a work prepared by an officer or employee of the United States Government as part of that person’s official duties \cite{wikiHierarchicalDBMS}}
 \end{figure}
 
@@ -532,17 +534,16 @@ The data within the network model consists of two main parts: data objects, and
 relationships.
 \par\vspace{\baselineskip}
 An example of network model structure can be seen in Figure~\ref{fig:networkDBMS_structure}
-\begin{figure}
+\begin{figure}[H]
   \centering
-  \label{fig:networkDBMS_structure}
   \includegraphics{graphics/dbms_network_data.png}
   \caption{Network information model. \copyright H.Maurer and N.Scherbakov. Reprinted with permission \cite{network_model_coronet}}
+  \label{fig:networkDBMS_structure}
 \end{figure}
 
 Relationships between records can be implemented by using logical constructions.
 This is called a "Data Set" . In the most basic case, each set consists of a father
 and a child. The "Data Set" has the following properties:
-
 \begin{itemize}
   \item Each set includes exactly one record of the first type. This record is called an Owner of the set.
   \item Each set may include 0 (i.e. an Empty set occurrence), 1 or N records of the same type. These records are called members of the data set.
@@ -550,11 +551,12 @@ and a child. The "Data Set" has the following properties:
 \end{itemize}
 An example of a network model relationship can be seen in Figure~\ref{fig:networkDBMS_relationship}.
 \par\vspace{\baselineskip}
-\begin{figure}
+
+\begin{figure}[H]
   \centering
+  \includegraphics{graphics/dbms_network_relationship.png}
+  \caption{Example of network model relationship \copyright H.Maurer \newline and N.Scherbakov. Reprinted with permission \cite{network_model_coronet}}
   \label{fig:networkDBMS_relationship}
-  \includegraphics{graphics/dbms_network_model_relationship.png}
-  \caption{Example of network model relationship \copyright H.Maurer and N.Scherbakov. Reprinted with permission \cite{network_model_coronet}}
 \end{figure}
 
 The basic setup of a network model is therefore a collection of record occurrences and
@@ -564,7 +566,10 @@ data sets.
 Object oriented databases are databases where the information stored within is organized
 in the form of objects, like what would be used in an object oriented programming
 language. An OODBMS combines the the features of an object-oriented language and a
-DBMS. The OODBMS permits a much tighter coupling between the database and the application. This allows the programmer to maintain consistency within a single environment.
+DBMS. The OODBMS permits a much tighter coupling between the database and the application. 
+This allows the programmer to maintain consistency within a single environment. An example 
+of an object oriented DBMS model can be seen in Figure~\ref{fig:ooDBMS_structure}.
+
 \par\vspace{\baselineskip}
 In an OODBMS data is encapsulated in \textit{abstract data objects}, also known
 as ADOs. ADOs all have the following properties:
@@ -586,12 +591,11 @@ typically by returning some (other) object back to the message sender and/or cau
 some observable change (eg. in a graphical user interface).
 \end{itemize} \cite{object_oriented_data_model}
 \par\vspace{\baselineskip}
-An example of an object oriented DBMS model can be seen on Figure~\ref{fig:ooDBMS_structure}
 \begin{figure}
   \centering
-  \label{fig:ooDBMS_structure}
   \includegraphics[scale=.5]{graphics/dbms_oodbms_example.png}
   \caption{An example of an object-oriented model. Public Domain \cite{wikiObjectOrientedDBMS}}
+  \label{fig:ooDBMS_structure}
 \end{figure}
 
 \subsubsection{NoSQL}
@@ -610,16 +614,14 @@ Some examples of document-style stores are CouchDB and MongoDB. These are stores
 \par\vspace{\baselineskip}
 Examples of key-value stores include MemcacheDB and Dynamo. These type of database
 management system store data by strict key value pairs and are usually implemented by
-distributed hash tables.
-\par\vspace{\baselineskip}
-With both of these styles you will be accessing the data one record at
-at time as apposed to a SQL style database.
+distributed hash tables. An example of a NoSQL architecture, specifically MongoDB,
+can be seen in Figure~\ref{fig:nosqlDBMS_structure}. With both of these styles you 
+will be accessing the data one record at at time as apposed to a SQL style database.
 \par\vspace{\baselineskip}
 There are typically two different arguments for choosing a NoSQL database management
 system. These arguments can be summarized as such:
-
 \begin{quote}
-"There are two possible reasons
+``There are two possible reasons
 to move to either of these alternate
 DBMS technologies: performance and
 flexibility.
@@ -629,61 +631,57 @@ with MySQL for my data storage needs
 and over time found performance to be
 inadequate. My options were:
 
-\begin{itemize}
-  \item 1. “Shard” my data to partition it
+\begin{enumerate}
+  \item “Shard” my data to partition it
 across several sites, giving me a serious
 headache managing distributed data
 in my application or
-  \item 2. Abandon MySQL and pay big licensing
+  \item Abandon MySQL and pay big licensing
 fees for an enterprise SQL
 DBMS or
 \item Move to something other
 than a SQL DBMS.
-\end{itemize}\footnote{Formatting mine}
+\end{enumerate}
 
 The flexibility argument goes something
 like the following: My data does
 not conform to a rigid relational schema.
 Hence, I can’t be bound by the
 structure of a RDBMS and need something
-more flexible"
-\end{quote} \cite{stonebraker2010sql}
+more flexible``\cite{stonebraker2010sql}\footnote{Formatting mine}
+\end{quote} 
 \par\vspace{\baselineskip}
-An example of a NoSQL architecture can be seen in Figure~\ref{fig:nosqlDBMS_structure}
-\begin{figure}
+%\newpage
+
+\begin{figure}[H]
   \centering
-  \label{fig:nosqlDBMS_structure}
   \textbf{Example NoSQL Architecture}
   \includegraphics[scale=.4]{graphics/dbms_nosql_mongo_architecture.jpg}
-  \caption{Example NoSQL Architecture \copyright mongoDB   \citep{mongodb_architecture}}
+  \caption{Example NoSQL Architecture \copyright mongoDB   \citep{mongodb_architecture} Reprinted with permission}
+  \label{fig:nosqlDBMS_structure}
 \end{figure}
+\newpage
 
 \subsubsection{NewSQL}
 NewSQL is a database management system that attempts to provide
 the same scalable performance that a NoSQL DBMS can provide while still conforming to
-the relational model. "Generally speaking, NewSQL data stores meet many of the
+the relational model. ''Generally speaking, NewSQL data stores meet many of the
 requirements for data management in cloud environments and also offer the benefits of
-the well-known SQL standard"\cite{grolinger2013data}
+the well-known SQL standard''\cite{grolinger2013data}
 \par\vspace{\baselineskip}
 Since NewSQL is based on the relational model, every NewSQL DBMS must offer their clients
 a pure relational view of data. This means that the data is interacted in terms of tables
 and relations. This does not mean that the internal data representation is the same across
 all NewSQL stores.
 \par\vspace{\baselineskip}
-"One of the main characteristics of the NoSQL and NewSQL data stores is their ability to
+``One of the main characteristics of the NoSQL and NewSQL data stores is their ability to
 scale horizontally and effectively by adding more servers into the resource pool. Even
 though there have been attempts to scale relational databases horizontally, on the contrary,
 RDBs are designed to scale vertically by means of adding more power to a single existing
-server"\cite{grolinger2013data}
+server''\cite{grolinger2013data}
 \par\vspace{\baselineskip}
-The scalability of different data stores can be seen in Figure~\ref{fig:nosql_scalability}
-\begin{figure}
-  \centering
-  \label{fig:nosql_scalability}
-  \textbf{Partitioning, replication, consistency, and concurrency control capabilities}
-  \includegraphics[scale=.4]{graphics/nosql_newsql_scalability_table.png}
-  \caption{NoSQL and NewSQL Data Modeling \copyright 2013 Grolinger et al. \cite{grolinger2013data}}
-\end{figure}
+The scalability of different data stores can be found in Grolinger et al's 
+report on NoSQL and NewSQL databases\cite{grolinger2013data}.
 
 \newpage
 
@@ -701,10 +699,10 @@ Work distribution between threads is done via a task-queue that each thread in t
 thread pool pulls work from. Tasks are C++11 lambda functions that are packaged up
 via the standard library's \inlinecode{std::packaged_task<>}
  class.
-This class provides an interface that allows us to generate a \inlinecode|std::future<>|
+This class provides an interface that allows us to generate a \inlinecode{std::future<>}
 object that is a thread-safe interface to a thread's return value. The bulk of the
 ideas behind this thread pool were found online \cite{stackoverflow1} though we substituted
-the command queue, that was initially implemented using a \inlinecode{std::mutex}
+the command queue that was initially implemented using a \inlinecode{std::mutex}
 and \inlinecode{std::queue<>}, with a Tervel queue that allows
 non-blocking and wait-free access and insertion into the command queue.
 \par\vspace{\baselineskip}
@@ -737,53 +735,65 @@ and reported by the server is as follows:
  \item Longest execution time of a query
  \item Median execution time of a query
  \item Average ``load'' of a worker thread
+ \item Current total size of data store
 \end{itemize}
+
+There would be more extensive reporting features, except that a lot of 
+nice statistics about process memory and the system in general are found through files within the /proc
+directory. While these are likely memory-mapped files, Linux's file I/O cannot be guaranteed to be
+asynchronous or non-blocking which means that we cannot use them likely. As such, we have decided
+to shelve those monitoring features until further testing can be done.
 \par\vspace{\baselineskip}
 
 \subsection{Database Internals}
 %author Robert Medina
 Data Store receives data requests and based on those requests will return a subset of data from
-the database. This database will represent data in a table format using nested vectors. Each table
-will be stored in a table hashmap to allow for easy table lookup. Each table contains a relational
-schema for the type of data each column can accept. This is represented as a pair in the table
-lookup hashmap.
+the database. This database will represent data in a table format using nested vectors as shown
+in Figure~\ref{fig:tables_in_memory}. Each table will be stored in a table hashmap to allow for 
+easy table lookup. Each table contains a relational schema for the type of data each column 
+can accept. This is represented as a pair in the table lookup hashmap.
+\par\vspace{\baselineskip}
 
 \begin{figure}
   \centering
   \includegraphics[scale=.5]{graphics/Table_In_Memory.png}
   \caption{Example of tervel vector table representation in memory}
+  \label{fig:tables_in_memory}
 \end{figure}
 
-Nested vectors are stored as row store architecture and column store architecture.
+These nested vectors can be used as either a row store or column store, both of which are defined below.
+\par\vspace{\baselineskip}
 
 Row store architectures store the memory of a row in a vector of multiple types and then
 a table would be composed of a vector of those rows as shown in Figure~\ref{fig:row_store_ex}.
-\begin{figure}
+\begin{figure}[H]
   \centering
   \includegraphics[scale=.6]{graphics/row_store_example.png}
   \cite{rowstore}
-  \label{fig:row_store_ex}
   \caption{An example of a row store architecture.}
+  \label{fig:row_store_ex}
 \end{figure}
 
 Column store architecture stores the memory of a row in a vector of one type and then 
 creates another vector that holds those vectors as shown in Figure~\ref{fig:column_store_ex}.
+\par\vspace{\baselineskip}
+
 \begin{figure}
   \centering
   \includegraphics[scale=.6]{graphics/column_store_example.png}
   \cite{rowstore}
-  \label{fig:column_store_ex}
   \caption{An example of a column store architecture.}
+  \label{fig:column_store_ex}
 \end{figure}
 
 A side-by-side difference between row and column store architectures is shown in Figure~\ref{fig:row_column_diff}.
-
 \par\vspace{\baselineskip}
+
 \begin{figure}
   \centering
   \includegraphics[scale=.6]{graphics/row_store_and_column_example.png}
-  \label{fig:row_column_diff}
   \caption{A row store and column store side-by-side comparison.\cite{rowstore}}
+  \label{fig:row_column_diff}
 \end{figure}
 
 Whenever a data request inquires about a table or more the data store will return a subset of that
@@ -809,7 +819,7 @@ noticeable to see how adding a new row in column store would require multiple
 access to multiple column vectors.
 \par\vspace{\baselineskip}
 
-\begin{figure}
+\begin{figure}[H]
   \centering
   \includegraphics[scale=.5]{graphics/row_store_column_accessing_data.png}
   \caption{A visualization of accessing the same data in a row store versus a column store.}
@@ -818,9 +828,10 @@ access to multiple column vectors.
 
 \subsubsection{ACID}
 %author Robert Medina
-Properties of a reliable database is outline as ACID. In order to guarantee that
-database transactions are processed reliably a database must have atomicity, consistency,
-isolation and durability.
+Properties of a reliable database are traditionally defined as Atomicity, Consistency, Isolation, 
+and Durability(ACID). These properties are required to reliably process SQL transactions as well as
+be able to handle edge cases and extreme conditions that are experienced by databases in 
+production environments.
 \par\vspace{\baselineskip}
 
 Atomicity refers to the ability of a database to guarantee that all transactions
