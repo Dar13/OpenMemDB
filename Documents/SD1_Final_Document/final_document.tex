@@ -9,7 +9,7 @@
 \usepackage{listings}
 \usepackage{color}
 \usepackage[square,sort,comma,numbers]{natbib}
-\usepackage{mathtools}
+%\usepackage{mathtools}
 
 % Temporarily ignore graphics
 % \renewcommand{\includegraphics}[2][]{\fbox{}}
@@ -382,11 +382,14 @@ by the database manager. The relational model is a combination of three
 components, such as Structural, Integrity, and Manipulative parts."
 \cite{sumathi2007fundamentals}
 \end{quote}
+\par\vspace{\baselineskip}
+An example of an RDBMS structure can be seen in Figure~\ref{fig:RDBMS_structure}
 \begin{figure}
   \centering
+  \label{fig:RDBMS_structure}
   \textbf{Relational DBMS Structure}
   \includegraphics[scale=.5]{graphics/dbms_RDBMS_structure.png}
-  \caption{Represents a disk based RDBMS}
+  \caption{Represents a disk based RDBMS. Printed with permission \cite{wikiRDBMS}}
 \end{figure}
 The three components can be further broken down.
 \par\vspace{\baselineskip}
@@ -478,10 +481,13 @@ The hierarchical database model is typically used for large amounts of data that
 unlikely to change. It is recognized as the first database model used by IBM in
 the 1960s.\cite{hierarchical_dbms_techopedia}
 \par\vspace{\baselineskip}
+
+An example of a Hierarchical DBMS structure can be seen in Figure~\ref{fig:hierarchicalDBMS_structure}
 \begin{figure}
   \centering
+  \label{fig:hierarchicalDBMS_structure}
   \includegraphics[scale=.5]{graphics/dbms_RDBMS_structure.png}
-  \caption{Example structure for hierarchical database}
+  \caption{Example structure for hierarchical database. This work is in the public domain in the United States because it is a work prepared by an officer or employee of the United States Government as part of that person’s official duties \cite{wikiHierarchicalDBMS}}
 \end{figure}
 
 \subsubsection{Network}
@@ -491,13 +497,14 @@ model does not limit itself to having every child have only one parent. In the n
 model all children can have multiple parents, and obviously parents can have multiple
 children. The network model also consists of items called "records" that which is a
 collection of data items. Each data item has a name and a value.
-
+\par\vspace{\baselineskip}
+An example of a network model record can be seen in Figure~\ref{fig:networkDBMS_record}
 \begin{figure}
   \centering
+  \label{fig:networkDBMS_record}
   \textbf{Network model record example}
   \includegraphics{graphics/dbms_network_model_record.png}
-  \caption{Example of network model record}
-  \cite{network_model_coronet}
+  \caption{Example of network model record. \copyright H.Maurer and N.Scherbakov. Reprinted with permission  \cite{network_model_coronet}}
 \end{figure}
 
 Each record can have it's own grouping within by grouping two or more elementary items.
@@ -506,12 +513,13 @@ under one data item.
 \par\vspace{\baselineskip}
 The data within the network model consists of two main parts: data objects, and
 relationships.
-
+\par\vspace{\baselineskip}
+An example of network model structure can be seen in Figure~\ref{fig:networkDBMS_structure}
 \begin{figure}
   \centering
+  \label{fig:networkDBMS_structure}
   \includegraphics{graphics/dbms_network_data.png}
-  \caption{Network information model}
-  \cite{network_model_coronet}
+  \caption{Network information model. \copyright H.Maurer and N.Scherbakov. Reprinted with permission \cite{network_model_coronet}}
 \end{figure}
 
 Relationships between records can be implemented by using logical constructions.
@@ -523,11 +531,13 @@ and a child. The "Data Set" has the following properties:
   \item Each set may include 0 (i.e. an Empty set occurrence), 1 or N records of the same type. These records are called members of the data set.
   \item All members within one set occurrence have a fixed order (are sorted).
 \end{itemize}
-
+\par\vspace{\baselineskip}
+An example of a network model relationship can be seen in Figure~\ref{fig:networkDBMS_relationship}
 \begin{figure}
   \centering
+  \label{fig:networkDBMS_relationship}
   \includegraphics{graphics/dbms_network_model_relationship.png}
-  \caption{Example of network model relationship}
+  \caption{Example of network model relationship \copyright H.Maurer and N.Scherbakov. Reprinted with permission \cite{network_model_coronet}}
 \end{figure}
 
 The basic setup of a network model is therefore a collection of record occurrences and
@@ -558,11 +568,13 @@ by that operation. The object can respond to the message in a number of ways, bu
 typically by returning some (other) object back to the message sender and/or causing
 some observable change (eg. in a graphical user interface).
 \end{itemize} \cite{object_oriented_data_model}
-
+\par\vspace{\baselineskip}
+An example of an object oriented DBMS model can be seen on Figure~\ref{fig:ooDBMS_structure}
 \begin{figure}
   \centering
+  \label{fig:ooDBMS_structure}
   \includegraphics[scale=.5]{graphics/dbms_oodbms_example.png}
-  \caption{An example of an object-oriented model}
+  \caption{An example of an object-oriented model. Public Domain \cite{wikiObjectOrientedDBMS}}
 \end{figure}
 
 \subsubsection{NoSQL}
@@ -619,13 +631,14 @@ Hence, I can’t be bound by the
 structure of a RDBMS and need something
 more flexible"
 \end{quote} \cite{stonebraker2010sql}
-
+\par\vspace{\baselineskip}
+An example of a NoSQL architecture can be seen in Figure~\ref{fig:nosqlDBMS_structure}
 \begin{figure}
   \centering
+  \label{fig:nosqlDBMS_structure}
   \textbf{Example NoSQL Architecture}
   \includegraphics[scale=.4]{graphics/dbms_nosql_mongo_architecture.jpg}
-  \caption{Example NoSQL Architecture}
-  \citep{mongodb_architecture}
+  \caption{Example NoSQL Architecture \copyright mongoDB   \citep{mongodb_architecture}}
 \end{figure}
 
 \subsubsection{NewSQL}
@@ -645,12 +658,14 @@ scale horizontally and effectively by adding more servers into the resource pool
 though there have been attempts to scale relational databases horizontally, on the contrary,
 RDBs are designed to scale vertically by means of adding more power to a single existing
 server"\cite{grolinger2013data}
-
+\par\vspace{\baselineskip}
+The scalability of different data stores can be seen in Figure~\ref{fig:nosql_scalability}
 \begin{figure}
   \centering
+  \label{fig:nosql_scalability}
   \textbf{Partitioning, replication, consistency, and concurrency control capabilities}
   \includegraphics[scale=.4]{graphics/nosql_newsql_scalability_table.png}
-  \caption{NoSQL and NewSQL Data Modeling}
+  \caption{NoSQL and NewSQL Data Modeling \copyright 2013 Grolinger et al. \cite{grolinger2013data}}
 \end{figure}
 
 \newpage
