@@ -770,7 +770,7 @@ a table would be composed of a vector of those rows as shown in Figure~\ref{fig:
   \centering
   \includegraphics[scale=.6]{graphics/row_store_example.png}
   \cite{rowstore}
-  \caption{An example of a row store architecture.}
+  \caption{An example of a row store architecture. \copyright Oracle LEarning Library 2014, reprinted with permission}
   \label{fig:row_store_ex}
 \end{figure}
 
@@ -782,7 +782,7 @@ creates another vector that holds those vectors as shown in Figure~\ref{fig:colu
   \centering
   \includegraphics[scale=.6]{graphics/column_store_example.png}
   \cite{rowstore}
-  \caption{An example of a column store architecture.}
+  \caption{An example of a column store architecture. \copyright Oracle Learning Library 2014, reprinted with permission}
   \label{fig:column_store_ex}
 \end{figure}
 
@@ -792,7 +792,7 @@ A side-by-side difference between row and column store architectures is shown in
 \begin{figure}
   \centering
   \includegraphics[scale=.6]{graphics/row_store_and_column_example.png}
-  \caption{A row store and column store side-by-side comparison.\cite{rowstore}}
+  \caption{A row store and column store side-by-side comparison. \copyright Oracle Learning Library 2014, Reprinted with permission.\cite{rowstore}}
   \label{fig:row_column_diff}
 \end{figure}
 
@@ -822,7 +822,8 @@ access to multiple column vectors.
 \begin{figure}[H]
   \centering
   \includegraphics[scale=.5]{graphics/row_store_column_accessing_data.png}
-  \caption{A visualization of accessing the same data in a row store versus a column store.}
+  \cite{saphana}
+  \caption{A visualization of accessing the same data in a row store versus a column store. \copyright SAP HANA 2015, reprinted with permission}
   \label{fig:row_col_access_data}
 \end{figure}
 
@@ -870,7 +871,7 @@ a typical index layout.
   \centering
   \includegraphics{graphics/indexentry.png}
   \cite{ramakrishnan2000database}
-  \caption{INSERT TEXT}
+  \caption{Index key abstract concept for keys and data relations \copyright Ramakrishnan 2000, reprinted with permission}
   \label{fig:index_entry}
 \end{figure}
 
@@ -910,7 +911,7 @@ An example of a B-tree can be seen in Figure~\ref{fig:b_tree_ex}.
   \centering
   \includegraphics[scale=.5]{graphics/B_Tree_Example.png}
   \cite{b+tree}
-  \caption{INSERT TEXT}
+  \caption{Example of a B Tree with symbols \copyright Morris 1998, reprinted with permission}
   \label{fig:b_tree_ex}
 \end{figure}
 
@@ -924,7 +925,7 @@ the difference between the two types of tree data structures visually.
   \centering
   \includegraphics[scale=.5]{graphics/B_B+_Tree_Difference.png}
   \cite{b+tree}
-  \caption{A graphic depicting the differences between a B-tree and a B+ tree.}
+  \caption{A graphic depicting the differences between a B-tree and a B+ tree. \copyright Perrone 2012, reprinted with permission}
   \label{fig:b_b+_tree_diff}
 \end{figure}
 
@@ -942,7 +943,7 @@ in Figure~\ref{fig:b+_tree_runtimes}.
   \end{tabular}
   \label{fig:b+_tree_runtimes}
   \caption{The Big-O notation for various operations done on B+ trees. Where $m$ is the 
-	   number of index entries and $k$ is the number of data records.}
+	   number of index entries and $k$ is the number of data records. \copyright Ramakrishnan 2000, reprinted with permission}
 \end{figure}
 
 The height of a B+ tree is $log_m(n)$, where $m$ is the number of children and $n$ is the number of data entries.
@@ -968,7 +969,7 @@ looks like.
   \textbf{Abstract Diagram of ISAM structure}
   \includegraphics[scale=.8]{graphics/ISAM_abstract_diagram.png}
   \cite{ramakrishnan2000database}
-  \caption{Behavior similiar to B+ Tree Structure}
+  \caption{Behavior similiar to B+ Tree Structure \copyright Ramakrishnan 2000, reprinted with permission}
   \label{fig:isam_visual}
 \end{figure}
 
@@ -988,7 +989,7 @@ how ISAM memory allocation occurs.
   \textbf{Page Allocation for ISAM}
   \includegraphics{graphics/ISAM_page_allocation.png}
   \cite{ramakrishnan2000database}
-  \caption{The order of which memory gets allocated on the page}
+  \caption{The order of which memory gets allocated on the page \copyright Ramakrishnan 2000, reprinted with permission}
   \label{fig:isam_memory}
 \end{figure}
 
@@ -1012,7 +1013,7 @@ gives the specific runtimes of the various operations.
   Deletion & $ log_f N $ & If an empty overflow exists it will be de-allocated \\ \hline
   \end{tabular}
   \label{fig:isam_runtimes}
-  \caption{The runtimes of common operations done on an ISAM tree}
+  \caption{The runtimes of common operations done on an ISAM tree \copyright Ramakrishnan 2000, reprinted with permission}
 \end{figure}
 
 \begin{figure}
@@ -1028,6 +1029,7 @@ gives the specific runtimes of the various operations.
   \textbf{After inserting 23*, 48*, 41*, 42*}
   \includegraphics[scale=.75]{graphics/ISAM_example_insertion.png}
   \cite{ramakrishnan2000database}
+  \caption{ISAM insertion \copyright Ramakrishnan 2000, reprinted with permission}
 \end{figure}
 
 \begin{figure}
@@ -1035,6 +1037,7 @@ gives the specific runtimes of the various operations.
   \textbf{After deleting 42*, 51*, 97*}
   \includegraphics[scale=.7]{graphics/ISAM_example_deletion.png}
   \cite{ramakrishnan2000database}
+  \caption{ISAM deletion \copyright Ramakrishnan 2000, reprinted with permission}
 \end{figure}
 
 \par\vspace{\baselineskip}
@@ -1069,6 +1072,7 @@ to an overflow chain in the bucket.
 \begin{figure}
   \centering
   \includegraphics[scale=.75]{graphics/Static_Hashing_Abstract}
+  \caption{Abtract data structure representation of static hashing \copyright Ramakrishnan 2000, reprinted with permission}
   \cite{ramakrishnan2000database}
 \end{figure}
 
@@ -1130,7 +1134,7 @@ entries each bucket can hold.
   \textbf{Extendible Hashmap}
   \includegraphics{graphics/ExtendibleHashing_Depth_2.png}
   \cite{ramakrishnan2000database}
-  \caption{Example of Extendible Hashing at Depth 2}
+  \caption{Example of Extendible Hashing at Depth 2 \copyright Ramakrishnan 2000, reprinted with permission}
 \end{figure}
 
 \begin{figure}
@@ -1138,7 +1142,7 @@ entries each bucket can hold.
   \textbf{Spliting Occurs}
   \includegraphics{graphics/ExtendibleHashing_Spliting.png}
   \cite{ramakrishnan2000database}
-  \caption{New bucket is made}
+  \caption{New bucket is made \copyright Ramakrishnan 2000, reprinted with permission}
 \end{figure}
 
 
@@ -1153,7 +1157,7 @@ the original bucket local depth value.
   \textbf{Directory Doubling}
   \includegraphics{graphics/ExtendibleHashing_Depth_3.png}
   \cite{ramakrishnan2000database}
-  \caption{Directory doubles and the global depth increases to three.}
+  \caption{Directory doubles and the global depth increases to three. \copyright Ramakrishnan 2000, reprinted with permission}
 \end{figure}
 
 \begin{center}
@@ -1186,7 +1190,7 @@ In the split operation, there exists a split policy that determines when splitin
   \textbf{Splitting Occurs}
   \includegraphics{graphics/Linear_hashing_splitting}
   \cite{ramakrishnan2000database}
-  \caption{Abstract view of bucket splitting}
+  \caption{Abstract view of bucket splitting \copyright Ramakrishnan 2000, reprinted with permission}
 \end{figure}
 
 When a split occurs the data may not necessary reside in the newly split bucket. An overflow page is
@@ -1210,7 +1214,7 @@ figures. A typical inserting using linear hashing is shown in Figure~\ref{fig:li
   \textbf{Insertion of 43*, 43 mod (4) = 3 = (011)2 binary representation}
   \includegraphics{graphics/Linear_hashing_insertion}
   \cite{ramakrishnan2000database}
-  \caption{Overflowing occurs}
+  \caption{Overflowing occurs \copyright Ramakrishnan 2000, reprinted with permission}
   \label{fig:linear_hash_insert}
 \end{figure}
 
@@ -1226,7 +1230,7 @@ of potential keys to be hashed will be doubled as Figure~\ref{fig:linear_hash_le
   \textbf{Linear Hashing level increased due to maximum capacity}
   \includegraphics{graphics/Linear_hashing_level_increased}
   \cite{ramakrishnan2000database}
-  \caption{Notice that the number of bits increased as well, since $d(i) = d(a) + i$.}
+  \caption{Notice that the number of bits increased as well, since $d(i) = d(a) + i$.  \copyright Ramakrishnan 2000, reprinted with permission}
   \label{fig:linear_hash_level_inc}
 \end{figure}
 
@@ -1289,10 +1293,10 @@ Those symbol weights are the following:
   \centering
   \includegraphics{graphics/huffman_example_symbol_freq.png}
   \cite{huffman}
-  \caption{Symbols with frequencies as weights data set}
+  \caption{Symbols with frequencies as weights data set \copyright Daescu 2012, reprinted with permission} \label{huffman_example}
 \end{figure}
 
-Once the data set is prepared it is inserted into a priority queue. In this example the priority 
+Once the data set is prepared it is inserted into a priority queue. In this figure \ref{huffman_example}, the priority 
 queue sets the least frequency symbol counter to be of the highest priority.
 \par\vspace{\baselineskip}
 
@@ -1300,7 +1304,7 @@ queue sets the least frequency symbol counter to be of the highest priority.
   \centering
   \includegraphics{graphics/huffman_example_initial.png}
   \cite{huffman}
-  \caption{Data set inserted into a priority queue}
+  \caption{Data set inserted into a priority queue  \copyright Daescu 2012, reprinted with permission} \label{huff_example}
 \end{figure}
 
 The process begins with the leaf nodes turning into a new node with children whose symbol weight is smaller than
@@ -1319,7 +1323,7 @@ Using a priority queue where the node with the lowest probability is given the h
   \item The remaining node is the root node and the tree is complete.
 \end{enumerate}
 
-Continuing with the example, the first two leaf nodes are added as children to a parent node whose
+Continuing with figure \ref{huff_example}, the first two leaf nodes are added as children to a parent node whose
 weight is the sum of the two children nodes. This is shown in Figures~\ref{fig:huffman_ex_int_1} and
 ~\ref{fig:huffman_ex_int_2}.
 \par\vspace{\baselineskip}
@@ -1328,7 +1332,7 @@ weight is the sum of the two children nodes. This is shown in Figures~\ref{fig:h
   \centering
   \includegraphics[scale=.65]{graphics/huffman_example_internal_node.png}
   \cite{huffman}
-  \caption{Highest priority on queue is merged together}
+  \caption{Highest priority on queue is merged together  \copyright Daescu 2012, reprinted with permission}
   \label{fig:huffman_ex_int_1}
 \end{figure}
 
@@ -1336,7 +1340,7 @@ weight is the sum of the two children nodes. This is shown in Figures~\ref{fig:h
   \centering
   \includegraphics[scale=.63]{graphics/huffman_example_internal_node_added.png}
   \cite{huffman}
-  \caption{New node inserted into queue}
+  \caption{New node inserted into queue  \copyright Daescu 2012, reprinted with permission}
   \label{fig:huffman_ex_int_2}
 \end{figure}
 
@@ -1347,7 +1351,7 @@ This continues repeatedly until one tree is created from the data set.
   \centering
   \includegraphics[scale=.75]{graphics/huffman_example_end.png}
   \cite{huffman}
-  \caption{Complete Huffman Tree from priority queue}
+  \caption{Complete Huffman Tree from priority queue  \copyright Daescu 2012, reprinted with permission}
 \end{figure}
 
 The last node in the queue contains the root to the Huffman tree. This Huffman tree
@@ -1363,19 +1367,19 @@ Figure~\ref{fig:huffman_prefix_table}.
   \centering
   \includegraphics[scale=.67]{graphics/huffman_example_prefix_table}
   \cite{huffman}
-  \caption{Prefix Code Table derived from Huffman Tree}
+  \caption{Prefix Code Table derived from Huffman Tree  \copyright Daescu 2012, reprinted with permission}
   \label{fig:huffman_prefix_table}
 \end{figure}
 
 \par\vspace{\baselineskip}
-After the prefix table is applied to the original data set the following result is the compressed
+After the prefix table in Figure~\ref{huffman_prefix_table} is applied to the original data set the following result is the compressed
 data for this data set as shown in Figure~\ref{fig:huffman_compressed}.
 \par\vspace{\baselineskip}
 \begin{figure}
   \centering
   \includegraphics[scale=.75]{graphics/huffman_example_compressed_result}
   \cite{huffman}
-  \caption{Prefix code representation of original data set.}
+  \caption{Prefix code representation of original data set.  \copyright Daescu 2012, reprinted with permission}
   \label{fig:huffman_compressed}
 \end{figure}
 
@@ -1406,23 +1410,24 @@ variable pair, (offset, length of match, codeword for symbol).
 \par\vspace{\baselineskip}
 \begin{figure}
   \centering
+  \cite{LZ77_78}
   \includegraphics{graphics/LZ77_compression_code}
   \cite{LZ77_78}
-  \caption{Psuedo Algorithm for encoding processes for look-ahead and search buffer}
+  \caption{Psuedo Algorithm for encoding processes for look-ahead and search buffer \copyright Wikipedia 2015, reprinted with permission}
 \end{figure}
 
 \begin{figure}
   \centering
-  \includegraphics[scale=.5]{graphics/LZ77_example_window}
+  \includegraphics[scale=.5]{graphics/LZ77_example_window} \label{LZ77_example}
   \cite{LZ77_78}
-  \caption{The format is more clearly defined with in this example.}
+  \caption{The format is more clearly defined with in this example. \copyright Wikipedia 2015, reprinted with permission}
 \end{figure}
 \newpage
 
 A clear limitation of LZ77 algorithm is that the window only can allocate enough memory for the dictionary. At
 larger window sizes performance begins to dwindle. A smaller window size also means that valuable dictionary data
 encoding is being toss away because they are removed from the dictionary to make room for the newly encoded data sets
-from the look-ahead buffer.
+from the look-ahead buffer as since in figure \ref{LZ77_example}.
 \par\vspace{\baselineskip}
 Much like LZ77 the LZ78 lossless data compression algorithm replicates many of the LZ77 compression features however
 LZ78 attempts to address some of the more underlying problems with LZ77 such as a finite amount of memory for
@@ -1444,8 +1449,8 @@ the program must also insure that this memory gets cleaned up after it is done w
 \begin{figure}
   \centering
   \includegraphics{graphics/c++_memory_heirarchy.png}
+  \caption{A visualization of the C++ memory heirarchy. \copyright Adrian, 2006, reprinted with permission. \cite{stackheap}}
   \label{fig:cpp_mem_heirarchy}
-  \caption{A visualization of the C++ memory heirarchy.}
 \end{figure}
 
 Programs cannot predict how much memory will be required at run time. This memory can be allocated 
@@ -3093,10 +3098,10 @@ data value in a \inlinecode{boost::variant} object that matches with that data t
 	   const U & get(const variant<T1, T2, ..., TN> &);
    \end{lstlisting}
   \cite{boostvariant}
-  \caption{Describes the type of data variant will accept} \label{templateboostvar}
+  \caption{Describes the type of data variant will accept\copyright Friedman, Maman 2002, reprinted with permission} \label{templateboostvar}
 \end{figure}
 
-Figure \ref{templateboostvar} shows ** something **?
+Figure \ref{templateboostvar} shows the various types that can be accepted using the get function
 
 While \inlinecode{boost::get<T>} is an acceptable means for value retrieval it suffers from several flaws.
 The get function can only work for one static type of \inlinecode{boost::variant},
@@ -3130,7 +3135,7 @@ via \inlinecode{boost::apply_visitor}. Visitation requires the program to explic
   	};
   \end{lstlisting}
   \cite{boostvariant}
-  \caption{Improvement on data retrevial, betterthan get function since types are not predefined} \label{visitationexample}
+  \caption{Improvement on data retrevial, betterthan get function since types are not predefined \copyright Friedman, Maman 2002, reprinted with permission} \label{visitationexample}
 \end{figure}
 
 This provides the same functionality as get but now this code allows the program to write
@@ -3178,7 +3183,7 @@ however not all compilers are able to this function.
   \end{lstlisting}
 
   \cite{boostvariant}
-  \caption{Allows the program to create their own type sequence without using variant constructor} \label{typesequence}
+  \caption{Allows the program to create their own type sequence without using variant constructor\copyright Friedman, Maman 2002, reprinted with permission} \label{typesequence}
 \end{figure}
 
 \begin{figure}
@@ -3189,7 +3194,7 @@ however not all compilers are able to this function.
 	\end{lstlisting}
 	
 	\cite{boostvariant}
-	\caption{Allows the program to create their own type sequence without using variant constructor} \label{typesequence2}
+	\caption{Allows the program to create their own type sequence without using variant constructor \copyright Friedman, Maman 2002, reprinted with permission} \label{typesequence2}
 \end{figure}
 
 {\bfseries Extending Visitation Even Further}:
@@ -3222,7 +3227,7 @@ extends this by allowing simultaneous visitation of content of two different var
   	};
   	\end{lstlisting}
   \cite{boostvariant}
-  \caption{Compares two variant objects} \label{binvisitation}
+  \caption{Compares two variant objects \copyright Friedman, Maman 2002, reprinted with permission} \label{binvisitation}
 \end{figure}
 
 \newpage
@@ -3254,7 +3259,7 @@ multiple compares between variants objects with in tables.
 	  };
 	\end{lstlisting}
   \cite{boostvariant}
-  \caption{Compares three or more variant objects} \label{multivisitation}
+  \caption{Compares three or more variant objects \copyright Friedman, Maman 2002, reprinted with permission} \label{multivisitation}
 \end{figure}
 
 \par\vspace{\baselineskip}
