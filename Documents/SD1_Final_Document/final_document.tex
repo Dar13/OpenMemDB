@@ -2469,9 +2469,12 @@ if (result.isSuccess) {
   \label{code:lib_cmd_exec}
   \caption{Code snippet showing how to execute a command using libomdb}
   \end{figure}
-
+ 
+  \par\vspace{\baselineskip}
+  The sequence diagram of executing a command with libomdb is shown Figure~\ref{fig:libomdb_command_sequence}.
   \begin{figure}
     \centering
+    \label{fig:libomdb_command_sequence}
     \textbf{Sequence Diagram for Executing Command}
     \includegraphics[scale=.5]{graphics/libomdb_command_activity.png}
     \caption{Executing Command Sequence Diagram}
@@ -2522,9 +2525,12 @@ if (result.isSuccess) {
   parsed and executed. The \inlinecode{executeQuery()} command
   does nearly the exact same thing but will receive a different data structure from the
   database in return.
-
+  \par\vspace{\baselineskip}
+  A detailed description of the methods contained in the \inlinecode{Connection} class 
+  can be seen in Figure~\ref{fig:connection_methods}.
   \begin{figure}
     \centering
+    \label{fig:connection_methods}
     \textbf{Connection Class Layout}
     \includegraphics{graphics/libomdb_Diagrams/libomdb_connection_layout.png}
 	\caption{Connection layout}
@@ -2565,9 +2571,12 @@ if (result.isSuccess) {
   \inlinecode{Result} forward one row, if there are still rows
   remaining in the \lstinline[basicstyle=\ttfamily]|Result|. If there is not, it does
   nothing and returns \lstinline[basicstyle=\ttfamily]|false|.
-
+  \par\vspace{\baselineskip}
+  A detailed description of the methods contained in the \inlinecode{Result} class 
+  can be found in Figure~\ref{fig:result_methods}.
   \begin{figure}
     \centering
+    \label{fig:result_methods}
     \textbf{Result Class Layout}
     \includegraphics{graphics/libomdb_Diagrams/libomdb_result_layout.png}
     \caption{Result Layout}
@@ -2600,8 +2609,11 @@ if (result.isSuccess) {
   column at the passed in index, and
   \inlinecode{getColumnType(index)} returns the type of data that
   is stored in the column specified by index.
-
+  \par\vspace{\baselineskip}
+  A detailed description of the methods contained in the \inlinecode{ResultMetaData}
+  class can be found in Figure~\ref{fig:reultmetadata_methods}
   \begin{figure}
+    \label{fig:reultmetadata_methods}
     \centering
     \textbf{ResultMetaData Class Layout}
     \includegraphics{graphics/libomdb_Diagrams/libomdb_resultmetadata_layout.png}
