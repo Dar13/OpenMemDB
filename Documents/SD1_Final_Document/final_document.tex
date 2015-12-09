@@ -2065,22 +2065,28 @@ similarities end as far as OpenMemDB is concerned. MemSQL and VoltDB on the othe
 hand both use distributed systems to achieve performance gains. MemSQL differs from
 VoltDB in a few ways, the most important being it's use of lock free data structures
 for storing data and its storing of pre-compiled commonly used queries\cite{MemSQL}.
+\par\vspace{\baselineskip}
+An sample overview of MemSQL architecture can be seen in Figure~\ref{fig:memsql_architecture}
 \begin{figure}
   \centering
+  \label{fig:memsql_architecture}
   \textbf{MemSQL Two-tiered Architecture}
   \includegraphics[scale=.5]{graphics/memsql_dbms_architecture.png}
-  \caption{MemSQL Architecture}
+  \caption{MemSQL Architecture \copyright memsql \cite{MemSQL}}
 \end{figure}
 VoltDB tries to make its performance gains by what they call "Concurreny through
 scheduling"\cite{VoltDB}. This is the process of using a single-threaded pipeline
 that performs the task it was scheduled. This limits the need for locking during
 transactions by intelligently scheduling the transactions so that locks are not
 necessary.
+\par\vspace{\baselineskip}
+VoltDB's serialized processing architecture can be seen in Figure~\ref{fig:voltdb_serialized}
 \begin{figure}
   \centering
+  \label{fig:voltdb_serialized}
   \textbf{VoltDB Serialized Architecture}
   \includegraphics[scale=.5]{graphics/voltdb_serialized_architecture.png}
-  \caption{VoltDB Serialized Processing}
+  \caption{VoltDB Serialized Processing \copyright VoltDB \cite{VoltDB}}
 \end{figure}
 \par\vspace{\baselineskip}
 OpenMemDB aims to take a different approach, one that is fully wait free. The goal is
@@ -2109,10 +2115,12 @@ known and less well documented DBMS that are worthy of note.
   \cite{aerospike}
   \end{quote}
   \par\vspace{\baselineskip}
+  An illustration of Aerospikes architecture can be seen in Figure~\ref{fig:aerospike_architecture}
   \begin{figure}
     \centering
+    \label{fig:aerospike_architecture}
     \includegraphics[scale=.25]{graphics/aerospike_dbms_architecture.png}
-    \caption{Aerospike Architecture}
+    \caption{Aerospike Architecture \copyright 2015 Aerospike, Inc. \cite{aerospike}}
   \end{figure}
   \cite{aerospike}
   \par\vspace{\baselineskip}
@@ -2136,8 +2144,13 @@ known and less well documented DBMS that are worthy of note.
   MPP operates by allowing the data warehouse to leverage multiple servers
   in a network cluster to process data simultaneously.
   \par\vspace{\baselineskip}
-\includegraphics[scale=.45]{graphics/dashDB_mpp_architecture.png}
-  \cite{dashDB}
+  An example of dashDB's MPP architecture can be seen in Figure~\ref{fig:dashdb_mpp}
+  \begin{figure}
+    \centering
+    \label{fig:dashdb_mpp}
+    \includegraphics[scale=.45]{graphics/dashDB_mpp_architecture.png}
+    \caption{Example of dashDB MPP Architecture \copyright 2015 dashDB \cite{dashDB}}
+  \end{figure}
   \par\vspace{\baselineskip}
   Each server in this data warehouse utilizes a number of key technologies, including:
   \begin{itemize}
@@ -2164,8 +2177,13 @@ nable dashDB to maximize hardware performance.
   dashDB uses a highly parallelized infrastructure optimized for columnar data
   exchange that is organized as such:
   \par\vspace{\baselineskip}
-\includegraphics[scale=.45]{graphics/dashDB_query_architecture.png}
-\cite{dashDB}
+  A example of dasDB's query architecture can be seen in Figure~\ref{fig:dashdb_query}
+  \begin{figure}
+ 	\centering
+ 	\label{fig:dashdb_query} 
+ 	\includegraphics[scale=.45]{graphics/dashDB_query_architecture.png}
+	\caption{Example of dashDB Query Architecture \copyright dashDB \cite{dashDB}}
+  \end{figure}
 \par\vspace{\baselineskip}
 \item eXtremeDB is the in-memory variant of the McObject family of data management projects.
   It stores its data entirely in main memory, eliminating the need for disk I/O.
@@ -2178,8 +2196,13 @@ nable dashDB to maximize hardware performance.
   transactions will complete together or the database will be rolled back to a
   pre-transaction state.\cite{extremeDB}
   \par\vspace{\baselineskip}
-\includegraphics[scale=.5]{graphics/extremeDB_dbms_architecture.jpg}
-  \cite{extremeDB}
+  An illustration of extremeDB's architecture can be seen in Figure~\ref{fig:extremedb_architecture}
+  \begin{figure}
+	\centering
+	\label{fig:extremedb_architecture}  
+	\includegraphics[scale=.5]{graphics/extremeDB_dbms_architecture.jpg}
+	\caption{extremeDB architecture \copyright 2014 McObject LLC \cite{extremeDB}}
+  \end{figure}
   \par\vspace{\baselineskip}
 
   \item GemFire is a distributed, in-memory, shared-nothing, NoSQL key-value store.
@@ -2192,7 +2215,13 @@ nable dashDB to maximize hardware performance.
   smart buffering to ensure messages move from node to node faster than what
   traditional messaging would provide."\cite{gemfire}
   \par\vspace{\baselineskip}
-  \includegraphics[scale=.5]{graphics/gemfire_peer_architecture.png}
+  An illustration of GemFire's peer architecture can be seen in Figure~\ref{fig:gemfire_peer}
+  \begin{figure}
+  	\centering
+  	\label{fig:gemfire_peer}
+  	\includegraphics[scale=.5]{graphics/gemfire_peer_architecture.png}
+  	\caption{GemFire peer architecture \copyright GemStone Systems, Inc. 2006 \cite{gemfire}}
+  \end{figure}
   \par\vspace{\baselineskip}
 
   \item Hekaton is Microsoft's database engine that is optimized for memory resident
@@ -2253,8 +2282,13 @@ nable dashDB to maximize hardware performance.
   massively parallel in-memory architecture in order to eliminate the I/O bottleneck
   that slows disk backed database management systems.
   \par\vspace{\baselineskip}
-  \includegraphics[scale=.5]{graphics/sap_hana_dbms_architecture.png}
-  \cite{saphana}
+  An example of a massively parallel layout can be seen in Figure~\ref{fig:saphana_architecture}
+  \begin{figure}
+	\centering
+	\label{fig:saphana_architecture}	
+	\includegraphics[scale=.5]{graphics/sap_hana_dbms_architecture.png}
+    \caption{SAP HANA Massively Parallel Architecture \copyright 2015 SAP \citep{saphana}}
+  \end{figure}
   \par\vspace{\baselineskip}
 \end{itemize}
 
