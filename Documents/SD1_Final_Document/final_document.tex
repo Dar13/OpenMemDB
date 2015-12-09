@@ -708,7 +708,7 @@ and reported by the server is as follows:
 \end{itemize}
 \par\vspace{\baselineskip}
 
-\subsection{Data Store}
+\subsection{Database Internals}
 %author Robert Medina
 Data Store receives data requests and based on those requests will return a subset of data from
 the database. This database will represent data in a table format using nested vectors. Each table
@@ -716,17 +716,40 @@ will be stored in a table hashmap to allow for easy table lookup. Each table con
 schema for the type of data each column can accept. This is represented as a pair in the table
 lookup hashmap.
 
-\includegraphics{graphics/Table_In_Memory.png}
+\begin{figure}
+  \centering
+  \includegraphics[scale=.5]{graphics/Table_In_Memory.png}
+  \caption{INSERT TEXT}
+\end{figure}
 
 Nested vectors are stored as row store architecture and column store architecture.
 
-Row Store Architecture stores the memory of a row in a vector of multiple types as such
-\includegraphics{graphics/row_store_example.png}
-Column Store Architecture stores the memory of a row in a vector of one type
-%\includegraphics{graphics/column_store_example.png}
+Row store architectures store the memory of a row in a vector of multiple types and then
+a table would be composed of a vector of those rows as shown in Figure~\ref{fig:row_store_ex}.
+\begin{figure}
+  \centering
+  \includegraphics[scale=.6]{graphics/row_store_example.png}
+  \label{fig:row_store_ex}
+  \caption{An example of a row store architecture.}
+\end{figure}
 
-Side by Side Difference between row and column store
-\includegraphics{graphics/row_store_and_column_example.png}
+Column store architecture stores the memory of a row in a vector of one type and then 
+creates another vector that holds those vectors as shown in Figure~\ref{fig:column_store_ex}.
+\begin{figure}
+  \centering
+  \includegraphics[scale=.6]{graphics/column_store_example.png}
+  \label{fig:column_store_ex}
+  \caption{An example of a column store architecture.}
+\end{figure}
+
+A side-by-side difference between row and column store architectures is shown in Figure~\ref{fig:row_column_diff}.
+\par\vspace{\baselineskip}
+\begin{figure}
+  \centering
+  \includegraphics[scale=.6]{graphics/row_store_and_column_example.png}
+  \label{fig:row_column_diff}
+  \caption{A row store and column store side-by-side comparison.}
+\end{figure}
 
 Whenever a data request inquires about a table or more the data store will return a subset of that
 data in the form of nested vectors.
@@ -745,7 +768,7 @@ The advantages of row based tables are easy row inserts into tables, and easy ro
 wants to manipulate the entire row data instead of a few columns. In column store this would require multiple column vectors
 being rewritten and maniuplated which would be a costly operation to perform.
 
-\includegraphics{graphics/row_store_column_accessing_data}
+\includegraphics{graphics/row_store_column_accessing_data.png}
 
 Seeing in the row store and column store figure previously, it would be
 difficult to find the sales column in a row store column, and it is easily
@@ -2519,7 +2542,7 @@ if (result.isSuccess) {
    \centering
    % SQL Engine generation of predicate tree activity diagram
    \textbf{Predicate Tree Generation}
-   \includegraphics{graphics/sqlengine_predicate.png}
+   \includegraphics{graphics/SQLEngine_predicate_gen.png}
    \caption{Diagram of the process used to generate the tree of predicates
 	    used within the SQL Engine component of OpenMemDB}
   \end{figure}
@@ -3032,7 +3055,7 @@ module must be comprehensive. The tests we are going to perform are:
  \item Throughput on contested tables
  \begin{itemize}
   \item Many readers and writers on a single table
-  \item Effectively a stress-test for Tervel's ability to manage many threads on the same
+  \item Effectively a stress-test for Tervel's ability to manage many \\ threads on the same
 	structure.
  \end{itemize}
  \item Cache coherency/efficiency benchmark 
@@ -3090,7 +3113,7 @@ as follows:
  \end{itemize}
  \item Program execution over time
  \begin{itemize}
-  \item Determine whether the system still perform within specifications after a \\ relatively long time
+  \item Determine whether the system still perform within specifications after a relatively long time
  \end{itemize}
  \item End-to-End latency benchmark
  \begin{itemize}
