@@ -535,8 +535,8 @@ and a child. The "Data Set" has the following properties:
   \item Each set may include 0 (i.e. an Empty set occurrence), 1 or N records of the same type. These records are called members of the data set.
   \item All members within one set occurrence have a fixed order (are sorted).
 \end{itemize}
+An example of a network model relationship can be seen in Figure~\ref{fig:networkDBMS_relationship}.
 \par\vspace{\baselineskip}
-An example of a network model relationship can be seen in Figure~\ref{fig:networkDBMS_relationship}
 \begin{figure}
   \centering
   \label{fig:networkDBMS_relationship}
@@ -882,39 +882,54 @@ By definition a B-tree is a tree with the following properties:
   \end{itemize}
   \item B Trees have a height of $log_m(N)$, where $m$ is the number of children
 \end{itemize}
+An example of a B-tree can be seen in Figure~\ref{fig:b_tree_ex}.
 
 \begin{figure}
   \centering
-  \includegraphics{graphics/B_Tree_Example.png}
+  \includegraphics[scale=.5]{graphics/B_Tree_Example.png}
   \cite{b+tree}
   \caption{INSERT TEXT}
   \label{fig:b_tree_ex}
 \end{figure}
 
-B+ Tree differs slightly in the fact that B trees store their data (keys) within the internal nodes while
-B+ trees only points to the data. All the data in a B+ is stored in the leaves of tree. In addition,
-B+ Tree links all their leaves together with a doubly linked list.
+A B+ tree differs slightly in the fact that B-trees store their data (keys) within the internal nodes while 
+B+ trees only points to the data. All the data in a B+ tree is stored in the leaves of tree. In addition,
+B+ trees link all their leaves together with a doubly linked list. Figure~\ref{fig:b_b+_tree_diff} shows
+the difference between the two types of tree data structures visually.
+\par\vspace{\baselineskip}
 
 \begin{figure}
   \centering
-  \includegraphics{graphics/B_B+_Tree_Difference.png}
+  \includegraphics[scale=.5]{graphics/B_B+_Tree_Difference.png}
   \cite{b+tree}
+  \caption{A graphic depicting the differences between a B-tree and a B+ tree.}
   \label{fig:b_b+_tree_diff}
 \end{figure}
 
-The runtime for a B+ Tree is the following:
-Searching is logm(n), m is index entries
-Insertion is same as searching
-Deletion is same as searching
-Searching with range $( log_m n + k) $, m is index entries and k is number of data records
-Key Compression:
-The height of a B+ tree is log(m)(n), m = number of children, n = number of data entries.
-Tradiationally for databases on disk the number of data entries would be based on the size of the data and
-the size of the page. This is because tree nodes should fit on a single page, if B+ Tree leaves take up more
+The runtime for the various operations possible when using a B+ tree is shown
+in Figure~\ref{fig:b+_tree_runtimes}.
+\begin{figure}
+  \centering
+  \begin{tabular}{l | c}
+    Operation & Runtime \\ \hline \hline
+    Search & $log_m(n)$ \\ \hline
+    Search with range & $log_m(n) + k$
+    Insert & $log_m(n)$ \\ \hline
+    Delete & $log_m(n)$ \\ \hline
+  \end{tabular}
+  \label{fig:b+_tree_runtimes}
+  \caption{The Big-O notation for various operations done on B+ trees. Where $m$ is the 
+	   number of index entries and $k$ is the number of data records.}
+\end{figure}
+
+The height of a B+ tree is $log_m(n)$, where $m$ is the number of children and $n$ is the number of data entries.
+Traditionally for databases on disk the number of data entries would be based on the size of the data and
+the size of the page. This is because tree nodes should fit on a single page, if B+ tree leaves take up more
 memory than a page offers then B+ tree is resized to fit onto a page. Since the page can only fit so much
 data this is why the number of data entries is dependent on the size of data entries. So, it is reasonable
 to max the number of data entries by making the size of data smaller. This enures that more entires will
 fit on a page and the height of the B+ tree would remain small, thus keeping data retrevial performance fast.
+\par\vspace{\baselineskip}
 
 \subsubsection{ISAM}
 %author Robert Medina
@@ -2539,7 +2554,7 @@ if (result.isSuccess) {
   \begin{figure}
     \centering
     \textbf{Connection Class Layout}
-    %\includegraphics{graphics/libomdb_connection_layout.png}
+    \includegraphics{graphics/libomdb_Diagrams/libomdb_connection_layout.png}
 	\caption{Connection layout}
   \end{figure}
   \par\vspace{\baselineskip}
@@ -2582,7 +2597,7 @@ if (result.isSuccess) {
   \begin{figure}
     \centering
     \textbf{Result Class Layout}
-    %\includegraphics{graphics/libomdb_result_layout.png}
+    \includegraphics{graphics/libomdb_Diagrams/libomdb_result_layout.png}
     \caption{Result Layout}
   \end{figure}
   \par\vspace{\baselineskip}
@@ -2617,7 +2632,7 @@ if (result.isSuccess) {
   \begin{figure}
     \centering
     \textbf{ResultMetaData Class Layout}
-    %\includegraphics{graphics/libomdb_resultMetaData_layout.png}
+    \includegraphics{graphics/libomdb_Diagrams/libomdb_resultmetadata_layout.png}
     \caption{ResultMetaData Layout}
   \end{figure}
 
