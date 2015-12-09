@@ -9,6 +9,7 @@
 \usepackage{listings}
 \usepackage{color}
 \usepackage[square,sort,comma,numbers]{natbib}
+\usepackage{titling}
 %\usepackage{mathtools}
 
 % Temporarily ignore graphics
@@ -36,10 +37,16 @@ stringstyle=\color{codered}
 
 \newcommand{\inlinecode}[1]{\colorbox{codegrey}{\lstinline[language=C++]{#1}}}
 
-\title{Non-Blocking In-Memory Database\thanks{Sponsor: Dr. Damian Dechev}}
-\author{Michael McGee, Robert Medina, Neil Moore, Jason Stavrinaky\\[1ex]
-	\includegraphics{graphics/OMDB_logo_text_trans.png}\\[1ex]
+\pretitle{%
+  \begin{center}
+  \LARGE
+  \includegraphics{graphics/OMDB_logo_text_trans.png}
+  \newline
 }
+\posttitle{\end{center}}
+
+\title{Non-Blocking In-Memory Database\thanks{Sponsor: Dr. Damian Dechev}}
+\author{Michael McGee, Robert Medina, Neil Moore, Jason Stavrinaky}
 \date{11/4/2015}
 
 \pdfinfo{%
@@ -777,9 +784,8 @@ A side-by-side difference between row and column store architectures is shown in
 \begin{figure}
   \centering
   \includegraphics[scale=.6]{graphics/row_store_and_column_example.png}
-   \cite{rowstorefigure}
   \label{fig:row_column_diff}
-  \caption{A row store and column store side-by-side comparison.}
+  \caption{A row store and column store side-by-side comparison.\cite{rowstore}}
 \end{figure}
 
 Whenever a data request inquires about a table or more the data store will return a subset of that
@@ -2715,7 +2721,7 @@ if (result.isSuccess) {
     \item \inlinecode{m_metaData}
   \end{itemize}
   \inlinecode{m_rows} is a \inlinecode{vector<ResultRow>}, \inlinecode{ResultRow} is a typedef for
-  a \inlinecode{vector<DataValue>}, and \inlinecode{DataValue} is a typedef for \inlinecode{boost::variant<>}.
+  a  \\ \inlinecode{vector<DataValue>}, and \inlinecode{DataValue} is a typedef for \inlinecode{boost::variant<>}.
   So with all typedefs removed \inlinecode{m_rows} is actually a \inlinecode{vector<vector<boost:variant<> > >}.
 
   \inlinecode{m_metaData} is the
@@ -2748,18 +2754,13 @@ if (result.isSuccess) {
     \caption{Result Layout}
   \end{figure}
   \par\vspace{\baselineskip}
-  A quick overview of the the \inlinecode{ResultMetaData} class
-  is necessary to fully understand the how the
-  \inlinecode{Result} class is meant to work.
-  The \inlinecode{ResultMetaData} class contains only one
-  private member, which is
-  \inlinecode{m_data}, a
-  \inlinecode{vector<MetaDataColumn>}.
+  A quick overview of the the \inlinecode{ResultMetaData} class is necessary to fully understand 
+  the how the \inlinecode{Result} class is meant to work. The \inlinecode{ResultMetaData} class 
+  contains a private member, \inlinecode{m_data}, of type \inlinecode{std::vector<MetaDataColumn>}.
   \inlinecode{MetaDataColumn} is a struct that contains two fields:
-  a \inlinecode{string name} and a
-  \inlinecode{SQL_TYPE type}. \inlinecode{name}
+  a \inlinecode{string name} and a \inlinecode{SQL_TYPE type}. \inlinecode{name}
   is the name of the column and \inlinecode{type} is the
-  \inlinecode{SQL_TYPE} of the column, i.e. "VARCHAR", "DATE", etc.
+  \inlinecode{SQL_TYPE} of the column, i.e. ''VARCHAR``, ''DATE``, etc.
   \par\vspace{\baselineskip}
   The \inlinecode{ResultMetaData} class also has
   three instance methods available:
@@ -3092,7 +3093,8 @@ it is very easy to declare a variant object but it is less clear on how such typ
 accepted into a function.The Preprocessor library provides a powerful solution to this dilemma.
 
 \newpage
-The Boost.Variant library provides a macro \inlinecode{BOOST_VARIANT_ENUM_PARAMS} that
+
+The Boost.Variant library has a macro \inlinecode{BOOST_VARIANT_ENUM_PARAMS} that
 simplifies the process for the user of declaring variant types in function templates or
 other things of such nature. It is possible to use a type sequence to specify bounded types
 instead of using boost variant default function. Essentially a type sequence performs the
@@ -3100,8 +3102,8 @@ same functionality of Boost.Variant but if the program for whatever needs must e
 create specific types of type sequences it is possible with \inlinecode{make_variant_over}
 function. As shown in the figure \inlinecode{boost::make_variant_over} creates a type sequence that
 is customizable.
-
 \par\vspace{\baselineskip}
+
 Problems with the variant class template is parameter list is limiting in
 two factors. There must be a implementation maximum limit of the types available and the
 nature of parameter lists makes compile-time manipulation of the list excessively difficult.
