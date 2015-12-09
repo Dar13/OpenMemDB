@@ -901,12 +901,13 @@ the difference between the two types of tree data structures visually.
 
 The runtime for the various operations possible when using a B+ tree is shown
 in Figure~\ref{fig:b+_tree_runtimes}.
+
 \begin{figure}
   \centering
   \begin{tabular}{l | c}
     Operation & Runtime \\ \hline \hline
     Search & $log_m(n)$ \\ \hline
-    Search with range & $log_m(n) + k$
+    Search with range & $log_m(n) + k$ \\
     Insert & $log_m(n)$ \\ \hline
     Delete & $log_m(n)$ \\ \hline
   \end{tabular}
@@ -924,18 +925,21 @@ to max the number of data entries by making the size of data smaller. This enure
 fit on a page and the height of the B+ tree would remain small, thus keeping data retrevial performance fast.
 \par\vspace{\baselineskip}
 
-\subsubsection{ISAM}
 %author Robert Medina
-ISAM:
-Indexed Sequential Access Method is a variant of a B tree. In many ways it is similiar to a B+ tree however there are minor details about how memory is handled
-that makes ISAM a better method than B+ tree. Although this is usually not the case. ISAM follows the exact same rules for a B tree but it does not contain
-data internally with in its nodes. All the data from an ISAM resides in its leaf pages.
+The Indexed Sequential Access Method(ISAM) is a variant of a B tree. In many ways it is similiar to a B+ tree 
+however there are minor details about how memory is handled that makes ISAM a better method than B+ tree. 
+Although this is usually not the case due to the further optimizations done in B+ tree implementations. 
+ISAM follows the exact same rules for a B tree but it does not contain data internally with in its nodes. 
+All the data from an ISAM resides in its leaf pages. Figure~\ref{fig:isam_visual} visualizes what an ISAM tree
+looks like.
+\par\vspace{\baselineskip}
 
 \begin{figure}
   \centering
   \textbf{Abstract Diagram of ISAM structure}
   \includegraphics[scale=.8]{graphics/ISAM_abstract_diagram.png}
   \caption{Behavior similiar to B+ Tree Structure}
+  \label{fig:isam_visual}
 \end{figure}
 
 All non-leaf pages contain pointers that reference to the data in a leaf page. It is common for
@@ -945,8 +949,8 @@ itself and not the leaf pages memory block. This static memory allocation in a s
 provide a better performance than a dynamic B+ tree depending on the situation. At creation all
 leaf pages are allocated squentially and sorted on the search key value. The non-leaf pages
 are then allocated in memory. In the event that there is more data than ISAM can handle with its
-default leaf page count then those pages go into an overflow page. Here is how the ISAM memory
-allocation appears
+default leaf page count then those pages go into an overflow page. Figure~\ref{fig:isam_memory} shows 
+how ISAM memory allocation occurs.
 \par\vspace{\baselineskip}
 
 \begin{figure}
@@ -954,6 +958,7 @@ allocation appears
   \textbf{Page Allocation for ISAM}
   \includegraphics{graphics/ISAM_page_allocation.png}
   \caption{The order of which memory gets allocated on the page}
+  \label{fig:isam_memory}
 \end{figure}
 
 Basic operations of insertion, deletion and search are very straightforward. An search starts at the
@@ -962,18 +967,22 @@ with the search key value. This is standard in most tree data structures. Insert
 based off the search operation and will either insert a new data to the pointer reference in the leaf
 page or delete a data value from the reference of the pointer in the leaf page. None of the leaf
 pages de-allocate memory. In addition the overflow pages are linked to the end of a leaf page array.
-This way the overflow page will also be considered in the basic operations of ISAM.
+This way the overflow page will also be considered in the basic operations of ISAM. Figure~\ref{fig:isam_runtimes}
+gives the specific runtimes of the various operations.
 \par\vspace{\baselineskip}
 
-\begin{center}
-\begin{tabular}{l | c}
+\begin{figure}
+  \centering
+  \begin{tabular}{l | c | l}
   \hline
-  Operation & Runtime \\ \hline \hline
-  Search & $ log_f N $ \\ \hline
-  Insert & $ log_f N $ \footnote{There is some overhead for leaf-page and overflow pages} \\ \hline
-  Deletion & $ log_f N $\footnote{If an empty overflow exists it will be de-allocated} \\ \hline
-\end{tabular}
-\end{center}
+  Operation & Runtime  & Sidenote \\ \hline \hline
+  Search & $ log_f N $ & \\ \hline
+  Insert & $ log_f N $ & \begin{tabular}{@{}l@{}}There is some overhead for leaf-page\\and overflow pages\end{tabular} \\ \hline
+  Deletion & $ log_f N $ & If an empty overflow exists it will be de-allocated \\ \hline
+  \end{tabular}
+  \label{fig:isam_runtimes}
+  \caption{The runtimes of common operations done on an ISAM tree}
+\end{figure}
 
 \begin{figure}
   \centering
