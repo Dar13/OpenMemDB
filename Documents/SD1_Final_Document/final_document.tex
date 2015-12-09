@@ -9,7 +9,7 @@
 \usepackage{listings}
 \usepackage{color}
 \usepackage[square,sort,comma,numbers]{natbib}
-\usepackage{mathtools}
+%\usepackage{mathtools}
 
 % Temporarily ignore graphics
 % \renewcommand{\includegraphics}[2][]{\fbox{}}
@@ -757,7 +757,8 @@ creates another vector that holds those vectors as shown in Figure~\ref{fig:colu
   \caption{An example of a column store architecture.}
 \end{figure}
 
-A side-by-side difference between row and column store architectures is shown in Figure~\ref{fig:row_column_diff}.
+A side-by-side difference between row and column store architectures is shown in Figure~\ref{fig:row_column_diff}
+this 
 \par\vspace{\baselineskip}
 \begin{figure}
   \centering
@@ -2598,7 +2599,9 @@ if (result.isSuccess) {
   prohibit further communication such as the Internet going down.
   \par\vspace{\baselineskip}
   The freestanding functions mentioned above abstract away the process of listening to a port
-  and accepting a connection. They are defined as:
+  and accepting a connection. They are defined as shown in Figure~\ref{code:work_manager_func_def}.
+  \begin{figure}
+  \label{code:work_manager_func_def}
   \begin{lstlisting}[language=C++]
 omdb::NetworkStatus omdb::ListenToPort(uint16_t port_id,
 				       uint32_t* socket_fd,
@@ -2608,6 +2611,7 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
 					   uint32_t* conn_fd,
 					   sockaddr_storage* conn_addr)
   \end{lstlisting}
+  \end{figure}
   The \lstinline[basicstyle=\ttfamily]|omdb::NetworkStatus| datatype is used to return various
   possible error conditions and is internally used to classify whether the error is fatal
   or can be recovered from. Due to our goal of being non-blocking, we utilize various specially-defined
@@ -2632,7 +2636,11 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
   essential to retrieving query results from the worker threads in an asynchronous way. This way
   we can continue to be non-blocking without needing to wait for a thread to finish which also
   allows us to be wait-free, our overriding requirement. Forcing the \lstinline|std::future<Result>|
-  to be non-blocking when checking for a return value is currently clunky:
+  to be non-blocking when checking for a return value is currently clunky as shown in Figure~\ref{code:clunk_future}.
+  \par\vspace{\baselineskip}
+  
+  \begin{figure}
+  \label{code:clunk_future}
   \begin{lstlisting}[language=C++]
 [&results] (std::future<Result>& res) -> bool
 {
@@ -2649,7 +2657,11 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
   return false;
 };
   \end{lstlisting}
-  However, it does function in a way that is suitable for our reasons. Thankfully the rest of the thread
+  
+  \caption{Example code to poll for a result from a future}
+  \end{figure}
+  
+  However, it does function in a way that is suitable for our needs. Thankfully the rest of the thread
   pool is much smoother.
   \par\vspace{\baselineskip}
   The second part, the mapping of a job number to a connection, is needed to get the correct query results
@@ -2676,19 +2688,24 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
   with work can negatively affect the ability of the system to be wait-free as the rest of system is
   starved for work.
   \par\vspace{\baselineskip}
+  The UML diagram for the design of the few Work Manager classes is shown in Figure~\ref{fig:work_manager_class}
+  and shows the relationships between the different classes.
+  
   \begin{figure}
    \centering
    % WorkManager class diagram
+   \label{fig:work_manager_class}
    \textbf{WorkManager Module Class Diagram}
    \includegraphics[scale=.80]{graphics/WorkManager_class.png}
    \caption{The class diagram of the main WorkManager class within OpenMemDB's Work Manager module}
   \end{figure}
 
   The flow of data from the client to the database and from there to the worker threads
-  is as follows:
+  is shown in Figure~\ref{fig:work_manager_activity}
   \begin{figure}
    \centering
    % Data flow diagram (client -> wrk_mgr.assign_job)
+   \label{fig:work_manager_activity}
    \textbf{Data Flow from Client to SQL Engine}
    \includegraphics[scale=.8]{graphics/WorkManager_activity.png}
    \caption{Shows the flow of data from a client to the worker threads within OpenMemDB}
@@ -2955,6 +2972,10 @@ Memory management in C++
   could be performed in much the same way that the logs were created. We would simply
   ``playback'' the queries contained within the log and that should lead us to the same
   state within the tables as it was when the database crashed.
+  \par\vspace{\baselineskip}
+  The diagram in Figure~\ref{fig:logger_interaction} shows the network interaction between
+  the client, database server, and the log server.
+  
   % this is the interaction diagram between the main database and the logger
   % should also include the interaction between database and client, just to be complete
   \begin{figure}
@@ -3019,7 +3040,7 @@ doesn't have the necessary parallization or memory needed in order to truly test
 highly-parallelized and memory-intensive database management system. The server we were allowed to
 use had the following hardware characteristics:
 \begin{itemize}
- \item 64 cores
+ \item 64 cores (AMD Operon)
  \item 312 gigabytes of RAM
  \item 1 terabyte of hard disk storage
 \end{itemize}
