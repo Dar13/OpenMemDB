@@ -1513,8 +1513,7 @@ Locks can be very useful tools to prevent race conditions, however they should b
 Using locks can cause a {\bfseries deadlock}. {\bfseries Deadlocks} can happen when a thread
 {\bfseries t1} holds a lock and is waiting on a piece of data that is locked by another thread
 {\bfseries t2}, while at the same time {\bfseries t2} is waiting on the lock from {\bfseries t1}.
-This causes a loop, and neither lock ever gets released. The next figure illustrates this example.
-
+This causes a loop, and neither lock ever gets released.
 %figure
 
 \par\vspace{\baselineskip}
@@ -1681,7 +1680,7 @@ an easy to follow process to figuring out if an algorithm is lock free.
 \begin{figure}
     \centering
 	\includegraphics[scale=0.65]{graphics/lockfreechart.png}
-    \caption{Is it lock free?}
+    \caption{Is it lock free? Printed with permission. Copyright\copyright 2015 Jeff Preshing}
     \citep{introlockfree}
 \end{figure}
 
@@ -1709,7 +1708,7 @@ figure shows a variety of these problems and some proposed solutions.
 \begin{figure}
     \centering
 	\includegraphics[scale=0.7]{graphics/techniques.png}
-	\caption{Techniques}
+	\caption{Techniques. Printed with permission. Copyright\copyright 2015 Jeff Preshing}
 	\citep{introlockfree}
 \end{figure}
 
@@ -1807,7 +1806,7 @@ this hierarchy.
 \begin{figure}
     \centering
 	\includegraphics[scale=0.25]{graphics/paralleltypes.png}
-	\caption{Hierarchy}
+	\caption{Hierarchy. Printed with permission. Copyright\copyright 2015 Pedro Ramalhete}
 	\citep{concurrencyfreaks}
 \end{figure}
 
