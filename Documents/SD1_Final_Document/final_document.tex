@@ -1127,47 +1127,56 @@ ruin the property of a hashmap.
 
 Intuitively a simple hash table with a pointer to a page would make sense. However in the case of
 additional pages, without an overflow chain rehashing the table would be necessary. In this
-case rehashing the table would be a costly operation. Including that the data structure is unusable
-while rehashing is in progress. Dynamic hashing techniques solve this problem.
+case rehashing the table would be a costly operation. This is mainly due to the fact that the data structure is unusable
+while rehashing is in progress. Dynamic hashing techniques such as extendible hashing solve this problem.
 \par\vspace{\baselineskip}
 
-Extendible Hashing is a hash map of pointers that maps to buckets with various levels of depth. This directory
+Extendible hashing is a hash map of pointers that maps to buckets with various levels of depth. This directory
 is based on an index value using $ X\ modulo\ 2\textsuperscript{global depth} $. The global depth is the number of bits for the binary
 representation of that index value. Each bucket in the directory has a shared data entry limit for the number of
-entries each bucket can hold.
+entries each bucket can hold. An example of an extendible hashmap can be seen in Figure~\ref{fig:ext_hash_example},
+and a graphic depicting the splitting of a bucket after an insert is found in Figure~\ref{fig:ext_hash_split}.
 
-\begin{figure}
+\begin{figure}[H]
   \centering
   \textbf{Extendible Hashmap}
   \includegraphics{graphics/ExtendibleHashing_Depth_2.png}
-  \cite{ramakrishnan2000database}
-  \caption{Example of Extendible Hashing at Depth 2 \copyright Ramakrishnan 2000, reprinted with permission}
+  \caption{Example of Extendible Hashing at Depth 2 \copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
+  \label{fig:ext_hash_example}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[H]
   \centering
-  \textbf{Spliting Occurs}
+  \textbf{Splitting Occurs}
   \includegraphics{graphics/ExtendibleHashing_Spliting.png}
-  \cite{ramakrishnan2000database}
-  \caption{New bucket is made \copyright Ramakrishnan 2000, reprinted with permission}
+  \caption{New bucket is made \copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
+  \label{fig:ext_hash_split}
 \end{figure}
-
 
 Whenever a data entry is inserted, the local depth of that bucket is compared with the global depth. If the local depth
 is equal to the global depth then the directory is doubled and each pointer in the newly allocated memory is mapped to the
 original buckets respectively. Also the global depth is increased by one and the directory index values are reindex to new
 bit values. When this overflow occurs the maximum bucket gets split up into two buckets, one at the original index and the
 second one at this new index value. This new index value holds the data entry and it's local depth is increased by one, along with
-the original bucket local depth value.
+the original bucket local depth value. Figure~\ref{fig:ext_hash_dir_dbl} shows the directory doubling and the depth increasing
+after an insertion.
+\par\vspace{\baselineskip}
 
 \begin{figure}
-  \textbf{Directory Doubling}
+  \centering
   \includegraphics{graphics/ExtendibleHashing_Depth_3.png}
-  \cite{ramakrishnan2000database}
-  \caption{Directory doubles and the global depth increases to three. \copyright Ramakrishnan 2000, reprinted with permission}
+  \caption{Directory doubles and the global depth increases to three. \copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
+  \label{fig:ext_hash_dir_dbl}
 \end{figure}
 
-\begin{center}
+When looking at Figure~\ref{fig:ext_hash_runtimes}, it may seem like there is no performance 
+benefit to using extendible hashing despite the more complex algorithms and data structures. 
+In practice however, the length of a bucket is much smaller than static hashing and has
+a uniform limit. This makes it more desirable in terms of performance on an average.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+\centering
 \begin{tabular}{l | c }
   \hline
   Operation & Runtime \\ \hline \hline
@@ -1175,12 +1184,9 @@ the original bucket local depth value.
   Insert & O(1) \\ \hline
   Delete & O(n) \\ \hline
 \end{tabular}
-\end{center}
-
-In practice however, the length of a bucket is much smaller than static hashing and has
-a uniform limit. This makes it more desirable in terms of performance on an average.
-
-%author Robert Medina
+\caption{The Big-O runtimes of an extendible hash map}
+\label{fig:ext_hash_runtimes}
+\end{figure}
 
 Linear Hashing is a dynamic hashing technique that adjusts to inserts and deletes in a stable manner.
 Unlike Extendible Hashing, Linear Hashing does not have a directory to where the data is
@@ -1188,16 +1194,31 @@ stored. Linear Hashing deals with collisions naturally and contains a lot of fle
 the timing of bucket splits. However if the data distribution is bery skewed overflow chains could cause Linear Hashing performance to be
 worse than Extendible Hashing.
 \par\vspace{\baselineskip}
-Linear Hashing utilizes a famiy of hash functions H(a), h(1), h(2), ... , h(n), with each function having the property that each function's range is twice of that of its predecessor. This means that if h(i) maps a data entry into one of M buckets then h(i+1) maps a data entry into one of 2M buckets. This family typically contains a hash function $ h(i) = value = h(value) modulo (2^i N) $, where N is the initial number of buckets which normally is 2. If N is a power of 2 then the hash function h will look at the last d(i) bits. d(o) is the number of bits needed to represent N, and N can change as the number of buckets increase from splitting. d(i) is the next mod value, which is equal to d(i) = d(a)+i, for the next hash function in this family of hash functions.
+
+Linear hashing utilizes a famiy of hash functions $H(a), h(1), h(2), ... , h(n)$, with each function 
+having the property that each function's range is twice of that of its predecessor. This means that 
+if $h(i)$ maps a data entry into one of M buckets then $h(i+1)$ maps a data entry into one of $2M$ 
+buckets. This family typically contains a hash function $h(i) = value = h(value)\ modulo\ (2^i * N) $, 
+where $N$ is the initial number of buckets which normally is 2. If $N$ is a power of 2 then the hash 
+function $h$ will look at the last $d(i)$ bits. $d(o)$ is the number of bits needed to represent $N$, 
+and $N$ can change as the number of buckets increase from splitting. $d(i)$ is the next modulo value, 
+which is equal to $d(i) = d(a)+i$, for the next hash function in this family of hash functions.
 \par\vspace{\baselineskip}
-In the split operation, there exists a split policy that determines when spliting is the appropiate. This can occur in terms of rounds. During a round, represented as round number Level only hash functions h(level) and h(level+1) are in use. The buckets from first to last are split depending on the timing in a round. At any time there exists buckets that splited, yet to be split and new buckets that were created recently.
+
+In the split operation, there exists a split policy that determines when splitting is the appropiate. 
+This can occur in terms of rounds. During a round, represented as round number level only hash 
+functions $h(level)$ and $h(level+1)$ are in use. The buckets from first to last are split depending 
+on the timing in a round. At any time there exists buckets that splitted, yet to be split and new 
+buckets that were created recently. A visual representation of this operation can be found in 
+Figure~\ref{fig:lin_hash_split}.
 \par\vspace{\baselineskip}
-\begin{figure}
+
+\begin{figure}[H]
   \centering
   \textbf{Splitting Occurs}
   \includegraphics{graphics/Linear_hashing_splitting}
-  \cite{ramakrishnan2000database}
-  \caption{Abstract view of bucket splitting \copyright Ramakrishnan 2000, reprinted with permission}
+  \caption{Abstract view of bucket splitting \copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
+  \label{fig:lin_hash_split}
 \end{figure}
 
 When a split occurs the data may not necessary reside in the newly split bucket. An overflow page is
@@ -1206,7 +1227,8 @@ occurs in a round robin fashion, eventually all buckets are split including over
 This redistributes data into split buckets and each bucket is prevented from getting too large,
 including overflow chains.
 \par\vspace{\baselineskip}
-The counter level is used to indicate the current round number. The bucket to be split is called
+
+The counter $level$ is used to indicate the current round number. The bucket to be split is called
 next and is initially the first bucket. The number of buckets is denoted by $level$ and $Nlevel$.
 $N(o)$ is the number of buckets, also called $N$. A spliting policy can be a wide range of logic
 such as whenever overflow chains are created or if a certain number of space is taken up with
@@ -1216,12 +1238,11 @@ between the buckets to the newest created buckets. These definitions will be ref
 figures. A typical inserting using linear hashing is shown in Figure~\ref{fig:linear_hash_insert}.
 \par\vspace{\baselineskip}
 
-\begin{figure}
+\begin{figure}[H]
   \centering
   \textbf{Insertion of 43*, 43 mod (4) = 3 = (011)2 binary representation}
   \includegraphics{graphics/Linear_hashing_insertion}
-  \cite{ramakrishnan2000database}
-  \caption{Overflowing occurs \copyright Ramakrishnan 2000, reprinted with permission}
+  \caption{Overflowing occurs \copyright Ramakrishnan 2000, reprinted with \newline permission.\cite{ramakrishnan2000database}}
   \label{fig:linear_hash_insert}
 \end{figure}
 
@@ -1232,18 +1253,18 @@ number of buckets after the split is twice the number at the beginning of the ro
 started with a level incremented by 1 and next rest to 0. Since level is increased by one the number 
 of potential keys to be hashed will be doubled as Figure~\ref{fig:linear_hash_level_inc} shows.
 \par\vspace{\baselineskip}
+
 \begin{figure}
   \centering
-  \textbf{Linear Hashing level increased due to maximum capacity}
+  \textbf{Linear hashing level increased due to maximum capacity}
   \includegraphics{graphics/Linear_hashing_level_increased}
-  \cite{ramakrishnan2000database}
-  \caption{Notice that the number of bits increased as well, since $d(i) = d(a) + i$.  \copyright Ramakrishnan 2000, reprinted with permission}
+  \caption{Notice that the number of bits increased as well, since $d(i) = d(a) + i$.  \copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
   \label{fig:linear_hash_level_inc}
 \end{figure}
 
-Extendible hashing and linear hashing are very much alike to each other in terms of their operations and 
-how each data structure handle these operations. When linear hashing splitting occurs in a round. The 
-number of buckets to be split is up to the last bucket in the range N. This is essentially the same 
+Extendible hashing and linear hashing are very similar in terms of their operations and 
+how each data structure handles these operations. When linear hashing splitting occurs in a round, the 
+number of buckets to be split is up to the last bucket in the range $N$. This is essentially the same 
 principle with respect to extendible hashing but occurs more frequently. The hashing functions are 
 very similar to extendible hashing, in a sense that the hashing function relates to a family of 
 hashing functions. Linear hashing with uniform distributions can have a lower average cost for 
