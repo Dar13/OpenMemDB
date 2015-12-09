@@ -916,12 +916,13 @@ the difference between the two types of tree data structures visually.
 
 The runtime for the various operations possible when using a B+ tree is shown
 in Figure~\ref{fig:b+_tree_runtimes}.
+
 \begin{figure}
   \centering
   \begin{tabular}{l | c}
     Operation & Runtime \\ \hline \hline
     Search & $log_m(n)$ \\ \hline
-    Search with range & $log_m(n) + k$
+    Search with range & $log_m(n) + k$ \\
     Insert & $log_m(n)$ \\ \hline
     Delete & $log_m(n)$ \\ \hline
   \end{tabular}
@@ -939,12 +940,14 @@ to max the number of data entries by making the size of data smaller. This enure
 fit on a page and the height of the B+ tree would remain small, thus keeping data retrevial performance fast.
 \par\vspace{\baselineskip}
 
-\subsubsection{ISAM}
 %author Robert Medina
-ISAM:
-Indexed Sequential Access Method is a variant of a B tree. In many ways it is similiar to a B+ tree however there are minor details about how memory is handled
-that makes ISAM a better method than B+ tree. Although this is usually not the case. ISAM follows the exact same rules for a B tree but it does not contain
-data internally with in its nodes. All the data from an ISAM resides in its leaf pages.
+The Indexed Sequential Access Method(ISAM) is a variant of a B tree. In many ways it is similiar to a B+ tree 
+however there are minor details about how memory is handled that makes ISAM a better method than B+ tree. 
+Although this is usually not the case due to the further optimizations done in B+ tree implementations. 
+ISAM follows the exact same rules for a B tree but it does not contain data internally with in its nodes. 
+All the data from an ISAM resides in its leaf pages. Figure~\ref{fig:isam_visual} visualizes what an ISAM tree
+looks like.
+\par\vspace{\baselineskip}
 
 \begin{figure}
   \centering
@@ -952,6 +955,7 @@ data internally with in its nodes. All the data from an ISAM resides in its leaf
   \includegraphics[scale=.8]{graphics/ISAM_abstract_diagram.png}
   \cite{ramakrishnan2000database}
   \caption{Behavior similiar to B+ Tree Structure}
+  \label{fig:isam_visual}
 \end{figure}
 
 All non-leaf pages contain pointers that reference to the data in a leaf page. It is common for
@@ -961,8 +965,8 @@ itself and not the leaf pages memory block. This static memory allocation in a s
 provide a better performance than a dynamic B+ tree depending on the situation. At creation all
 leaf pages are allocated squentially and sorted on the search key value. The non-leaf pages
 are then allocated in memory. In the event that there is more data than ISAM can handle with its
-default leaf page count then those pages go into an overflow page. Here is how the ISAM memory
-allocation appears
+default leaf page count then those pages go into an overflow page. Figure~\ref{fig:isam_memory} shows 
+how ISAM memory allocation occurs.
 \par\vspace{\baselineskip}
 
 \begin{figure}
@@ -971,6 +975,7 @@ allocation appears
   \includegraphics{graphics/ISAM_page_allocation.png}
   \cite{ramakrishnan2000database}
   \caption{The order of which memory gets allocated on the page}
+  \label{fig:isam_memory}
 \end{figure}
 
 Basic operations of insertion, deletion and search are very straightforward. An search starts at the
@@ -979,18 +984,22 @@ with the search key value. This is standard in most tree data structures. Insert
 based off the search operation and will either insert a new data to the pointer reference in the leaf
 page or delete a data value from the reference of the pointer in the leaf page. None of the leaf
 pages de-allocate memory. In addition the overflow pages are linked to the end of a leaf page array.
-This way the overflow page will also be considered in the basic operations of ISAM.
+This way the overflow page will also be considered in the basic operations of ISAM. Figure~\ref{fig:isam_runtimes}
+gives the specific runtimes of the various operations.
 \par\vspace{\baselineskip}
 
-\begin{center}
-\begin{tabular}{l | c}
+\begin{figure}
+  \centering
+  \begin{tabular}{l | c | l}
   \hline
-  Operation & Runtime \\ \hline \hline
-  Search & $ log_f N $ \\ \hline
-  Insert & $ log_f N $ \footnote{There is some overhead for leaf-page and overflow pages} \\ \hline
-  Deletion & $ log_f N $\footnote{If an empty overflow exists it will be de-allocated} \\ \hline
-\end{tabular}
-\end{center}
+  Operation & Runtime  & Sidenote \\ \hline \hline
+  Search & $ log_f N $ & \\ \hline
+  Insert & $ log_f N $ & \begin{tabular}{@{}l@{}}There is some overhead for leaf-page\\and overflow pages\end{tabular} \\ \hline
+  Deletion & $ log_f N $ & If an empty overflow exists it will be de-allocated \\ \hline
+  \end{tabular}
+  \label{fig:isam_runtimes}
+  \caption{The runtimes of common operations done on an ISAM tree}
+\end{figure}
 
 \begin{figure}
   \centering
@@ -2400,21 +2409,6 @@ nable dashDB to maximize hardware performance.
 \newpage
 
 \section{Design Summary}
-OpenMemDB is a SQL compliant database that utilizes multiprocessor techniques and non-blocking
-data structures to offer high scalability and thread wide progress. In order to accomplish this
-multiple components are necessary to meet the technical requirements layout. OpenMemDB is 
-comprised of an application GUI, SQL Engine, Data Storage, Work Manager, and a Connector. 
-It is necessary for the client to be able to communicate with the database through the Connector
-and the application GUI. On the server side since the client is using SQL in order to provide
-logical operations to the database a SQL Engine is necessary to correctly and efficently parse
-such syntax into a type of representation that the database can understand. It is also important
-that certain syntax be processed in an organized methodology. More specifically, the Work Manager
-will be responsible for distributing the system's workload pool of worker threads. The Connector API
-will provide a way to connect to the database and execute meaniful commands to the database. The
-SQL Engine will be responsible for parsing SQL syntax, determing the order in which the SQL queries 
-are ordered and the actual execution of these queries. Data Store will allocate memory for SQL
-operations and return any data references so data can be modified or changed. Efficent data storage,
-data retrevial and memory management are the primary responsibilities for Data Store. 
 %% A summary describing the overall architecture should go here. Followed by subsections
 %% for each major piece.
   \subsection{libomdb: The Connection API}
@@ -2541,9 +2535,12 @@ if (result.isSuccess) {
   \label{code:lib_cmd_exec}
   \caption{Code snippet showing how to execute a command using libomdb}
   \end{figure}
-
+ 
+  \par\vspace{\baselineskip}
+  The sequence diagram of executing a command with libomdb is shown Figure~\ref{fig:libomdb_command_sequence}.
   \begin{figure}
     \centering
+    \label{fig:libomdb_command_sequence}
     \textbf{Sequence Diagram for Executing Command}
     \includegraphics[scale=.5]{graphics/libomdb_command_activity.png}
     \caption{Executing Command Sequence Diagram}
@@ -2594,9 +2591,12 @@ if (result.isSuccess) {
   parsed and executed. The \inlinecode{executeQuery()} command
   does nearly the exact same thing but will receive a different data structure from the
   database in return.
-
+  \par\vspace{\baselineskip}
+  A detailed description of the methods contained in the \inlinecode{Connection} class 
+  can be seen in Figure~\ref{fig:connection_methods}.
   \begin{figure}
     \centering
+    \label{fig:connection_methods}
     \textbf{Connection Class Layout}
     \includegraphics{graphics/libomdb_Diagrams/libomdb_connection_layout.png}
 	\caption{Connection layout}
@@ -2637,9 +2637,12 @@ if (result.isSuccess) {
   \inlinecode{Result} forward one row, if there are still rows
   remaining in the \lstinline[basicstyle=\ttfamily]|Result|. If there is not, it does
   nothing and returns \lstinline[basicstyle=\ttfamily]|false|.
-
+  \par\vspace{\baselineskip}
+  A detailed description of the methods contained in the \inlinecode{Result} class 
+  can be found in Figure~\ref{fig:result_methods}.
   \begin{figure}
     \centering
+    \label{fig:result_methods}
     \textbf{Result Class Layout}
     \includegraphics{graphics/libomdb_Diagrams/libomdb_result_layout.png}
     \caption{Result Layout}
@@ -2672,8 +2675,11 @@ if (result.isSuccess) {
   column at the passed in index, and
   \inlinecode{getColumnType(index)} returns the type of data that
   is stored in the column specified by index.
-
+  \par\vspace{\baselineskip}
+  A detailed description of the methods contained in the \inlinecode{ResultMetaData}
+  class can be found in Figure~\ref{fig:reultmetadata_methods}
   \begin{figure}
+    \label{fig:reultmetadata_methods}
     \centering
     \textbf{ResultMetaData Class Layout}
     \includegraphics{graphics/libomdb_Diagrams/libomdb_resultmetadata_layout.png}
@@ -2889,30 +2895,19 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
    \caption{Shows the flow of data from a client to the worker threads within OpenMemDB}
   \end{figure}
 
+\newpage
   \subsection{Data Store}
 	%author Robert Medina
-Data Store is responsible for allocating memory and referening memory locations from the database. The 
-memory allocation is based on a shared memory model therefore it is necessary that the functions used by
-Data Store is multiprocessor friendly. It is imperative that Data Store offers data correctness, efficent data
-retrevial, efficent data storage and effect memory management. Data Store utilized the Boost Library in
-order to allocate heterogenous data structures and the STL, standard template library to dynamically
-allocate memory for these data structures. It is significant to provide the least overhead to provide
-efficent data storage and data retrevial of such data structures and editing such functions can lead
-to memory mismanagement. These functions must be correctly used otherwise unnecessary overhead
-on garbage memory and memory corruption can affect these operations.
-Introduction:
-Boost variant library focuses on typesafe storage and retrieval of a bounded set of types that is
-of discriminated unions. A variant data type exposes an interface independent of the current value's type.
-The user define the set of types that are allowed in a variant and this can contain any number of disparate
-variant instructions. Two ways to retrieve a type from the value that is held in a variant is either the program
-must store this type or use boost visitor mechanism. This variant data type is stored as a stack instead of a heap
-to avoid expensive memory allocations.
+{\bfseries Introduction} :
+\par\vspace{\baselineskip}
+Boost variant library focuses on type-safe storage and retrieval of a bounded set of types that is
+of discriminated unions. A variant data type exposes an interface independent of the current value's type. The user defines the set of types that are allowed in a variant and this can contain any number of disparate variant instructions. Two ways to retrieve a type from the value that is held in a variant is either the program must store this type or use boost visitor mechanism. This variant data type is stored as a stack instead of a heap to avoid expensive memory allocations.
 \par\vspace{\baselineskip}
 
-BoundedType:
-Every type that is specified as a template argument to variant must satisfy the above requirements. In addition certain
-features of variant are available if its bounded types meet certain additional requirements. The minimum requirements for
-a type to be accepted in a boost variant object are:
+{\bfseries BoundedType} :
+\par\vspace{\baselineskip}
+Every type that is specified as a template argument to variant must satisfy the above requirements. In addition, certain
+features of variant are available if its bounded types meet certain extra requirements. The minimum requirements for a type to be accepted in a boost variant object are:
 \begin{enumerate}
  \item CopyConstructible or MoveConstructible
  \item Destructor upholds the no-throw exception-safety guarantee
@@ -2922,21 +2917,21 @@ a type to be accepted in a boost variant object are:
 Additional Features are:
 \begin{enumerate}
  \item Assignable: variant is itself Assignable if and only if every one of its bounded
- types meets the requirements of the concept. (Note that top-level const-qualified
- types and reference types do not meet these requirements.)
+ types meets the requirements of the concept (Note that top-level const-qualified
+ types and reference types do not meet these requirements)
  \item MoveAssignable: variant is itself MoveAssignable if and only if every one of its
- bounded types meets the requirements of the concept. (Note that top-level const-qualified
- types and reference types do not meet these requirements.)
+ bounded types meets the requirements of the concept (Note that top-level const-qualified
+ types and reference types do not meet these requirements)
  \item DefaultConstructible [20.1.4]: variant is itself DefaultConstructible if and only
- if its first bounded type (i.e., T1) meets the requirements of the concept.
+ if its first bounded type (i.e., T1) meets the requirements of the concept
  \item EqualityComparable: variant is itself EqualityComparable if and only if every one
- of its bounded types meets the requirements of the concept.
+ of its bounded types meets the requirements of the concept
  \item LessThanComparable: variant is itself LessThanComparable if and only if every one
- of its bounded types meets the requirements of the concept.
+ of its bounded types meets the requirements of the concept
  \item OutputStreamable: variant is itself OutputStreamable if and only if every one of
- its bounded types meets the requirements of the concept.
+ its bounded types meets the requirements of the concept
  \item Hashable: variant is itself Hashable if and only if every one of its bounded types
- meets the requirements of the concept.
+ meets the requirements of the concept
 \end{enumerate}
 
 CopyConstructible is a type that can be constructed from a value or reference of the same
@@ -2946,9 +2941,10 @@ succedd and satisfy all requirements even in bizarre situations. Should an excep
 occur, it will be handled internally and not by the programmer.
 \par\vspace{\baselineskip}
 
-Using Boost variant:
+{\bfseries Using Boost variant}:
+\par\vspace{\baselineskip}
 Whenever a \inlinecode{boost::variant} object is created the default constructor makes the first type its first bounded type.
-A discriminated union container is defined by instantiating the \inlinecode{boost::variant} with the desired argument types.
+A discriminated union container is defined by instantiating \inlinecode{boost::variant} with the desired argument types.
 These types are called bounded types and derive from the BoundedType concept. In order to limit the different
 types that bounded types can accept the \inlinecode{BOOST_VARIANT_LIMIT_TYPES} must be manipulated to reflect this.
 In order to retrieve data types from \inlinecode{boost::variant} there are multiple functions available in order to accomplish this task.
@@ -2965,7 +2961,7 @@ data value in a \inlinecode{boost::variant} object that matches with that data t
 
 While \inlinecode{boost::get<T>} is an acceptable means for value retrieval it suffers from several flaws.
 The get function can only work for one static type of \inlinecode{boost::variant},
-the heterogenous data variant at declaration. If \inlinecode{boost::variant} object
+the heterogeneous data variant at declaration. If \inlinecode{boost::variant} object
 changes its data type then get will lead to logical errors that were not considered.
 Thus boost variant needs a more robust un-static function to retrieve
 data from a \inlinecode{boost::variant} object. The variant library offers a compile-time visitation
@@ -2987,19 +2983,26 @@ a function object that operates on any variant given to it. This is useful when 
 variant types.
 \par\vspace{\baselineskip}
 
-Preprocessor macros:
+{\bfseries Preprocessor macros:}
+
+\par\vspace{\baselineskip}
 The variant class greatly simplifies use for specific instructions of the template but it
 significantly complicates use for generic instructions. When creating a variant instruction
-it is very easy to declare an variant object but it is less clear on how such types are
-accepted into a function. The Preprocessor library provides a powerful solution to this dilemma.
+it is very easy to declare a variant object but it is less clear on how such types are
+accepted into a function.The Preprocessor library provides a powerful solution to this dilemma.
+
+\newpage
 The Boost.Variant library provides a macro \inlinecode{BOOST_VARIANT_ENUM_PARAMS} that
 simplifies the process for the user of declaring variant types in function templates or
 other things of such nature. It is possible to use a type sequence to specify bounded types
 instead of using boost variant default function. Essentially a type sequence performs the
 same functionality of Boost.Variant but if the program for whatever needs must edit and
 create specific types of type sequences it is possible with \inlinecode{make_variant_over}
-function. As shown below \inlinecode{boost::make_variant_over} creates a type sequence that
-is customizable. Problems with the variant class template is parameter list is limiting in
+function. As shown in the figure \inlinecode{boost::make_variant_over} creates a type sequence that
+is customizable.
+
+\par\vspace{\baselineskip}
+Problems with the variant class template is parameter list is limiting in
 two factors. There must be a implementation maximum limit of the types available and the
 nature of parameter lists makes compile-time manipulation of the list excessively difficult.
 This is where editing a type sequence on your own would be helpful in these two aspects
@@ -3014,8 +3017,9 @@ however not all compilers are able to this function.
   \caption{Allows the program to create their own type sequence without using variant constructor}
 \end{figure}
 
-Extending Visitation Even Further:
-Visitation is a powerful mechanism for manipulating a boost variant object content. Binear visitation
+{\bfseries Extending Visitation Even Further}:
+\par\vspace{\baselineskip}
+Visitation is a powerful mechanism for manipulating a boost variant object content. Binary visitation
 extends this by allowing simultaneous visitation of content of two different variant objects.
 \par\vspace{\baselineskip}
 
@@ -3027,8 +3031,10 @@ extends this by allowing simultaneous visitation of content of two different var
   \caption{Compares two variant objects}
 \end{figure}
 
-Multi visitation:
-Multi vistation is like binary visitation with respect to functionality except that it allows for
+\newpage
+{\bfseries Multi visitation}:
+\par\vspace{\baselineskip}
+Multi visitation is like binary visitation with respect to functionality except that it allows for
 three or more boost variant objects to be compared. This maybe an useful tool when used for
 multiple compares between variants objects with in tables.
 
@@ -3040,119 +3046,148 @@ multiple compares between variants objects with in tables.
   \caption{Compares three or more variant objects}
 \end{figure}
 
-Boost variant over boost any:
-Boost variant contains several advantages over boost any such as guaranting the type of its
-content is a user-specificed set of types. Boost variant provides compile-time checked
+\par\vspace{\baselineskip}
+{\bfseries Boost variant over boost any}:
+\par\vspace{\baselineskip}
+Boost variant contains several advantages over boost any such as guaranteeing the type of its
+content is a user-specified set of types. Boost variant provides compile-time checked
 visitation of its content, before run-time. This allows for safer type storage. Boost variant
 enables generic visitation of its content and offers an efficient stack-based storage scheme
 that avoids the overhead of dynamic allocation. Boost any had some advantages over variant such
 as virtually any type for its template argument content, no-throw guarantee of exception safety
 for swap operation and less expensive compile-time processor/memory demands. Overall boost
-variant was choosen for its highly customable type storage. The user-specificed set of types
+variant was chosen for its highly customizable type storage. The user-specified set of types
 is something that was highly sought for our data structures.
 \par\vspace{\baselineskip}
 
-\subsubsubsection{Data Types}
+\newpage
+\subsubsection{Data Types}
 	Data Store has multiple types predefined that allow for a variant of types that tables can be
 	comprosided of. There are over seven data types that are used to make up data store. One of which
 	uses data types that the query planner will used. This is how the query planner and the data store
 	interact with one another.
-1.) DataVariant made up of SQL data types with a boost variant vector
-2.)	TervDataVariant is TervWrapper around an exisiting data variant.
-3.)	DataTableRecord is a vector of a tervel data variant. This makes up one row in
-	a table.
-4.)	DataTable is a vector of a data table record. This makes up a table that contains multiple rows.
-	This is how a table will be represented in data store. Each table will be registered into lookup table
-	for data access.
-5.)	TableSchema is a boost variant vector that stores the table schema
-6.)	SchemaTablePair is a pair that bundles table nested vector with the table schema
-7.)	TableMap is a hashmap that stores the location of schematablepair with the table name. This
-	allows for easy fast instant access retrevial of tables.
+	
+	\begin{enumerate}
+		\item \inlinecode{DataVariant} made up of SQL data types with a boost variant vector
+		\item \inlinecode{TervDataVariant} is TervWrapper around an exisiting data variant
+		\item \inlinecode{DataTableRecord} is a vector of a tervel data variant. This makes up one row in
+		a table
+		\item \inlinecode{DataTable} is a vector of a data table record. This makes up a table that contains multiple rows.
+		This is how a table will be represented in data store. Each table will be registered into lookup table
+		for data access
+		\item \inlinecode{TableSchema} is a boost variant vector that stores the table schema
+		\item \inlinecode{SchemaTablePair} is a pair that bundles table nested vector with the table schema
+		\item \inlinecode{TableMap} is a hashmap that stores the location of schematablepair with the table name. This
+		allows for easy fast instant access retrevial of tables
+	\end{enumerate}
 
-\subsubsubsection{Functions}
-	Data Store is made up of multiple functions that takes in multiple arguments in order to reference tables in memory and return the references that point to the memory to the query planner for further modification. Data store primary objective is to allocate memory and assure that this is done using non-blocking techniques. It is important to note that in order to de-allocate memory from the heap it is possible to do so when data store returns the pointers . The reasoning behind this is that data store should not perform any logic operations just as parsing inputs, etc, etc. Data store primary objective is to allocate memory and send references on where that memory can be located, in order words data storage and data retrevial. 
-write about functions
-	Data Store is made up of multiple functions that create data tables and returns specific data.
-1.) createRow:
-		createRow takes in a DataVariant row and a tablename in order to find the specific table
+\newpage
+\subsubsection{Functions}
+	Data Store is made up of multiple functions that takes in multiple arguments in order to reference tables in memory and return the references that point to the memory to the query planner for further modification. Data store primary objective is to allocate memory and assure that this is done using non-blocking techniques. 
+	\par\vspace{\baselineskip}
+	
+	It is important to note that in order to de-allocate memory from the heap it is possible to do so when data store returns the pointers. The reasoning behind this is that data store should not perform any logic operations just as parsing inputs, etc, etc. Data store primary objective is to allocate memory and send references on where that memory can be located, in order words data storage and data retrieval. 
+	\par\vspace{\baselineskip}
+	The Data Store is made up of multiple functions that create data tables and returns specific data: 
+	
+	\begin{enumerate}
+		\item \inlinecode{createRow} takes in a DataVariant row and a tablename in order to find the specific table
 		you want to insert the row into. The DataVariant row is checked by checkSchema function in
 		order to see if the table schema registered into the lookup\_table hashmap exists and whether
-		or not the new row data type fits into the table schema.
-2.) createTable
-		createTable takes in a char array tablename and a TableSchema schema argument in order to add
-		the string to the hashmap lookup_table as well as the table schema. This is added as a pair
-		into the lookup table and now the table is registered into the lookup\_table and memory is allocated
-		for that table.
-3.) checkSchema
-		checkSchema takes in a char array tablename and checks whether or not if the table exists in the
-		hashmap lookup_table. If it does exisit then it checks whether the TableSchema schema matches the
-		schema from the lookup\_table. If it does match up then it returns true otherwise false.
-4.) getRow:
-		getRow takes in a char array tablename and an int rowID in order to find the table in the lookup_table
-		and finds the row based on the rowID index. It then returns the row pointer it found.
-5.) getTable
-		getTable takes in a char array tablename and finds the table from the lookup\_table. If it finds the table
-		then it returns the table pointer.
+		or not the new row data type fits into the table schema
+		\item \inlinecode{createTable} takes in a char array tablename and a TableSchema schema argument in order to add
+		the string to the hashmap lookup{\_}table as well as the table schema. This is added as a pair
+		into the lookup table and now the table is registered into the lookup{\_}table and memory is allocated
+		for that table
+		\item \inlinecode{checkSchema} takes in a char array tablename and checks whether or not if the table exists in the
+		hashmap lookup{\_}table. If it does exist then it checks whether the TableSchema schema matches the
+		schema from the lookup{\_}table. If it does match up then it returns true otherwise false.
+		\item \inlinecode{getRow} takes in a char array tablename and an int rowID in order to find the table in the lookup{\_}table
+		and finds the row based on the rowID index. It then returns the row pointer it found
+		\item \inlinecode{getTable} takes in a char array tablename and finds the table from the lookup\_table. If it finds the table
+		then it returns the table pointer
+	\end{enumerate}
 
-\subsubsubsection{Data Structures}
-	Nested vectors are used to represent tables. Each table is stored into a hashmap called lookup_table to refer to
+\subsubsection{Data Structures}
+	Nested vectors are used to represent tables. Each table is stored into a hashmap called lookup{\_}table to refer to
 	tables. A pair is used to group up table schema boost variant vector and the data table itself. Nested vectors
-	are used since it most is the most efficent way to represent memory. A hashmap is used to refer tables because each
+	are used since it most is the most efficient way to represent memory. A hashmap is used to refer tables because each
 	table contains a unique identifier char array. A hashmap provides instant access table lookup. A pair is used to group
 	up the table with its schema. Each table have their own unique schema and it is retrievable from the table lookup hashmap.
 
-\subsubsubsection{Accessing Data Performance}
+\subsubsection{Accessing Data Performance}
 	Nested vectors are instant access O(1), if you have the index of the column or row. This makes data retrieval
 	linear time O(n). In the case of a full table scan, it is only necessary to find the columns desired, then each other row
-	column data can be retrieved by using the column index. If a full table scan with all columns are desired then this is O(n^2). A pair is fairly easy to retrieve data from since it is only two pointers or objects grouped together in an object. In the case for a hashmap, it provides instant access O(1), until the hashmap becomes more filled up and collisions being to happen. Normally hashmaps become reindex whenever they are around half full but it may be more advantageous to use dynamic hashing. This is something that will be determine based on performance testing on a training data set.
+	column data can be retrieved by using the column index. If a full table scan with all columns are desired then this is $O(n^2)$. 
+	\par\vspace{\baselineskip}
+	A pair is fairly easy to retrieve data from since it is only two pointers or objects grouped together in an object. In the case for a hashmap, it provides instant access O(1), until the hashmap becomes more filled up and collisions being to happen. Normally hashmaps become reindex whenever they are around half full but it may be more advantageous to use dynamic hashing. This is something that will be determine based on performance testing on a training data set.
 
-\subsubsubsection{Dynamic Memory Allocation}
-Memory management in C++
-	Memory in a C++ program is divded into two parts, the stack and the heap. The stack contains all the variables
-	declared inside the function and will take up memory from the stack. While the heap is responsible for all unused memory 
-	of the program. This memory can be allocated dynammically when the program runs but the program must also insure that this memory gets cleaned up after it is done with it.
+\newpage
+\subsubsection{Dynamic Memory Allocation}
+{\bfseries Memory management in C++}
+\par\vspace{\baselineskip}
+	Memory in a C++ program is dived into two parts, the stack and the heap. The stack contains all the variables declared inside the function and will take up memory from the stack. While the heap is responsible for all unused memory of the program. This memory can be allocated dynamically when the program runs but the program must also insure that this memory gets cleaned up after it is done with it.\newline
 	\includegraphics{graphics/c++_memory_heirarchy.png}
+
+	\newline
+	Programs cannot predict how much memory will be required at run time. This memory can be allocated by the new operator and is referenced by the address of the space allocated. This memory can also be deleted by the delete operator. This is used when memory is no longer used purposely. If it is not cleaned up then it creates garbage memory that could otherwise be used resourcefully. There are other ways to dynamically allocate memory, such as malloc(), calloc(), and realloc(). There are major differences between the new operator and the other memory allocation functions.  The following are some useful concepts and guidelines to keep in mind when using these functions. It is imperative to learn about these guidelines otherwise potential problems could occur such as memory corruption.
 	\cite{newerror}
-	Programs cannot predicte how much memory will be required at run time. This memory can be allocated by the new operator and is referenced by the address of the space allocated. This memory can also be deleted by the delete operator. This is used when memory is no longer used purposely. If it is not cleaned up then it creates garbage memory that could otheriwse be used resourcefully. There are other ways to dynammically allocate memory, such as malloc(), calloc(), and realloc(). There are major differences between the new operator and the other memory allocation functions.  The following are some useful concepts and guidelines to keep in mind when using these functions. It is imparative to learn about these guidelines otherwise potential problems could occur such as memory corruption.
 
-1.) Delete and Free do not MIX
+\begin{enumerate}
+	\item {\bfseries Delete and Free do not MIX}:
 	The delete() function works for the new() function but it causes undefined behavior when used on a malloc(). If the free() function is used on a new() object then the same thing occurs. When deallocating memory for new or malloc it is necessary to apply the correct functions to free up memory. This can usually occur when user-defined functions are applied instead of the STL, standard template library for C++. This can vary from system to system but also from compiler to compiler. When the delete operation is called to delete the new object the compiler generates the following code.
+	\newline
 	\includegraphics{graphics/new_delete_example.png}
-	If the only function the programmer desire is to handle the raw uninitalized memory then new and delete operators should not be considered. Instead the operator new and operator delete should be used to allocate memory and deallocate. This is essentially the same as malloc and free.
+	\newline
+	If the only function the programmer desire is to handle the raw uninitialized memory then new and delete operators should not be considered. Instead the operator new and operator delete should be used to allocate memory and deallocate. This is essentially the same as malloc and free.
+	\newline
 	\includegraphics{graphics/new_operator_bypass.png}
-	\cite{boostuse}
-
-2.) New and malloc mixed
-	If a placement new is used to create an object in memory, not the new function but placement new used to store already allocated data from malloc() function then delete should not be used because like in the previous example, the delete function calls the operator delete to deallocate memory but the memory contained was not allocated by the operator new. This placement new just returns the pointer passed to it. So in general, if raw memory was passed to placement new and this memory was dynammically allocated then still memory must be deallocated to prevent a memory leak.
+	\newline
+	\item {\bfseries New and malloc mixed}:
+	If a placement new is used to create an object in memory, not the new function but placement new used to store already allocated data from malloc() function then delete should not be used because like in the previous example, the delete function calls the operator delete to deallocate memory but the memory contained was not allocated by the operator new. This placement new just returns the pointer passed to it. So in general, if raw memory was passed to placement new and this memory was dynamically allocated then still memory must be deallocated to prevent a memory leak.
+	\newline
 	\includegraphics{graphics/new_placement.png}
+	\newline
 	\cite{boostuse}
-
-3.) New operator
+	
+	\item {\bfseries New operator}:
 	There is a difference between the new operator and operator new. The new operator does two things.
-	First, it allocates enough memory to hold an object of the type inputed. Secondly, it calls a constructor to initialize an object of the type defined. This operator's behavior cannot be changed in ay way. The way the memory is allocated can be changed however. The new operator calls a function to perform the memory allocation. This can be overloaded to change the bahvior. The function at allocates memory for the new operator is "operator new". 
+	First, it allocates enough memory to hold an object of the type inputed. Secondly, it calls a constructor to initialize an object of the type defined. This operator's behavior cannot be changed in any way. The way memory is allocated can be changed however. The new operator calls a function to perform the memory allocation. This can be overloaded to change the behavior. The function at allocates memory for the new operator is "operator new". 
+	\newline
 	\includegraphics{graphics/operator_new_header.png}
+	\newline
 	\cite{boostuse}
-	The operator new returns a void pointer to raw, uninitialized memory. The parameter, size_t, specifices how much memory to allocate. Whenever the programmer needs to call raw memory it is called by operator new like so.
+	The operator new returns a void pointer to raw, uninitialized memory. The parameter, size{\_}t, specifies how much memory to allocate. Whenever the programmer needs to call raw memory it is called by operator new like so.
+	\newline
 	\includegraphics{graphics/operator_new_raw_memory.png}
+	\newline
 	\cite{boostuse}
+	
 	This line of code will return a raw chuck of meaningless memory.
-
-4.) Placement new
-	Sometimes there exists raw memory that was allocated dynammically but does not have a constructor to be linked up to. Invoking a constructor on an existing object is not logical. Constructors exist to initialize objects and objects can only be initialized once. Therefore there must be a way to call a constructor directly so it can be linked to already allocated memory. Placement new allows the programmer to directly work with a constructor. Here is an example of how placement new might be used.
+	
+	\item {\bfseries Placement new}:
+	Sometimes there exists raw memory that was allocated dynamically but does not have a constructor to be linked up to. Invoking a constructor on an existing object is not logical. Constructors exist to initialize objects and objects can only be initialized once. Therefore there must be a way to call a constructor directly so it can be linked to already allocated memory. Placement new allows the programmer to directly work with a constructor. Here is an example of how placement new might be used.
+	\newline
 	\includegraphics{graphics/placement_new_example.png}
+	\newline
 	\cite{boostuse}
 	In the function constructWidgetInBuffer, the expressed return is a new operator that returns the location of the constructor by using an overloaded operator new function.
+	\newline
 	\includegraphics{graphics/operator_new_overload.png}
-
-5.) Error Handling
-	By default if new() cannot find memory it calls a pointer to function called _new_handler()
-	\includegraphics{graphics/operator_new_function.png}
-	\cite{boostuse}
-	if _new_handler() can somehow supply memory for malloc() then everything is good otherwise an exception is thrown.
-
-6.) Memory Corruption
-		There exist two reasons that memory corruption could occur in a program. The source of the memory corruption and its manifestation may be far apart. This makes it difficult to finding the cause of the memory corruption in relation to its effect. The second reason is that symptoms occuring during bizzare conditions which make them significantly harder to replicate. Memory Corruption Errors can be categorized into four categories. One of the more common errors is using uninitialized memory. This refers to the contents of uninitialized memory are treated as garbage values. The usage of such garbage values can lead to unpredictable program behavior. Second error is using none-owned memory. It is common that pointers are used to access and modify memory. Whenever this pointer is a null pointer also known as a dangling pointer, or to a memory location outside of current stack or heap bounds, it is referring to memory that is not possessed by the program. Using these pointers causes serious flaws. Accessing such memory usually cause OS exceptions, that commonly leads to program crashes. Third, using memory beyond the memory that was allocated also known as a buffer overflow. For example, an array that is inside a loop contains a incorrect terminating condition then memory that is accessed beyond the bounds of the array may be manipulated that was otherwise not supposed to. Lastly, the four category that causes memory corruption is fauly heap memory management. Memory leaks and freeing non-heap or un-allocated memory are the most frequen erros caused by fault heap memory management. Since C++ gives so much freedom to allocate any amount of memory the program needs it can lead to such errors when the program does not clean yourself. More specifically memory leaks is allocated memory but are not released. This causes the program to consume memory and reduce the available memory in the heap.
+	\newline
 	
+	\item {\bfseries Error Handling}:
+	By default if new() cannot find memory it calls a pointer to function called {\_}new{\_}handler()
+	\newline
+	\includegraphics{graphics/operator_new_function.png}
+	\newline
+	\cite{boostuse}
+	if $\_new\_handler()$ can somehow supply memory for malloc() then everything is good, otherwise an exception is thrown.
+	
+	\item {\bfseries Memory Corruption}:
+	There exist two reasons that memory corruption could occur in a program. The source of the memory corruption and its manifestation may be far apart. This makes it difficult to finding the cause of the memory corruption in relation to its effect. The second reason is that symptoms occurring during bizarre conditions which make them significantly harder to replicate. Memory Corruption Errors can be categorized into four categories. One of the more common errors is using uninitialized memory. This refers to the contents of uninitialized memory are treated as garbage values. The usage of such garbage values can lead to unpredictable program behavior. Second error is using none-owned memory. It is common that pointers are used to access and modify memory. Whenever this pointer is a null pointer (also known as a dangling pointer) or to a memory location outside of current stack or heap bounds, it is referring to memory that is not possessed by the program. Using these pointers causes serious flaws. Accessing such memory usually cause OS exceptions that commonly leads to program crashes. Third, using memory beyond the memory that was allocated (also known as a buffer overflow). For example, an array that is inside a loop contains an incorrect terminating condition then memory that is accessed beyond the bounds of the array may be manipulated that was otherwise not supposed to. Lastly, the fourth category that causes memory corruption is faulty heap memory management. Memory leaks and freeing non-heap or un-allocated memory are the most frequent errors caused by fault heap memory management. Since C++ gives so much freedom to allocate any amount of memory the program needs it can lead to such errors when the program does not clean itself. More specifically memory leaks are allocated memory but are not released. This causes the program to consume memory and reduce the available memory in the heap.
+\end{enumerate}
+
   \subsection{Logger}
   %author Neil Moore
   Comprehensive logging is essential for any database that wants to be ACID, or
@@ -3230,16 +3265,6 @@ stress-test the system. The hardware used by each member:
   \item{\makebox[4cm]{GPU:\hfill} GeForce GTX 660 OC}
   \item{\makebox[4cm]{Primary Hard Disk:\hfill} Seagate 1 terabyte}
   \item{\makebox[4cm]{Operating System:\hfill} Windows 10 / Arch Linux dual boot}
- \end{itemize}
-
- \item Robert Medina's personal machine
- \begin{itemize}
-  \item{\makebox[4cm]{CPU:\hfill} Intel Duo SU7300}
-  \item{\makebox[4cm]{RAM:\hfill} 4 GB DDR3}
-  \item{\makebox[4cm]{Motherboard:\hfill} ASUS UL50VT}
-  \item{\makebox[4cm]{GPU:\hfill} GeForce G210M}
-  \item{\makebox[4cm]{Primary Hard Disk:\hfill} Seagate 465 GB}
-  \item{\makebox[4cm]{Operating System:\hfill} Windows 7}
  \end{itemize}
 
 \end{itemize}
