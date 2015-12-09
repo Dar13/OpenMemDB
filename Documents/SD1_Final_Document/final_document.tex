@@ -3010,8 +3010,19 @@ machines.
 \section{System Test Plan}
 In order to verify the accuracy and performance characteristics required of a Database Management System,
 a holistic testing plan is needed. However, specific modules must be tested as well in order to 
-verify that they meet their individual requirements as well. All of these tests will require 
-the use of libomdb, so that part of the system will be tested exhaustively.
+verify that they meet their individual requirements as well. Unfortunately we cannot explicitly test
+for wait-freedom as that in itself is a topic for a doctorate thesis, so that verification must
+be done manually.
+\par\vspace{\baselineskip}
+The testing architecture used is custom-made so as to be able to test specific configurations and 
+execution paths. Valgrind and cachegrind are heavily utilized within this architecture  to verify 
+memory safety and measure cache usage, and test programs were developed to stress test network 
+performance. Test data sets were randomly generated, but the configuration of the tables were
+specially chosen to mirror worst-case and real-world scenarios.
+\par\vspace{\baselineskip}
+These tests will be performed throughout the life of the project on a weekly basis against the current
+development branch in the project's GitHub repository. 
+
 \subsection{Data Store}
 As the module on which all others rely on to store the actual data, the testing for this
 module must be comprehensive. The tests we are going to perform are:
@@ -3027,8 +3038,6 @@ module must be comprehensive. The tests we are going to perform are:
  \item Cache coherency/efficiency benchmark 
  \item Data consistency/determinism tests
 \end{itemize}
-
-These tests should allow a comprehensive test suite for the Data Store module.
 
 \subsection{Work Manager}
 This module is broad with many moving parts, requiring special attention be paid to the individual
@@ -3093,7 +3102,11 @@ as follows:
 \newpage
 
 \section{Project Summary}
-
+In summary, this project is a relational database that utilizes wait-free principles and
+data structures to better utilize the increasingly parallel hardware of today. This was a 
+difficult task as multiprocessor programming is far more difficult than traditional
+programming. We are confident that we will end up successful when evaluated against the 
+requirements given to us by our sponsor.
 \newpage
 
 \bibliography{final_document}
