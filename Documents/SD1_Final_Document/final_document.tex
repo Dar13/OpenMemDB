@@ -1,8 +1,6 @@
 \documentclass[letterpaper, 12pt]{article}
 %\documentclass[letterpaper,10pt]{scrartcl}
 
-% TODO: Normilize our itemization template? (Periods at the end or not?)
-
 \usepackage[utf8]{inputenc}
 \usepackage[pass,letterpaper]{geometry}
 \usepackage{graphicx}
@@ -3054,10 +3052,39 @@ data value in a \inlinecode{boost::variant} object that matches with that data t
 \begin{figure}
   \centering
   \textbf{Template for boost variant}
-  \includegraphics{graphics/boost_variant_get_header.png}
+   \begin{lstlisting}[language=C++,basicstyle=\tiny]
+	   namespace boost {
+	   class bad_get;
+	   template<typename U, typename T1, typename T2, ..., typename TN> 
+	   U * relaxed_get(variant<T1, T2, ..., TN> *);
+	   template<typename U, typename T1, typename T2, ..., typename TN> 
+	   const U * relaxed_get(const variant<T1, T2, ..., TN> *);
+	   template<typename U, typename T1, typename T2, ..., typename TN> 
+	   U & relaxed_get(variant<T1, T2, ..., TN> &);
+	   template<typename U, typename T1, typename T2, ..., typename TN> 
+	   const U & relaxed_get(const variant<T1, T2, ..., TN> &);
+	   template<typename U, typename T1, typename T2, ..., typename TN> 
+	   U * strict_get(variant<T1, T2, ..., TN> *);
+	   template<typename U, typename T1, typename T2, ..., typename TN> 
+	   const U * strict_get(const variant<T1, T2, ..., TN> *);
+	   template<typename U, typename T1, typename T2, ..., typename TN> 
+	   U & strict_get(variant<T1, T2, ..., TN> &);
+	   template<typename U, typename T1, typename T2, ..., typename TN> 
+	   const U & strict_get(const variant<T1, T2, ..., TN> &);
+	   template<typename U, typename T1, typename T2, ..., typename TN> 
+	   U * get(variant<T1, T2, ..., TN> *);
+	   template<typename U, typename T1, typename T2, ..., typename TN> 
+	   const U * get(const variant<T1, T2, ..., TN> *);
+	   template<typename U, typename T1, typename T2, ..., typename TN> 
+	   U & get(variant<T1, T2, ..., TN> &);
+	   template<typename U, typename T1, typename T2, ..., typename TN> 
+	   const U & get(const variant<T1, T2, ..., TN> &);
+   \end{lstlisting}
   \cite{boostvariant}
-  \caption{Describes the type of data variant will accept}
+  \caption{Describes the type of data variant will accept} \label{templateboostvar}
 \end{figure}
+
+Figure \ref{templateboostvar} shows ** something **?
 
 While \inlinecode{boost::get<T>} is an acceptable means for value retrieval it suffers from several flaws.
 The get function can only work for one static type of \inlinecode{boost::variant},
@@ -3068,12 +3095,30 @@ data from a \inlinecode{boost::variant} object. The variant library offers a com
 via \inlinecode{boost::apply_visitor}. Visitation requires the program to explicity handle or ignore bounded types.
 \par\vspace{\baselineskip}
 
+
 \begin{figure}
   \centering
   \textbf{Visitation example}
-  \includegraphics[scale=.5]{graphics/boost_variant_visitation.png}
+  \begin{lstlisting}[language=C++]
+  	class times_two_visitor
+  	: public boost::static_visitor<>
+  	{
+  	public:
+  	
+  	void operator()(int & i) const
+  	{
+  	i *= 2;
+  	}
+  	
+  	void operator()(std::string & str) const
+  	{
+  	str += str;
+  	}
+  	
+  	};
+  \end{lstlisting}
   \cite{boostvariant}
-  \caption{Improvement on data retrevial, betterthan get function since types are not predefined}
+  \caption{Improvement on data retrevial, betterthan get function since types are not predefined} \label{visitationexample}
 \end{figure}
 
 This provides the same functionality as get but now this code allows the program to write
@@ -3112,9 +3157,26 @@ however not all compilers are able to this function.
 \begin{figure}
   \centering
   \textbf{Under the hood for variant implementation}
-  \includegraphics[scale=.5]{graphics/boost_variant_type_sequence.png}
+  \begin{lstlisting}[language=C++]
+    typedef mpl::vector< std::string > types_initial;
+    typedef mpl::push_front< types_initial, int >::type types;
+    
+    boost::make_variant_over< types >::type v1;
+  \end{lstlisting}
+
   \cite{boostvariant}
-  \caption{Allows the program to create their own type sequence without using variant constructor}
+  \caption{Allows the program to create their own type sequence without using variant constructor} \label{typesequence}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\textbf{Behaves equivalently to figure \ref{typesequence}}
+	\begin{lstlisting}[language=C++]
+		boost::variant< int, std::string > v2;
+	\end{lstlisting}
+	
+	\cite{boostvariant}
+	\caption{Allows the program to create their own type sequence without using variant constructor} \label{typesequence2}
 \end{figure}
 
 {\bfseries Extending Visitation Even Further}:
@@ -3126,9 +3188,28 @@ extends this by allowing simultaneous visitation of content of two different var
 \begin{figure}
   \centering
   \textbf{Example code using binary visitation}
-  \includegraphics[scale=.5]{graphics/boost_variant_binary_visitation.png}
+  	\begin{lstlisting}[language=C++]
+  	class are_strict_equals
+  	: public boost::static_visitor<bool>
+  	{
+  	public:
+  	
+  	template <typename T, typename U>
+  	bool operator()( const T &, const U & ) const
+  	{
+  	return false; // cannot compare different types
+  	}
+  	
+  	template <typename T>
+  	bool operator()( const T & lhs, const T & rhs ) const
+  	{
+  	return lhs == rhs;
+  	}
+  	
+  	};
+  	\end{lstlisting}
   \cite{boostvariant}
-  \caption{Compares two variant objects}
+  \caption{Compares two variant objects} \label{binvisitation}
 \end{figure}
 
 \newpage
@@ -3141,9 +3222,26 @@ multiple compares between variants objects with in tables.
 \begin{figure}
   \centering
   \textbf{Example code for multi visitation}
-  \includegraphics{graphics/boost_variant_multi_visitation.png}
+
+	\begin{lstlisting}[language=C++, basicstyle=\tiny]
+	  #include <boost/variant/multivisitors.hpp>
+	  
+	  typedef boost::variant<int, double, bool> bool_like_t;
+	  typedef boost::variant<int, double> arithmetics_t;
+	  
+	  struct if_visitor: public boost::static_visitor<arithmetics_t> {
+	  template <class T1, class T2>
+	  arithmetics_t operator()(bool b, T1 v1, T2 v2) const {
+	  if (b) {
+	  return v1;
+	  } else {
+	  return v2;
+	  }
+	  }
+	  };
+	\end{lstlisting}
   \cite{boostvariant}
-  \caption{Compares three or more variant objects}
+  \caption{Compares three or more variant objects} \label{multivisitation}
 \end{figure}
 
 \par\vspace{\baselineskip}
