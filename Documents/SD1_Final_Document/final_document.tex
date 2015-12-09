@@ -1412,6 +1412,124 @@ the same format as LZ77 as well as the encoder.
 
 \newpage
 
+\subsection{Dynamic Memory Allocation}
+{\bfseries Memory management in C++}
+\par\vspace{\baselineskip}
+Memory in a C++ program is dived into two parts, the stack and the heap. The stack contains all the 
+variables declared inside the function and will take up memory from the stack. While the heap is responsible 
+for all unused memory of the program. This memory can be allocated dynamically when the program runs but 
+the program must also insure that this memory gets cleaned up after it is done with it.
+\begin{figure}
+  \centering
+  \includegraphics{graphics/c++_memory_heirarchy.png}
+  \label{fig:cpp_mem_heirarchy}
+  \caption{A visualization of the C++ memory heirarchy.}
+\end{figure}
+
+Programs cannot predict how much memory will be required at run time. This memory can be allocated 
+by the new operator and is referenced by the address of the space allocated. This memory can 
+also be deleted by the delete operator. This is used when memory is no longer used purposely. 
+If it is not cleaned up then it creates garbage memory that could otherwise be used resourcefully. 
+There are other ways to dynamically allocate memory, such as malloc(), calloc(), and realloc(). 
+There are major differences between the new operator and the other memory allocation functions.  
+The following are some useful concepts and guidelines to keep in mind when using these functions. 
+It is imperative to learn about these guidelines otherwise potential problems could occur 
+such as memory corruption. \cite{newerror}
+
+\begin{enumerate}
+  \item {\bfseries Delete and free do not mix}:
+  The delete() operator works for the new operator but it causes undefined behavior when used 
+  on a piece of memory allocated via \inlinecode{malloc()}. If the \inlinecode{free()} function 
+  is used on an object allocated via new then the same thing occurs. When deallocating memory for 
+  new or malloc it is necessary to apply the correct functions to free up memory. This can usually 
+  occur when user-defined functions are applied instead of the Standard Template Library(STL), 
+  the standard library for  C++. This can vary from system to system but also from compiler 
+  to compiler. When the delete operation is called to delete the new object the compiler 
+  generates the following code seen in Figure~\ref{code:delete_free_no_mix}
+  \newline
+  \begin{figure}
+  \begin{lstlisting}[language=C++]
+// call the object's destructor
+ps->~string();
+
+// deallocate the memory used by the object
+operator delete(ps);
+  \end{lstlisting}
+  \label{code:delete_free_no_mix}
+  \end{figure}
+  
+  \item {\bfseries Placement new is extremely dangerous}:
+  If a placement new is used to create an object in memory(e.g. \inlinecode{foo* f = new(place) foo();}) 
+  then you as the programmer are given sole responsibility for managing that memory location. This can
+  be extremely dangerous as you have to account of platform alignment and memory allocation manually
+  rather than being able to rely on C++'s standard library. You are also responsible for calling that
+  object's destructor at the end of its lifetime or else that memory will leak. As such, we recommend 
+  not using this unless you are manually implementing a memory pool or some other advanced memory construct.
+
+  \item {\bfseries New operator}:
+  There is a difference between the \inlinecode{new} operator and \inlinecode{operator new}. The new operator 
+  is the default memory allocation function as defined by the standard library, while \inlinecode{operator new} 
+  is an overloaded version of the new operator. The default operator always work in the way specified by
+  the standard and cannot be directly edited. That behavior is as follows:
+  \begin{itemize}
+   \item It allocates a block of memory that can house the provided class or data type
+   \item If the given class or data type has a constructor, call it
+  \end{itemize}
+  In order to provide the programmer fine-grained control over the memory allocation process, C++
+  provides a way too overload the default new operator and use a custom memory allocator. This is referred to
+  as the operator new so as to differentiate it from the default new operator.
+  \par\vspace{\baselineskip}
+  The memory returned by operator new cannot be guaranteed to be in any particular state as it is 
+  defined by the programmer. As such, be wary of what assumptions you make in handling the memory
+  returned to you by operator new.
+
+  \item {\bfseries Allocating raw buffers}:
+  If a programmer wishes to allocate a buffer of $n$ bytes in C++, they have a couple of options:
+  \begin{enumerate}
+   \item Use \inlinecode{new} to allocate an array of \inlinecode{char} or \inlinecode{uint8_t}:
+   \begin{lstlisting}[language=C++]
+   uint8_t* buffer = new uint8_t[n];
+   \end{lstlisting}
+   \item Use \inlinecode{malloc} to allocate a block of memory that is $n$ bytes long:
+   \begin{lstlisting}[language=C++]
+   uint8_t* buffer = malloc(sizeof(uint8_t)  * n);
+   \end{lstlisting}
+  \end{enumerate}
+  Both of the returned blocks of memory will be uninitialized and the programmer is responsible
+  for their release via \inlinecode{delete} or \inlinecode{free()}, respectively.
+  
+  \item {\bfseries Error Handling}:
+  By default, \inlinecode{new} throws an exception if it cannot allocate the amount of memory
+  requested of it. This exception is usually considered a fatal error as the internal state of
+  the application may no longer be valid. However, there is a variation on \inlinecode{new} that
+  does not throw: \inlinecode{new (std::nothrow) uint8_t[n]}. That variant behaves like \inlinecode{malloc()}
+  in that it returns \inlinecode{nullptr} when it cannot allocate the amount of memory requested.
+
+  \item {\bfseries Memory Corruption}:
+  There exist two reasons that memory corruption could occur in a program. The source of the 
+  memory corruption and its manifestation may be far apart. This makes it difficult to finding 
+  the cause of the memory corruption in relation to its effect. The second reason is that symptoms 
+  occurring during bizarre conditions which make them significantly harder to replicate. Memory 
+  corruption errors can be categorized into four categories. One of the more common errors is using 
+  uninitialized memory. This refers to the contents of uninitialized memory are treated as garbage 
+  values. The usage of such garbage values can lead to unpredictable program behavior. Second error 
+  is using none-owned memory. It is common that pointers are used to access and modify memory. 
+  Whenever this pointer is a null pointer (also known as a dangling pointer) or to a memory location 
+  outside of current stack or heap bounds, it is referring to memory that is not possessed by the program. 
+  Using these pointers causes serious flaws. Accessing such memory usually cause operating system exceptions that commonly 
+  lead to program crashes such as a segmentation fault. Third, using memory beyond the memory that was 
+  allocated (also known as a buffer overflow). For example, an array that is inside a loop contains an 
+  incorrect terminating condition then memory that is accessed beyond the bounds of the array may be 
+  manipulated that was otherwise not supposed to. Lastly, the fourth category that causes memory corruption 
+  is faulty heap memory management. Memory leaks and freeing non-heap or un-allocated memory are the 
+  most frequent errors caused by fault heap memory management. Since C++ gives so much freedom to 
+  allocate any amount of memory the program needs it can lead to such errors when the program does 
+  not properly take care of its memory. More specifically memory leaks are blocks of allocated memory 
+  that are not released and the pointers pointing to them go out of scope or are overwritten. These blocks
+  are ''lost`` to the program and cannot be cleaned up until the process exits. This causes the program to 
+  consume memory and reduce the available memory in the heap and system as a whole.
+\end{enumerate}
+
 \subsection{Parallelism}
 % Author: Jason
 % TODO: restructure this section to flow better
@@ -2569,45 +2687,39 @@ if (result.isSuccess) {
     \centering
     \label{fig:connection_methods}
     \textbf{Connection Class Layout}
-    \includegraphics{graphics/libomdb_Diagrams/libomdb_connection_layout.png}
+    \includegraphics{graphics/libomdb_connection_layout.png}
 	\caption{Connection layout}
   \end{figure}
   \par\vspace{\baselineskip}
 
-  The \lstinline[basicstyle=\ttfamily]|Result| class is made up of two private members:
+  The \inlinecode{Result} class is made up of two private members:
   \begin{itemize}
     \item \inlinecode{m_rows}
     \item \inlinecode{m_metaData}
   \end{itemize}
-  \inlinecode{m_rows} is a
-  \inlinecode{vector<ResultRow>},
-  \inlinecode{ResultRow} is a typedef for
-  a \inlinecode{vector<DataValue>}, and
-  \inlinecode{DataValue} is a typedef for
-  \inlinecode{boost::variant<>}.
-  So with all typedefs removed \inlinecode{m_rows} is
-  actually a
-  \inlinecode{vector<vector<boost:variant<> > >}.
+  \inlinecode{m_rows} is a \inlinecode{vector<ResultRow>}, \inlinecode{ResultRow} is a typedef for
+  a \inlinecode{vector<DataValue>}, and \inlinecode{DataValue} is a typedef for \inlinecode{boost::variant<>}.
+  So with all typedefs removed \inlinecode{m_rows} is actually a \inlinecode{vector<vector<boost:variant<> > >}.
 
   \inlinecode{m_metaData} is the
   \inlinecode{ResultMetaData} object that describes the
   \inlinecode{Result} object. The contents of the
   \inlinecode{ResultMetaData} class will be covered later.
   \par\vspace{\baselineskip}
-  The \lstinline[basicstyle=\ttfamily]|Result| class also contains thee instance methods:
+  The \inlinecode{Result} class also contains thee instance methods:
   \begin{itemize}
     \item \inlinecode{getMetaData(): ResultMetaData}
     \item \inlinecode{getValue(int index): DataValue}
     \item \inlinecode{next(): bool}
   \end{itemize}
   \inlinecode{getMetaData()} is used to obtain the meta-data
-  information about the \lstinline[basicstyle=\ttfamily]|Result|.
+  information about the \inlinecode{Result}.
   \inlinecode{getValue( index )} will return the
   \inlinecode{DataValue} of the column at the specified index.
   \inlinecode{next()} moves the
   \inlinecode{Result} forward one row, if there are still rows
-  remaining in the \lstinline[basicstyle=\ttfamily]|Result|. If there is not, it does
-  nothing and returns \lstinline[basicstyle=\ttfamily]|false|.
+  remaining in the \inlinecode{Result}. If there is not, it does
+  nothing and returns false.
   \par\vspace{\baselineskip}
   A detailed description of the methods contained in the \inlinecode{Result} class 
   can be found in Figure~\ref{fig:result_methods}.
@@ -2615,7 +2727,7 @@ if (result.isSuccess) {
     \centering
     \label{fig:result_methods}
     \textbf{Result Class Layout}
-    \includegraphics{graphics/libomdb_Diagrams/libomdb_result_layout.png}
+    \includegraphics{graphics/libomdb_result_layout.png}
     \caption{Result Layout}
   \end{figure}
   \par\vspace{\baselineskip}
@@ -2641,7 +2753,7 @@ if (result.isSuccess) {
   \end{itemize}
 
   \inlinecode{getColumnCount()} returns the number of
-  columns contained in the \lstinline[basicstyle=\ttfamily]|Result|.
+  columns contained in the \inlinecode{Result}.
   \inlinecode{getColumnLabel(index)} returns the label of the
   column at the passed in index, and
   \inlinecode{getColumnType(index)} returns the type of data that
@@ -2653,7 +2765,7 @@ if (result.isSuccess) {
     \label{fig:reultmetadata_methods}
     \centering
     \textbf{ResultMetaData Class Layout}
-    \includegraphics{graphics/libomdb_Diagrams/libomdb_resultmetadata_layout.png}
+    \includegraphics[scale=.75]{graphics/libomdb_resultmetadata_layout.png}
     \caption{ResultMetaData Layout}
   \end{figure}
 
@@ -2747,7 +2859,7 @@ if (result.isSuccess) {
   to setup and use network or UNIX sockets which favors using C-style freestanding functions
   rather than a more object-oriented approach, at least in the initial setup and initialization
   of the socket. As such, we only created a class for the connection between the server and client
-  and is suitably named \lstinline[basicstyle=\ttfamily]|omdb::Connection|. This class holds
+  and is suitably named \inlinecode{omdb::Connection}. This class holds
   information about the client as well as the socket file descriptor that is needed to send
   or receive data over the socket. Instances of the class are created when the server detects an
   incoming new connection and they persist until the client disconnects or network conditions
@@ -2767,14 +2879,14 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
 					   sockaddr_storage* conn_addr)
   \end{lstlisting}
   \end{figure}
-  The \lstinline[basicstyle=\ttfamily]|omdb::NetworkStatus| datatype is used to return various
+  The \inlinecode{omdb::NetworkStatus} datatype is used to return various
   possible error conditions and is internally used to classify whether the error is fatal
   or can be recovered from. Due to our goal of being non-blocking, we utilize various specially-defined
-  functions in the Linux network API such as \lstinline[basicstyle=\ttfamily]|accept4| and
-  \lstinline[basicstyle=\ttfamily]|setsockopt| to coax Linux into making both non-blocking
+  functions in the Linux network API such as \inlinecode{accept4} and
+  \inlinecode{setsockopt} to coax Linux into making both non-blocking
   sockets and non-blocking accepting of connections. This also has the interesting side effect of
-  changing certain error codes' meaning, specifically \lstinline[basicstyle=\ttfamily]|EAGAIN| and
-  \lstinline[basicstyle=\ttfamily]|EWOULDBLOCK|. Those two codes' meaning is now one of success, or not
+  changing certain error codes' meaning, specifically \inlinecode{EAGAIN} and
+  \inlinecode{EWOULDBLOCK}. Those two codes' meaning is now one of success, or not
   failing, rather than failure. Our error-handling code reflects that, which makes for some initial
   confusion if you are not familiar with the rationale behind it.
   \par\vspace{\baselineskip}
@@ -2782,10 +2894,10 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
   SQL Engine, of fulfilling the client's commands or queries, we used a thread pool concept that
   heavily relies on C++11 features. This thread pool is composed of three parts:
   \begin{itemize}
-   \item A vector of \lstinline[]|std::future<Result>| objects
+   \item A vector of \inlinecode{std::future<Result>} objects
    \item A map that relates a job number to a connection, defined as:\\
-	 \lstinline[]|std::map<uint32_t, omdb::Connection>|
-   \item A vector of \lstinline[]|WorkThreadData| objects
+	 \inlinecode{std::map<uint32_t, omdb::Connection>}
+   \item A vector of \inlinecode{WorkThreadData} objects
   \end{itemize}
   The first part, the vector of \inlinecode{std::future<Result>} objects, is
   essential to retrieving query results from the worker threads in an asynchronous way. This way
@@ -2825,9 +2937,9 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
   or could lead to putting reference to the connection within the query result object itself, introducing
   complexity in that way.
   \par\vspace{\baselineskip}
-  The vector of \lstinline[]|WorkThreadData| objects is the mechanism in
+  The vector of \inlinecode{WorkThreadData} objects is the mechanism in
   which the Work Manager sends jobs, the queries or commands that a client sends to OpenMemDB, to the
-  worker threads in the thread pool. The jobs are contained within a \lstinline[language=C++]|std::packaged_task<Result(int)>|
+  worker threads in the thread pool. The jobs are contained within a \inlinecode{std::packaged_task<Result(int)>}
   object which is a C++11 construct that can generate the previously mentioned \inlinecode{std::future<Result>}.
   The generated future object is stored in the afore-mentioned vector and the job is then passed to a selected
   worker thread to be evaluated. The selection process for where this job is placed is the work load distribution
@@ -3094,70 +3206,7 @@ is something that was highly sought for our data structures.
 	A pair is fairly easy to retrieve data from since it is only two pointers or objects grouped together in an object. In the case for a hashmap, it provides instant access O(1), until the hashmap becomes more filled up and collisions being to happen. Normally hashmaps become reindex whenever they are around half full but it may be more advantageous to use dynamic hashing. This is something that will be determine based on performance testing on a training data set.
 
 \newpage
-\subsubsection{Dynamic Memory Allocation}
-{\bfseries Memory management in C++}
-\par\vspace{\baselineskip}
-	Memory in a C++ program is dived into two parts, the stack and the heap. The stack contains all the variables declared inside the function and will take up memory from the stack. While the heap is responsible for all unused memory of the program. This memory can be allocated dynamically when the program runs but the program must also insure that this memory gets cleaned up after it is done with it.\newline
-	\includegraphics{graphics/c++_memory_heirarchy.png}
 
-	\newline
-	Programs cannot predict how much memory will be required at run time. This memory can be allocated by the new operator and is referenced by the address of the space allocated. This memory can also be deleted by the delete operator. This is used when memory is no longer used purposely. If it is not cleaned up then it creates garbage memory that could otherwise be used resourcefully. There are other ways to dynamically allocate memory, such as malloc(), calloc(), and realloc(). There are major differences between the new operator and the other memory allocation functions.  The following are some useful concepts and guidelines to keep in mind when using these functions. It is imperative to learn about these guidelines otherwise potential problems could occur such as memory corruption.
-	\cite{newerror}
-
-\begin{enumerate}
-	\item {\bfseries Delete and Free do not MIX}:
-	The delete() function works for the new() function but it causes undefined behavior when used on a malloc(). If the free() function is used on a new() object then the same thing occurs. When deallocating memory for new or malloc it is necessary to apply the correct functions to free up memory. This can usually occur when user-defined functions are applied instead of the STL, standard template library for C++. This can vary from system to system but also from compiler to compiler. When the delete operation is called to delete the new object the compiler generates the following code.
-	\newline
-	\includegraphics{graphics/new_delete_example.png}
-	\newline
-	If the only function the programmer desire is to handle the raw uninitialized memory then new and delete operators should not be considered. Instead the operator new and operator delete should be used to allocate memory and deallocate. This is essentially the same as malloc and free.
-	\newline
-	\includegraphics{graphics/new_operator_bypass.png}
-	\newline
-	\item {\bfseries New and malloc mixed}:
-	If a placement new is used to create an object in memory, not the new function but placement new used to store already allocated data from malloc() function then delete should not be used because like in the previous example, the delete function calls the operator delete to deallocate memory but the memory contained was not allocated by the operator new. This placement new just returns the pointer passed to it. So in general, if raw memory was passed to placement new and this memory was dynamically allocated then still memory must be deallocated to prevent a memory leak.
-	\newline
-	\includegraphics{graphics/new_placement.png}
-	\newline
-	\cite{boostuse}
-	
-	\item {\bfseries New operator}:
-	There is a difference between the new operator and operator new. The new operator does two things.
-	First, it allocates enough memory to hold an object of the type inputed. Secondly, it calls a constructor to initialize an object of the type defined. This operator's behavior cannot be changed in any way. The way memory is allocated can be changed however. The new operator calls a function to perform the memory allocation. This can be overloaded to change the behavior. The function at allocates memory for the new operator is "operator new". 
-	\newline
-	\includegraphics{graphics/operator_new_header.png}
-	\newline
-	\cite{boostuse}
-	The operator new returns a void pointer to raw, uninitialized memory. The parameter, size{\_}t, specifies how much memory to allocate. Whenever the programmer needs to call raw memory it is called by operator new like so.
-	\newline
-	\includegraphics{graphics/operator_new_raw_memory.png}
-	\newline
-	\cite{boostuse}
-	
-	This line of code will return a raw chuck of meaningless memory.
-	
-	\item {\bfseries Placement new}:
-	Sometimes there exists raw memory that was allocated dynamically but does not have a constructor to be linked up to. Invoking a constructor on an existing object is not logical. Constructors exist to initialize objects and objects can only be initialized once. Therefore there must be a way to call a constructor directly so it can be linked to already allocated memory. Placement new allows the programmer to directly work with a constructor. Here is an example of how placement new might be used.
-	\newline
-	\includegraphics{graphics/placement_new_example.png}
-	\newline
-	\cite{boostuse}
-	In the function constructWidgetInBuffer, the expressed return is a new operator that returns the location of the constructor by using an overloaded operator new function.
-	\newline
-	\includegraphics{graphics/operator_new_overload.png}
-	\newline
-	
-	\item {\bfseries Error Handling}:
-	By default if new() cannot find memory it calls a pointer to function called {\_}new{\_}handler()
-	\newline
-	\includegraphics{graphics/operator_new_function.png}
-	\newline
-	\cite{boostuse}
-	if $\_new\_handler()$ can somehow supply memory for malloc() then everything is good, otherwise an exception is thrown.
-	
-	\item {\bfseries Memory Corruption}:
-	There exist two reasons that memory corruption could occur in a program. The source of the memory corruption and its manifestation may be far apart. This makes it difficult to finding the cause of the memory corruption in relation to its effect. The second reason is that symptoms occurring during bizarre conditions which make them significantly harder to replicate. Memory Corruption Errors can be categorized into four categories. One of the more common errors is using uninitialized memory. This refers to the contents of uninitialized memory are treated as garbage values. The usage of such garbage values can lead to unpredictable program behavior. Second error is using none-owned memory. It is common that pointers are used to access and modify memory. Whenever this pointer is a null pointer (also known as a dangling pointer) or to a memory location outside of current stack or heap bounds, it is referring to memory that is not possessed by the program. Using these pointers causes serious flaws. Accessing such memory usually cause OS exceptions that commonly leads to program crashes. Third, using memory beyond the memory that was allocated (also known as a buffer overflow). For example, an array that is inside a loop contains an incorrect terminating condition then memory that is accessed beyond the bounds of the array may be manipulated that was otherwise not supposed to. Lastly, the fourth category that causes memory corruption is faulty heap memory management. Memory leaks and freeing non-heap or un-allocated memory are the most frequent errors caused by fault heap memory management. Since C++ gives so much freedom to allocate any amount of memory the program needs it can lead to such errors when the program does not clean itself. More specifically memory leaks are allocated memory but are not released. This causes the program to consume memory and reduce the available memory in the heap.
-\end{enumerate}
 
   \subsection{Logger}
   %author Neil Moore
