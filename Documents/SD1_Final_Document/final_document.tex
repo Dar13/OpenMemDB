@@ -1586,21 +1586,22 @@ It is important to take advantage of parallelization because processors have hit
 reasonable clock speed\citep{processorspeed}. The maximum consumer processor clock speed has
 hovered around 4GHz for many years now. Instead of increasing clock speed, processor
 manufacturers are starting to introduce more cores and new technologies such as hyperthreading
-to compensate for clock speed insufficiency. Processors just aren't getting faster fast enough.
-Adopting parallelism strategies is the easiest way to take advantage of these new technologies.
+to compensate for clock speed stagnancy. Processors just aren't getting faster fast enough.
+Adopting parallelism strategies is the easiest way to take advantage of these new technologies
+and continue to increase performance.
 
 \subsubsection{Code Speedup}
 Parallelism has massive potential for increasing performance. Parallelization of algorithms
 allows the processor to carry out many calculations simultaneously. In fact, if we can
-parallelize the entire algorithm, a theoretical speed up of {\bfseries n} times can be
-achieved where {\bfseries n} is the number of processors we can split the calculations on.
-Most modern computers today have at least 2 cores, and 4 cores being common. This means
+parallelize the entire algorithm, a theoretical speed up of $n$ times can be
+achieved where $n$ is the number of processors we can split the calculations on.
+Most modern computers today have at least 2 cores, with 4 cores being common. This means
 if we can parallelize every part of an algorithm, we can theoretically speed up performance
 by 2 or 4 times for 2 or 4 cores, respectively.
 
 \par\vspace{\baselineskip}
-Of course, in reality the speed up is less than that. We have memory latency, IO, locks
-(more on that in the next section), "inter-processor communication and coordination"\citep[p. 13]{artofmulti},
+Of course, in reality the speed up is less than that. We have memory latency, I/O, locks
+(more on that in the next section), ''inter-processor communication and coordination``\citep[p. 13]{artofmulti},
 and much more to worry about. Still, the gain from parallelization is often large enough to spend
 the time to implement. In order to decide whether or not it is worth it, we can make estimates of
 how much of the code can be parallelized.
@@ -1610,13 +1611,13 @@ how much of the code can be parallelized.
 \newpage
 Consider the following situation:
 \begin{quotation}
-	"Five friends who decide to paint a five-room house. If all the rooms are the same size,
+	''Five friends who decide to paint a five-room house. If all the rooms are the same size,
 	then it makes sense to assign one friend to paint one room, and as long as everyone paints at
 	about the same rate, we would get a five-fold speed-up over the single-painter case.
 	The task becomes more complicated if the rooms are of different sizes. For example, if one
 	room is twice the size of the others, then the five painters will not achieve a five-fold
 	speedup because the overall completion time is dominated by the one room that takes the
-	longest to paint"\citep[p. 13]{artofmulti}.
+	longest to paint``\citep[p. 13]{artofmulti}.
 \end{quotation}
 
 We can use {\bfseries Ahmdal's Law} to approximate the speedup to be gained from painting the house with five friends, or in a real scenario, the estimated parallelizable code.
@@ -1650,11 +1651,11 @@ code as is possible is very important to maintain high performance.
 Though parallelism is a great tool that certainly affects performance tremendously in a positive way,
 it also has it's own caveats. Imagine we have two threads, {\bfseries t1} and {\bfseries t2}
 working in parallel and that eventually there comes a point where both threads need to write a value {\bfseries i}.
+Figure~\ref{fig:race_cond_1} shows the initial conditions in this situation.
+\par\vspace{\baselineskip}
 
-
-\begin{table}[h]
+\begin{figure}[H]
 \centering
-\caption{Race Condition}
 \begin{tabular}{|l|l|l|}
 	\hline
 	& {\bfseries Thread t1} & {\bfseries Thread t2} \\
@@ -1666,7 +1667,9 @@ working in parallel and that eventually there comes a point where both threads n
 	3 & Write back to i & Write back to i \\
 	\hline
 \end{tabular}
-\end{table}
+\caption{Race Condition}
+\label{fig:race_cond_1}
+\end{figure}
 
 Since execution of parallel threads does not guarantee that the above steps will occur in
 any specific order, a few possibilities occur. If thread t2 executes step 1 while
@@ -1674,12 +1677,11 @@ t1 is any time between steps 1 and 3 or similarly if thread t1 executes step 1 w
 t2 is between 1 and 3, we will get wrong values. In this case, the threads race
 to get the value because no real order is established. Therefore, one of the
 threads can get the old value before it is updated. This is called a {\bfseries race condition}.
-Let's take a look at a specific example. Assume {\bfseries i} is set to 2,
-then the following executes:
+Let's take a look at a specific example. Figure~\ref{fig:race_cond_2} shows the execution path described
+above, assuming {\bfseries i} is set to 2.
 
-\begin{table}[h]
+\begin{figure}[H]
 \centering
-\caption{Race Condition}
 \begin{tabular}{|l|l|l|}
 	\hline
 	& {\bfseries Thread t1} & {\bfseries Thread t2} \\
@@ -1693,12 +1695,13 @@ then the following executes:
 	4 & Write back to i(3) &  \\
 	\hline
 \end{tabular}
-\end{table}
+\caption{Race Condition}
+\label{fig:race_cond_2}
+\end{figure}
 
 Due to the unpredictable order of execution, we end up with {\bfseries i} = 3,
 when in reality we should have gotten 4. How do we solve this problem?
 We can use {\bfseries mutual exclusion}.
-
 \par\vspace{\baselineskip}
 
 {\bfseries Mutual exclusion} allows us to lock a piece of data to ensure no other thread can
@@ -1707,11 +1710,10 @@ before another thread writes to it, for example.
 
 \par\vspace{\baselineskip}
 
-Consider the updated scenario:
+Consider the updated scenario as shown in Figure~\ref{fig:race_cond_3}.
 
-\begin{table}[h]
+\begin{figure}[H]
 \centering
-\caption{Race Condition}
 \begin{tabular}{|l|l|l|}
 	\hline
 	& {\bfseries Thread t1} & {\bfseries Thread t2} \\
@@ -1727,16 +1729,18 @@ Consider the updated scenario:
 	5 & Unlock i & Unlock i \\
 	\hline
 \end{tabular}
-\end{table}
+\caption{Race Condition}
+\label{fig:race_cond_3}
+\end{figure}
 
 Locking the variable allows a thread exclusive access to it. In this case, it doesn't
 matter if {\bfseries t1} or {\bfseries t2} gets it first, the thread that did
 not get the lock will be locked out until the lock is released. Lets take a
-look at our example with locks, assuming {\bfseries t1 got the lock first}:
+look at our example with locks, assuming {\bfseries t1 got the lock first} in 
+Figure~\ref{fig:race_cond_4}.
 
-\begin{table}[h]
+\begin{figure}[h]
 \centering
-\caption{Race Condition}
 \begin{tabular}{|l|l|l|}
 	\hline
 	& {\bfseries Thread t1} & {\bfseries Thread t2} \\
@@ -1762,16 +1766,16 @@ look at our example with locks, assuming {\bfseries t1 got the lock first}:
 	10 & & Unlock i\\
 	\hline
 \end{tabular}
-\end{table}
+\caption{Race Condition}
+\label{fig:race_cond_4}
+\end{figure}
 
 In this case, {\bfseries i} correctly gets assigned 4.
-
 \par\vspace{\baselineskip}
 
 The caveat there is that this slows down parallel execution. Threads have to wait for
 the variable to be unlocked, wasting valuable time. Of course, not all variables
 will need locks, otherwise parallelism would not be any faster than serial code execution.
-
 \par\vspace{\baselineskip}
 
 Locks can be very useful tools to prevent race conditions, however they should be used carefully.
@@ -1779,8 +1783,6 @@ Using locks can cause a {\bfseries deadlock}. {\bfseries Deadlocks} can happen w
 {\bfseries t1} holds a lock and is waiting on a piece of data that is locked by another thread
 {\bfseries t2}, while at the same time {\bfseries t2} is waiting on the lock from {\bfseries t1}.
 This causes a loop, and neither lock ever gets released.
-%figure
-
 \par\vspace{\baselineskip}
 
 Not all threads are created equal. In reality some threads take up resources much more often than others.
@@ -1790,9 +1792,7 @@ made unavailable for long periods by 'greedy' threads"\citep{oracleconcurrency}.
 
 \par\vspace{\baselineskip}
 
-%figure
-
-In \textit{The Art of Multiprocessor Programming \citep{artofmulti} } it is stated that a good lock algorithm should have:
+In \textit{The Art of Multiprocessor Programming}\citep{artofmulti} it is stated that a good lock algorithm should have:
 
 \begin{itemize}
 	\item {\bfseries Mutual Exclusion}: Critical sections of different threads do not overlap.
@@ -1803,7 +1803,6 @@ In \textit{The Art of Multiprocessor Programming \citep{artofmulti} } it is stat
 These guidelines are great for safe parallel programming by today's standards, but we can do better.
 We present our implementation of a DBMS without the use of locks, while still maintaining a highly 
 parallelizable data structure core.
-
 \par\vspace{\baselineskip}
 
 It is important to understand that if we could remove locks, we would get a noticeable increase in performance.
@@ -1859,31 +1858,32 @@ their execution that cannot be done concurrently).
 \subsubsection{Blocking}
 A blocking algorithm is the most common of the list. Pretty much anything that uses locks is 
 blocking. 
-
-
-
-\begin{figure}
-	\begin{lstlisting}[language=Java]
-	Lock lock = new Lock();
-	
-	public void method1(){
-	lock.lock();
-	dowork();
-	lock.unlock();
-	}
-	
-	\end{lstlisting}
-	\caption{Blocking Example} \label{fig:blocking_ex}
-\end{figure}
-
-Figure \ref{fig:blocking_ex} is an example of a blocking algorithm.
-The code above simply creates a obtains a lock by calling lock.lock(). While it is locked, 
-the thread will do some work with dowork() and when it's done it will unlock it via 
-lock.unlock(). If for example, another thread wanted to acquire the lock, it would not be 
-able to until method1() unlocks it. The thread would just wait until it can acquire the 
-lock, otherwise doing nothing until then.
-
 \par\vspace{\baselineskip}
+
+Figure \ref{code:block_ex} is an example of a blocking algorithm.
+The code simply creates a obtains a lock by calling \inlinecode{lock.lock()}. While it is locked, 
+the thread will do some work with \inlinecode{dowork()} and when it's done it will unlock it via 
+\inlinecode{lock.unlock()}. If for example, another thread wanted to acquire the lock, it would not be 
+able to until \inlinecode{method1()} unlocks it. The thread would just wait until it can acquire the 
+lock, otherwise doing nothing until then.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+\begin{lstlisting}[language=Java]
+Lock lock = new Lock();
+
+public void method1(){
+  lock.lock();
+
+  dowork();
+
+  lock.unlock();
+}
+\end{lstlisting}
+\caption{Blocking Example}
+\label{code:block_ex}
+\end{figure}	
+
 
 {\bfseries Advantage}\newline
 The advantage to this is that it is very easy to code. There is no worry about two threads 
@@ -1905,6 +1905,7 @@ critical section has halted)." \citep{artofmulti}.
 
 An example of a Starvation Free algorithm would be some code with a very strict fairness 
 policy. This allows all threads to be able to execute their critical sections.
+\par\vspace{\baselineskip}
 
 {\bfseries Advantage}\newline
 Allows all threads to have a change to execute its critical section.
@@ -1916,10 +1917,10 @@ Not much faster than Blocking, it just guarantees more threads will execute thei
 \subsubsection{Obstruction Free}
 
 \begin{quotation}
-"A synchronization technique is obstruction-free if it  guarantees progress for any 
+''A synchronization technique is obstruction-free if it  guarantees progress for any 
 thread that  eventually executes  in  isolation. Even  though other  threads  may  be  
 in the  midst  of  executing operations,  a  thread  is  considered to execute in 
-isolation as long as the other threads do not take any steps." \citep{obsfree}
+isolation as long as the other threads do not take any steps.`` \citep{obsfree}
 \end{quotation}
 
 Obstruction freedom basically states that a threads makes progress only if it doesn't encounter 
@@ -1939,80 +1940,85 @@ In all, Obstruction Free is a nice in-between solution
 
 \subsubsection{Lock Free}
 \begin{quotation}
-	"A method is lock-free if it guarantees that infinitely often some method call finishes 
-	in a finite number of steps"\citep[p. 60]{artofmulti}.
+	''A method is lock-free if it guarantees that infinitely often some method call finishes 
+	in a finite number of steps``\citep[p. 60]{artofmulti}.
 \end{quotation}
 
 Lock freedom simply says that at all times, at least one thread is making progress. It might 
 take infinitely many steps, but it always makes progress.  
+\par\vspace{\baselineskip}
+
+The chart in Figure~\ref{lockfreechart} shows an easy to follow process to figuring out if an algorithm is lock free.
 
 \begin{figure}
     \centering
 	\includegraphics[scale=0.65]{graphics/lockfreechart.png}
     \caption{Is it lock free? Printed with permission. Copyright\copyright 2015 Jeff Preshing}
-    \citep{introlockfree} \label{lockfreechart}
-\end{figure}
-
-The chart \ref{lockfreechart} shows an easy to follow process to figuring out if an algorithm is lock free.
-
-\begin{figure}
-	\begin{lstlisting}[language=Java]
-	AtomicInteger atomicVar = new AtomicInteger(0);
-	
-	public void funcLockFree() {
-	int localVar = atomicVar.get();
-	
-	while (!atomicVar.compareAndSet(localVar, localVar+1)) {
-	localVar = atomicVar.get();
-		}
-	}
-	\end{lstlisting} 
-	\caption{Lockfree Example} \label{fig:lockfree_ex}
-	\citep{concurrencyfreaks}
+    \citep{introlockfree} 
+    \label{lockfreechart}
 \end{figure}
 
 Figure \ref{fig:lockfree_ex} is an example of a lock free algorithm.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+\begin{lstlisting}[language=Java]
+AtomicInteger atomicVar = new AtomicInteger(0);
+
+public void funcLockFree() {
+  int localVar = atomicVar.get();
+
+  while (!atomicVar.compareAndSet(localVar, localVar+1)) {
+    localVar = atomicVar.get();
+  }
+}
+\end{lstlisting} 
+\caption{Lockfree Example} \label{fig:lockfree_ex}
+\citep{concurrencyfreaks}
+\end{figure}
+
 
 In this case, we are incrementing an atomic integer in a loop. This guarantees that 
 some thread is always working. If the compare and swap operation fails on some thread, 
 that just means another thread is making progress and working on their compare and swap.
+\par\vspace{\baselineskip}
 
 Lock free programming isn't easy, there are many problems that can be faced. Each 
 problem requires a unique technique to solve. Some can't even be solved. 
+\par\vspace{\baselineskip}
 
-\begin{figure}
-    \centering
-	\includegraphics[scale=0.7]{graphics/techniques.png}
-	\caption{Techniques. Printed with permission. Copyright\copyright 2015 Jeff Preshing}
-	\citep{introlockfree} \label{techniques}
-\end{figure} 
 Figure \ref{techniques} shows a variety of these problems and some proposed solutions.
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.7]{graphics/techniques.png}
+  \caption{Techniques. Printed with permission. Copyright\copyright 2015 Jeff Preshing.\cite{introlockfree}}
+  \label{techniques}
+\end{figure} 
 \newpage
 
 {\bfseries Atomic operations} are ones that happen without the possibility of another thread 
 messing with it. In other words, atomic operations happen in a single step. Atomic operations 
 are immensely helpful in implementing lock-free and wait-free algorithms; since most 
 processors already have built in support for many atomic operations. 
-
 \par\vspace{\baselineskip}
+
 One set of atomic operations that is particularly useful are{\bfseries read-modify-write (RMW)} 
 operations. These allow us to read and write to a new memory location simultaneously. In general, 
 they help us out because they allow for multiple threads writing to memory at the same time. 
 If a few of these threads happen to collide and want to write to the same location for example, 
 the threads will just execute one at a time. This guarantees that the system as a whole can move 
 forward, making progress (though individual thread starvation is still possible).  
-
 \par\vspace{\baselineskip}
+
 
 {\bfseries Advantage} \par\vspace{\baselineskip}
 Guarantees system level progress, the system is always doing something useful.
+\par\vspace{\baselineskip}
 
 
-{\bfseries Disadvantage} 
 \par\vspace{\baselineskip}
 Starvation is still possible. Does not guarantee thread level progress. 
-
-\par\vspace{\baselineskip}
+{\bfseries Disadvantage} 
 
 \subsubsection{Wait Free}
 \begin{quotation}
@@ -2037,74 +2043,73 @@ even divided into categories itself, the categories are as follows:
 {\bfseries Bounded Wait Freedom} limits the number of steps a method call can take. "This bound 
 may depend on the number of threads"\citep[p. 59]{artofmulti}. Let's take a look at a 
 piece of code. 
+\par\vspace{\baselineskip}
 
-\begin{figure}
-	\begin{lstlisting}[language=Java]
-	AtomicIntegerArray arr = new AtomicIntegerArray(MAX_THREADS);
-	
-	public void funcWaitFreeBounded() {
-	for (int i = 0; i < MAX_THREADS ; i++) {
-	arr.set(i, 1);
-	}
-	}
-	\end{lstlisting}
-	\citep{concurrencyfreaks}
-	\caption{Bounded Wait Free Example} \label{boundedwaitfree_ex}
-\end{figure}
- 
 Figure \ref{boundedwaitfree_ex} shows a bounded wait free algorithm. 
 In this case, we are writing to an array that depends on the number of threads. Notice that this can't be 
 population oblivious because the array depends on the number of threads, a dependency that is not 
 true in population oblivious wait freedom.
-
 \par\vspace{\baselineskip}
+
+\begin{figure}[H]
+\begin{lstlisting}[language=Java]
+AtomicIntegerArray arr = new AtomicIntegerArray(MAX_THREADS);
+
+public void funcWaitFreeBounded() {
+  for (int i = 0; i < MAX_THREADS ; i++) {
+    arr.set(i, 1);
+  }
+}
+\end{lstlisting}
+\caption{Bounded Wait Free Example.\citep{concurrencyfreaks}} \label{boundedwaitfree_ex}
+\end{figure}
+ 
+
 Finally, in {\bfseries Population Oblivious} wait freedom, "performance does not depend on the 
-number of active threads" \citep[p. 59]{artofmulti}. Let's take a look at a piece of code. 
+number of active threads" \citep[p. 59]{artofmulti}. Let's take a look at a piece of code in
+Figure~\ref{wfpo_ex}.
+\par\vspace{\baselineskip}
 
+\begin{figure}[H]
+\begin{lstlisting}[language=C++]
+atomic<int> counter;
 
-
-\begin{figure}
-	\begin{lstlisting}[language=C++]
-	atomic<int> counter;
-	
-	void funcWaitFreeBoundedPopulationOblivious() {
-	counter.fetch_add(1);
-	}
-	\end{lstlisting} 
-	\citep{concurrencyfreaks}
-	\caption{Wait Free Population Oblivious Example} \label{wfpo_ex}
+void funcWaitFreeBoundedPopulationOblivious() {
+  counter.fetch_add(1);
+}
+\end{lstlisting} 
+\caption{Wait Free Population Oblivious Example.\cite{concurrencyfreaks}} \label{wfpo_ex}
 \end{figure}
 
-Simply incrementing a variable using the fetch-and-add atomic operation. It can be seen from figure \ref{wfpo_ex}, that no 
+Simply incrementing a variable using the fetch-and-add atomic operation. It can be seen in the code snippet that no 
 matter how many or how little threads we have, the performance isn't any better or any worse. 
 It is simply doing one operation with no complex sub operations.
-
 \par\vspace{\baselineskip}
 
 As we can see, the definitions the more and more specific and with such specification, it becomes 
 harder to implement. However it also becomes a stronger guarantee of progress. In the case of 
 wait free algorithms, progress is guaranteed at the thread level. Starvation is not possible.
+\par\vspace{\baselineskip}
 
 These algorithms form a hierarchy, a wait free population oblivious algorithm is also wait 
 free bounded, and wait free, and lock free. The following diagram better illustrates 
 this hierarchy.
-
-\begin{figure}
-    \centering
-	\includegraphics[scale=0.25]{graphics/paralleltypes.png}
-	\caption{Hierarchy. Printed with permission. Copyright\copyright 2015 Pedro Ramalhete}
-	\citep{concurrencyfreaks} \caption{Parallel Types} \label{paralleltypes}
-\end{figure}
-
+\par\vspace{\baselineskip}
 
 As we can see from figure \ref{paralleltypes}, lock free is the most general and provides the least guarantee. Then 
 wait free is next, then wait free bounded, and finally wait free population oblivious.
+\par\vspace{\baselineskip}
 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.45]{graphics/paralleltypes.png}
+  \caption{Parallel guarantee hierarchy. Printed with permission. \newline Copyright\copyright 2015 Pedro Ramalhete.\citep{concurrencyfreaks}}
+  \label{paralleltypes}
+\end{figure}
 
 {\bfseries Advantage}
 \par\vspace{\baselineskip}
 \begin{itemize}
-
 	\item Guarantees thread level progress, no thread can starve
 	\item It has been proven that every algorithm can be written wait free
 \end{itemize}
@@ -2113,7 +2118,6 @@ wait free is next, then wait free bounded, and finally wait free population obli
 {\bfseries Disadvantage}
 \par\vspace{\baselineskip}
 \begin{itemize}
-
 	\item Very hard to implement properly
 	\item Though it has been proven that every algorithm can be written wait free, not all implementations are fast
 \end{itemize}
@@ -2126,13 +2130,6 @@ This component is responsible for receiving commands written in the standard que
 language and transforming those commands into an internal representation that can be
 executed by the DBMS. The SQL Engine often consists of three pieces: the tokenizer, the
 parser, code generator/query planner, and the query executor.
-
-\begin{figure}
-  \centering
-  \textbf{SQL Engine UML Activity Diagram}
-  \includegraphics{graphics/SQLEngine_activity_overview.png}
-  \caption{Diagram showing how the SQL engine handles and executes a SQL statement}
-\end{figure}
 
 \subsubsection{Tokenizer}
 %initial author Neil Moore
@@ -2241,13 +2238,15 @@ implement a very strong or robust query planner with large amounts of optimizing
 capability. This is due to the fact that we have determined that the queries we are supporting
 can be decomposed into a series of predicates that then can be evaluated almost independently.
 These predicates are modeled in a way similar to the tree formed by boolean expressions, as shown
-in the graphic below.
+in Figure~\ref{fig:bool_expr_tree}.
 \par\vspace{\baselineskip}
-\begin{figure}
+
+\begin{figure}[H]
  \centering
  \textbf{A Boolean Expression as a Binary Tree}
  \includegraphics{graphics/boolean_expression_tree.png}
  \caption{A typical boolean expression found within SQL decomposed into a binary tree}
+ \label{fig:bool_expr_tree}
 \end{figure}
 
 Therefore, we deduced that there are three different types of predicates that a given tree of
