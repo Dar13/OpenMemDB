@@ -1,4 +1,4 @@
-\documentclass[letterpaper, 12pt]{article}
+\documentclass[letterpaper, 11pt]{article}
 %\documentclass[letterpaper,10pt]{scrartcl}
 
 \usepackage[utf8]{inputenc}
@@ -10,7 +10,8 @@
 \usepackage{bigfoot}
 \usepackage[square,sort,comma,numbers]{natbib}
 \usepackage{titling}
-%\usepackage{mathtools}
+\usepackage{mathtools}
+\usepackage{helvet}
 
 % Temporarily ignore graphics
 % \renewcommand{\includegraphics}[2][]{\fbox{}}
@@ -37,16 +38,19 @@ stringstyle=\color{codered}
 
 \newcommand{\inlinecode}[1]{\colorbox{codegrey}{\lstinline[language=C++]{#1}}}
 
+\renewcommand{\familydefault}{\sfdefault}
+
 \pretitle{%
   \begin{center}
-  \LARGE
-  \includegraphics{graphics/OMDB_logo_text_trans.png}
+  %\includegraphics{graphics/OMDB_logo_text_trans.png}
+  \hfill\includegraphics[scale=.25]{graphics/OpenMemDB_new_text_trans.png}\hspace*{\fill}
   \newline
+  \LARGE
 }
 \posttitle{\end{center}}
 
 \title{Non-Blocking In-Memory Database\thanks{Sponsor: Dr. Damian Dechev}}
-\author{Michael McGee, Robert Medina, Neil Moore, Jason Stavrinaky}
+\author{Michael McGee \and Robert Medina \and Neil Moore \and Jason Stavrinaky}
 \date{11/4/2015}
 
 \pdfinfo{%
@@ -145,8 +149,8 @@ of Central Florida have created a framework of wait-free data structures named T
 This project is one that I knew would be incredibly challenging, yet also had the greatest
 potential in terms of personal growth and end product. These technologies are only going to
 become more and more important and widespread throughout the software industry as hardware
-continues to parallelize, memory becomes faster and cheaper, and wait-free/lock-free algorithms
-become more mature. Experience working with high-performance, memory-intensive, and
+continues to parallelize, memory becomes faster and cheaper, and wait-free/lock-free  \\ algorithms
+become more mature. Experience working with high performance, memory-intensive, and
 standards-defined technologies opens the door for later opportunities in cutting-edge technologies.
 
 \subsubsection{Michael McGee}
@@ -173,10 +177,10 @@ I am currently taking a database systems course and when Dr. Dechev pitched the 
 creating a non-blocking database it was simply one of the projects I had to be apart of.
 I consider multicore programming a necessary skill to learn since new emerging technologies
 in hardware are utilizing more and more processors. This project also gives me a chance to
-learn more about outside coursework on higher level theroy such as non-blocking algorithms
-and efficent data retrevial. I know that after completing this project I will have learn
+learn more about outside coursework on higher level theory such as non-blocking algorithms
+and efficent data retrevial. I know that after completing this project I will have learned
 more about database management systems, non-blocking algortihms and multicore programming.
-It is also something that others with in the university or anyone really can work and improve
+It is also something that others within the university or anyone really can work and improve
 on. This is a project that I hope will have a long lasting effect on future students who
 intend to work and contribute towards this program.
 
@@ -207,8 +211,8 @@ The requirements for this project as given to us by our sponsor, Dr. Dechev, are
 \begin{itemize}
  \item A wait-free, massively parallel, in-memory database
  \item Project must be open-source (MIT or BSD licensing)
- \item The database must be able to run a simple benchmark showing its performance characteristics against
- against both in-memory databases and conventional databases
+ \item The database must be able to run a simple benchmark that allows a comparison of its performance against
+ against competing in-memory databases and conventional databases
  \item A workshop paper that details the problems solved by wait-freedom and how we
  implemented those solutions
  \item In-depth documentation on both the design and implementation of our database
@@ -520,10 +524,10 @@ collection of data items. Each data item has a name and a value.
 An example of a network model record can be seen in Figure~\ref{fig:networkDBMS_record}
 \begin{figure}
   \centering
-  \label{fig:networkDBMS_record}
   \textbf{Network model record example}
   \includegraphics{graphics/dbms_network_model_record.png}
-  \caption{Example of network model record. \copyright H.Maurer and N.Scherbakov. Reprinted with permission  \cite{network_model_coronet}}
+  \caption{Example of network model record. \newline \copyright H.Maurer and N.Scherbakov. Reprinted with permission  \cite{network_model_coronet}}
+  \label{fig:networkDBMS_record}
 \end{figure}
 
 Each record can have it's own grouping within by grouping two or more elementary items.
@@ -536,8 +540,8 @@ relationships.
 An example of network model structure can be seen in Figure~\ref{fig:networkDBMS_structure}
 \begin{figure}[H]
   \centering
-  \includegraphics{graphics/dbms_network_data.png}
-  \caption{Network information model. \copyright H.Maurer and N.Scherbakov. Reprinted with permission \cite{network_model_coronet}}
+  \includegraphics[scale=.90]{graphics/dbms_network_data.png}
+  \caption{Network information model. \newline \copyright H.Maurer and N.Scherbakov. Reprinted with permission \cite{network_model_coronet}}
   \label{fig:networkDBMS_structure}
 \end{figure}
 
@@ -554,7 +558,7 @@ An example of a network model relationship can be seen in Figure~\ref{fig:networ
 
 \begin{figure}[H]
   \centering
-  \includegraphics{graphics/dbms_network_relationship.png}
+  \includegraphics[scale=.9]{graphics/dbms_network_relationship.png}
   \caption{Example of network model relationship \copyright H.Maurer \newline and N.Scherbakov. Reprinted with permission \cite{network_model_coronet}}
   \label{fig:networkDBMS_relationship}
 \end{figure}
@@ -756,7 +760,7 @@ can accept. This is represented as a pair in the table lookup hashmap.
 
 \begin{figure}
   \centering
-  \includegraphics[scale=.5]{graphics/Table_In_Memory.png}
+  \includegraphics[scale=.45]{graphics/Table_In_Memory.png}
   \caption{Example of tervel vector table representation in memory}
   \label{fig:tables_in_memory}
 \end{figure}
@@ -905,7 +909,7 @@ An example of a B-tree can be seen in Figure~\ref{fig:b_tree_ex}.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[scale=.55]{graphics/B_Tree_Example.png}
+  \includegraphics[scale=.50]{graphics/B_Tree_Example.png}
   \caption{Example of a B Tree with symbols \copyright Morris 1998, reprinted with permission.\cite{b+tree}}
   \label{fig:b_tree_ex}
 \end{figure}
@@ -918,7 +922,7 @@ the difference between the two types of tree data structures visually.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[scale=.75]{graphics/B_B+_Tree_Difference.png}
+  \includegraphics[scale=.70]{graphics/B_B+_Tree_Difference.png}
   \caption{A graphic depicting the differences between a B-tree and a B+ tree. \copyright Perrone 2012, reprinted with permission.\cite{b+tree}}
   \label{fig:b_b+_tree_diff}
 \end{figure}
@@ -961,7 +965,7 @@ looks like.
 \begin{figure}[H]
   \centering
   \textbf{Abstract Diagram of ISAM structure}
-  \includegraphics[scale=.8]{graphics/ISAM_abstract_diagram.png}
+  \includegraphics[scale=.75]{graphics/ISAM_abstract_diagram.png}
   \caption{Behavior similiar to B+ Tree Structure \copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
   \label{fig:isam_visual}
 \end{figure}
@@ -1021,7 +1025,7 @@ system such as hard disks.
 \begin{figure}
   \centering
   \textbf{Example of an ISAM structure}
-  \includegraphics[scale=.75]{graphics/ISAM_example.png}
+  \includegraphics[scale=.71]{graphics/ISAM_example.png}
   
   \caption{Some exisiting data that is already inserted.\copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
   \label{fig:isam_example_vis}
@@ -1038,7 +1042,7 @@ system such as hard disks.
 \begin{figure}
   \centering
   \textbf{After deleting 42*, 51*, 97*}
-  \includegraphics[scale=.7]{graphics/ISAM_example_deletion.png}
+  \includegraphics[scale=.65]{graphics/ISAM_example_deletion.png}
   \caption{ISAM deletion operation \copyright Ramakrishnan 2000, reprinted \newline with permission.\cite{ramakrishnan2000database}}
   \label{fig:isam_example_delete}
 \end{figure}
@@ -1070,7 +1074,7 @@ Figure~\ref{fig:static_abstract}.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[scale=.75]{graphics/Static_Hashing_Abstract.png}
+  \includegraphics[scale=.70]{graphics/Static_Hashing_Abstract.png}
   \caption{Abtract data structure representation of static hashing \newline \copyright Ramakrishnan 2000, 
   reprinted with permission.\cite{ramakrishnan2000database}}
   \label{fig:static_abstract}
@@ -1206,9 +1210,9 @@ which is equal to $d(i) = d(a)+i$, for the next hash function in this family of 
 \par\vspace{\baselineskip}
 
 In the split operation, there exists a split policy that determines when splitting is the appropiate. 
-This can occur in terms of rounds. During a round, represented as round number level only hash 
-functions $h(level)$ and $h(level+1)$ are in use. The buckets from first to last are split depending 
-on the timing in a round. At any time there exists buckets that splitted, yet to be split and new 
+This can occur in terms of rounds. During a round, represented as round number $level$ only hash 
+functions $h(level)$ and \\ $h(level+1)$ are in use. The buckets from first to last are split depending 
+on the timing in a round. At any time there exists buckets that have split, have yet to be split and new 
 buckets that were created recently. A visual representation of this operation can be found in 
 Figure~\ref{fig:lin_hash_split}.
 \par\vspace{\baselineskip}
@@ -1216,7 +1220,7 @@ Figure~\ref{fig:lin_hash_split}.
 \begin{figure}[H]
   \centering
   \textbf{Splitting Occurs}
-  \includegraphics{graphics/Linear_hashing_splitting}
+  \includegraphics[scale=.95]{graphics/Linear_hashing_splitting}
   \caption{Abstract view of bucket splitting \copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
   \label{fig:lin_hash_split}
 \end{figure}
@@ -1319,7 +1323,7 @@ Those symbol weights are the ones seen in Figure~\ref{fig:huffman_ex_sym_freq}.
 
 \begin{figure}[H]
   \centering
-  \includegraphics{graphics/huffman_example_symbol_freq.png}
+  \includegraphics[scale=.9]{graphics/huffman_example_symbol_freq.png}
   \caption{Symbols with frequencies as weights data set \copyright Daescu 2012, reprinted with permission.\cite{huffman}}
   \label{fig:huffman_ex_sym_freq}
 \end{figure}
@@ -1330,7 +1334,7 @@ queue sets the least frequency symbol counter to be of the highest priority.
 
 \begin{figure}
   \centering
-  \includegraphics{graphics/huffman_example_initial.png}
+  \includegraphics[scale=.9]{graphics/huffman_example_initial.png}
   \caption{Data set inserted into a priority queue  \copyright Daescu 2012, reprinted with permission.\cite{huffman}}
   \label{huff_example}
 \end{figure}
@@ -1358,7 +1362,7 @@ weight is the sum of the two children nodes. This is shown in Figures~\ref{fig:h
 
 \begin{figure}
   \centering
-  \includegraphics[scale=.65]{graphics/huffman_example_internal_node.png}
+  \includegraphics[scale=.63]{graphics/huffman_example_internal_node.png}
   \cite{huffman}
   \caption{Highest priority on queue is merged together  \copyright Daescu 2012, reprinted with permission}
   \label{fig:huffman_ex_int_1}
@@ -1366,7 +1370,7 @@ weight is the sum of the two children nodes. This is shown in Figures~\ref{fig:h
 
 \begin{figure}
   \centering
-  \includegraphics[scale=.63]{graphics/huffman_example_internal_node_added.png}
+  \includegraphics[scale=.58]{graphics/huffman_example_internal_node_added.png}
   \cite{huffman}
   \caption{New node inserted into queue  \copyright Daescu 2012, reprinted with permission}
   \label{fig:huffman_ex_int_2}
@@ -1393,7 +1397,7 @@ Figure~\ref{fig:huffman_prefix_table}.
 
 \begin{figure}
   \centering
-  \includegraphics[scale=.67]{graphics/huffman_example_prefix_table}
+  \includegraphics[scale=.6]{graphics/huffman_example_prefix_table}
   \caption{Prefix Code Table derived from Huffman Tree  \copyright Daescu 2012, reprinted with permission.\cite{huffman}}
   \label{fig:huffman_prefix_table}
 \end{figure}
@@ -1454,7 +1458,7 @@ from the look-ahead buffer as since in Figure~\ref{fig:lz77_format}.
 
 \begin{figure}
   \centering
-  \includegraphics[scale=.7]{graphics/LZ77_example_window}
+  \includegraphics[scale=.6]{graphics/LZ77_example_window}
   \caption{The format is more clearly defined with in this example. \copyright Wikipedia 2015, reprinted with permission.\cite{LZ77_78}}
   \label{fig:lz77_format}
 \end{figure}
@@ -1891,7 +1895,7 @@ accessing a piece of data at the same time, it just wouldn't be possible.
 \par\vspace{\baselineskip}
 
 {\bfseries Disadvantage}\newline
-This is the slowest way of parallel programming. Whenever a lock is needed, one gives up 
+This is the slowest technique of parallel programming. Whenever a lock is needed, one gives up 
 almost all benefits of multiple threads.
 
 \newpage
@@ -1952,7 +1956,7 @@ The chart in Figure~\ref{lockfreechart} shows an easy to follow process to figur
 
 \begin{figure}
     \centering
-	\includegraphics[scale=0.65]{graphics/lockfreechart.png}
+	\includegraphics[scale=0.63]{graphics/lockfreechart.png}
     \caption{Is it lock free? Printed with permission. Copyright\copyright 2015 Jeff Preshing}
     \citep{introlockfree} 
     \label{lockfreechart}
@@ -1990,7 +1994,7 @@ problem requires a unique technique to solve. Some can't even be solved.
 Figure \ref{techniques} shows a variety of these problems and some proposed solutions.
 \begin{figure}
   \centering
-  \includegraphics[scale=0.7]{graphics/techniques.png}
+  \includegraphics[scale=0.67]{graphics/techniques.png}
   \caption{Techniques. Printed with permission. Copyright\copyright 2015 Jeff Preshing.\cite{introlockfree}}
   \label{techniques}
 \end{figure} 
@@ -2102,7 +2106,7 @@ wait free is next, then wait free bounded, and finally wait free population obli
 
 \begin{figure}[H]
   \centering
-  \includegraphics[scale=0.45]{graphics/paralleltypes.png}
+  \includegraphics[scale=0.42]{graphics/paralleltypes.png}
   \caption{Parallel guarantee hierarchy. Printed with permission. \newline Copyright\copyright 2015 Pedro Ramalhete.\citep{concurrencyfreaks}}
   \label{paralleltypes}
 \end{figure}
@@ -2370,15 +2374,14 @@ because the documentation for them was thorough. However, there are numerous les
 known and less well documented DBMS that are worthy of note:
 
 \begin{itemize}
-  \par\vspace{\baselineskip}
   \item Aerospike is an AGPL licensed NoSQL flash-optimized in memory
   DBMS. Aerospike is an open source project that follows the similar pattern of
   a distributed shared-nothing architecture that is appearing common among most
   in-memory DBMS.
   \begin{quote}
-  "Aerospike architecture is derived from its core principles – NoSQL scalability and
-  flexibility, along with traditional database consistency, reliability and
-  extensibility."
+  ``Aerospike architecture is derived from its core principles –  \\ NoSQL scalability and
+  flexibility, along with traditional database  \\ consistency, reliability and
+  extensibility.''
   \cite{aerospike}
   \end{quote}
   \par\vspace{\baselineskip}
@@ -2495,12 +2498,12 @@ nable dashDB to maximize hardware performance.
   OLTP data. Hekaton is fully implemented within SQL Server and can be utilized from
   within.
   \begin{quote}
-  "Hekaton is designed for high levels of concurrency but does not
+  ``Hekaton is designed for high levels of concurrency but does not
   rely on partitioning to achieve this. Any thread can access any row
   in a table without acquiring latches or locks. The engine uses latchfree
   (lock-free) data structures to avoid physical interference
   among threads and a new optimistic, multiversion concurrency
-  control technique to avoid interference among transactions"\cite{hekaton}
+  control technique to avoid interference among transactions''\cite{hekaton}
   \end{quote}
   Hekaton stores it's data in two different formats: a lock-free hash table and a
   lock free B-tree called a Bw-tree. Data is always accessed with an index lookup.
@@ -2535,7 +2538,7 @@ nable dashDB to maximize hardware performance.
   and update data both in regular tables and Hekaton tables.
   Commits and aborts are fully coordinated across the two engines.
   \item High availability: Hekaton is integrated with AlwaysOn,
-  SQL Server’s high availability feature. Hekaton tables in a database
+  SQL \\ Server’s high availability feature. Hekaton tables in a database
   fail over in the same way as other tables and are also
   readable on secondary servers.
   \item Storage, log: Hekaton logs its updates to the regular SQL
@@ -2640,7 +2643,7 @@ from clients via SQL statements.
   \inlinecode{getColumnCount()} method, the
   label of a specific column through the
   \inlinecode{getColumnLabel( index )},
-  and the data type of a specific column with the
+  and the data type of a specific column with the \\
   \inlinecode{getColumnType( index )} method.
   \par\vspace{\baselineskip}
   
@@ -2672,7 +2675,7 @@ while (result.next()) {
   \begin{figure}[H]
     \centering
     \textbf{Sequence Diagram for Querying Data}
-    \includegraphics[scale=.5]{graphics/libomdb_query_activity.png}
+    \includegraphics[scale=.47]{graphics/libomdb_query_activity.png}
     \caption{Querying Database Sequence Diagram}
     \label{fig:lib_query_activity}
   \end{figure}
@@ -2712,7 +2715,7 @@ if (result.isSuccess) {
   \begin{figure}[H]
     \centering
     \textbf{Sequence Diagram for Executing Command}
-    \includegraphics[scale=.5]{graphics/libomdb_command_activity.png}
+    \includegraphics[scale=.49]{graphics/libomdb_command_activity.png}
     \caption{Executing Command Sequence Diagram}
     \label{fig:libomdb_command_sequence}
   \end{figure}
@@ -2831,7 +2834,7 @@ if (result.isSuccess) {
   \begin{figure}[H]
     \centering
     \textbf{ResultMetaData Class Layout}
-    \includegraphics[scale=.75]{graphics/libomdb_resultmetadata_layout.png}
+    \includegraphics[scale=.7]{graphics/libomdb_resultmetadata_layout.png}
     \caption{ResultMetaData Layout}
     \label{fig:reultmetadata_methods}
   \end{figure}
@@ -3030,7 +3033,7 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
    \centering
    % WorkManager class diagram
    \textbf{WorkManager Module Class Diagram}
-   \includegraphics[scale=.80]{graphics/WorkManager_class.png}
+   \includegraphics[scale=.75]{graphics/WorkManager_class.png}
    \caption{The class diagram of the main WorkManager class within OpenMemDB's Work Manager module}
    \label{fig:work_manager_class}
   \end{figure}
@@ -3051,14 +3054,19 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
 	%author Robert Medina
 {\bfseries Introduction} :
 \par\vspace{\baselineskip}
-Boost variant library focuses on type-safe storage and retrieval of a bounded set of types that is
-of discriminated unions. A variant data type exposes an interface independent of the current value's type. The user defines the set of types that are allowed in a variant and this can contain any number of disparate variant instructions. Two ways to retrieve a type from the value that is held in a variant is either the program must store this type or use boost visitor mechanism. This variant data type is stored as a stack instead of a heap to avoid expensive memory allocations.
+Boost.Variant focuses on type-safe storage and retrieval of a bounded set of types that composes a 
+discriminated union. A variant data type exposes an interface independent of the current value's type. 
+The user defines the set of types that are allowed in a variant and this can contain any number of 
+disparate variant instructions. Two ways to retrieve a type from the value that is held in a variant is 
+either the program must store this type or use boost visitor mechanism. This variant data type is stored 
+as a stack instead of a heap to avoid expensive memory allocations.
 \par\vspace{\baselineskip}
 
 {\bfseries BoundedType} :
 \par\vspace{\baselineskip}
-Every type that is specified as a template argument to variant must satisfy the above requirements. In addition, certain
-features of variant are available if its bounded types meet certain extra requirements. The minimum requirements for a type to be accepted in a boost variant object are:
+Every type that is specified as a template argument to variant must satisfy the above requirements. 
+In addition, certain features of variant are available if its bounded types meet certain extra 
+requirements. The minimum requirements for a type to be accepted in a boost variant object are:
 \begin{enumerate}
  \item CopyConstructible or MoveConstructible
  \item Destructor upholds the no-throw exception-safety guarantee
@@ -3102,54 +3110,54 @@ In order to retrieve data types from \inlinecode{boost::variant} there are multi
 Value retrieval can be accomplish by using the get function. Get takes in a type as an argument and returns the first
 data value in a \inlinecode{boost::variant} object that matches with that data type.
 \par\vspace{\baselineskip}
-\begin{figure}
+Figure \ref{templateboostvar} shows the various types that can be accepted using the get function
+
+\begin{figure}[H]
   \centering
   \textbf{Template for boost variant}
    \begin{lstlisting}[language=C++,basicstyle=\tiny]
-	   namespace boost {
-	   class bad_get;
-	   template<typename U, typename T1, typename T2, ..., typename TN> 
-	   U * relaxed_get(variant<T1, T2, ..., TN> *);
-	   template<typename U, typename T1, typename T2, ..., typename TN> 
-	   const U * relaxed_get(const variant<T1, T2, ..., TN> *);
-	   template<typename U, typename T1, typename T2, ..., typename TN> 
-	   U & relaxed_get(variant<T1, T2, ..., TN> &);
-	   template<typename U, typename T1, typename T2, ..., typename TN> 
-	   const U & relaxed_get(const variant<T1, T2, ..., TN> &);
-	   template<typename U, typename T1, typename T2, ..., typename TN> 
-	   U * strict_get(variant<T1, T2, ..., TN> *);
-	   template<typename U, typename T1, typename T2, ..., typename TN> 
-	   const U * strict_get(const variant<T1, T2, ..., TN> *);
-	   template<typename U, typename T1, typename T2, ..., typename TN> 
-	   U & strict_get(variant<T1, T2, ..., TN> &);
-	   template<typename U, typename T1, typename T2, ..., typename TN> 
-	   const U & strict_get(const variant<T1, T2, ..., TN> &);
-	   template<typename U, typename T1, typename T2, ..., typename TN> 
-	   U * get(variant<T1, T2, ..., TN> *);
-	   template<typename U, typename T1, typename T2, ..., typename TN> 
-	   const U * get(const variant<T1, T2, ..., TN> *);
-	   template<typename U, typename T1, typename T2, ..., typename TN> 
-	   U & get(variant<T1, T2, ..., TN> &);
-	   template<typename U, typename T1, typename T2, ..., typename TN> 
-	   const U & get(const variant<T1, T2, ..., TN> &);
+namespace boost {
+class bad_get;
+template<typename U, typename T1, typename T2, ..., typename TN> 
+U * relaxed_get(variant<T1, T2, ..., TN> *);
+template<typename U, typename T1, typename T2, ..., typename TN> 
+const U * relaxed_get(const variant<T1, T2, ..., TN> *);
+template<typename U, typename T1, typename T2, ..., typename TN> 
+U & relaxed_get(variant<T1, T2, ..., TN> &);
+template<typename U, typename T1, typename T2, ..., typename TN> 
+const U & relaxed_get(const variant<T1, T2, ..., TN> &);
+template<typename U, typename T1, typename T2, ..., typename TN> 
+U * strict_get(variant<T1, T2, ..., TN> *);
+template<typename U, typename T1, typename T2, ..., typename TN> 
+const U * strict_get(const variant<T1, T2, ..., TN> *);
+template<typename U, typename T1, typename T2, ..., typename TN> 
+U & strict_get(variant<T1, T2, ..., TN> &);
+template<typename U, typename T1, typename T2, ..., typename TN> 
+const U & strict_get(const variant<T1, T2, ..., TN> &);
+template<typename U, typename T1, typename T2, ..., typename TN> 
+U * get(variant<T1, T2, ..., TN> *);
+template<typename U, typename T1, typename T2, ..., typename TN> 
+const U * get(const variant<T1, T2, ..., TN> *);
+template<typename U, typename T1, typename T2, ..., typename TN> 
+U & get(variant<T1, T2, ..., TN> &);
+template<typename U, typename T1, typename T2, ..., typename TN> 
+const U & get(const variant<T1, T2, ..., TN> &);
    \end{lstlisting}
-  \cite{boostvariant}
-  \caption{Describes the type of data variant will accept\copyright Friedman, Maman 2002, reprinted with permission} \label{templateboostvar}
+  
+  \caption{Describes the type of data variant will accept\copyright Friedman, Maman 2002, reprinted with permission.\cite{boostvariant}} 
+  \label{templateboostvar}
 \end{figure}
-
-Figure \ref{templateboostvar} shows the various types that can be accepted using the get function
 
 While \inlinecode{boost::get<T>} is an acceptable means for value retrieval it suffers from several flaws.
 The get function can only work for one static type of \inlinecode{boost::variant},
-the heterogeneous data variant at declaration. If \inlinecode{boost::variant} object
-changes its data type then get will lead to logical errors that were not considered.
+the heterogeneous data variant at declaration. If the \\ \inlinecode{boost::variant} object
+changes its data type then \inlinecode{boost::get<T>} will lead to logical errors that were not considered.
 Thus boost variant needs a more robust un-static function to retrieve
 data from a \inlinecode{boost::variant} object. The variant library offers a compile-time visitation
 via \inlinecode{boost::apply_visitor}. Visitation requires the program to explicity handle or ignore bounded types.
 \par\vspace{\baselineskip}
 
-
-\begin{figure}
+\begin{figure}[H]
   \centering
   \textbf{Visitation example}
   \begin{lstlisting}[language=C++]
@@ -3197,8 +3205,8 @@ other things of such nature. It is possible to use a type sequence to specify bo
 instead of using boost variant default function. Essentially a type sequence performs the
 same functionality of Boost.Variant but if the program for whatever needs must edit and
 create specific types of type sequences it is possible with \inlinecode{make_variant_over}
-function. As shown in the figure \inlinecode{boost::make_variant_over} creates a type sequence that
-is customizable.
+function. As shown in Figures~\ref{typesequence} and~\ref{typesequence2}, you can create a 
+type sequence that is customizable.
 \par\vspace{\baselineskip}
 
 Problems with the variant class template is parameter list is limiting in
@@ -3208,7 +3216,7 @@ This is where editing a type sequence on your own would be helpful in these two 
 however not all compilers are able to this function.
 \par\vspace{\baselineskip}
 
-\begin{figure}
+\begin{figure}[H]
   \centering
   \textbf{Under the hood for variant implementation}
   \begin{lstlisting}[language=C++]
@@ -3217,53 +3225,51 @@ however not all compilers are able to this function.
     
     boost::make_variant_over< types >::type v1;
   \end{lstlisting}
-
-  \cite{boostvariant}
-  \caption{Allows the program to create their own type sequence without using variant constructor\copyright Friedman, Maman 2002, reprinted with permission} \label{typesequence}
+  \caption{Allows the program to create their own type sequence without using variant constructor\copyright Friedman, Maman 2002, reprinted with permission.\cite{boostvariant}} 
+  \label{typesequence}
 \end{figure}
 
-\begin{figure}
-	\centering
-	\textbf{Behaves equivalently to figure \ref{typesequence}}
-	\begin{lstlisting}[language=C++]
-		boost::variant< int, std::string > v2;
-	\end{lstlisting}
-	
-	\cite{boostvariant}
-	\caption{Allows the program to create their own type sequence without using variant constructor \copyright Friedman, Maman 2002, reprinted with permission} \label{typesequence2}
+\begin{figure}[H]
+  \centering
+  \textbf{Behaves equivalently to figure \ref{typesequence}}
+  \begin{lstlisting}[language=C++]
+boost::variant< int, std::string > v2;
+  \end{lstlisting}
+  \caption{Allows the program to create their own type sequence without using variant constructor \copyright Friedman, Maman 2002, reprinted with permission.\cite{boostvariant}} 
+  \label{typesequence2}
 \end{figure}
 
 {\bfseries Extending Visitation Even Further}:
 \par\vspace{\baselineskip}
 Visitation is a powerful mechanism for manipulating a boost variant object content. Binary visitation
-extends this by allowing simultaneous visitation of content of two different variant objects.
+extends this by allowing simultaneous visitation of content of two different variant objects. An example is 
+shown in Figure~\ref{binvisitation}.
 \par\vspace{\baselineskip}
 
 \begin{figure}
   \centering
   \textbf{Example code using binary visitation}
-  	\begin{lstlisting}[language=C++]
-  	class are_strict_equals
-  	: public boost::static_visitor<bool>
-  	{
-  	public:
-  	
-  	template <typename T, typename U>
-  	bool operator()( const T &, const U & ) const
-  	{
-  	return false; // cannot compare different types
-  	}
-  	
-  	template <typename T>
-  	bool operator()( const T & lhs, const T & rhs ) const
-  	{
-  	return lhs == rhs;
-  	}
-  	
-  	};
-  	\end{lstlisting}
-  \cite{boostvariant}
-  \caption{Compares two variant objects \copyright Friedman, Maman 2002, reprinted with permission} \label{binvisitation}
+  \begin{lstlisting}[language=C++]
+class are_strict_equals
+: public boost::static_visitor<bool>
+{
+public:
+
+  template <typename T, typename U>
+  bool operator()( const T &, const U & ) const
+  {
+    return false; // cannot compare different types
+  }
+
+  template <typename T>
+  bool operator()( const T & lhs, const T & rhs ) const
+  {
+    return lhs == rhs;
+  } 
+};
+  \end{lstlisting}
+  \caption{Compares two variant objects \copyright Friedman, Maman 2002, reprinted with permission.\cite{boostvariant}} 
+  \label{binvisitation}
 \end{figure}
 
 \newpage
@@ -3271,31 +3277,34 @@ extends this by allowing simultaneous visitation of content of two different var
 \par\vspace{\baselineskip}
 Multi visitation is like binary visitation with respect to functionality except that it allows for
 three or more boost variant objects to be compared. This maybe an useful tool when used for
-multiple compares between variants objects with in tables.
+multiple compares between variants objects with in tables. An example code that performs multiple 
+visitation can be found in Figure~\ref{code:multi_visit}.
 
-\begin{figure}
+\begin{figure}[H]
   \centering
   \textbf{Example code for multi visitation}
+  \begin{lstlisting}[language=C++, basicstyle=\small]
+#include <boost/variant/multivisitors.hpp>
 
-	\begin{lstlisting}[language=C++, basicstyle=\tiny]
-	  #include <boost/variant/multivisitors.hpp>
-	  
-	  typedef boost::variant<int, double, bool> bool_like_t;
-	  typedef boost::variant<int, double> arithmetics_t;
-	  
-	  struct if_visitor: public boost::static_visitor<arithmetics_t> {
-	  template <class T1, class T2>
-	  arithmetics_t operator()(bool b, T1 v1, T2 v2) const {
-	  if (b) {
-	  return v1;
-	  } else {
-	  return v2;
-	  }
-	  }
-	  };
-	\end{lstlisting}
+typedef boost::variant<int, double, bool> bool_like_t;
+typedef boost::variant<int, double> arithmetics_t;
+
+struct if_visitor :
+  public boost::static_visitor<arithmetics_t>
+{
+  template <class T1, class T2>
+  arithmetics_t operator()(bool b, T1 v1, T2 v2) const {
+    if (b) {
+      return v1;
+    } else {
+      return v2;
+    }
+  }
+};
+  \end{lstlisting}
   \cite{boostvariant}
-  \caption{Compares three or more variant objects \copyright Friedman, Maman 2002, reprinted with permission} \label{multivisitation}
+  \caption{Compares three or more variant objects \copyright Friedman, Maman 2002, reprinted with permission} 
+  \label{code:multi_visit}
 \end{figure}
 
 \par\vspace{\baselineskip}
@@ -3314,65 +3323,65 @@ is something that was highly sought for our data structures.
 
 \newpage
 \subsubsection{Data Types}
-	Data Store has multiple types predefined that allow for a variant of types that tables can be
-	comprosided of. There are over seven data types that are used to make up data store. One of which
-	uses data types that the query planner will used. This is how the query planner and the data store
-	interact with one another.
-	
-	\begin{enumerate}
-		\item \inlinecode{DataVariant} made up of SQL data types with a boost variant vector
-		\item \inlinecode{TervDataVariant} is TervWrapper around an exisiting data variant
-		\item \inlinecode{DataTableRecord} is a vector of a tervel data variant. This makes up one row in
-		a table
-		\item \inlinecode{DataTable} is a vector of a data table record. This makes up a table that contains multiple rows.
-		This is how a table will be represented in data store. Each table will be registered into lookup table
-		for data access
-		\item \inlinecode{TableSchema} is a boost variant vector that stores the table schema
-		\item \inlinecode{SchemaTablePair} is a pair that bundles table nested vector with the table schema
-		\item \inlinecode{TableMap} is a hashmap that stores the location of schematablepair with the table name. This
-		allows for easy fast instant access retrevial of tables
-	\end{enumerate}
+Data Store has multiple types predefined that allow for a variant of types that tables can be
+comprosided of. There are over seven data types that are used to make up data store. One of which
+uses data types that the query planner will used. This is how the query planner and the data store
+interact with one another.
+
+\begin{enumerate}
+  \item \inlinecode{DataVariant} made up of SQL data types with a boost variant vector
+  \item \inlinecode{TervDataVariant} is TervWrapper around an exisiting data variant
+  \item \inlinecode{DataTableRecord} is a vector of a tervel data variant. This makes up one row in
+  a table
+  \item \inlinecode{DataTable} is a vector of a data table record. This makes up a table that contains multiple rows.
+  This is how a table will be represented in data store. Each table will be registered into lookup table
+  for data access
+  \item \inlinecode{TableSchema} is a boost variant vector that stores the table schema
+  \item \inlinecode{SchemaTablePair} is a pair that bundles table nested vector with the table schema
+  \item \inlinecode{TableMap} is a hashmap that stores the location of schematablepair with the table name. This
+allows for easy fast instant access retrevial of tables
+\end{enumerate}
 
 \newpage
 \subsubsection{Functions}
-	Data Store is made up of multiple functions that takes in multiple arguments in order to reference tables in memory and return the references that point to the memory to the query planner for further modification. Data store primary objective is to allocate memory and assure that this is done using non-blocking techniques. 
-	\par\vspace{\baselineskip}
-	
-	It is important to note that in order to de-allocate memory from the heap it is possible to do so when data store returns the pointers. The reasoning behind this is that data store should not perform any logic operations just as parsing inputs, etc, etc. Data store primary objective is to allocate memory and send references on where that memory can be located, in order words data storage and data retrieval. 
-	\par\vspace{\baselineskip}
-	The Data Store is made up of multiple functions that create data tables and returns specific data: 
-	
-	\begin{enumerate}
-		\item \inlinecode{createRow} takes in a DataVariant row and a tablename in order to find the specific table
-		you want to insert the row into. The DataVariant row is checked by checkSchema function in
-		order to see if the table schema registered into the lookup\_table hashmap exists and whether
-		or not the new row data type fits into the table schema
-		\item \inlinecode{createTable} takes in a char array tablename and a TableSchema schema argument in order to add
-		the string to the hashmap lookup{\_}table as well as the table schema. This is added as a pair
-		into the lookup table and now the table is registered into the lookup{\_}table and memory is allocated
-		for that table
-		\item \inlinecode{checkSchema} takes in a char array tablename and checks whether or not if the table exists in the
-		hashmap lookup{\_}table. If it does exist then it checks whether the TableSchema schema matches the
-		schema from the lookup{\_}table. If it does match up then it returns true otherwise false.
-		\item \inlinecode{getRow} takes in a char array tablename and an int rowID in order to find the table in the lookup{\_}table
-		and finds the row based on the rowID index. It then returns the row pointer it found
-		\item \inlinecode{getTable} takes in a char array tablename and finds the table from the lookup\_table. If it finds the table
-		then it returns the table pointer
-	\end{enumerate}
+Data Store is made up of multiple functions that takes in multiple arguments in order to reference tables in memory and return the references that point to the memory to the query planner for further modification. Data store primary objective is to allocate memory and assure that this is done using non-blocking techniques. 
+\par\vspace{\baselineskip}
+
+It is important to note that in order to de-allocate memory from the heap it is possible to do so when data store returns the pointers. The reasoning behind this is that data store should not perform any logic operations just as parsing inputs, etc, etc. Data store primary objective is to allocate memory and send references on where that memory can be located, in order words data storage and data retrieval. 
+\par\vspace{\baselineskip}
+The Data Store is made up of multiple functions that create data tables and returns specific data: 
+
+\begin{enumerate}
+  \item \inlinecode{createRow} takes in a DataVariant row and a tablename in order to find the specific table
+  you want to insert the row into. The DataVariant row is checked by checkSchema function in
+  order to see if the table schema registered into the lookup\_table hashmap exists and whether
+  or not the new row data type fits into the table schema
+  \item \inlinecode{createTable} takes in a char array tablename and a \inlinecode{TableSchema} object in order to add
+  the string to the hashmap lookup table as well as the table schema. This is added as a pair
+  into the lookup table and now the table is registered into the lookup table and memory is allocated
+  for that table
+  \item \inlinecode{checkSchema} takes in a char array tablename and checks whether or not if the table exists in the
+  hashmap lookup table. If it does exist then it checks whether the TableSchema schema matches the
+  schema from the lookup table. If it does match up then it returns true otherwise false.
+  \item \inlinecode{getRow} takes in a char array tablename and an int rowID in order to find the table in the lookup table
+  and finds the row based on the rowID index. It then returns the row pointer it found
+  \item \inlinecode{getTable} takes in a char array tablename and finds the table from the lookup table. If it finds the table
+  then it returns the table pointer
+\end{enumerate}
 
 \subsubsection{Data Structures}
-	Nested vectors are used to represent tables. Each table is stored into a hashmap called lookup{\_}table to refer to
-	tables. A pair is used to group up table schema boost variant vector and the data table itself. Nested vectors
-	are used since it most is the most efficient way to represent memory. A hashmap is used to refer tables because each
-	table contains a unique identifier char array. A hashmap provides instant access table lookup. A pair is used to group
-	up the table with its schema. Each table have their own unique schema and it is retrievable from the table lookup hashmap.
+Nested vectors are used to represent tables. Each table is stored into a hashmap called lookup{\_}table to refer to
+tables. A pair is used to group up table schema boost variant vector and the data table itself. Nested vectors
+are used since it most is the most efficient way to represent memory. A hashmap is used to refer tables because each
+table contains a unique identifier char array. A hashmap provides instant access table lookup. A pair is used to group
+up the table with its schema. Each table have their own unique schema and it is retrievable from the table lookup hashmap.
 
 \subsubsection{Accessing Data Performance}
-	Nested vectors are instant access O(1), if you have the index of the column or row. This makes data retrieval
-	linear time O(n). In the case of a full table scan, it is only necessary to find the columns desired, then each other row
-	column data can be retrieved by using the column index. If a full table scan with all columns are desired then this is $O(n^2)$. 
-	\par\vspace{\baselineskip}
-	A pair is fairly easy to retrieve data from since it is only two pointers or objects grouped together in an object. In the case for a hashmap, it provides instant access O(1), until the hashmap becomes more filled up and collisions being to happen. Normally hashmaps become reindex whenever they are around half full but it may be more advantageous to use dynamic hashing. This is something that will be determine based on performance testing on a training data set.
+Nested vectors are instant access O(1), if you have the index of the column or row. This makes data retrieval
+linear time O(n). In the case of a full table scan, it is only necessary to find the columns desired, then each other row
+column data can be retrieved by using the column index. If a full table scan with all columns are desired then this is $O(n^2)$. 
+\par\vspace{\baselineskip}
+A pair is fairly easy to retrieve data from since it is only two pointers or objects grouped together in an object. In the case for a hashmap, it provides instant access O(1), until the hashmap becomes more filled up and collisions being to happen. Normally hashmaps become reindex whenever they are around half full but it may be more advantageous to use dynamic hashing. This is something that will be determine based on performance testing on a training data set.
 
 \newpage
 
@@ -3401,7 +3410,7 @@ is something that was highly sought for our data structures.
   
   % this is the interaction diagram between the main database and the logger
   % should also include the interaction between database and client, just to be complete
-  \begin{figure}
+  \begin{figure}[H]
     \centering
     \textbf{Client, Database, and Logger Interaction Diagram}
     \includegraphics{graphics/Logger_interaction.png}
@@ -3594,7 +3603,7 @@ as follows:
 
 \newpage
 
-\section{Project Summary}
+\section{Project Summary \& Conclusion}
 In summary, this project is a relational database that utilizes wait-free principles and
 data structures to better utilize the increasingly parallel hardware of today. This was a 
 difficult task as multiprocessor programming is far more difficult than traditional
@@ -3608,6 +3617,16 @@ requirements given to us by our sponsor.
 
 \appendix
 \section{Appendix A}
+We use all copyrighted material under terms of fair use, as our project is an educational and research tool 
+rather than a commercial effort. This is supported by Section 107 of the United States Copyright Act which states:
+\begin{quotation}
+``the fair use of a copyrighted work, including such use by reproduction in copies or phonorecords 
+  or by any other means specified by that section, for purposes such as criticism, comment, news reporting, 
+  teaching (including multiple copies for classroom use), scholarship, or research, is not an infringement 
+  of copyright.''
+\end{quotation}
+\par\vspace{\baselineskip}
+
 
 
 \end{document}
