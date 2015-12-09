@@ -265,15 +265,17 @@ can do in Vim. Additionally, Vim adds many features on top of Vi that caused Vim
 to gain a huge following of programmers everywhere with plugin support being the main
 reason. We chose Vim for that reason as well as its customizability. It can tweaked
 to work exactly how we want it to work. With plugins, we can add essentially infinite
-functionality. In the figure below, we have Vim running with the powerline plugin as
-well as git integration.
+functionality.
 
 \begin{figure}
     \centering
 	\includegraphics[scale=0.25]{graphics/vimide.png}
-    \caption{Vim}
+    \caption{Vim} \label{vim}
 \end{figure}
 
+ In figure \ref{vim}, we have Vim running with the powerline plugin as
+ well as git integration. 
+ 
 \newpage
 
 \subsubsection{Atom}
@@ -285,9 +287,10 @@ those of us who aren't too familiar with Vim.
 \begin{figure}
     \centering
 	\includegraphics[scale=0.25]{graphics/atomide.png}
-    \caption{Atom}
+    \caption{Atom} \label{atom}
 \end{figure}
 
+Figure \ref{atom} shows our simple yet effective Atom setup.
 
 \newpage
 
@@ -297,14 +300,15 @@ As competitor to Atom, Sublime Text has its advantages over Atom. Being older th
 Sublime Text has many more packages available that gives it the edge in versatility. In
 addition, Sublime has higher performance at the cost of CPU usage. While Atom uses less
 CPU and more RAM. In all, both editors have their uses and are great for different things,
-and as such we use them both.
+and as such we use them both.  
 
 \begin{figure}
     \centering
 	\includegraphics[scale=0.25]{graphics/sublimeide.png}
-    \caption{Sublime Text}
+    \caption{Sublime Text} \label{sublime}
 \end{figure}
 
+Figure \ref{sublime} shows a similar setup to our Atom setup.
 
 \newpage
 
@@ -319,8 +323,10 @@ papers for this project.
 \begin{figure}
     \centering
 	\includegraphics[scale=0.25]{graphics/texstudioide.png}
-    \caption{Texmaker/Texstudio}
+    \caption{Texmaker/Texstudio} \label{texmaker}
 \end{figure}
+
+Figure \ref{texmaker} shows Texmaker in action!
 
 \newpage
 
@@ -338,8 +344,10 @@ has become invaluable to our development process.
 \begin{figure}
     \centering
 	\includegraphics[scale=0.25]{graphics/zealdoc.png}
-    \caption{Zeal documentation browser}
+    \caption{Zeal documentation browser} \label{zeal}
 \end{figure}
+
+Zeal is shown in figure \ref{zeal}.
 
 \newpage
 
@@ -1697,20 +1705,25 @@ their execution that cannot be done concurrently).
 
 \subsubsection{Blocking}
 A blocking algorithm is the most common of the list. Pretty much anything that uses locks is 
-blocking. Consider the following example:
-
-\begin{lstlisting}[language=Java]
-Lock lock = new Lock();
-
-public void method1(){
-  lock.lock();
-  dowork();
-  lock.unlock();
-}
-
-\end{lstlisting}
+blocking. 
 
 
+
+\begin{figure}
+	\begin{lstlisting}[language=Java]
+	Lock lock = new Lock();
+	
+	public void method1(){
+	lock.lock();
+	dowork();
+	lock.unlock();
+	}
+	
+	\end{lstlisting}
+	\caption{Blocking Example} \label{fig:blocking_ex}
+\end{figure}
+
+Figure \ref{fig:blocking_ex} is an example of a blocking algorithm.
 The code above simply creates a obtains a lock by calling lock.lock(). While it is locked, 
 the thread will do some work with dowork() and when it's done it will unlock it via 
 lock.unlock(). If for example, another thread wanted to acquire the lock, it would not be 
@@ -1778,44 +1791,49 @@ In all, Obstruction Free is a nice in-between solution
 \end{quotation}
 
 Lock freedom simply says that at all times, at least one thread is making progress. It might 
-take infinitely many steps, but it always makes progress. The chart on this page shows 
-an easy to follow process to figuring out if an algorithm is lock free. 
+take infinitely many steps, but it always makes progress.  
 
 \begin{figure}
     \centering
 	\includegraphics[scale=0.65]{graphics/lockfreechart.png}
     \caption{Is it lock free? Printed with permission. Copyright\copyright 2015 Jeff Preshing}
-    \citep{introlockfree}
+    \citep{introlockfree} \label{lockfreechart}
 \end{figure}
 
-The following is an example of a lock free algorithm.
-\citep{concurrencyfreaks}
-\begin{lstlisting}[language=Java]
-AtomicInteger atomicVar = new AtomicInteger(0);
+The chart \ref{lockfreechart} shows an easy to follow process to figuring out if an algorithm is lock free.
 
-public void funcLockFree() {
-  int localVar = atomicVar.get();
+\begin{figure}
+	\begin{lstlisting}[language=Java]
+	AtomicInteger atomicVar = new AtomicInteger(0);
+	
+	public void funcLockFree() {
+	int localVar = atomicVar.get();
+	
+	while (!atomicVar.compareAndSet(localVar, localVar+1)) {
+	localVar = atomicVar.get();
+		}
+	}
+	\end{lstlisting} 
+	\caption{Lockfree Example} \label{fig:lockfree_ex}
+	\citep{concurrencyfreaks}
+\end{figure}
 
-  while (!atomicVar.compareAndSet(localVar, localVar+1)) {
-    localVar = atomicVar.get();
-  }
-}
-\end{lstlisting} 
+Figure \ref{fig:lockfree_ex} is an example of a lock free algorithm.
+
 In this case, we are incrementing an atomic integer in a loop. This guarantees that 
 some thread is always working. If the compare and swap operation fails on some thread, 
 that just means another thread is making progress and working on their compare and swap.
 
 Lock free programming isn't easy, there are many problems that can be faced. Each 
-problem requires a unique technique to solve. Some can't even be solved. The next 
-figure shows a variety of these problems and some proposed solutions.
+problem requires a unique technique to solve. Some can't even be solved. 
 
 \begin{figure}
     \centering
 	\includegraphics[scale=0.7]{graphics/techniques.png}
 	\caption{Techniques. Printed with permission. Copyright\copyright 2015 Jeff Preshing}
-	\citep{introlockfree}
-\end{figure}
-
+	\citep{introlockfree} \label{techniques}
+\end{figure} 
+Figure \ref{techniques} shows a variety of these problems and some proposed solutions.
 \newpage
 
 {\bfseries Atomic operations} are ones that happen without the possibility of another thread 
@@ -1865,35 +1883,46 @@ even divided into categories itself, the categories are as follows:
 
 {\bfseries Bounded Wait Freedom} limits the number of steps a method call can take. "This bound 
 may depend on the number of threads"\citep[p. 59]{artofmulti}. Let's take a look at a 
-piece of code. \citep{concurrencyfreaks}
+piece of code. 
 
-\begin{lstlisting}[language=Java]
-AtomicIntegerArray arr = new AtomicIntegerArray(MAX_THREADS);
-
-public void funcWaitFreeBounded() {
-  for (int i = 0; i < MAX_THREADS ; i++) {
-    arr.set(i, 1);
-  }
-}
-\end{lstlisting} 
-
-In this case, we are writign to an array that depends on the number of threads. Notice that this can't be 
+\begin{figure}
+	\begin{lstlisting}[language=Java]
+	AtomicIntegerArray arr = new AtomicIntegerArray(MAX_THREADS);
+	
+	public void funcWaitFreeBounded() {
+	for (int i = 0; i < MAX_THREADS ; i++) {
+	arr.set(i, 1);
+	}
+	}
+	\end{lstlisting}
+	\citep{concurrencyfreaks}
+	\caption{Bounded Wait Free Example} \label{boundedwaitfree_ex}
+\end{figure}
+ 
+Figure \ref{boundedwaitfree_ex} shows a bounded wait free algorithm. 
+In this case, we are writing to an array that depends on the number of threads. Notice that this can't be 
 population oblivious because the array depends on the number of threads, a dependency that is not 
 true in population oblivious wait freedom.
 
 \par\vspace{\baselineskip}
 Finally, in {\bfseries Population Oblivious} wait freedom, "performance does not depend on the 
-number of active threads" \citep[p. 59]{artofmulti}. Let's take a look at a piece of code. \citep{concurrencyfreaks}
+number of active threads" \citep[p. 59]{artofmulti}. Let's take a look at a piece of code. 
 
-\begin{lstlisting}[language=C++]
-atomic<int> counter;
 
-void funcWaitFreeBoundedPopulationOblivious() {
-  counter.fetch_add(1);
-}
-\end{lstlisting} 
 
-Simply incrementing a variable using the fetch-and-add atomic operation. It can be seen here, that no 
+\begin{figure}
+	\begin{lstlisting}[language=C++]
+	atomic<int> counter;
+	
+	void funcWaitFreeBoundedPopulationOblivious() {
+	counter.fetch_add(1);
+	}
+	\end{lstlisting} 
+	\citep{concurrencyfreaks}
+	\caption{Wait Free Population Oblivious Example} \label{wfpo_ex}
+\end{figure}
+
+Simply incrementing a variable using the fetch-and-add atomic operation. It can be seen from figure \ref{wfpo_ex}, that no 
 matter how many or how little threads we have, the performance isn't any better or any worse. 
 It is simply doing one operation with no complex sub operations.
 
@@ -1911,11 +1940,11 @@ this hierarchy.
     \centering
 	\includegraphics[scale=0.25]{graphics/paralleltypes.png}
 	\caption{Hierarchy. Printed with permission. Copyright\copyright 2015 Pedro Ramalhete}
-	\citep{concurrencyfreaks}
+	\citep{concurrencyfreaks} \caption{Parallel Types} \label{paralleltypes}
 \end{figure}
 
 
-As we can see, lock free is the most general and provides the least guarantee. Then 
+As we can see from figure \ref{paralleltypes}, lock free is the most general and provides the least guarantee. Then 
 wait free is next, then wait free bounded, and finally wait free population oblivious.
 
 
