@@ -1917,7 +1917,7 @@ policy. This allows all threads to be able to execute their critical sections.
 \par\vspace{\baselineskip}
 
 {\bfseries Advantage}\newline
-Allows all threads to have a change to execute its critical section.
+Allows all threads to have a chance to execute its critical section.
 \par\vspace{\baselineskip}
 
 {\bfseries Disadvantage}\newline
@@ -2011,7 +2011,7 @@ are immensely helpful in implementing lock-free and wait-free algorithms; since 
 processors already have built in support for many atomic operations. 
 \par\vspace{\baselineskip}
 
-One set of atomic operations that is particularly useful are{\bfseries read-modify-write (RMW)} 
+One set of atomic operations that is particularly useful are {\bfseries read-modify-write (RMW)} 
 operations. These allow us to read and write to a new memory location simultaneously. In general, 
 they help us out because they allow for multiple threads writing to memory at the same time. 
 If a few of these threads happen to collide and want to write to the same location for example, 
@@ -2024,10 +2024,10 @@ forward, making progress (though individual thread starvation is still possible)
 Guarantees system level progress, the system is always doing something useful.
 \par\vspace{\baselineskip}
 
-
+{\bfseries Disadvantage} 
 \par\vspace{\baselineskip}
 Starvation is still possible. Does not guarantee thread level progress. 
-{\bfseries Disadvantage} 
+
 
 \subsubsection{Wait Free}
 \begin{quotation}
