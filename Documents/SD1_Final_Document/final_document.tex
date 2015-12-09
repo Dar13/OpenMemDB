@@ -1314,25 +1314,25 @@ and links to two child nodes. Here is an example of a text that is initalized in
 frequency of the characters being used as the weight of the symbol.
 \par\vspace{\baselineskip}
 As an example, ``Eerie eyes seen near lake'' translates into the following symbols ``E e r i [space] y s n a r l k .''
-Those symbol weights are the following:
+Those symbol weights are the ones seen in Figure~\ref{fig:huffman_ex_sym_freq}.
 \par\vspace{\baselineskip}
 
-\begin{figure}
+\begin{figure}[H]
   \centering
   \includegraphics{graphics/huffman_example_symbol_freq.png}
-  \cite{huffman}
-  \caption{Symbols with frequencies as weights data set \copyright Daescu 2012, reprinted with permission} \label{huffman_example}
+  \caption{Symbols with frequencies as weights data set \copyright Daescu 2012, reprinted with permission.\cite{huffman}}
+  \label{fig:huffman_ex_sym_freq}
 \end{figure}
 
-Once the data set is prepared it is inserted into a priority queue. In this figure \ref{huffman_example}, the priority 
+Once the data set is prepared it is inserted into a priority queue. In Figure \ref{huff_example}, the priority 
 queue sets the least frequency symbol counter to be of the highest priority.
 \par\vspace{\baselineskip}
 
 \begin{figure}
   \centering
   \includegraphics{graphics/huffman_example_initial.png}
-  \cite{huffman}
-  \caption{Data set inserted into a priority queue  \copyright Daescu 2012, reprinted with permission} \label{huff_example}
+  \caption{Data set inserted into a priority queue  \copyright Daescu 2012, reprinted with permission.\cite{huffman}}
+  \label{huff_example}
 \end{figure}
 
 The process begins with the leaf nodes turning into a new node with children whose symbol weight is smaller than
@@ -1351,7 +1351,7 @@ Using a priority queue where the node with the lowest probability is given the h
   \item The remaining node is the root node and the tree is complete.
 \end{enumerate}
 
-Continuing with figure \ref{huff_example}, the first two leaf nodes are added as children to a parent node whose
+Continuing with the example in Figure \ref{huff_example}, the first two leaf nodes are added as children to a parent node whose
 weight is the sum of the two children nodes. This is shown in Figures~\ref{fig:huffman_ex_int_1} and
 ~\ref{fig:huffman_ex_int_2}.
 \par\vspace{\baselineskip}
@@ -1372,14 +1372,14 @@ weight is the sum of the two children nodes. This is shown in Figures~\ref{fig:h
   \label{fig:huffman_ex_int_2}
 \end{figure}
 
-This continues repeatedly until one tree is created from the data set.
+This continues repeatedly until one tree is created from the data set as shown in Figure~\ref{fig:huffman_full_tree}.
 \par\vspace{\baselineskip}
 
 \begin{figure}
   \centering
   \includegraphics[scale=.75]{graphics/huffman_example_end.png}
-  \cite{huffman}
-  \caption{Complete Huffman Tree from priority queue  \copyright Daescu 2012, reprinted with permission}
+  \caption{Complete Huffman Tree from priority queue  \copyright Daescu 2012, reprinted with permission.\cite{huffman}}
+  \label{fig:huffman_full_tree}
 \end{figure}
 
 The last node in the queue contains the root to the Huffman tree. This Huffman tree
@@ -1394,28 +1394,26 @@ Figure~\ref{fig:huffman_prefix_table}.
 \begin{figure}
   \centering
   \includegraphics[scale=.67]{graphics/huffman_example_prefix_table}
-  \cite{huffman}
-  \caption{Prefix Code Table derived from Huffman Tree  \copyright Daescu 2012, reprinted with permission}
+  \caption{Prefix Code Table derived from Huffman Tree  \copyright Daescu 2012, reprinted with permission.\cite{huffman}}
   \label{fig:huffman_prefix_table}
 \end{figure}
 
 \par\vspace{\baselineskip}
-After the prefix table in Figure~\ref{huffman_prefix_table} is applied to the original data set the following result is the compressed
+After the prefix table in Figure~\ref{fig:huffman_prefix_table} is applied to the original data set the following result is the compressed
 data for this data set as shown in Figure~\ref{fig:huffman_compressed}.
 \par\vspace{\baselineskip}
 \begin{figure}
   \centering
   \includegraphics[scale=.75]{graphics/huffman_example_compressed_result}
-  \cite{huffman}
-  \caption{Prefix code representation of original data set.  \copyright Daescu 2012, reprinted with permission}
+  \caption{Prefix code representation of original data set.  \copyright Daescu 2012, reprinted with permission.\cite{huffman}}
   \label{fig:huffman_compressed}
 \end{figure}
 
 Considering that the original size of the set in ASCII would take 8*26 = 208 bits, when compared to
 the newly compressed data the new compressed data size is 73 bits.
 \par\vspace{\baselineskip}
-The unique prefix property must be maintain in order for the Huffman property to remain a valid prefix
-data symbol table. No code is a prefix to any other code in a system as described initially.
+The unique prefix property must be maintained in order for the Huffman property to remain a valid prefix
+data symbol table. No code is a prefix to any other code in a system as initially described.
 \par\vspace{\baselineskip}
 
 \subsubsection{LZ77/78}
@@ -1423,40 +1421,44 @@ LZ77/78 are two lossless data compression algorithms. LZ77 algorithms achieves c
 occurences of data with references to a single copy of that data existing earlier in the uncompressed
 data stream. Length-distance pair is a pair numbers that are used primarily for enconding matches. In order
 to spot matches the encoder tracks a small subset of data of the most recent data. This structure in which
-the most recent data is stored is called a sliding window. LZ77 also known as sliding window compression is
+the most recent data is stored is called a sliding window. LZ77, also known as sliding window compression, is
 a compression algorithm for sequential data compression. The sliding window consists of two parts, a search
 buffer and a look-ahead buffer. The search buffer contains a portion of recently encoded sequence data and
 the look-ahead buffer contains the next portion of data to be encoded.
 \par\vspace{\baselineskip}
+
 In order for the data in the look-ahead buffer to be encoded, the encoder searches back through the
 search buffer until it finds a match to the first symbol in the look-ahead buffer. This distance between
 the pointer from look-ahead is called the offset. Once a match is found for the first symbol then the encoder
 determines whether or not the symbol matches with the symbol from the look-ahead buffer. The number of
 consecutive symbols in the search buffer that match consecutive symbols in the look-ahead buffer is called
 the length of the match. Now the encode encodes this longest match symbol into a type of format of triple
-variable pair, (offset, length of match, codeword for symbol).
+variable pair: offset, length of match, and codeword for symbol. The full pseudo code for this compression 
+algorithm is found in Figure~\ref{fig:lz77_algo}.
 \par\vspace{\baselineskip}
-\begin{figure}
-  \centering
-  \cite{LZ77_78}
-  \includegraphics{graphics/LZ77_compression_code}
-  \cite{LZ77_78}
-  \caption{Psuedo Algorithm for encoding processes for look-ahead and search buffer \copyright Wikipedia 2015, reprinted with permission}
-\end{figure}
 
 \begin{figure}
   \centering
-  \includegraphics[scale=.5]{graphics/LZ77_example_window} \label{LZ77_example}
-  \cite{LZ77_78}
-  \caption{The format is more clearly defined with in this example. \copyright Wikipedia 2015, reprinted with permission}
+  \includegraphics{graphics/LZ77_compression_code}
+  \caption{Psuedo Algorithm for encoding processes for look-ahead and search buffer \copyright Wikipedia 2015, reprinted with permission.\cite{LZ77_78}}
+  \label{fig:lz77_algo}
 \end{figure}
+
 \newpage
 
 A clear limitation of LZ77 algorithm is that the window only can allocate enough memory for the dictionary. At
 larger window sizes performance begins to dwindle. A smaller window size also means that valuable dictionary data
 encoding is being toss away because they are removed from the dictionary to make room for the newly encoded data sets
-from the look-ahead buffer as since in figure \ref{LZ77_example}.
+from the look-ahead buffer as since in Figure~\ref{fig:lz77_format}.
 \par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=.7]{graphics/LZ77_example_window}
+  \caption{The format is more clearly defined with in this example. \copyright Wikipedia 2015, reprinted with permission.\cite{LZ77_78}}
+  \label{fig:lz77_format}
+\end{figure}
+
 Much like LZ77 the LZ78 lossless data compression algorithm replicates many of the LZ77 compression features however
 LZ78 attempts to address some of the more underlying problems with LZ77 such as a finite amount of memory for
 the dictionary. With LZ78, the dictionary is an unlimited collection of seen phrases. LZ78 schemes work by inputing
@@ -1467,13 +1469,13 @@ the same format as LZ77 as well as the encoder.
 
 \newpage
 
-\subsection{Dynamic Memory Allocation}
-{\bfseries Memory management in C++}
-\par\vspace{\baselineskip}
-Memory in a C++ program is dived into two parts, the stack and the heap. The stack contains all the 
+\subsection{Dynamic Memory Allocation in C++}
+Memory in a C++ program is dived into two parts, the stack and the heap, as shown in Figure~\ref{fig:cpp_mem_heirarchy}. The stack contains all the 
 variables declared inside the function and will take up memory from the stack. While the heap is responsible 
 for all unused memory of the program. This memory can be allocated dynamically when the program runs but 
 the program must also insure that this memory gets cleaned up after it is done with it.
+\par\vspace{\baselineskip}
+
 \begin{figure}
   \centering
   \includegraphics{graphics/c++_memory_heirarchy.png}
@@ -1493,25 +1495,11 @@ such as memory corruption. \cite{newerror}
 
 \begin{enumerate}
   \item {\bfseries Delete and free do not mix}:
-  The delete() operator works for the new operator but it causes undefined behavior when used 
-  on a piece of memory allocated via \inlinecode{malloc()}. If the \inlinecode{free()} function 
-  is used on an object allocated via new then the same thing occurs. When deallocating memory for 
-  new or malloc it is necessary to apply the correct functions to free up memory. This can usually 
-  occur when user-defined functions are applied instead of the Standard Template Library(STL), 
-  the standard library for  C++. This can vary from system to system but also from compiler 
-  to compiler. When the delete operation is called to delete the new object the compiler 
-  generates the following code seen in Figure~\ref{code:delete_free_no_mix}
-  \newline
-  \begin{figure}
-  \begin{lstlisting}[language=C++]
-// call the object's destructor
-ps->~string();
-
-// deallocate the memory used by the object
-operator delete(ps);
-  \end{lstlisting}
-  \label{code:delete_free_no_mix}
-  \end{figure}
+  The delete operator works for the new operator but it causes undefined behavior when used 
+  on a piece of memory allocated via \inlinecode{malloc()}. Using the \inlinecode{free()} function 
+  is used on an object allocated via new also results in undefined behavior. When deallocating memory for 
+  new or malloc it is necessary to apply the correct functions to free up memory. The alternative may or may not work
+  depending on how the implementation of C++ decided to handle that edge case.
   
   \item {\bfseries Placement new is extremely dangerous}:
   If a placement new is used to create an object in memory(e.g. \inlinecode{foo* f = new(place) foo();}) 
@@ -1524,15 +1512,15 @@ operator delete(ps);
   \item {\bfseries New operator}:
   There is a difference between the \inlinecode{new} operator and \inlinecode{operator new}. The new operator 
   is the default memory allocation function as defined by the standard library, while \inlinecode{operator new} 
-  is an overloaded version of the new operator. The default operator always work in the way specified by
+  is an overloaded version of the new operator. The default operator always works in the way specified by
   the standard and cannot be directly edited. That behavior is as follows:
   \begin{itemize}
    \item It allocates a block of memory that can house the provided class or data type
    \item If the given class or data type has a constructor, call it
   \end{itemize}
   In order to provide the programmer fine-grained control over the memory allocation process, C++
-  provides a way too overload the default new operator and use a custom memory allocator. This is referred to
-  as the operator new so as to differentiate it from the default new operator.
+  provides a way to overload the default new operator and use a custom memory allocator. This is referred to
+  as \inlinecode{operator new} so as to differentiate it from the default new operator.
   \par\vspace{\baselineskip}
   The memory returned by operator new cannot be guaranteed to be in any particular state as it is 
   defined by the programmer. As such, be wary of what assumptions you make in handling the memory
