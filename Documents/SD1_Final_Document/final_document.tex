@@ -2331,41 +2331,43 @@ hand both use distributed systems to achieve performance gains. MemSQL differs f
 VoltDB in a few ways, the most important being it's use of lock free data structures
 for storing data and its storing of pre-compiled commonly used queries\cite{MemSQL}.
 \par\vspace{\baselineskip}
-An sample overview of MemSQL architecture can be seen in Figure~\ref{fig:memsql_architecture}
-\begin{figure}
+An sample overview of MemSQL architecture can be seen in Figure~\ref{fig:memsql_architecture}.
+\begin{figure}[H]
   \centering
-  \label{fig:memsql_architecture}
   \textbf{MemSQL Two-tiered Architecture}
   \includegraphics[scale=.5]{graphics/memsql_dbms_architecture.png}
-  \caption{MemSQL Architecture \copyright memsql \cite{MemSQL}}
+  \caption{MemSQL Architecture \copyright MemSQL \cite{MemSQL}}
+  \label{fig:memsql_architecture}
 \end{figure}
-VoltDB tries to make its performance gains by what they call "Concurreny through
-scheduling"\cite{VoltDB}. This is the process of using a single-threaded pipeline
+
+VoltDB tries increase its performance by using a architecture they call \\ ``[c]oncurrency through
+scheduling''\cite{VoltDB}. This is the process of using a single-threaded pipeline
 that performs the task it was scheduled. This limits the need for locking during
 transactions by intelligently scheduling the transactions so that locks are not
 necessary.
 \par\vspace{\baselineskip}
-VoltDB's serialized processing architecture can be seen in Figure~\ref{fig:voltdb_serialized}
-\begin{figure}
+VoltDB's serialized processing architecture can be seen in Figure~\ref{fig:voltdb_serialized}.
+\begin{figure}[H]
   \centering
-  \label{fig:voltdb_serialized}
   \textbf{VoltDB Serialized Architecture}
   \includegraphics[scale=.5]{graphics/voltdb_serialized_architecture.png}
   \caption{VoltDB Serialized Processing \copyright VoltDB \cite{VoltDB}}
+  \label{fig:voltdb_serialized}
 \end{figure}
-\par\vspace{\baselineskip}
+
 OpenMemDB aims to take a different approach, one that is fully wait free. The goal is
 to use powerful wait free data structures that will allow for a massively parallel
 DBMS that can scale with the addition of processors and memory. It is our assumption
-that the achievement of a fully weight free DBMS will achieve the performance gains
+that the achievement of a fully wait free DBMS will achieve the performance gains
 that have been lacking in the DBMS world while eliminating the complexity of
-distributed systems, all while retaining full ACID compliance.
+distributed systems, all while retaining near-full ACID compliance.
+\par\vspace{\baselineskip}
 
 \subsubsection{Other Database Management Systems}
 The two DBMS systems listed above are far from the only ones that exist. They were
-researched more heavily because of there perceived similarities to our project and
+researched more heavily because of their perceived similarities to our project and
 because the documentation for them was thorough. However, there are numerous lesser
-known and less well documented DBMS that are worthy of note.
+known and less well documented DBMS that are worthy of note:
 
 \begin{itemize}
   \par\vspace{\baselineskip}
@@ -2380,12 +2382,12 @@ known and less well documented DBMS that are worthy of note.
   \cite{aerospike}
   \end{quote}
   \par\vspace{\baselineskip}
-  An illustration of Aerospikes architecture can be seen in Figure~\ref{fig:aerospike_architecture}
-  \begin{figure}
+  An illustration of Aerospikes architecture can be seen in Figure~\ref{fig:aerospike_architecture}.
+  \begin{figure}[H]
     \centering
-    \label{fig:aerospike_architecture}
     \includegraphics[scale=.25]{graphics/aerospike_dbms_architecture.png}
     \caption{Aerospike Architecture \copyright 2015 Aerospike, Inc. \cite{aerospike}}
+    \label{fig:aerospike_architecture}
   \end{figure}
   \cite{aerospike}
   \par\vspace{\baselineskip}
@@ -2409,12 +2411,12 @@ known and less well documented DBMS that are worthy of note.
   MPP operates by allowing the data warehouse to leverage multiple servers
   in a network cluster to process data simultaneously.
   \par\vspace{\baselineskip}
-  An example of dashDB's MPP architecture can be seen in Figure~\ref{fig:dashdb_mpp}
-  \begin{figure}
+  An example of dashDB's MPP architecture can be seen in Figure~\ref{fig:dashdb_mpp}.
+  \begin{figure}[H]
     \centering
-    \label{fig:dashdb_mpp}
     \includegraphics[scale=.45]{graphics/dashDB_mpp_architecture.png}
     \caption{Example of dashDB MPP Architecture \copyright 2015 dashDB \cite{dashDB}}
+    \label{fig:dashdb_mpp}
   \end{figure}
   \par\vspace{\baselineskip}
   Each server in this data warehouse utilizes a number of key technologies, including:
@@ -2442,12 +2444,12 @@ nable dashDB to maximize hardware performance.
   dashDB uses a highly parallelized infrastructure optimized for columnar data
   exchange that is organized as such:
   \par\vspace{\baselineskip}
-  A example of dasDB's query architecture can be seen in Figure~\ref{fig:dashdb_query}
+  A example of dasDB's query architecture can be seen in Figure~\ref{fig:dashdb_query}.
   \begin{figure}
  	\centering
- 	\label{fig:dashdb_query} 
  	\includegraphics[scale=.45]{graphics/dashDB_query_architecture.png}
 	\caption{Example of dashDB Query Architecture \copyright dashDB \cite{dashDB}}
+ 	\label{fig:dashdb_query} 
   \end{figure}
 \par\vspace{\baselineskip}
 \item eXtremeDB is the in-memory variant of the McObject family of data management projects.
@@ -2461,12 +2463,12 @@ nable dashDB to maximize hardware performance.
   transactions will complete together or the database will be rolled back to a
   pre-transaction state.\cite{extremeDB}
   \par\vspace{\baselineskip}
-  An illustration of extremeDB's architecture can be seen in Figure~\ref{fig:extremedb_architecture}
+  An illustration of extremeDB's architecture can be seen in Figure~\ref{fig:extremedb_architecture}.
   \begin{figure}
 	\centering
-	\label{fig:extremedb_architecture}  
 	\includegraphics[scale=.5]{graphics/extremeDB_dbms_architecture.jpg}
 	\caption{extremeDB architecture \copyright 2014 McObject LLC \cite{extremeDB}}
+	\label{fig:extremedb_architecture}  
   \end{figure}
   \par\vspace{\baselineskip}
 
@@ -2480,12 +2482,12 @@ nable dashDB to maximize hardware performance.
   smart buffering to ensure messages move from node to node faster than what
   traditional messaging would provide."\cite{gemfire}
   \par\vspace{\baselineskip}
-  An illustration of GemFire's peer architecture can be seen in Figure~\ref{fig:gemfire_peer}
+  An illustration of GemFire's peer architecture can be seen in Figure~\ref{fig:gemfire_peer}.
   \begin{figure}
   	\centering
-  	\label{fig:gemfire_peer}
   	\includegraphics[scale=.5]{graphics/gemfire_peer_architecture.png}
   	\caption{GemFire peer architecture \copyright GemStone Systems, Inc. 2006 \cite{gemfire}}
+  	\label{fig:gemfire_peer}
   \end{figure}
   \par\vspace{\baselineskip}
 
@@ -2548,11 +2550,11 @@ nable dashDB to maximize hardware performance.
   that slows disk backed database management systems.
   \par\vspace{\baselineskip}
   An example of a massively parallel layout can be seen in Figure~\ref{fig:saphana_architecture}
-  \begin{figure}
+  \begin{figure}[H]
 	\centering
-	\label{fig:saphana_architecture}	
 	\includegraphics[scale=.5]{graphics/sap_hana_dbms_architecture.png}
-    \caption{SAP HANA Massively Parallel Architecture \copyright 2015 SAP \citep{saphana}}
+	\caption{SAP HANA Massively Parallel Architecture \copyright 2015 SAP \citep{saphana}}
+	\label{fig:saphana_architecture}	
   \end{figure}
   \par\vspace{\baselineskip}
 \end{itemize}
@@ -2562,6 +2564,20 @@ nable dashDB to maximize hardware performance.
 \section{Design Summary}
 %% A summary describing the overall architecture should go here. Followed by subsections
 %% for each major piece.
+OpenMemDB is a SQL compliant database that utilizes advanced multiprocessor techniques and non-blocking
+data structures to offer high scalability and guaranteed high throughput. In order to accomplish this
+multiple components are necessary to meet the technical requirements of the project. OpenMemDB is 
+comprised of an application connector API, SQL Engine, Data Store, and Work Manager.
+It is necessary for the client to be able to communicate with the database through the connector, 
+dubbed libomdb. On the server since the client is using SQL in order to provide
+statements to the database a SQL Engine is necessary to correctly and efficently parse
+such statements into a type of representation that the database can then understand and evaluate.
+It is also important that certain statements be distributed in an organized manner. More specifically, 
+the Work Manager will be responsible for distributing the system's workload among its pool of worker threads. 
+The Data Store will be responsible for the efficient storage and retrieval of the data inserted and requested 
+from clients via SQL statements.
+\par\vspace{\baselineskip}
+
   \subsection{libomdb: The Connection API}
   With any database management system it is common to provide an easy way to connect
   to a specific database, and to execute commands that act on that database. The most common
@@ -2573,6 +2589,7 @@ nable dashDB to maximize hardware performance.
   connect to a specific database and to execute all of the supported SQL operations on
   that database.
   \par\vspace{\baselineskip}
+  
   libomdb is broken in to two main operations: connecting to a database, and performing
   operations on the database that you are connected to. In order to connect to the database
   the application developer will call the
@@ -2584,7 +2601,7 @@ nable dashDB to maximize hardware performance.
   The high-level design of the classes used in libomdb can be seen in Figure~\ref{fig:lib_class}
   and shows the relationship between them.
 
-  \begin{figure}
+  \begin{figure}[H]
     \centering
     \textbf{Overall libomdb Class Architecture}
     \includegraphics[scale=.5]{graphics/libomdb_Class.png}
@@ -2628,7 +2645,7 @@ nable dashDB to maximize hardware performance.
   \par\vspace{\baselineskip}
   
   A sample of how to query for data and cycle through the results is shown in Figure~\ref{code:lib_query_cycle}.
-  \begin{figure}
+  \begin{figure}[H]
   \begin{lstlisting}[language=C++]
 Connection conn = Connection.connect("localhost", 3310, "users");
 
@@ -2646,19 +2663,19 @@ while (result.next()) {
   \label{code:lib_query_cycle}
   \caption{Querying and cycling through results in libomdb}
   \end{figure}
-  \par\vspace{\baselineskip}
+  
   The high-level sequence diagram of querying data in libomdb is shown in Figure~\ref{fig:lib_query_activity}
   and details the various steps in communicating to the server and then returning it to the
   caller.
+  \par\vspace{\baselineskip}
 
-  \begin{figure}
+  \begin{figure}[H]
     \centering
     \textbf{Sequence Diagram for Querying Data}
     \includegraphics[scale=.5]{graphics/libomdb_query_activity.png}
     \caption{Querying Database Sequence Diagram}
     \label{fig:lib_query_activity}
   \end{figure}
-  \par\vspace{\baselineskip}
 
   An update command can be executed in much the same way as a query. First
   a connection needs to be established to the desired database using the
@@ -2672,7 +2689,9 @@ while (result.next()) {
   \par\vspace{\baselineskip}
   An example of executing a command against a database in libomdb would be something similar
   to Figure~\ref{code:lib_cmd_exec}.
-  \begin{figure}
+  \par\vspace{\baselineskip}
+  
+  \begin{figure}[H]
   \begin{lstlisting}[language=C++]
 Connection conn = Connection.connect("localhost", 3310, "users");
 
@@ -2689,12 +2708,13 @@ if (result.isSuccess) {
  
   \par\vspace{\baselineskip}
   The sequence diagram of executing a command with libomdb is shown Figure~\ref{fig:libomdb_command_sequence}.
-  \begin{figure}
+  
+  \begin{figure}[H]
     \centering
-    \label{fig:libomdb_command_sequence}
     \textbf{Sequence Diagram for Executing Command}
     \includegraphics[scale=.5]{graphics/libomdb_command_activity.png}
     \caption{Executing Command Sequence Diagram}
+    \label{fig:libomdb_command_sequence}
   \end{figure}
 
   \par\vspace{\baselineskip}
@@ -2775,12 +2795,12 @@ if (result.isSuccess) {
   \par\vspace{\baselineskip}
   A detailed description of the methods contained in the \inlinecode{Result} class 
   can be found in Figure~\ref{fig:result_methods}.
-  \begin{figure}
+  \begin{figure}[H]
     \centering
-    \label{fig:result_methods}
     \textbf{Result Class Layout}
     \includegraphics{graphics/libomdb_result_layout.png}
     \caption{Result Layout}
+    \label{fig:result_methods}
   \end{figure}
   \par\vspace{\baselineskip}
   A quick overview of the the \inlinecode{ResultMetaData} class is necessary to fully understand 
@@ -2808,12 +2828,12 @@ if (result.isSuccess) {
   \par\vspace{\baselineskip}
   A detailed description of the methods contained in the \inlinecode{ResultMetaData}
   class can be found in Figure~\ref{fig:reultmetadata_methods}
-  \begin{figure}
-    \label{fig:reultmetadata_methods}
+  \begin{figure}[H]
     \centering
     \textbf{ResultMetaData Class Layout}
     \includegraphics[scale=.75]{graphics/libomdb_resultmetadata_layout.png}
     \caption{ResultMetaData Layout}
+    \label{fig:reultmetadata_methods}
   \end{figure}
 
   %% Starting here, talk about the use of boost::variant.
@@ -2837,7 +2857,7 @@ if (result.isSuccess) {
   \inlinecode{new} or \inlinecode{malloc}). A visualization of the memory layout of the system
   when using OpenMemDB can be found in Figure~\ref{fig:cpp_mem_model}.
   \par\vspace{\baselineskip}
-  \begin{figure}
+  \begin{figure}[H]
    \centering
    % C++ memory model diagram
     \textbf{C++ Memory Model}
@@ -2867,7 +2887,7 @@ if (result.isSuccess) {
   that OpenMemDB will not be supporting, require a full-featured solver that may not be able to progress 
   in a way that can be called wait-free.
   \par\vspace{\baselineskip}
-  \begin{figure}
+  \begin{figure}[H]
    \centering
    % SQL Engine generation of predicate tree activity diagram
    \textbf{Predicate Tree Generation}
@@ -2914,8 +2934,7 @@ if (result.isSuccess) {
   \par\vspace{\baselineskip}
   The freestanding functions mentioned above abstract away the process of listening to a port
   and accepting a connection. They are defined as shown in Figure~\ref{code:work_manager_func_def}.
-  \begin{figure}
-  \label{code:work_manager_func_def}
+  \begin{figure}[H]
   \begin{lstlisting}[language=C++]
 omdb::NetworkStatus omdb::ListenToPort(uint16_t port_id,
 				       uint32_t* socket_fd,
@@ -2925,6 +2944,8 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
 					   uint32_t* conn_fd,
 					   sockaddr_storage* conn_addr)
   \end{lstlisting}
+  \caption{Work Manager network function definitions}
+  \label{code:work_manager_func_def}
   \end{figure}
   The \inlinecode{omdb::NetworkStatus} datatype is used to return various
   possible error conditions and is internally used to classify whether the error is fatal
@@ -2953,8 +2974,7 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
   to be non-blocking when checking for a return value is currently clunky as shown in Figure~\ref{code:clunk_future}.
   \par\vspace{\baselineskip}
   
-  \begin{figure}
-  \label{code:clunk_future}
+  \begin{figure}[H]
   \begin{lstlisting}[language=C++]
 [&results] (std::future<Result>& res) -> bool
 {
@@ -2973,6 +2993,7 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
   \end{lstlisting}
   
   \caption{Example code to poll for a result from a future}
+  \label{code:clunk_future}
   \end{figure}
   
   However, it does function in a way that is suitable for our needs. Thankfully the rest of the thread
@@ -3005,24 +3026,24 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
   The UML diagram for the design of the few Work Manager classes is shown in Figure~\ref{fig:work_manager_class}
   and shows the relationships between the different classes.
   
-  \begin{figure}
+  \begin{figure}[H]
    \centering
    % WorkManager class diagram
-   \label{fig:work_manager_class}
    \textbf{WorkManager Module Class Diagram}
    \includegraphics[scale=.80]{graphics/WorkManager_class.png}
    \caption{The class diagram of the main WorkManager class within OpenMemDB's Work Manager module}
+   \label{fig:work_manager_class}
   \end{figure}
 
   The flow of data from the client to the database and from there to the worker threads
   is shown in Figure~\ref{fig:work_manager_activity}
-  \begin{figure}
+  \begin{figure}[H]
    \centering
    % Data flow diagram (client -> wrk_mgr.assign_job)
-   \label{fig:work_manager_activity}
    \textbf{Data Flow from Client to SQL Engine}
    \includegraphics[scale=.8]{graphics/WorkManager_activity.png}
    \caption{Shows the flow of data from a client to the worker threads within OpenMemDB}
+   \label{fig:work_manager_activity}
   \end{figure}
 
 \newpage
