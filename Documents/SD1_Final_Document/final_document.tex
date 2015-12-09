@@ -9,7 +9,7 @@
 \usepackage{listings}
 \usepackage{color}
 \usepackage[square,sort,comma,numbers]{natbib}
-\usepackage{mathtools}
+%\usepackage{mathtools}
 
 % Temporarily ignore graphics
 % \renewcommand{\includegraphics}[2][]{\fbox{}}
@@ -18,19 +18,23 @@
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codered}{rgb}{0.6,0,0}
+\definecolor{codegrey}{gray}{0.9}
 
-\lstdefinestyle{omdb_cpp}{
+\lstdefinestyle{omdb_code}{
 keepspaces=true,
 showspaces=false,
 showstringspaces=false,
 showtabs=false,
 tabsize=2,
 basicstyle=\footnotesize,
+backgroundcolor=\color{codegrey},
 commentstyle=\color{codegreen},
 keywordstyle=\color{blue},
 stringstyle=\color{codered}
 }
-\lstset{style=omdb_cpp}
+\lstset{style=omdb_code}
+
+\newcommand{\inlinecode}[1]{\colorbox{codegrey}{\lstinline[language=C++]{#1}}}
 
 \title{Non-Blocking In-Memory Database\thanks{Sponsor: Dr. Damian Dechev}}
 \author{Michael McGee, Robert Medina, Neil Moore, Jason Stavrinaky\\[1ex]
@@ -382,11 +386,14 @@ by the database manager. The relational model is a combination of three
 components, such as Structural, Integrity, and Manipulative parts."
 \cite{sumathi2007fundamentals}
 \end{quote}
+\par\vspace{\baselineskip}
+An example of an RDBMS structure can be seen in Figure~\ref{fig:RDBMS_structure}
 \begin{figure}
   \centering
+  \label{fig:RDBMS_structure}
   \textbf{Relational DBMS Structure}
   \includegraphics[scale=.5]{graphics/dbms_RDBMS_structure.png}
-  \caption{Represents a disk based RDBMS}
+  \caption{Represents a disk based RDBMS. Printed with permission \cite{wikiRDBMS}}
 \end{figure}
 The three components can be further broken down.
 \par\vspace{\baselineskip}
@@ -478,10 +485,13 @@ The hierarchical database model is typically used for large amounts of data that
 unlikely to change. It is recognized as the first database model used by IBM in
 the 1960s.\cite{hierarchical_dbms_techopedia}
 \par\vspace{\baselineskip}
+
+An example of a Hierarchical DBMS structure can be seen in Figure~\ref{fig:hierarchicalDBMS_structure}
 \begin{figure}
   \centering
+  \label{fig:hierarchicalDBMS_structure}
   \includegraphics[scale=.5]{graphics/dbms_RDBMS_structure.png}
-  \caption{Example structure for hierarchical database}
+  \caption{Example structure for hierarchical database. This work is in the public domain in the United States because it is a work prepared by an officer or employee of the United States Government as part of that person’s official duties \cite{wikiHierarchicalDBMS}}
 \end{figure}
 
 \subsubsection{Network}
@@ -491,13 +501,14 @@ model does not limit itself to having every child have only one parent. In the n
 model all children can have multiple parents, and obviously parents can have multiple
 children. The network model also consists of items called "records" that which is a
 collection of data items. Each data item has a name and a value.
-
+\par\vspace{\baselineskip}
+An example of a network model record can be seen in Figure~\ref{fig:networkDBMS_record}
 \begin{figure}
   \centering
+  \label{fig:networkDBMS_record}
   \textbf{Network model record example}
   \includegraphics{graphics/dbms_network_model_record.png}
-  \caption{Example of network model record}
-  \cite{network_model_coronet}
+  \caption{Example of network model record. \copyright H.Maurer and N.Scherbakov. Reprinted with permission  \cite{network_model_coronet}}
 \end{figure}
 
 Each record can have it's own grouping within by grouping two or more elementary items.
@@ -506,12 +517,13 @@ under one data item.
 \par\vspace{\baselineskip}
 The data within the network model consists of two main parts: data objects, and
 relationships.
-
+\par\vspace{\baselineskip}
+An example of network model structure can be seen in Figure~\ref{fig:networkDBMS_structure}
 \begin{figure}
   \centering
+  \label{fig:networkDBMS_structure}
   \includegraphics{graphics/dbms_network_data.png}
-  \caption{Network information model}
-  \cite{network_model_coronet}
+  \caption{Network information model. \copyright H.Maurer and N.Scherbakov. Reprinted with permission \cite{network_model_coronet}}
 \end{figure}
 
 Relationships between records can be implemented by using logical constructions.
@@ -523,11 +535,13 @@ and a child. The "Data Set" has the following properties:
   \item Each set may include 0 (i.e. an Empty set occurrence), 1 or N records of the same type. These records are called members of the data set.
   \item All members within one set occurrence have a fixed order (are sorted).
 \end{itemize}
-
+\par\vspace{\baselineskip}
+An example of a network model relationship can be seen in Figure~\ref{fig:networkDBMS_relationship}
 \begin{figure}
   \centering
+  \label{fig:networkDBMS_relationship}
   \includegraphics{graphics/dbms_network_model_relationship.png}
-  \caption{Example of network model relationship}
+  \caption{Example of network model relationship \copyright H.Maurer and N.Scherbakov. Reprinted with permission \cite{network_model_coronet}}
 \end{figure}
 
 The basic setup of a network model is therefore a collection of record occurrences and
@@ -558,11 +572,13 @@ by that operation. The object can respond to the message in a number of ways, bu
 typically by returning some (other) object back to the message sender and/or causing
 some observable change (eg. in a graphical user interface).
 \end{itemize} \cite{object_oriented_data_model}
-
+\par\vspace{\baselineskip}
+An example of an object oriented DBMS model can be seen on Figure~\ref{fig:ooDBMS_structure}
 \begin{figure}
   \centering
+  \label{fig:ooDBMS_structure}
   \includegraphics[scale=.5]{graphics/dbms_oodbms_example.png}
-  \caption{An example of an object-oriented model}
+  \caption{An example of an object-oriented model. Public Domain \cite{wikiObjectOrientedDBMS}}
 \end{figure}
 
 \subsubsection{NoSQL}
@@ -619,13 +635,14 @@ Hence, I can’t be bound by the
 structure of a RDBMS and need something
 more flexible"
 \end{quote} \cite{stonebraker2010sql}
-
+\par\vspace{\baselineskip}
+An example of a NoSQL architecture can be seen in Figure~\ref{fig:nosqlDBMS_structure}
 \begin{figure}
   \centering
+  \label{fig:nosqlDBMS_structure}
   \textbf{Example NoSQL Architecture}
   \includegraphics[scale=.4]{graphics/dbms_nosql_mongo_architecture.jpg}
-  \caption{Example NoSQL Architecture}
-  \citep{mongodb_architecture}
+  \caption{Example NoSQL Architecture \copyright mongoDB   \citep{mongodb_architecture}}
 \end{figure}
 
 \subsubsection{NewSQL}
@@ -645,12 +662,14 @@ scale horizontally and effectively by adding more servers into the resource pool
 though there have been attempts to scale relational databases horizontally, on the contrary,
 RDBs are designed to scale vertically by means of adding more power to a single existing
 server"\cite{grolinger2013data}
-
+\par\vspace{\baselineskip}
+The scalability of different data stores can be seen in Figure~\ref{fig:nosql_scalability}
 \begin{figure}
   \centering
+  \label{fig:nosql_scalability}
   \textbf{Partitioning, replication, consistency, and concurrency control capabilities}
   \includegraphics[scale=.4]{graphics/nosql_newsql_scalability_table.png}
-  \caption{NoSQL and NewSQL Data Modeling}
+  \caption{NoSQL and NewSQL Data Modeling \copyright 2013 Grolinger et al. \cite{grolinger2013data}}
 \end{figure}
 
 \newpage
@@ -667,16 +686,16 @@ within the DBMS. Specifically, it is the:
 
 Work distribution between threads is done via a task-queue that each thread in the
 thread pool pulls work from. Tasks are C++11 lambda functions that are packaged up
-via the standard library's \lstinline|std::packaged_task<>|
+via the standard library's \inlinecode{std::packaged_task<>}
  class.
-This class provides an interface that allows us to generate a \lstinline|std::future<>|
+This class provides an interface that allows us to generate a \inlinecode|std::future<>|
 object that is a thread-safe interface to a thread's return value. The bulk of the
 ideas behind this thread pool were found online \cite{stackoverflow1} though we substituted
-the command queue, that was initially implemented using a \lstinline|std::mutex|
-and \lstinline|std::queue<>|, with a Tervel queue that allows
+the command queue, that was initially implemented using a \inlinecode{std::mutex}
+and \inlinecode{std::queue<>}, with a Tervel queue that allows
 non-blocking and wait-free access and insertion into the command queue.
 \par\vspace{\baselineskip}
-The reference used mutual exclusion objects such as \lstinline|std::mutex|
+The reference used mutual exclusion objects such as \inlinecode{std::mutex}
 which is contrary to our goal of a fully non-blocking and wait-free system. Using the Tervel
 queue as detailed above allows us to remain non-blocking and wait-free as long as Tervel
 is also considered non-blocking and wait-free. While the implementation uses condition variables,
@@ -1839,7 +1858,7 @@ One of the most important pieces of a Database Management System is the SQL Engi
 This component is responsible for receiving commands written in the standard query
 language and transforming those commands into an internal representation that can be
 executed by the DBMS. The SQL Engine often consists of three pieces: the tokenizer, the
-parser, and the code generator.
+parser, code generator/query planner, and the query executor.
 
 \begin{figure}
   \centering
@@ -2250,62 +2269,67 @@ nable dashDB to maximize hardware performance.
   way to provide this connectivity is to support either ODBC or JDBC. However, the work
   required to be an ODBC or JDBC compliant database is considerable, and given that it is
   not one of the requirements of our project we will not be going down that road. We have
-  decided in stead to design our own connection library, which we are calling
-  "libombd". libomdb will provide all of the absolutely necessary components needed to
+  decided instead to design our own connection library, which we are calling
+  ``libomdb``. libomdb will provide all of the absolutely necessary components needed to
   connect to a specific database and to execute all of the supported SQL operations on
   that database.
   \par\vspace{\baselineskip}
   libomdb is broken in to two main operations: connecting to a database, and performing
   operations on the database that you are connected to. In order to connect to the database
   the application developer will call the
-  \lstinline[basicstyle=\ttfamily]|connect()| method that is provided by the libomdb API.
-  This method will return a \lstinline[basicstyle=\ttfamily]|Connection| object that can
+  \inlinecode{connect()} method that is provided by the libomdb API.
+  This method will return a \inlinecode{Connection} object that can
   then be used to execute queries or commands to the database that was connected to.
   \par\vspace{\baselineskip}
+  
+  The high-level design of the classes used in libomdb can be seen in Figure~\ref{fig:lib_class}
+  and shows the relationship between them.
 
   \begin{figure}
     \centering
     \textbf{Overall libomdb Class Architecture}
     \includegraphics[scale=.5]{graphics/libomdb_Class.png}
     \caption{libomdb Class Diagram}
+    \label{fig:lib_class}
   \end{figure}
 
   In order to connect to a database the application developer must provide the
   host-name of the server, the port the server is listening on, and the name of the
   database that is being connected to. These are provided as arguments to the
-  \lstinline[basicstyle=\ttfamily]|connect(host-name, port-number, database-name)|
+  \inlinecode{connect(host-name, port-number, database-name)}
   method.
   \par\vspace{\baselineskip}
   The connection object returned to the application developer after making this method
   call represents a connection to only the database that was passed in the call. If the
   application developer needs a connection to another database, they must create a new
   connection object through a separate
-  \lstinline[basicstyle=\ttfamily]|connect()| call.
+  \inlinecode{connect()} call.
   \par\vspace{\baselineskip}
   Once the connection is established, the returned connection object is then used for all
   operations on the database. Queries can be made against the database by calling
-  the \lstinline[basicstyle=\ttfamily]|executeQuery( query )|
-  method. This will return a \lstinline[basicstyle=\ttfamily]|Result| object, which can
+  the \inlinecode{executeQuery( query )}
+  method. This will return a \inlinecode{Result} object, which can
   then be used to access the results of the query. Accessing the results of the query
-  through a \lstinline[basicstyle=\ttfamily]|Result| object is simple and can be done by
+  through a \inlinecode{Result} object is simple and can be done by
   by cycling through the rows in the
-  \lstinline[basicstyle=\ttfamily]|Result| and accessing the data at the column that
-  is desired. Contained in the \lstinline[basicstyle=\ttfamily]|Result| object is a
-  \lstinline[basicstyle=\ttfamily]|ResultMetaData| object than can be used to obtain
-  information about the \lstinline[basicstyle=\ttfamily]|Result| that was returned.
-  The \lstinline[basicstyle=\ttfamily]|ResultMetaData| object corresponding to the
-  \lstinline[basicstyle=\ttfamily]|Result| object is obtained by calling the
-  \lstinline[basicstyle=\ttfamily]|getMetaData()| method and contains
+  \inlinecode{Result} and accessing the data at the column that
+  is desired. Contained in the \inlinecode{Result} object is a
+  \inlinecode{ResultMetaData} object than can be used to obtain
+  information about the \inlinecode{Result} that was returned.
+  The \inlinecode{ResultMetaData} object corresponding to the
+  \inlinecode{Result} object is obtained by calling the
+  \inlinecode{getMetaData()} method and contains
   methods for accessing the number of columns in the
-  \lstinline[basicstyle=\ttfamily]|Result| through the
-  \lstinline[basicstyle=\ttfamily]|getColumnCount()| method, the
+  \inlinecode{Result} through the
+  \inlinecode{getColumnCount()} method, the
   label of a specific column through the
-  \lstinline[basicstyle=\ttfamily]|getColumnLabel( index )|,
+  \inlinecode{getColumnLabel( index )},
   and the data type of a specific column with the
-  \lstinline[basicstyle=\ttfamily]|getColumnType( index )| method.
+  \inlinecode{getColumnType( index )} method.
   \par\vspace{\baselineskip}
-  A sample of how to query for data and cycle through the results is:
-
+  
+  A sample of how to query for data and cycle through the results is shown in Figure~\ref{code:lib_query_cycle}.
+  \begin{figure}
   \begin{lstlisting}[language=C++]
 Connection conn = Connection.connect("localhost", 3310, "users");
 
@@ -2320,27 +2344,36 @@ while (result.next()) {
   }
 }
   \end{lstlisting}
+  \label{code:lib_query_cycle}
+  \caption{Querying and cycling through results in libomdb}
+  \end{figure}
   \par\vspace{\baselineskip}
+  The high-level sequence diagram of querying data in libomdb is shown in Figure~\ref{fig:lib_query_activity}
+  and details the various steps in communicating to the server and then returning it to the
+  caller.
 
   \begin{figure}
     \centering
     \textbf{Sequence Diagram for Querying Data}
     \includegraphics[scale=.5]{graphics/libomdb_query_activity.png}
     \caption{Querying Database Sequence Diagram}
+    \label{fig:lib_query_activity}
   \end{figure}
   \par\vspace{\baselineskip}
 
   An update command can be executed in much the same way as a query. First
   a connection needs to be established to the desired database using the
-  \lstinline|Connection.connect()| method. Then the desired non-query
-  command is executed using the \lstinline|executeCommand( command )| method.
-  A \lstinline|CommandResult| will be returned from this call,
+  \inlinecode{Connection.connect()} method. Then the desired non-query
+  command is executed using the \inlinecode{executeCommand( command )} method.
+  A \inlinecode{CommandResult} will be returned from this call,
   which is a struct that has two fields: a boolean field,
-  \lstinline|isSuccess|, and an integer field,
-  \lstinline|numAffected|, which represents the number of rows
+  \inlinecode{isSuccess}, and an integer field,
+  \inlinecode{numAffected}, which represents the number of rows
   that were effected by the command.
   \par\vspace{\baselineskip}
-  An example of a command executed against a database would be something like this:
+  An example of executing a command against a database in libomdb would be something similar
+  to Figure~\ref{code:lib_cmd_exec}.
+  \begin{figure}
   \begin{lstlisting}[language=C++]
 Connection conn = Connection.connect("localhost", 3310, "users");
 
@@ -2351,6 +2384,9 @@ if (result.isSuccess) {
   cout << "Rows affected: " << result.numAffected;
 }
   \end{lstlisting}
+  \label{code:lib_cmd_exec}
+  \caption{Code snippet showing how to execute a command using libomdb}
+  \end{figure}
 
   \begin{figure}
     \centering
@@ -2363,45 +2399,45 @@ if (result.isSuccess) {
 
   \subsubsection{Design}
   There are two main classes used in the libomdb library:  \\
-  \lstinline|Connection| and \lstinline|Result|. The uses of these classes
-  are obvious. \lstinline|Connection| is used to represent a connection to
-  a specific database and \lstinline|Result| is used to hold the results of a
+  \inlinecode{Connection} and \inlinecode{Result}. The uses of these classes
+  are obvious. \inlinecode{Connection} is used to represent a connection to
+  a specific database and \inlinecode{Result} is used to hold the results of a
   query against the connected database.
 
   \par\vspace{\baselineskip}
-  The \lstinline|Connection| class is made up of two private
-  member fields \lstinline|m_socket_fd| and
-  \lstinline|m_metaData|.
-  \lstinline|m_socket_fd| is the the socket file descriptor that is
+  The \inlinecode{Connection} class is made up of two private
+  member fields \inlinecode{m_socket_fd} and
+  \inlinecode{m_metaData}.
+  \inlinecode{m_socket_fd} is the the socket file descriptor that is
   used to communicate with the server hosting the database.
-  \lstinline|m_metaData| is the related
-  \lstinline|ConnectionMetaData| object that contains some
+  \inlinecode{m_metaData} is the related
+  \inlinecode{ConnectionMetaData} object that contains some
   information about the connection represented by the
-  \lstinline|Connection| object. Some of the information contained
-  in this \lstinline|ConnectionMetaData| object are
-  the name of the database that the \lstinline|Connection| object
+  \inlinecode{Connection} object. Some of the information contained
+  in this \inlinecode{ConnectionMetaData} object are
+  the name of the database that the \inlinecode{Connection} object
   is connected to, and whether or not the connection is still active. The
-  \lstinline|Connection| class also contains three public
+  \inlinecode{Connection} class also contains three public
   instance methods and two public static methods. The instance methods are:
   \begin{itemize}
-    \item \lstinline|executeCommand( string command ): CommandResult|
-    \item \lstinline|executeQuery( string query ): Result|
-    \item \lstinline|getMetaData(): ConnectionMetaData|
+    \item \inlinecode{executeCommand( string command ): CommandResult}
+    \item \inlinecode{executeQuery( string query ): Result}
+    \item \inlinecode{getMetaData(): ConnectionMetaData}
   \end{itemize}
-  The static methods contained in the \lstinline|Connection| class
+  The static methods contained in the \inlinecode{Connection} class
   are:
   \begin{itemize}
-  	\item \lstinline|Connection.connect(string hostname, uint16_t port, string db): Connection|
-  	\item \lstinline|Connection.disconnect(Connection connection)|
+  	\item \inlinecode{Connection.connect(string hostname, uint16_t port, string db): Connection}
+  	\item \inlinecode{Connection.disconnect(Connection connection)}
   \end{itemize}
-  As has been seen a number of times the \lstinline|connect()|
+  As has been seen a number of times the \inlinecode{connect()}
   static method is used  to establish a connection to a database, and the
-  \lstinline|disconnect()| method is used to terminate a connection.
-  \lstinline|executeCommand()| in reality just sends a string of
+  \inlinecode{disconnect()} method is used to terminate a connection.
+  \inlinecode{executeCommand()} in reality just sends a string of
   text to across the socket connection represented by the
-  \lstinline|Connection| object's
-  \lstinline|m_socket_fd| to the database server where it will be
-  parsed and executed. The \lstinline|executeQuery()| command
+  \inlinecode{Connection} object's
+  \inlinecode{m_socket_fd} to the database server where it will be
+  parsed and executed. The \inlinecode{executeQuery()} command
   does nearly the exact same thing but will receive a different data structure from the
   database in return.
 
@@ -2415,36 +2451,36 @@ if (result.isSuccess) {
 
   The \lstinline[basicstyle=\ttfamily]|Result| class is made up of two private members:
   \begin{itemize}
-    \item \lstinline|m_rows|
-    \item \lstinline|m_metaData|
+    \item \inlinecode{m_rows}
+    \item \inlinecode{m_metaData}
   \end{itemize}
-  \lstinline|m_rows| is a
-  \lstinline|vector<ResultRow>|,
-  \lstinline|ResultRow| is a typedef for
-  a \lstinline|vector<DataValue>|, and
-  \lstinline|DataValue| is a typedef for
-  \lstinline|boost::variant<>|.
-  So with all typedefs removed \lstinline|m_rows| is
+  \inlinecode{m_rows} is a
+  \inlinecode{vector<ResultRow>},
+  \inlinecode{ResultRow} is a typedef for
+  a \inlinecode{vector<DataValue>}, and
+  \inlinecode{DataValue} is a typedef for
+  \inlinecode{boost::variant<>}.
+  So with all typedefs removed \inlinecode{m_rows} is
   actually a
-  \lstinline|vector<vector<boost:variant<> > >|.
+  \inlinecode{vector<vector<boost:variant<> > >}.
 
-  \lstinline|m_metaData| is the
-  \lstinline|ResultMetaData| object that describes the
-  \lstinline|Result| object. The contents of the
-  \lstinline|ResultMetaData| class will be covered later.
+  \inlinecode{m_metaData} is the
+  \inlinecode{ResultMetaData} object that describes the
+  \inlinecode{Result} object. The contents of the
+  \inlinecode{ResultMetaData} class will be covered later.
   \par\vspace{\baselineskip}
   The \lstinline[basicstyle=\ttfamily]|Result| class also contains thee instance methods:
   \begin{itemize}
-    \item \lstinline|getMetaData(): ResultMetaData|
-    \item \lstinline|getValue(int index): DataValue|
-    \item \lstinline|next(): bool|
+    \item \inlinecode{getMetaData(): ResultMetaData}
+    \item \inlinecode{getValue(int index): DataValue}
+    \item \inlinecode{next(): bool}
   \end{itemize}
-  \lstinline|getMetaData()| is used to obtain the meta-data
+  \inlinecode{getMetaData()} is used to obtain the meta-data
   information about the \lstinline[basicstyle=\ttfamily]|Result|.
-  \lstinline|getValue( index )| will return the
-  \lstinline|DataValue| of the column at the specified index.
-  \lstinline|next()| moves the
-  \lstinline|Result| forward one row, if there are still rows
+  \inlinecode{getValue( index )} will return the
+  \inlinecode{DataValue} of the column at the specified index.
+  \inlinecode{next()} moves the
+  \inlinecode{Result} forward one row, if there are still rows
   remaining in the \lstinline[basicstyle=\ttfamily]|Result|. If there is not, it does
   nothing and returns \lstinline[basicstyle=\ttfamily]|false|.
 
@@ -2455,32 +2491,32 @@ if (result.isSuccess) {
     \caption{Result Layout}
   \end{figure}
   \par\vspace{\baselineskip}
-  A quick overview of the the \lstinline|ResultMetaData| class
+  A quick overview of the the \inlinecode{ResultMetaData} class
   is necessary to fully understand the how the
-  \lstinline|Result| class is meant to work.
-  The \lstinline|ResultMetaData| class contains only one
+  \inlinecode{Result} class is meant to work.
+  The \inlinecode{ResultMetaData} class contains only one
   private member, which is
-  \lstinline|m_data|, a
-  \lstinline|vector<MetaDataColumn>|.
-  \lstinline|MetaDataColumn| is a struct that contains two fields:
-  a \lstinline|string name| and a
-  \lstinline|SQL_TYPE type|. \lstinline|name|
-  is the name of the column and \lstinline|type| is the
-  \lstinline|SQL_TYPE| of the column, i.e. "VARCHAR", "DATE", etc.
+  \inlinecode{m_data}, a
+  \inlinecode{vector<MetaDataColumn>}.
+  \inlinecode{MetaDataColumn} is a struct that contains two fields:
+  a \inlinecode{string name} and a
+  \inlinecode{SQL_TYPE type}. \inlinecode{name}
+  is the name of the column and \inlinecode{type} is the
+  \inlinecode{SQL_TYPE} of the column, i.e. "VARCHAR", "DATE", etc.
   \par\vspace{\baselineskip}
-  The \lstinline|ResultMetaData| class also has
+  The \inlinecode{ResultMetaData} class also has
   three instance methods available:
   \begin{itemize}
-    \item \lstinline|getColumnCount(): uint32_t|
-    \item \lstinline|getColumnLabel(int index): string|
-    \item \lstinline|getColumnType(int index): SQL_TYPE|
+    \item \inlinecode{getColumnCount(): uint32_t}
+    \item \inlinecode{getColumnLabel(int index): string}
+    \item \inlinecode{getColumnType(int index): SQL_TYPE}
   \end{itemize}
 
-  \lstinline|getColumnCount()| returns the number of
+  \inlinecode{getColumnCount()} returns the number of
   columns contained in the \lstinline[basicstyle=\ttfamily]|Result|.
-  \lstinline|getColumnLabel(index)| returns the label of the
+  \inlinecode{getColumnLabel(index)} returns the label of the
   column at the passed in index, and
-  \lstinline|getColumnType(index)| returns the type of data that
+  \inlinecode{getColumnType(index)} returns the type of data that
   is stored in the column specified by index.
 
   \begin{figure}
@@ -2503,12 +2539,13 @@ if (result.isSuccess) {
   ensure that the various threads do not interact in ways that would require synchronization.
   \par\vspace{\baselineskip}
   One of those ways is utilizing a feature in the C++ memory model that was introduced in C++11, specifically
-  the \lstinline|thread_local| storage specifier. That specifier instructs the compiler
+  the \inlinecode{thread_local} storage specifier. That specifier instructs the compiler
   to create a copy of each variable for each individual thread, and ties that variable's lifetime
   to the lifetime of the thread. While not used extensively, this feature removes the guesswork
-  of whether a variable is safe to be made \lstinline|static| or whether a copy
+  of whether a variable is safe to be made \inlinecode{static} or whether a copy
   would need to be made in each thread's initialization routine via dynamic memory (e.g.
-  \lstinline|new| or \lstinline|malloc|).
+  \inlinecode{new} or \inlinecode{malloc}). A visualization of the memory layout of the system
+  when using OpenMemDB can be found in Figure~\ref{fig:cpp_mem_model}.
   \par\vspace{\baselineskip}
   \begin{figure}
    \centering
@@ -2516,6 +2553,7 @@ if (result.isSuccess) {
     \textbf{C++ Memory Model}
     \includegraphics{graphics/cpp_memory_model.png}
     \caption{Diagram of the C++11 memory model as used by OpenMemDB}
+    \label{fig:cpp_mem_model}
   \end{figure}
   \par\vspace{\baselineskip}
   Another decision in the design of the SQL engine that was important to maintaining wait-freedom and
@@ -2531,12 +2569,13 @@ if (result.isSuccess) {
   is still the task of the planning and execution of SQL queries and commands. The strategies employed in
   planning the execution of these queries has been detailed earlier in this document, so we will not
   revisit them in detail. As a refresher, we have devised a way to reduce a series of boolean expressions
-  into a tree of predicates that a table's records can then be evaluated against. In order for a record
-  to be in the result set of a query, it must satisfy the entire tree of predicates. Due to our reduced scope
-  when implementing the SQL standard, we can comfortably guarantee that there will always be some form
-  of progress when devising the execution plan. This is mainly due to the fact that advanced joins and
-  other SQL constructs like nested queries, that OpenMemDB will not be supporting, require a full-featured
-  solver that may not be able to progress in a way that can be called wait-free.
+  into a tree of predicates that a table's records can then be evaluated against, as can be seen in 
+  Figure~\ref{fig:sqlengine_pred_gen}. In order for a record to be in the result set of a query, it must 
+  satisfy the entire tree of predicates. Due to our reduced scope when implementing the SQL standard, we 
+  can comfortably guarantee that there will always be some form of progress when devising the execution 
+  plan. This is mainly due to the fact that advanced joins and other SQL constructs like nested queries, 
+  that OpenMemDB will not be supporting, require a full-featured solver that may not be able to progress 
+  in a way that can be called wait-free.
   \par\vspace{\baselineskip}
   \begin{figure}
    \centering
@@ -2545,6 +2584,7 @@ if (result.isSuccess) {
    \includegraphics{graphics/SQLEngine_predicate_gen.png}
    \caption{Diagram of the process used to generate the tree of predicates
 	    used within the SQL Engine component of OpenMemDB}
+    \label{fig:sqlengine_pred_gen}
   \end{figure}
   \par\vspace{\baselineskip}
   Execution of the query plan is also within the purview of the SQL engine and also must be guaranteed to be
@@ -2616,10 +2656,10 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
 	 \lstinline[]|std::map<uint32_t, omdb::Connection>|
    \item A vector of \lstinline[]|WorkThreadData| objects
   \end{itemize}
-  The first part, the vector of \lstinline|std::future<Result>| objects, is
+  The first part, the vector of \inlinecode{std::future<Result>} objects, is
   essential to retrieving query results from the worker threads in an asynchronous way. This way
   we can continue to be non-blocking without needing to wait for a thread to finish which also
-  allows us to be wait-free, our overriding requirement. Forcing the \lstinline|std::future<Result>|
+  allows us to be wait-free, our overriding requirement. Forcing the \inlinecode{std::future<Result>}
   to be non-blocking when checking for a return value is currently clunky as shown in Figure~\ref{code:clunk_future}.
   \par\vspace{\baselineskip}
   
@@ -2657,7 +2697,7 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
   The vector of \lstinline[]|WorkThreadData| objects is the mechanism in
   which the Work Manager sends jobs, the queries or commands that a client sends to OpenMemDB, to the
   worker threads in the thread pool. The jobs are contained within a \lstinline[language=C++]|std::packaged_task<Result(int)>|
-  object which is a C++11 construct that can generate the previously mentioned \lstinline|std::future<Result>|.
+  object which is a C++11 construct that can generate the previously mentioned \inlinecode{std::future<Result>}.
   The generated future object is stored in the afore-mentioned vector and the job is then passed to a selected
   worker thread to be evaluated. The selection process for where this job is placed is the work load distribution
   task that the Work Manager is responsible for. In order to do this accurately, the Work Manager implements
@@ -2744,13 +2784,13 @@ occur, it will be handled internally and not by the programmer.
 \par\vspace{\baselineskip}
 
 Using Boost variant:
-Whenever a \lstinline|boost::variant| object is created the default constructor makes the first type its first bounded type.
-A discriminated union container is defined by instantiating the \lstinline|boost::variant| with the desired argument types.
+Whenever a \inlinecode{boost::variant} object is created the default constructor makes the first type its first bounded type.
+A discriminated union container is defined by instantiating the \inlinecode{boost::variant} with the desired argument types.
 These types are called bounded types and derive from the BoundedType concept. In order to limit the different
-types that bounded types can accept the \lstinline|BOOST_VARIANT_LIMIT_TYPES| must be manipulated to reflect this.
-In order to retrieve data types from \lstinline|boost::variant| there are multiple functions available in order to accomplish this task.
+types that bounded types can accept the \inlinecode{BOOST_VARIANT_LIMIT_TYPES} must be manipulated to reflect this.
+In order to retrieve data types from \inlinecode{boost::variant} there are multiple functions available in order to accomplish this task.
 Value retrieval can be accomplish by using the get function. Get takes in a type as an argument and returns the first
-data value in a \lstinline|boost::variant| object that matches with that data type.
+data value in a \inlinecode{boost::variant} object that matches with that data type.
 \par\vspace{\baselineskip}
 \begin{figure}
   \centering
@@ -2759,13 +2799,13 @@ data value in a \lstinline|boost::variant| object that matches with that data ty
   \caption{Describes the type of data variant will accept}
 \end{figure}
 
-While \lstinline|boost::get<T>| is an acceptable means for value retrieval it suffers from several flaws.
-The get function can only work for one static type of \lstinline|boost::variant|,
-the heterogenous data variant at declaration. If \lstinline|boost::variant| object
+While \inlinecode{boost::get<T>} is an acceptable means for value retrieval it suffers from several flaws.
+The get function can only work for one static type of \inlinecode{boost::variant},
+the heterogenous data variant at declaration. If \inlinecode{boost::variant} object
 changes its data type then get will lead to logical errors that were not considered.
 Thus boost variant needs a more robust un-static function to retrieve
-data from a \lstinline|boost::variant| object. The variant library offers a compile-time visitation
-via \lstinline|boost::apply_visitor|. Visitation requires the program to explicity handle or ignore bounded types.
+data from a \inlinecode{boost::variant} object. The variant library offers a compile-time visitation
+via \inlinecode{boost::apply_visitor}. Visitation requires the program to explicity handle or ignore bounded types.
 \par\vspace{\baselineskip}
 
 \begin{figure}
@@ -2776,8 +2816,8 @@ via \lstinline|boost::apply_visitor|. Visitation requires the program to explici
 \end{figure}
 
 This provides the same functionality as get but now this code allows the program to write
-generic visitors at compile-time. \lstinline|boost::apply_visitor| also contains one more benefit for
-value retrieval. Delayed visitation is a type of \lstinline|boost::apply_visitor| that returns
+generic visitors at compile-time. \inlinecode{boost::apply_visitor} also contains one more benefit for
+value retrieval. Delayed visitation is a type of \inlinecode{boost::apply_visitor} that returns
 a function object that operates on any variant given to it. This is useful when operating on a sequence of
 variant types.
 \par\vspace{\baselineskip}
@@ -2787,13 +2827,13 @@ The variant class greatly simplifies use for specific instructions of the templa
 significantly complicates use for generic instructions. When creating a variant instruction
 it is very easy to declare an variant object but it is less clear on how such types are
 accepted into a function. The Preprocessor library provides a powerful solution to this dilemma.
-The Boost.Variant library provides a macro \lstinline|BOOST_VARIANT_ENUM_PARAMS| that
+The Boost.Variant library provides a macro \inlinecode{BOOST_VARIANT_ENUM_PARAMS} that
 simplifies the process for the user of declaring variant types in function templates or
 other things of such nature. It is possible to use a type sequence to specify bounded types
 instead of using boost variant default function. Essentially a type sequence performs the
 same functionality of Boost.Variant but if the program for whatever needs must edit and
-create specific types of type sequences it is possible with \lstinline|make_variant_over|
-function. As shown below \lstinline|boost::make_variant_over| creates a type sequence that
+create specific types of type sequences it is possible with \inlinecode{make_variant_over}
+function. As shown below \inlinecode{boost::make_variant_over} creates a type sequence that
 is customizable. Problems with the variant class template is parameter list is limiting in
 two factors. There must be a implementation maximum limit of the types available and the
 nature of parameter lists makes compile-time manipulation of the list excessively difficult.
@@ -2968,6 +3008,7 @@ Memory management in C++
     \includegraphics{graphics/Logger_interaction.png}
     \caption{The network interaction model employed by OpenMemDB to implement a
 	     write-ahead-logger(WAL)}
+    \label{fig:logger_interaction}
   \end{figure}
 
 \newpage
