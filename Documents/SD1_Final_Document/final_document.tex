@@ -18,6 +18,11 @@
 
 \setlength{\parindent}{0cm}
 
+\makeatletter
+\renewcommand{\@pnumwidth}{3em}
+\renewcommand{\@tocrmarg}{4em}
+\makeatother
+
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codered}{rgb}{0.6,0,0}
 \definecolor{codegrey}{gray}{0.9}
@@ -172,7 +177,7 @@ memSQL sounds like an exciting challenge to undertake while also contributing
 to the programming community.
 
 \subsubsection{Robert Medina}
-One of the best things about this project is the process of making a database from scratch.
+One of the best things about this project is the process of making a \\ database from scratch.
 I am currently taking a database systems course and when Dr. Dechev pitched the idea of
 creating a non-blocking database it was simply one of the projects I had to be apart of.
 I consider multicore programming a necessary skill to learn since new emerging technologies
@@ -315,7 +320,7 @@ and as such we use them both.
 
 \begin{figure}
     \centering
-	\includegraphics[scale=0.25]{graphics/sublimeide.png}
+	\includegraphics[scale=0.24]{graphics/sublimeide.png}
     \caption{Sublime Text} \label{sublime}
 \end{figure}
 
@@ -551,7 +556,7 @@ and a child. The "Data Set" has the following properties:
 \begin{itemize}
   \item Each set includes exactly one record of the first type. This record is called an Owner of the set.
   \item Each set may include 0 (i.e. an Empty set occurrence), 1 or N records of the same type. These records are called members of the data set.
-  \item All members within one set occurrence have a fixed order (are sorted).
+  \item All members within one set occurrence have a fixed order (i.e. are sorted)
 \end{itemize}
 An example of a network model relationship can be seen in Figure~\ref{fig:networkDBMS_relationship}.
 \par\vspace{\baselineskip}
@@ -699,11 +704,10 @@ within the DBMS. Specifically, it is the:
   \item System resource monitor
 \end{itemize}
 
-Work distribution between threads is done via a task-queue that each thread in the
+Work distribution between threads is done through a task-queue that each thread in the
 thread pool pulls work from. Tasks are C++11 lambda functions that are packaged up
-via the standard library's \inlinecode{std::packaged_task<>}
- class.
-This class provides an interface that allows us to generate a \inlinecode{std::future<>}
+via the standard library's \inlinecode{std::packaged_task<>} class.
+This class provides an interface that allows us to generate a \\ \inlinecode{std::future<>}
 object that is a thread-safe interface to a thread's return value. The bulk of the
 ideas behind this thread pool were found online \cite{stackoverflow1} though we substituted
 the command queue that was initially implemented using a \inlinecode{std::mutex}
@@ -794,7 +798,7 @@ A side-by-side difference between row and column store architectures is shown in
 \begin{figure}
   \centering
   \includegraphics[scale=.6]{graphics/row_store_and_column_example.png}
-  \caption{A row store and column store side-by-side comparison. \copyright Oracle Learning Library 2014, reprinted with permission.\cite{rowstore}}
+  \caption{A row store and column store side-by-side comparison. \newline \copyright Oracle Learning Library 2014, reprinted with permission.\cite{rowstore}}
   \label{fig:row_column_diff}
 \end{figure}
 
@@ -853,8 +857,9 @@ those changes to the state of the database are not reflected to each other user.
 concurrently and rely on each other then locking will occur.
 \par\vspace{\baselineskip}
 
-Durability means that once a transaction is commited then those changes on the database will be reflected to the user
-and will be recorded pernamently. This is usually performed by backing up valid states of the database.
+Durability means that once a transaction is committed in a SQL statement then those changes on the database 
+will be reflected to the user and will be recorded pernamently. This is usually performed by backing 
+up valid states of the database.
 \par\vspace{\baselineskip}
 
 \subsubsection{Indexing}
@@ -893,7 +898,7 @@ B+ trees are a variant of a B-tree. A B-tree is an $n$-ary tree that splits data
 based on a key value into nodes with $T(j)$ subtrees and $K(j)$ nodes, where $j = (1<j<m)$.
 By definition a B-tree is a tree with the following properties:
 \begin{itemize}
-  \item Each node consists of $T(i)$ subtrees and $K(i)$ keys, where $i = (0,...,j)$
+  \item Each node consists of $T(i)$ subtrees and $K(i)$ keys, \\ where $i = (0,...,j)$
   \item There is a single root that contains a range of $m$ children, $2<= m < j$
   \item Each node contains a range of $m$ children, $(m/2) <= m < j$
   \item For each sub-tree $T(i)$ where $i = (0,...,j)$ each sub-tree contains keys $k(j)$ such that:
@@ -965,7 +970,7 @@ looks like.
 \begin{figure}[H]
   \centering
   \textbf{Abstract Diagram of ISAM structure}
-  \includegraphics[scale=.75]{graphics/ISAM_abstract_diagram.png}
+  \includegraphics[scale=.71]{graphics/ISAM_abstract_diagram.png}
   \caption{Behavior similiar to B+ Tree Structure \copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
   \label{fig:isam_visual}
 \end{figure}
@@ -1221,7 +1226,7 @@ Figure~\ref{fig:lin_hash_split}.
   \centering
   \textbf{Splitting Occurs}
   \includegraphics[scale=.95]{graphics/Linear_hashing_splitting}
-  \caption{Abstract view of bucket splitting \copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
+  \caption{Abstract view of bucket splitting. \newline \copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
   \label{fig:lin_hash_split}
 \end{figure}
 
@@ -2295,7 +2300,7 @@ FROM A,B
 WHERE A.x = B.x AND
       (B.y = 1 OR B.z = 2);
 \end{lstlisting}
-This query references two tables, A and B, and features a three-level boolean expression.
+This query references two tables, A \& B, and features a three-level boolean expression.
 Using the model defined previously, we are left with five predicates:
 \begin{enumerate}
  \item An overarching nested predicate using the AND operator between its children, 2 and 3, that are defined below.
@@ -2312,14 +2317,14 @@ by a hard limit of workers per statement.
 
 
 \subsection{Related Works}
-Over the last 30 years the there has been tremendous advancements in computing
-hardware. "Processors are thousands of times faster and memory is thousands of
-times times larger"\cite{stonebraker2007end}. Most technologies have advanced
+Over the last 30 years the there has been tremendous advancements \\ in computing
+hardware. ``Processors are thousands of times faster and memory is thousands of
+times times larger''\cite{stonebraker2007end}. Most technologies have advanced
 along with hardware, however database management systems have struggled to improve
-at a similar rate. This is mostly due to concurrency issues. "Existing studies show
+at a similar rate. This is mostly due to concurrency issues. ``Existing studies show
 that current database engines can spend more than 30\% of time in
 synchronization-related operations (e.g.locking and latching), even when only a
-single client thread is running."\cite{soares2015database}
+single client thread is running.`` \cite{soares2015database}
 \par\vspace{\baselineskip}
 There have been several attempts to solve this problem. Some of which will sacrifice
 some data consistency in order to achieve better performance. Still others
@@ -2376,13 +2381,12 @@ known and less well documented DBMS that are worthy of note:
 \begin{itemize}
   \item Aerospike is an AGPL licensed NoSQL flash-optimized in memory
   DBMS. Aerospike is an open source project that follows the similar pattern of
-  a distributed shared-nothing architecture that is appearing common among most
+  a distributed shared-nothing architecture that is becoming common among most
   in-memory DBMS.
   \begin{quote}
-  ``Aerospike architecture is derived from its core principles –  \\ NoSQL scalability and
-  flexibility, along with traditional database  \\ consistency, reliability and
-  extensibility.''
-  \cite{aerospike}
+  ``Aerospike's architecture is derived from its core principles –  NoSQL scalability and
+  flexibility, along with traditional \\ database consistency, reliability and
+  extensibility.'' \cite{aerospike}
   \end{quote}
   \par\vspace{\baselineskip}
   An illustration of Aerospikes architecture can be seen in Figure~\ref{fig:aerospike_architecture}.
@@ -2489,19 +2493,19 @@ nable dashDB to maximize hardware performance.
   \begin{figure}
   	\centering
   	\includegraphics[scale=.5]{graphics/gemfire_peer_architecture.png}
-  	\caption{GemFire peer architecture \copyright GemStone Systems, Inc. 2006 \cite{gemfire}}
+  	\caption{GemFire peer architecture \newline \copyright GemStone Systems, Inc. 2006 \cite{gemfire}}
   	\label{fig:gemfire_peer}
   \end{figure}
   \par\vspace{\baselineskip}
 
-  \item Hekaton is Microsoft's database engine that is optimized for memory resident
+  \item Hekaton is Microsoft's database engine that is optimized for memory \\ resident
   OLTP data. Hekaton is fully implemented within SQL Server and can be utilized from
   within.
   \begin{quote}
-  ``Hekaton is designed for high levels of concurrency but does not
+  ``Hekaton is designed for high levels of concurrency but \\ does not
   rely on partitioning to achieve this. Any thread can access any row
   in a table without acquiring latches or locks. The engine uses latchfree
-  (lock-free) data structures to avoid physical interference
+  (lock-free) data structures to \\ avoid physical interference
   among threads and a new optimistic, multiversion concurrency
   control technique to avoid interference among transactions''\cite{hekaton}
   \end{quote}
@@ -2510,7 +2514,7 @@ nable dashDB to maximize hardware performance.
   \par\vspace{\baselineskip}
   Hekaton's Architecture:
 \begin{itemize}
-  \item The Hekaton storage engine manages user data and indexes.
+  \item The Hekaton storage engine manages user data and indexes.\\
   It provides transactional operations on tables of records, hash
   and range indexes on the tables, and base mechanisms for storage,
   checkpointing, recovery and high-availability.
@@ -2523,7 +2527,7 @@ nable dashDB to maximize hardware performance.
   that provides integration with SQL Server resources and
   serves as a common library of additional functionality needed
   by compiled stored procedures.
-  \item Metadata: Metadata about Hekaton tables, indexes, etc. is
+  \item Metadata: Metadata about Hekaton's tables, indexes, etc. is
   stored in the regular SQL Server catalog. Users view and manage
   them using exactly the same tools as regular tables and indexes.
   \item Query optimization: Queries embedded in compiled stored
@@ -2542,8 +2546,8 @@ nable dashDB to maximize hardware performance.
   fail over in the same way as other tables and are also
   readable on secondary servers.
   \item Storage, log: Hekaton logs its updates to the regular SQL
-  Server transaction log. It uses SQL Server file streams for storing
-  checkpoints. Hekaton tables are recovered when a database is recovered.
+  Server transaction log. It uses SQL Server file streams for storing \\
+  checkpoints. Hekaton tables are recovered when a database is \\ recovered.
   \end{itemize} \cite{hekaton}
 
   \item SAP HANA
@@ -2925,7 +2929,7 @@ if (result.isSuccess) {
   \par\vspace{\baselineskip}
   The specific task of managing network connections between OpenMemDB and its clients is a fairly
   straightforward one as we don't have complex server-client interactions and relatively tame
-  throughput expectations. Linux in particular exposes a well-documented and mature C interface
+  throughput expectations. \\ Linux in particular exposes a well-documented and mature C interface
   to setup and use network or UNIX sockets which favors using C-style freestanding functions
   rather than a more object-oriented approach, at least in the initial setup and initialization
   of the socket. As such, we only created a class for the connection between the server and client
