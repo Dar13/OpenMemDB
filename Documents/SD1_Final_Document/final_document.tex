@@ -738,7 +738,7 @@ lookup hashmap.
 \begin{figure}
   \centering
   \includegraphics[scale=.5]{graphics/Table_In_Memory.png}
-  \caption{INSERT TEXT}
+  \caption{Example of tervel vector table representation in memory}
 \end{figure}
 
 Nested vectors are stored as row store architecture and column store architecture.
@@ -748,6 +748,7 @@ a table would be composed of a vector of those rows as shown in Figure~\ref{fig:
 \begin{figure}
   \centering
   \includegraphics[scale=.6]{graphics/row_store_example.png}
+  \cite{rowstore}
   \label{fig:row_store_ex}
   \caption{An example of a row store architecture.}
 \end{figure}
@@ -757,6 +758,7 @@ creates another vector that holds those vectors as shown in Figure~\ref{fig:colu
 \begin{figure}
   \centering
   \includegraphics[scale=.6]{graphics/column_store_example.png}
+  \cite{rowstore}
   \label{fig:column_store_ex}
   \caption{An example of a column store architecture.}
 \end{figure}
@@ -767,6 +769,7 @@ this
 \begin{figure}
   \centering
   \includegraphics[scale=.6]{graphics/row_store_and_column_example.png}
+   \cite{rowstorefigure}
   \label{fig:row_column_diff}
   \caption{A row store and column store side-by-side comparison.}
 \end{figure}
@@ -789,6 +792,7 @@ wants to manipulate the entire row data instead of a few columns. In column stor
 being rewritten and maniuplated which would be a costly operation to perform.
 
 \includegraphics{graphics/row_store_column_accessing_data.png}
+\cite{rowstorefigure}
 
 Seeing in the row store and column store figure previously, it would be
 difficult to find the sales column in a row store column, and it is easily
@@ -830,6 +834,7 @@ will point to the file in memory or memory address, depending on how the data is
 file scan of the database is now just reduced to scanning an index file.
 
 \includegraphics{graphics/indexentry.png}
+\cite{ramakrishnan2000database}
 
 However searching through an index file can still be a costly operation. Index files are smaller than the
 data it is referencing but it can still use a considerable about memory space. Therefore it would be
@@ -859,11 +864,13 @@ B+ Trees are a variant of a B Tree. B Trees is an n-ary tree that splits data
 	B Trees have a height of log(m)(N), m = number of children
 
 \includegraphics{graphics/B_Tree_Example.png}
+\cite{b+tree}
 B+ Tree differs slightly in the fact that B trees store their data (keys) within the internal nodes while
 B+ trees only points to the data. All the data in a B+ is stored in the leaves of tree. In addition,
 B+ Tree links all their leaves together with a doubly linked list.
 
 \includegraphics{graphics/B_B+_Tree_Difference.png}
+\cite{btree}
 
 The runtime for a B+ Tree is the following:
 Searching is logm(n), m is index entries
@@ -890,6 +897,7 @@ data internally with in its nodes. All the data from an ISAM resides in its leaf
   \centering
   \textbf{Abstract Diagram of ISAM structure}
   \includegraphics[scale=.8]{graphics/ISAM_abstract_diagram.png}
+  \cite{ramakrishnan2000database}
   \caption{Behavior similiar to B+ Tree Structure}
 \end{figure}
 
@@ -908,6 +916,7 @@ allocation appears
   \centering
   \textbf{Page Allocation for ISAM}
   \includegraphics{graphics/ISAM_page_allocation.png}
+  \cite{ramakrishnan2000database}
   \caption{The order of which memory gets allocated on the page}
 \end{figure}
 
@@ -934,6 +943,7 @@ This way the overflow page will also be considered in the basic operations of IS
   \centering
   \textbf{Example of an ISAM structure}
   \includegraphics[scale=.75]{graphics/ISAM_example.png}
+  \cite{ramakrishnan2000database}
   \caption{Some exisiting data that is already inserted}
 \end{figure}
 
@@ -941,12 +951,14 @@ This way the overflow page will also be considered in the basic operations of IS
   \centering
   \textbf{After inserting 23*, 48*, 41*, 42*}
   \includegraphics[scale=.75]{graphics/ISAM_example_insertion.png}
+  \cite{ramakrishnan2000database}
 \end{figure}
 
 \begin{figure}
   \centering
   \textbf{After deleting 42*, 51*, 97*}
   \includegraphics[scale=.7]{graphics/ISAM_example_deletion.png}
+  \cite{ramakrishnan2000database}
 \end{figure}
 
 \par\vspace{\baselineskip}
@@ -981,6 +993,7 @@ to an overflow chain in the bucket.
 \begin{figure}
   \centering
   \includegraphics[scale=.75]{graphics/Static_Hashing_Abstract}
+  \cite{ramakrishnan2000database}
 \end{figure}
 
 A good hash function is imperative to uniformly distribute values over the collection of buckets.
@@ -1040,6 +1053,7 @@ entries each bucket can hold.
   \centering
   \textbf{Extendible Hashmap}
   \includegraphics{graphics/ExtendibleHashing_Depth_2.png}
+  \cite{ramakrishnan2000database}
   \caption{Example of Extendible Hashing at Depth 2}
 \end{figure}
 
@@ -1047,6 +1061,7 @@ entries each bucket can hold.
   \centering
   \textbf{Spliting Occurs}
   \includegraphics{graphics/ExtendibleHashing_Spliting.png}
+  \cite{ramakrishnan2000database}
   \caption{New bucket is made}
 \end{figure}
 
@@ -1061,6 +1076,7 @@ the original bucket local depth value.
 \begin{figure}
   \textbf{Directory Doubling}
   \includegraphics{graphics/ExtendibleHashing_Depth_3.png}
+  \cite{ramakrishnan2000database}
   \caption{Directory doubles and the global depth increases to three.}
 \end{figure}
 
@@ -1093,6 +1109,7 @@ In the split operation, there exists a split policy that determines when splitin
   \centering
   \textbf{Splitting Occurs}
   \includegraphics{graphics/Linear_hashing_splitting}
+  \cite{ramakrishnan2000database}
   \caption{Abstract view of bucket splitting}
 \end{figure}
 
@@ -1115,6 +1132,7 @@ figures.
   \centering
   \textbf{Insertion of 43*, 43 mod (4) = 3 = (011)2 binary representation}
   \includegraphics{graphics/Linear_hashing_insertion}
+  \cite{ramakrishnan2000database}
   \caption{Overflowing occurs}
 \end{figure}
 
@@ -1130,6 +1148,7 @@ of potential keys to be hashed will be doubled.
   \centering
   \textbf{Linear Hashing level increased due to maximum capacity}
   \includegraphics{graphics/Linear_hashing_level_increased}
+  \cite{ramakrishnan2000database}
   \caption{Notice that the number of bits increased as well, since $d(i) = d(a) + i$.}
 \end{figure}
 
@@ -1190,6 +1209,7 @@ Those symbol weights are the following:
 \begin{figure}
   \centering
   \includegraphics{graphics/huffman_example_symbol_freq.png}
+  \cite{huffman}
   \caption{Symbols with frequencies as weights data set}
 \end{figure}
 
@@ -1200,6 +1220,7 @@ queue sets the least frequency symbol counter to be of the highest priority.
 \begin{figure}
   \centering
   \includegraphics{graphics/huffman_example_initial.png}
+  \cite{huffman}
   \caption{Data set inserted into a priority queue}
 \end{figure}
 
@@ -1227,6 +1248,7 @@ weight is the sum of the two children nodes. This is shown in Figures~\ref{fig:h
 \begin{figure}
   \centering
   \includegraphics[scale=.65]{graphics/huffman_example_internal_node.png}
+  \cite{huffman}
   \caption{Highest priority on queue is merged together}
   \label{fig:huffman_ex_int_1}
 \end{figure}
@@ -1234,6 +1256,7 @@ weight is the sum of the two children nodes. This is shown in Figures~\ref{fig:h
 \begin{figure}
   \centering
   \includegraphics[scale=.63]{graphics/huffman_example_internal_node_added.png}
+  \cite{huffman}
   \caption{New node inserted into queue}
   \label{fig:huffman_ex_int_2}
 \end{figure}
@@ -1244,6 +1267,7 @@ This continues repeatedly until one tree is created from the data set.
 \begin{figure}
   \centering
   \includegraphics[scale=.75]{graphics/huffman_example_end.png}
+  \cite{huffman}
   \caption{Complete Huffman Tree from priority queue}
 \end{figure}
 
@@ -1259,6 +1283,7 @@ Figure~\ref{fig:huffman_prefix_table}.
 \begin{figure}
   \centering
   \includegraphics[scale=.67]{graphics/huffman_example_prefix_table}
+  \cite{huffman}
   \caption{Prefix Code Table derived from Huffman Tree}
   \label{fig:huffman_prefix_table}
 \end{figure}
@@ -1270,6 +1295,7 @@ data for this data set as shown in Figure~\ref{fig:huffman_compressed}.
 \begin{figure}
   \centering
   \includegraphics[scale=.75]{graphics/huffman_example_compressed_result}
+  \cite{huffman}
   \caption{Prefix code representation of original data set.}
   \label{fig:huffman_compressed}
 \end{figure}
@@ -1302,12 +1328,14 @@ variable pair, (offset, length of match, codeword for symbol).
 \begin{figure}
   \centering
   \includegraphics{graphics/LZ77_compression_code}
+  \cite{LZ77_78}
   \caption{Psuedo Algorithm for encoding processes for look-ahead and search buffer}
 \end{figure}
 
 \begin{figure}
   \centering
   \includegraphics[scale=.5]{graphics/LZ77_example_window}
+  \cite{LZ77_78}
   \caption{The format is more clearly defined with in this example.}
 \end{figure}
 \newpage
@@ -2796,6 +2824,7 @@ data value in a \inlinecode{boost::variant} object that matches with that data t
   \centering
   \textbf{Template for boost variant}
   \includegraphics{graphics/boost_variant_get_header.png}
+  \cite{boostvariant}
   \caption{Describes the type of data variant will accept}
 \end{figure}
 
@@ -2812,6 +2841,7 @@ via \inlinecode{boost::apply_visitor}. Visitation requires the program to explic
   \centering
   \textbf{Visitation example}
   \includegraphics[scale=.5]{graphics/boost_variant_visitation.png}
+  \cite{boostvariant}
   \caption{Improvement on data retrevial, betterthan get function since types are not predefined}
 \end{figure}
 
@@ -2845,6 +2875,7 @@ however not all compilers are able to this function.
   \centering
   \textbf{Under the hood for variant implementation}
   \includegraphics[scale=.5]{graphics/boost_variant_type_sequence.png}
+  \cite{boostvariant}
   \caption{Allows the program to create their own type sequence without using variant constructor}
 \end{figure}
 
@@ -2857,6 +2888,7 @@ extends this by allowing simultaneous visitation of content of two different var
   \centering
   \textbf{Example code using binary visitation}
   \includegraphics[scale=.5]{graphics/boost_variant_binary_visitation.png}
+  \cite{boostvariant}
   \caption{Compares two variant objects}
 \end{figure}
 
@@ -2869,6 +2901,7 @@ multiple compares between variants objects with in tables.
   \centering
   \textbf{Example code for multi visitation}
   \includegraphics{graphics/boost_variant_multi_visitation.png}
+  \cite{boostvariant}
   \caption{Compares three or more variant objects}
 \end{figure}
 
@@ -2944,6 +2977,7 @@ Memory management in C++
 	declared inside the function and will take up memory from the stack. While the heap is responsible for all unused memory 
 	of the program. This memory can be allocated dynammically when the program runs but the program must also insure that this memory gets cleaned up after it is done with it.
 	\includegraphics{graphics/c++_memory_heirarchy.png}
+	\cite{newerror}
 	Programs cannot predicte how much memory will be required at run time. This memory can be allocated by the new operator and is referenced by the address of the space allocated. This memory can also be deleted by the delete operator. This is used when memory is no longer used purposely. If it is not cleaned up then it creates garbage memory that could otheriwse be used resourcefully. There are other ways to dynammically allocate memory, such as malloc(), calloc(), and realloc(). There are major differences between the new operator and the other memory allocation functions.  The following are some useful concepts and guidelines to keep in mind when using these functions. It is imparative to learn about these guidelines otherwise potential problems could occur such as memory corruption.
 
 1.) Delete and Free do not MIX
@@ -2951,28 +2985,34 @@ Memory management in C++
 	\includegraphics{graphics/new_delete_example.png}
 	If the only function the programmer desire is to handle the raw uninitalized memory then new and delete operators should not be considered. Instead the operator new and operator delete should be used to allocate memory and deallocate. This is essentially the same as malloc and free.
 	\includegraphics{graphics/new_operator_bypass.png}
+	\cite{boostuse}
 
 2.) New and malloc mixed
 	If a placement new is used to create an object in memory, not the new function but placement new used to store already allocated data from malloc() function then delete should not be used because like in the previous example, the delete function calls the operator delete to deallocate memory but the memory contained was not allocated by the operator new. This placement new just returns the pointer passed to it. So in general, if raw memory was passed to placement new and this memory was dynammically allocated then still memory must be deallocated to prevent a memory leak.
 	\includegraphics{graphics/new_placement.png}
+	\cite{boostuse}
 
 3.) New operator
 	There is a difference between the new operator and operator new. The new operator does two things.
 	First, it allocates enough memory to hold an object of the type inputed. Secondly, it calls a constructor to initialize an object of the type defined. This operator's behavior cannot be changed in ay way. The way the memory is allocated can be changed however. The new operator calls a function to perform the memory allocation. This can be overloaded to change the bahvior. The function at allocates memory for the new operator is "operator new". 
 	\includegraphics{graphics/operator_new_header.png}
+	\cite{boostuse}
 	The operator new returns a void pointer to raw, uninitialized memory. The parameter, size_t, specifices how much memory to allocate. Whenever the programmer needs to call raw memory it is called by operator new like so.
 	\includegraphics{graphics/operator_new_raw_memory.png}
+	\cite{boostuse}
 	This line of code will return a raw chuck of meaningless memory.
 
 4.) Placement new
 	Sometimes there exists raw memory that was allocated dynammically but does not have a constructor to be linked up to. Invoking a constructor on an existing object is not logical. Constructors exist to initialize objects and objects can only be initialized once. Therefore there must be a way to call a constructor directly so it can be linked to already allocated memory. Placement new allows the programmer to directly work with a constructor. Here is an example of how placement new might be used.
 	\includegraphics{graphics/placement_new_example.png}
+	\cite{boostuse}
 	In the function constructWidgetInBuffer, the expressed return is a new operator that returns the location of the constructor by using an overloaded operator new function.
 	\includegraphics{graphics/operator_new_overload.png}
 
 5.) Error Handling
 	By default if new() cannot find memory it calls a pointer to function called _new_handler()
 	\includegraphics{graphics/operator_new_function.png}
+	\cite{boostuse}
 	if _new_handler() can somehow supply memory for malloc() then everything is good otherwise an exception is thrown.
 
 6.) Memory Corruption
