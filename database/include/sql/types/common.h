@@ -9,7 +9,7 @@
 
 enum SQLTypes
 {
-  SQL_NONE = 0,
+ //SQL_NONE = 0, redeclaration error when both common.h files are included
   SQL_BOOLEAN = 1,
   SQL_SMALLINT,
   SQL_INTEGER,
@@ -19,4 +19,5 @@ enum SQLTypes
   SQL_TIMESTAMP
 };
 
+#endif
 #endif
