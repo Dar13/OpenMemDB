@@ -82,7 +82,7 @@ class SQLNullable
     bool m_is_nullable;
 };
 
-enum class SQLConstraints : uint32_t
+enum class SQLConstraintType : uint32_t
 {
   SQL_NO_CONSTRAINT = 0,
   SQL_NOT_NULL,
@@ -101,11 +101,19 @@ enum class SQLConstraints : uint32_t
  */
 struct SQLConstraint
 {
-  uint32_t type;
+  SQLConstraintType type;
   uint16_t column_idx;
   // TODO: DataVariant value;
   const char* ref_table;
   uint16_t ref_column_idx;
+};
+
+// TODO: Document this
+struct SQLColumn
+{
+    std::string name;
+    SQLType type;
+    SQLConstraint constraint;
 };
 
 #endif

@@ -7,6 +7,7 @@
 
 /* TODO: REMOVE THIS, JUST FOR TESTING */
 #include <sql/omdb_parser.h>
+#include <data/data_store.h>
 
 /**
  *  @brief The entry point of the application.
@@ -15,6 +16,8 @@ int main(int argc, char** argv)
 {
   setupTokenMappings();
   parse("CREATE TABLE test (user_id INTEGER, is_admin BOOLEAN);");
+
+  data_store data;
 
   return 1;
 
