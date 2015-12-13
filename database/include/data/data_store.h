@@ -38,6 +38,8 @@ struct SchemaTablePair
     TableSchema* schema;
 };
 
+
+
 // The mack-daddy, the mapping of table names to tables/schemas.
 using TableMap = tervel::containers::wf::HashMap<std::string, 
                                                  SchemaTablePair, 
@@ -66,14 +68,5 @@ public:
 private:
     TableMap table_name_mapping;
 };
-
-
-//messing around with data types
-using DataVariant = boost::variant<SQLBoolean, SQLDate, SQLTime, SQLTimestamp, SQLSmallInt, SQLInteger, SQLBigInt>;
-using DataTableRecord = tervel::containers::wf::vector::Vector<DataVariant>;
-using DataTable = tervel::containers::wf::vector::Vector<DataTableRecord>;
-using TableSchema = DataTableRecord;
-using SchemaTablePair = std::pair<DataTable,TableSchema>;
-using TableMap = tervel::containers::wf::HashMap<std::string, SchemaTablePair>;  
 
 #endif

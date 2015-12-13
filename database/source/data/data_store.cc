@@ -1,7 +1,8 @@
 #include "data/data_store.h"
 #include <iostream>
 
-	//creates an empty table
+
+//creates an empty table
 void DataStore::createTable(CreateTableCommand table_info)
 {
     if(table_info.columns.size() > 0)
