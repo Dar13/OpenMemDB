@@ -12,7 +12,7 @@
 
 // Project includes
 #include "sql/types/common.h"
-#include "hash_functor.h"
+#include "util/types.h"
 
 // Some typedefs(C++11-style) so that we don't have all that meaningless
 // namespace and template junk pop up everywhere.
@@ -21,10 +21,9 @@
 using DataVariant = boost::variant<SQLBoolean, SQLDate, SQLTime, SQLTimestamp,
                                   SQLSmallInt, SQLInteger, SQLBigInt>;
 
-//using TervDataVariant = TervelWrapper<DataVariant>;
+using TervDataVariant = TervelWrapper<DataVariant>;
 
-//using DataTableRecord = TervelWrapper<tervel::containers::wf::vector<TervDataVariant>>;
-using DataTableRecord = tervel::containers::wf::vector<DataVariant>;
+using DataTableRecord = TervelWrapper<tervel::containers::wf::vector<TervDataVariant>>;
 
 using DataTable = tervel::containers::wf::vector<DataTableRecord>;
 
@@ -41,5 +40,12 @@ using TableMap = tervel::containers::wf::HashMap<std::string,
 // TODO: An interface into the above defined types, as well as the management
 //       of that memory.
 */
+
+using DataVariant = boost::variant<SQLBoolean, SQLDate, SQLTime, SQLTimestamp, SQLSmallInt, SQLInteger, SQLBigInt>;
+using DataTableRecord = tervel::containers::wf::vector::Vector<DataVariant>;
+using DataTable = tervel::containers::wf::vector::Vector<DataTableRecord>;
+using TableSchema = DataTableRecord;
+using SchemaTablePair = std::pair<DataTable,TableSchema>;
+using TableMap = tervel::containers::wf::HashMap<std::string, SchemaTablePair>;  
 
 #endif

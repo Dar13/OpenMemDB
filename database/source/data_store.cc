@@ -68,10 +68,26 @@ class data_store
 			return table.get(second); //returns schema
 		}
 	}
-*/
 
+
+	void createTable(std::string tablename, TableSchema schema)
+	{
+		//SchemaTablePair pair = new SchemaTablePair(tablename, schema);
+		//DataTable table = new DataTable();
+	}
+*/
 	int main()
 	{
+		boost::variant<int, int, std::string, double, double, std::string> apples;
+		boost::variant<int, std::string, double> oranges;
+		apples = 1;
+		apples = 2;
+		oranges = 1;
+		oranges = 2;
+		if(boost::get<int>(apples) == 1)
+			std::cout << "apples is 1";
+		//std::cout << assert(boost::get<int>(oranges)==0);
+
 		std::cout << "Hello world";
 	}
 };
