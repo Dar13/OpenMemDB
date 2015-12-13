@@ -24,7 +24,7 @@ enum ERROR
 	SCHEMA_EMPTY, //cannot add an empty schema into table, must be a size greater than 0
 	MISSING_TABLE, //table not found in look up table hash map
 	
-}
+};
 
 
 // Some typedefs(C++11-style) so that we don't have all that meaningless
@@ -36,11 +36,11 @@ using DataVariant = boost::variant<SQLBoolean, SQLDate, SQLTime, SQLTimestamp,
 using TervDataVariant = TervelWrapper<DataVariant>;
 using DataTableRecord = TervelWrapper<tervel::containers::wf::vector::Vector<TervDataVariant>>;
 using DataTable = tervel::containers::wf::vector::Vector<DataTableRecord>;
-
+using DataTableColumn = tervel::containers::wf:vector::Vector<TervelWrapper<SQColumn>>;
 // Schema definition
 struct TableSchema
 {
-    tervel::containers::wf::vector::Vector<TervelWrapper<SQLColumn>> columns;
+    DataTableColumn columns;
 };
 
 struct SchemaTablePair
@@ -64,6 +64,15 @@ using TableMap = tervel::containers::wf::HashMap<std::string,
 class DataStore
 {
 public:
+    	//error codes to report problems in data store
+	enum ERROR
+	{
+	        MEM_FULL, //data store cannot allocate anymore memory
+        	SCHEMA_MISMATCH, //cannot insert row into table because schema does not match with table schema
+       	 	SCHEMA_EMPTY, //cannot add an empty schema into table, must be a size greater than 0
+       		 MISSING_TABLE, //table not found in look up table hash map
+	};
+
     DataStore();
 
     void createTable(CreateTableCommand table_info);
@@ -75,9 +84,12 @@ public:
     TableSchema* getTableSchema(std::string table_name);
 
     DataTableRecord& getRow(std::string table_name, uint32_t row_id);
+
+    void insertRow(std::string table_name, SQLColumn column);
     
 private:
     TableMap table_name_mapping;
 };
+
 
 #endif
