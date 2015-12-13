@@ -5,7 +5,7 @@
 //creates an empty table
 void DataStore::createTable(CreateTableCommand table_info)
 {
-    if(table_info.columns.size() > 0)
+    if(table_info.columns.size() > 0) //this should be <= correct?
     {
         // TODO: Returns an error code, statement cannot execute
         return;
