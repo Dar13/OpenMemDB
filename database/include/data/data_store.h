@@ -12,35 +12,63 @@
 
 // Project includes
 #include "sql/types/common.h"
+#include "sql/statements/data_definition.h"
 #include "util/types.h"
+#include "hash_functor.h"
 
 // Some typedefs(C++11-style) so that we don't have all that meaningless
 // namespace and template junk pop up everywhere.
-/*
 // Table data definitions
 using DataVariant = boost::variant<SQLBoolean, SQLDate, SQLTime, SQLTimestamp,
                                   SQLSmallInt, SQLInteger, SQLBigInt>;
 
 using TervDataVariant = TervelWrapper<DataVariant>;
-
-using DataTableRecord = TervelWrapper<tervel::containers::wf::vector<TervDataVariant>>;
-
-using DataTable = tervel::containers::wf::vector<DataTableRecord>;
+using DataTableRecord = TervelWrapper<tervel::containers::wf::vector::Vector<TervDataVariant>>;
+using DataTable = tervel::containers::wf::vector::Vector<DataTableRecord>;
 
 // Schema definition
-using TableSchema = int;
+struct TableSchema
+{
+    tervel::containers::wf::vector::Vector<TervelWrapper<SQLColumn>> columns;
+};
 
-using SchemaTablePair = std::pair<DataTable, TableSchema>;
+struct SchemaTablePair
+{
+    DataTable* table;
+    TableSchema* schema;
+};
 
 // The mack-daddy, the mapping of table names to tables/schemas.
 using TableMap = tervel::containers::wf::HashMap<std::string, 
                                                  SchemaTablePair, 
                                                  TableHashFunctor<std::string, SchemaTablePair>>;
 
+
+
 // TODO: An interface into the above defined types, as well as the management
 //       of that memory.
-*/
 
+class DataStore
+{
+public:
+    DataStore();
+
+    void createTable(CreateTableCommand table_info);
+
+    void deleteTable(std::string table_name);
+
+    DataTable* getTable(std::string table_name);
+
+    TableSchema* getTableSchema(std::string table_name);
+
+    DataTableRecord& getRow(std::string table_name, uint32_t row_id);
+    
+private:
+    TableMap table_name_mapping;
+};
+
+
+//messing around with data types
 using DataVariant = boost::variant<SQLBoolean, SQLDate, SQLTime, SQLTimestamp, SQLSmallInt, SQLInteger, SQLBigInt>;
 using DataTableRecord = tervel::containers::wf::vector::Vector<DataVariant>;
 using DataTable = tervel::containers::wf::vector::Vector<DataTableRecord>;

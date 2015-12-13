@@ -13,6 +13,8 @@
 struct CreateTableCommand
 {
   std::string table_name;
+  std::vector<SQLColumn> columns;
+  /* TODO: Change code to reflect new struct, the below are deprecated */
   std::vector<std::string> column_names;
   std::vector<SQLType> column_types;
   std::vector<SQLConstraint> column_constraints;
