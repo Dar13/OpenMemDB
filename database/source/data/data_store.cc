@@ -3,12 +3,12 @@
 
 
 //creates an empty table
-void DataStore::createTable(CreateTableCommand table_info)
+DataStore::Error DataStore::createTable(CreateTableCommand table_info)
 {
-    if(table_info.columns.size() > 0) //this should be <= correct?
+    if(table_info.columns.size() <= 0)
     {
         // TODO: Returns an error code, statement cannot execute
-        return;
+        return INVALID_SCHEMA;
     }
 
     TableSchema* schema = new TableSchema;
@@ -18,70 +18,85 @@ void DataStore::createTable(CreateTableCommand table_info)
     // have a constraint.
     for(uint32_t i = 0; i < table_info.columns.size(); i++)
     {
-        TervelWrapper<SQLColumn> terv_column = table_info.columns[i];
-
         // TODO: Handle return value
-        schema->columns.push_back(terv_column);
+        schema->columns.push_back(table_info.columns[i]);
     }
 
     DataTable* new_table = new DataTable();
 
-    SchemaTablePair pair = { new_table, schema};
+    SchemaTablePair* pair = new SchemaTablePair(new_table, schema);
 
     table_name_mapping.insert( table_info.table_name, pair);
 
+    return SUCCESS;
 }
 
-DataStore::ERROR DataStore::deleteTable(std::string table_name)
+DataStore::Error DataStore::deleteTable(std::string table_name)
 {
-	//returns false is the key cannot be found or access_counter is non-zero
+    // TODO: What does access_counter != 0 mean?
+    // Remove the 
 	if(!table_name_mapping.remove(table_name))
-		return MISSING_TABLE;
+    {
+		return INVALID_TABLE;
+    }
+
 	//TODO: may need to return a success code
+    return SUCCESS;
 }
 
-DataTable *getTable(std::string table_name)
+DataTable *DataStore::getTable(std::string table_name)
 {
 	//Tervel hashmap seems to use get_position for the key value
 	//at seems to be the function to use but the valueaccessor parameter 
 	//wants the address of the value
 
-	return &table_name_mapping.get(table_name); //returns pair
+    TableMap::ValueAccessor value;
+    if(table_name_mapping.at(table_name,value))
+    {
+        if(value.valid())
+        {
+            SchemaTablePair* pair = *value.value();
+            return pair->table;
+        }
+
+        return nullptr;
+    }
+
+    return nullptr;
 }
 
-TableSchema *getTableSchema(std::string table_name)
+TableSchema *DataStore::getTableSchema(std::string table_name)
 {
-	//assuming getTable works
-	return &(getTable(table_name).second; //returns the schema from the pair
-	//TODO: need error checking
+    SchemaTablePair* table_pair;
+    TableMap::ValueAccessor value;
+    if(table_name_mapping.at( table_name, value))
+    {
+        if(value.valid())
+        {
+            table_pair = *value.value();
+            return table_pair->schema;
+        }
+
+        return nullptr;
+    }
+
+    return nullptr;
 }
 
-DataTableRecord& getRow(std::string table_name, uint32_t row_id)
+DataStore::Error DataStore::getRow(std::string table_name, uint32_t row_id, Record** record)
 {
-	return &(getTable(table_name).first.at(row_id));
-}
+    DataTable* table = getTable(table_name);
 
-//returns a column based off the column_id offset using table schema
-//this returns an vector that is built from rows, this needs to be deleted
-//afterward
-DataTableColumn& getColumn(std::string table_name, uint32_t column_id)
-{
-	DataTable *table = getTable(table_name);
-	int table_size = table.size();
-	DataTableColumn column = new DataTableColumn(); 
-	for(uint32_t i = 0; i < table_size; i++)
-	{
-		//finds the row and inserts the data from column_id into column vector
-		column.push_back(getRow(table_name, i).at(column_id));
-	}
-	return &column; //this needs to be deleted and/or returns
-			//in such a way that there is no memory leak 
-}
+    // TODO: Need to do std::atomic<>.load() on table
 
-void insertRow(std::string table_name, DataTableRecord row)
-{
-	DataTable *table = getTable(table_name);
-	table.push_back(row);
-}
+    Record* req_record;
+    if(table != nullptr && table->at(row_id, req_record))
+    {
+        // TODO: Replace with std::atomic<>.load() on the record
+        *record = req_record;
+        return SUCCESS;
+    }
 
+    return INVALID_TABLE;
+}
 

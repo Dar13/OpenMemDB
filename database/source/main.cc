@@ -17,7 +17,7 @@ int main(int argc, char** argv)
   setupTokenMappings();
   parse("CREATE TABLE test (user_id INTEGER, is_admin BOOLEAN);");
 
-  data_store data;
+  DataStore data;
 
   return 1;
 

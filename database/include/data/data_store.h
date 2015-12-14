@@ -16,45 +16,38 @@
 #include "util/types.h"
 #include "hash_functor.h"
 
-//error codes to report problems in data store
-enum ERROR
-{
-	MEM_FULL, //data store cannot allocate anymore memory
-	SCHEMA_MISMATCH, //cannot insert row into table because schema does not match with table schema
-	SCHEMA_EMPTY, //cannot add an empty schema into table, must be a size greater than 0
-	MISSING_TABLE, //table not found in look up table hash map
-	
-};
 
 
 // Some typedefs(C++11-style) so that we don't have all that meaningless
 // namespace and template junk pop up everywhere.
 // Table data definitions
-using DataVariant = boost::variant<SQLBoolean, SQLDate, SQLTime, SQLTimestamp,
-                                  SQLSmallInt, SQLInteger, SQLBigInt>;
 
-using TervDataVariant = TervelWrapper<DataVariant>;
-using DataTableRecord = TervelWrapper<tervel::containers::wf::vector::Vector<TervDataVariant>>;
-using DataTable = tervel::containers::wf::vector::Vector<DataTableRecord>;
-using DataTableColumn = tervel::containers::wf:vector::Vector<TervelWrapper<SQColumn>>;
+using Data = boost::variant<SQLBoolean, SQLDate, SQLTime, SQLTimestamp, SQLSmallInt, SQLInteger, SQLBigInt>;
+
+using Record = std::vector<Data>;
+
+using DataTable = tervel::containers::wf::vector::Vector<Record*>;
+
 // Schema definition
 struct TableSchema
 {
-    DataTableColumn columns;
+    std::vector<SQLColumn> columns;
 };
 
 struct SchemaTablePair
 {
+    SchemaTablePair(DataTable* t, TableSchema* s)
+        : table(t), schema(s)
+    {}
+
     DataTable* table;
     TableSchema* schema;
 };
 
-
-
 // The mack-daddy, the mapping of table names to tables/schemas.
 using TableMap = tervel::containers::wf::HashMap<std::string, 
-                                                 SchemaTablePair, 
-                                                 TableHashFunctor<std::string, SchemaTablePair>>;
+                                                 SchemaTablePair*, 
+                                                 TableHashFunctor<std::string, SchemaTablePair*>>;
 
 
 
@@ -64,29 +57,27 @@ using TableMap = tervel::containers::wf::HashMap<std::string,
 class DataStore
 {
 public:
-    	//error codes to report problems in data store
-	enum ERROR
-	{
-	        MEM_FULL, //data store cannot allocate anymore memory
-        	SCHEMA_MISMATCH, //cannot insert row into table because schema does not match with table schema
-       	 	SCHEMA_EMPTY, //cannot add an empty schema into table, must be a size greater than 0
-       		 MISSING_TABLE, //table not found in look up table hash map
-	};
+    enum Error : uint32_t
+    {
+        SUCCESS = 0,
+        MEM_ALLOC,
+        INVALID_SCHEMA,
+        INVALID_TABLE
+    };
 
-    DataStore();
+    // TODO: Fix this
+    DataStore() {}
 
-    void createTable(CreateTableCommand table_info);
+    Error createTable(CreateTableCommand table_info);
 
-    void deleteTable(std::string table_name);
+    Error deleteTable(std::string table_name);
 
     DataTable* getTable(std::string table_name);
 
     TableSchema* getTableSchema(std::string table_name);
 
-    DataTableRecord& getRow(std::string table_name, uint32_t row_id);
+    Error getRow(std::string table_name, uint32_t row_id, Record** record);
 
-    void insertRow(std::string table_name, SQLColumn column);
-    
 private:
     TableMap table_name_mapping;
 };
