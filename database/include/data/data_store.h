@@ -16,15 +16,11 @@
 #include "util/types.h"
 #include "hash_functor.h"
 
-
-
 // Some typedefs(C++11-style) so that we don't have all that meaningless
 // namespace and template junk pop up everywhere.
 // Table data definitions
 
-using Data = boost::variant<SQLBoolean, SQLDate, SQLTime, SQLTimestamp, SQLSmallInt, SQLInteger, SQLBigInt>;
-
-using Record = std::vector<Data>;
+using Record = tervel::containers::wf::vector::Vector<Data>;
 
 using DataTable = tervel::containers::wf::vector::Vector<Record*>;
 
@@ -54,6 +50,9 @@ using TableMap = tervel::containers::wf::HashMap<std::string,
 // TODO: An interface into the above defined types, as well as the management
 //       of that memory.
 
+/**
+ *  @brief The interface into the data that is shared between all worker threads.
+ */
 class DataStore
 {
 public:
@@ -66,7 +65,9 @@ public:
     };
 
     // TODO: Fix this
-    DataStore() {}
+    DataStore()
+        : table_name_mapping(64)
+    {}
 
     Error createTable(CreateTableCommand table_info);
 
