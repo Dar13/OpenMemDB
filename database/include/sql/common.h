@@ -9,19 +9,10 @@
 
 #include <string>
 
-typedef std::string* SQLToken;
+// Project includes
+#include <util/types.h>
 
-enum class SQLType : uint16_t
-{
-  NONE = 0,
-  SMALLINT,
-  INTEGER,
-  BIGINT,
-  BOOLEAN,
-  DATE,
-  TIME,
-  TIMESTAMP
-};
+typedef std::string* SQLToken;
 
 enum class SQLStatement : uint16_t
 {
@@ -103,7 +94,7 @@ struct SQLConstraint
 {
   SQLConstraintType type;
   uint16_t column_idx;
-  // TODO: DataVariant value;
+  Data value;
   const char* ref_table;
   uint16_t ref_column_idx;
 };
@@ -112,7 +103,7 @@ struct SQLConstraint
 struct SQLColumn
 {
     std::string name;
-    SQLType type;
+    DataType type;
     SQLConstraint constraint;
 };
 

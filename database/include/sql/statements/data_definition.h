@@ -9,6 +9,7 @@
 
 // Project includes
 #include "sql/common.h"
+#include "util/types.h"
 
 struct CreateTableCommand
 {
@@ -16,7 +17,7 @@ struct CreateTableCommand
   std::vector<SQLColumn> columns;
   /* TODO: Change code to reflect new struct, the below are deprecated */
   std::vector<std::string> column_names;
-  std::vector<SQLType> column_types;
+  std::vector<DataType> column_types;
   std::vector<SQLConstraint> column_constraints;
 };
 

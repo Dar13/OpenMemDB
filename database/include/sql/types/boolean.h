@@ -7,29 +7,32 @@
 
 #include <sql/common.h>
 
-enum BooleanValue
+#include <util/types.h>
+
+enum BooleanValue : uint8_t
 {
-  SQL_FALSE = 0,
-  SQL_TRUE = 1,
-  SQL_UNKNOWN = 2
+    SQL_FALSE = 0,
+    SQL_TRUE = 1,
+    SQL_UNKNOWN = 2
 };
 
 class SQLBoolean : public SQLNullable
 {
 public:
-  SQLBoolean();
-  SQLBoolean(const SQLBoolean& other);
-  SQLBoolean(SQLBoolean& other);
-  SQLBoolean(bool value);
-  SQLBoolean(BooleanValue value);
-  SQLBoolean(BooleanValue value, bool nullable);
-
-  //! Stores the tri-state boolean value.
-  BooleanValue m_value;
-
-  SQLBoolean& operator=(SQLBoolean other);
-
-  bool IsUnknown() const;
+    SQLBoolean();
+    SQLBoolean(const SQLBoolean& other);
+    SQLBoolean(SQLBoolean& other);
+    SQLBoolean(bool value);
+    SQLBoolean(Data value);
+    SQLBoolean(BooleanValue value);
+    SQLBoolean(BooleanValue value, bool nullable);
+  
+    //! Stores the tri-state boolean value.
+    BooleanValue m_value;
+  
+    SQLBoolean& operator=(SQLBoolean other);
+  
+    bool IsUnknown() const;
 private:
 };
 

@@ -5,23 +5,9 @@
 #ifndef OMDB_UTIL_TYPES_H
 #define OMDB_UTIL_TYPES_H
 
-/**
- *  @brief Templated wrapper class that should handle Tervel's bit-fiddling
- *         graciously.
- *
- *  @detail This avoid both bitfields and bit-shifting and is both more
- *          generic and powerful, as template specializations are possible
- *          but probably not needed.
- */
-template <class T>
-struct TervelWrapper
+enum DataType : int8_t
 {
-    uint8_t reserved;
-    T data;
-};
-
-enum DataType : uint8_t
-{
+    NONE = -1,
     BOOLEAN = 0,
     SMALL_INT,
     INTEGER,
@@ -39,31 +25,38 @@ enum DataType : uint8_t
 union Data
 {
     // Any warnings thrown from this line need to carefully evaluated.
-    // This currently holds values up to 7, and the max value defined in DataType
+    // This currently holds values up to 7, and the maximum value defined in DataType
     // is 6.
     DataType type : 3;
+    uint64_t null : 1;
+
+    struct
+    {
+        uint64_t data : 2;
+        uint64_t pad : 57;
+    } boolean_data;
 
     struct
     {
         float data;
-        uint64_t pad : 26;
+        uint64_t pad : 25;
     } float_data;
 
     struct
     {
         uint16_t data;
-        uint64_t pad : 42;
+        uint64_t pad : 41;
     } short_data;
     
     struct
     {
         uint32_t data;
-        uint64_t pad : 26;
+        uint64_t pad : 25;
     } int_data;
 
     struct
     {
-        uint64_t data : 58;
+        uint64_t data : 57;
     } long_data;
 
     struct
@@ -71,7 +64,7 @@ union Data
         uint16_t year;
         uint8_t month;
         uint8_t day;
-        uint64_t pad : 26;
+        uint64_t pad : 25;
     } date_data;
 
     struct
@@ -81,7 +74,7 @@ union Data
         uint8_t second;
         int8_t tz_hour;
         int8_t tz_minute;
-        uint64_t pad : 18;
+        uint64_t pad : 17;
     } time_data;
 
 // Apparently the attribute is unnecessary.

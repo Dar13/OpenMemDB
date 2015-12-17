@@ -47,9 +47,6 @@ using TableMap = tervel::containers::wf::HashMap<std::string,
 
 
 
-// TODO: An interface into the above defined types, as well as the management
-//       of that memory.
-
 /**
  *  @brief The interface into the data that is shared between all worker threads.
  */
@@ -64,7 +61,6 @@ public:
         INVALID_TABLE
     };
 
-    // TODO: Fix this
     DataStore()
         : table_name_mapping(64)
     {}

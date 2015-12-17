@@ -17,34 +17,36 @@
 #include "data_definition.h"
 #include "data_manipulation.h"
 
+#include "util/types.h"
+
 struct StatementBuilder
 {
-  StatementBuilder()
-    : type(SQLStatement::INVALID), statement(nullptr)
-  {}
-
-  SQLStatement type;
-  void* statement;
+    StatementBuilder()
+        : type(SQLStatement::INVALID), statement(nullptr)
+    {}
+  
+    SQLStatement type;
+    void* statement;
 };
 
 enum class ExprFlags : uint32_t
 {
-  EMPTY       = 0x0,
-  COLUMN_REF  = 0x1,
-  LITERAL     = 0x2,
-  COMPOUND    = 0x4
+    EMPTY       = 0x0,
+    COLUMN_REF  = 0x1,
+    LITERAL     = 0x2,
+    COMPOUND    = 0x4
 };
 
 struct Expression
 {
-  Expression* left;
-  Expression* right;
-  ExpressionOperation op;
-
-  ExprFlags flags;
-
-  SQLType value_type;
-  void* value;
+    Expression* left;
+    Expression* right;
+    ExpressionOperation op;
+  
+    ExprFlags flags;
+  
+    DataType value_type;
+    void* value;
 };
 
 // Table management functions
