@@ -41,13 +41,31 @@ void builderStartSelectQuery(StatementBuilder* builder)
 // SELECT helper functions ////////////////////////////////////////////////////
 void builderAddSelectAllColumns(StatementBuilder* builder, SQLToken table)
 {
+    // Don't want to override a currently active statement
+    if(builder->type == SQLStatement::INVALID &&
+       builder->statement == nullptr)
+    {
+        builderStartSelectQuery(builder);
+    }
+
+    if(builder->type != SQLStatement::SELECT)
+    {
+        // Error!
+        printf("Statement is already being built!\n");
+        return;
+    }
+
     // TODO: Add all columns in the given table to this query
+
+    printf("AddSelectAllColumns called\n");
 }
 
 void builderAddQualifiedSelectColumn(StatementBuilder* builder,
                                      SQLToken table, SQLToken source_column,
                                      SQLToken output_column)
 {
+    // This means the output column should be named the same as the 
+    // source column
     if(output_column == nullptr)
     {
         output_column = source_column;
@@ -55,16 +73,19 @@ void builderAddQualifiedSelectColumn(StatementBuilder* builder,
   
     /* TODO: Calculate source_column's index within the given table */
     ColumnReference source;
+    source.table = *table;
   
-    if(builder->type != SQLStatement::SELECT)
+    if(builder->type != SQLStatement::SELECT && builder->statement == nullptr)
     {
-        printf("Invalid command!\n");
-        return;
+        // Start the SELECT statement then
+        builderStartSelectQuery(builder);
     }
   
     SelectQuery* query = reinterpret_cast<SelectQuery*>(builder->statement);
   
+    // Push the previously calculated stuff into the query object
     query->source_columns.push_back(source);
+
     query->output_columns.push_back(*output_column);
 }
 
@@ -137,6 +158,17 @@ void builderAddColumnType(StatementBuilder* builder, std::string* column_type)
 void builderAddExpressions(StatementBuilder* builder,
                            SQLToken left, SQLToken right, SQLToken op)
 {
+}
+
+void builderClean(StatementBuilder* builder)
+{
+    // DEBUG
+    printf("builderClean called\n");
+
+    delete builder->statement;
+
+    builder->statement = nullptr;
+    builder->type = SQLStatement::INVALID;
 }
 
 DataType getSQLType(std::string* type)

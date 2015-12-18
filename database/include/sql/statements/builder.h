@@ -69,4 +69,8 @@ void builderAddTableName(StatementBuilder* builder, SQLToken table_name);
 void builderAddExpressions(StatementBuilder* builder,
                            SQLToken left, SQLToken right, SQLToken op);
 
+
+// Overall builder management
+void builderClean(StatementBuilder* builder);
+
 #endif

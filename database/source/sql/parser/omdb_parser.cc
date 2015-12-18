@@ -26,14 +26,38 @@ void parse(std::string input)
   Parse(parser, 0, nullptr, &builder);
   ParseFree(parser, free);
 
-  CreateTableCommand* create_command = (CreateTableCommand*)builder.statement;
-  if(create_command == nullptr)
+  if(builder.statement == nullptr)
   {
-    printf("Command not created\n");
+      printf("Failed to parse statement!\n");
   }
   else
   {
-    printf("Parse successful\n");
+      printf("Statement parse was successful!\n");
+  }
+
+  switch(builder.type)
+  {
+      case SQLStatement::CREATE_TABLE:
+      {
+          CreateTableCommand* create = reinterpret_cast<CreateTableCommand*>(builder.statement);
+      }
+          break;
+      case SQLStatement::DROP_TABLE:
+      {
+          DropTableCommand* drop = reinterpret_cast<DropTableCommand*>(builder.statement);
+      }
+          break;
+      case SQLStatement::SELECT:
+      {
+          SelectQuery* query = reinterpret_cast<SelectQuery*>(builder.statement);
+      }
+          break;
+      // TODO: The other statements
+      case SQLStatement::UPDATE:
+      case SQLStatement::INSERT_INTO:
+      case SQLStatement::DELETE:
+      default:
+          break;
   }
 }
 
@@ -103,6 +127,14 @@ std::vector<TokenPair> tokenize(std::string input)
           case ',':
             pair.token = new std::string(",");
             pair.token_type = TK_COMMA;
+            break;
+          case '.':
+            pair.token = new std::string(".");
+            pair.token_type = TK_DOT;
+            break;
+          case '*':
+            pair.token = new std::string("*");
+            pair.token_type = TK_ASTERISK;
             break;
           default:
             pair.token = new std::string("ILLEGAL");

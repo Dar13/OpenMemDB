@@ -20,6 +20,7 @@
 
 %parse_failure {
   printf("Parse failed!\n");
+  builderClean(builder);
 }
 
 %parse_accept {
@@ -99,9 +100,7 @@ cmd ::= DROP TABLE name(A). {builderStartDropTable(builder, A);}
 
 // SELECT STATEMENT ///////////////////////////////////////////////////////////
 
-cmd ::= SELECT set_quantifier select_columns select_table.  {
-    builderStartSelectQuery(builder);
-}
+cmd ::= SELECT set_quantifier select_columns select_table.
 
 set_quantifier ::= DISTINCT|ALL.
 set_quantifier ::= .
@@ -114,7 +113,7 @@ select_column ::= name(X) DOT name(Y) as_clause(Z). {
   builderAddQualifiedSelectColumn(builder, X, Y, Z);
 }
 
-as_clause(A) ::= AS name(X).  { X = A; }
+as_clause(A) ::= AS name(X).  { A = X; }
 as_clause(A) ::= .            { A = nullptr; }
 
 select_table ::= FROM table_references where_clause group_by_clause.

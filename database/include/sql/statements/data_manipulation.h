@@ -9,6 +9,9 @@
 // Boost include
 #include <boost/variant.hpp>
 
+// Project includes
+#include "data/data_store.h"
+
 // Forward declaration
 struct Expression;
 
@@ -24,45 +27,45 @@ using ExpectedValue = boost::variant<S, RangeValue<S>>;
 
 enum class ExpressionOperation : int32_t
 {
-  NO_OP = 0,
-  EQUALS,
-  LESSER,
-  LESSER_EQUALS,
-  GREATER,
-  GREATER_EQUALS,
-  IN,
-  BETWEEN
+    NO_OP = 0,
+    EQUALS,
+    LESSER,
+    LESSER_EQUALS,
+    GREATER,
+    GREATER_EQUALS,
+    IN,
+    BETWEEN
 };
 
 struct BasePredicate
 {
-  /* TODO: Table* table */
-  uint32_t column_idx;
+    std::string table;
+    uint32_t column_idx;
 
-  ExpressionOperation operation;
+    ExpressionOperation operation;
 
-  /* TODO: bool evaluate(DataRecord& record);*/
+    /* TODO: bool evaluate(DataRecord& record);*/
 };
 
 template <class E>
 struct Predicate : public BasePredicate
 {
-  ExpectedValue<E> value;
+    ExpectedValue<E> value;
 };
 
 struct ColumnReference
 {
-  /* TODO: Table* table; */
-  uint32_t column_idx;
+    std::string table;
+    uint32_t column_idx;
 };
 
 struct SelectQuery
 {
-  /* TODO (if needed): std::vector<Table*> source_tables;*/
-  std::vector<ColumnReference> source_columns;
-  std::vector<std::string> output_columns;
-  std::vector<BasePredicate*> predicates;
-  Expression* expr;
+    /* TODO (if needed): std::vector<Table*> source_tables;*/
+    std::vector<ColumnReference> source_columns;
+    std::vector<std::string> output_columns;
+    std::vector<BasePredicate*> predicates;
+    Expression* expr;
 };
 
 // TODO: UPDATE, INSERT INTO & DELETE statements
