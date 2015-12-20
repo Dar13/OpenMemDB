@@ -55,7 +55,7 @@ void builderStartDropTable(StatementBuilder* builder, SQLToken table_name);
 
 // Query management function
 void builderStartSelectQuery(StatementBuilder* builder);
-void builderAddSelectPredicate(StatementBuilder* builder, SQLToken expr);
+void builderGeneratePredicates(StatementBuilder* builder);
 void builderAddSelectAllColumns(StatementBuilder* builder, SQLToken table);
 void builderAddQualifiedSelectColumn(StatementBuilder* builder,
                                      SQLToken table, SQLToken source_column,
@@ -66,9 +66,9 @@ void builderFinishSelectQuery(StatementBuilder* builder);
 void builderAddColumnName(StatementBuilder* builder, SQLToken column_name);
 void builderAddColumnType(StatementBuilder* builder, SQLToken column_type);
 void builderAddTableName(StatementBuilder* builder, SQLToken table_name);
-void builderAddExpressions(StatementBuilder* builder,
-                           SQLToken left, SQLToken right, SQLToken op);
-
+void builderStartNestedExpr(StatementBuilder* builder, SQLToken operation);
+void builderAddValueExpr(StatementBuilder* builder,
+        SQLToken operation, SQLToken left_term, SQLToken right_term);
 
 // Overall builder management
 void builderClean(StatementBuilder* builder);

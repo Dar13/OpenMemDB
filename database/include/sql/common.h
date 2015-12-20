@@ -50,6 +50,11 @@ inline bool isSQLSymbolChar(unsigned char ch)
   return (sql_ascii_map[ch] & SQL_SYMBOL) != 0;
 }
 
+inline bool isSQLNumericChar(unsigned char ch)
+{
+    return (sql_ascii_map[ch] & SQL_DIGIT) != 0;
+}
+
 int strnicmp(const char* left, const char* right, int n);
 
 /**

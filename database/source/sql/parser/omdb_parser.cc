@@ -11,54 +11,54 @@ static thread_local StatementBuilder builder;
 
 void parse(std::string input)
 {
-  void* parser = ParseAlloc(malloc);
+    void* parser = ParseAlloc(malloc);
 
-  Token token;
-  int token_id = 0;
+    Token token;
+    int token_id = 0;
 
-  // Tokenize the input string
-  std::vector<TokenPair> tokens = tokenize(input);
+    // Tokenize the input string
+    std::vector<TokenPair> tokens = tokenize(input);
 
-  for(auto token_pair : tokens)
-  {
-    Parse(parser, token_pair.token_type, token_pair.token, &builder);
-  }
-  Parse(parser, 0, nullptr, &builder);
-  ParseFree(parser, free);
+    for(auto token_pair : tokens)
+    {
+        Parse(parser, token_pair.token_type, token_pair.token, &builder);
+    }
+    Parse(parser, 0, nullptr, &builder);
+    ParseFree(parser, free);
 
-  if(builder.statement == nullptr)
-  {
-      printf("Failed to parse statement!\n");
-  }
-  else
-  {
-      printf("Statement parse was successful!\n");
-  }
+    if(builder.statement == nullptr)
+    {
+        printf("Failed to parse statement!\n");
+    }
+    else
+    {
+        printf("Statement parse was successful!\n");
+    }
 
-  switch(builder.type)
-  {
-      case SQLStatement::CREATE_TABLE:
-      {
-          CreateTableCommand* create = reinterpret_cast<CreateTableCommand*>(builder.statement);
-      }
-          break;
-      case SQLStatement::DROP_TABLE:
-      {
-          DropTableCommand* drop = reinterpret_cast<DropTableCommand*>(builder.statement);
-      }
-          break;
-      case SQLStatement::SELECT:
-      {
-          SelectQuery* query = reinterpret_cast<SelectQuery*>(builder.statement);
-      }
-          break;
-      // TODO: The other statements
-      case SQLStatement::UPDATE:
-      case SQLStatement::INSERT_INTO:
-      case SQLStatement::DELETE:
-      default:
-          break;
-  }
+    switch(builder.type)
+    {
+        case SQLStatement::CREATE_TABLE:
+        {
+            CreateTableCommand* create = reinterpret_cast<CreateTableCommand*>(builder.statement);
+        }
+            break;
+        case SQLStatement::DROP_TABLE:
+        {
+            DropTableCommand* drop = reinterpret_cast<DropTableCommand*>(builder.statement);
+        }
+            break;
+        case SQLStatement::SELECT:
+        {
+            SelectQuery* query = reinterpret_cast<SelectQuery*>(builder.statement);
+        }
+            break;
+        // TODO: The other statements
+        case SQLStatement::UPDATE:
+        case SQLStatement::INSERT_INTO:
+        case SQLStatement::DELETE:
+        default:
+            break;
+    }
 }
 
 void token_print(Token token)
@@ -107,6 +107,30 @@ std::vector<TokenPair> tokenize(std::string input)
     }
     else
     {
+        if(isSQLNumericChar(*itr))
+        {
+            std::string::iterator next = itr + 1;
+
+            while(next != input.end() && (isSQLNumericChar(*next) || *next == '.'))
+            {
+                next++;
+            }
+
+            pair.token = new std::string(itr, next);
+            if(pair.token->find('.') != std::string::npos)
+            {
+                pair.token_type = TK_INTEGER;
+            }
+            else
+            {
+                pair.token_type = TK_FLOAT;
+            }
+
+            itr = next;
+            tokens.push_back(pair);
+            continue;
+        }
+            
       if(isSQLSymbolChar(*itr))
       {
         // Finish out the symbol
@@ -135,6 +159,46 @@ std::vector<TokenPair> tokenize(std::string input)
           case '*':
             pair.token = new std::string("*");
             pair.token_type = TK_ASTERISK;
+            break;
+          case '=':
+            pair.token = new std::string("=");
+            pair.token_type = TK_EQ;
+            break;
+          case '!':
+            if(*(itr + 1) == '=')
+            {
+                pair.token = new std::string("!=");
+                pair.token_type = TK_NE;
+            }
+            else
+            {
+                pair.token = new std::string("!");
+                pair.token_type = TK_NOT;
+            }
+            break;
+          case '<':
+            if(*(itr + 1) == '=')
+            {
+                pair.token = new std::string("<=");
+                pair.token_type = TK_LE;
+            }
+            else
+            {
+                pair.token = new std::string("<");
+                pair.token_type = TK_LT;
+            }
+            break;
+          case '>':
+            if(*(itr + 1) == '=')
+            {
+                pair.token = new std::string(">=");
+                pair.token_type = TK_GE;
+            }
+            else
+            {
+                pair.token = new std::string(">");
+                pair.token_type = TK_GT;
+            }
             break;
           default:
             pair.token = new std::string("ILLEGAL");
@@ -168,4 +232,6 @@ void setupTokenMappings()
   keywords["NOT"] = TK_NOT;
   keywords["NULL"] = TK_NULL;
   keywords["DEFAULT"] = TK_DEFAULT;
+  keywords["AND"] = TK_AND;
+  keywords["OR"] = TK_OR;
 }

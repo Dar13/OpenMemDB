@@ -75,7 +75,7 @@ column_args ::= .
 
 column_constraints ::= DEFAULT LPAREN expr(X) RPAREN. {X; printf("col_const\n");}
 column_constraints ::= DEFAULT term(X).               {X; printf("col_const\n");}
-column_constraints ::= DEFAULT id(X).                 {X; printf("col_const\n");}
+//column_constraints ::= DEFAULT id(X).                 {X; printf("col_const\n");}
 
 column_constraints ::= NOT NULL.        {printf("Token: NOT NULL\n");}
 column_constraints ::= UNIQUE.          {printf("Token: UNIQUE\n");}
@@ -85,14 +85,15 @@ column_constraints ::= AUTO_INCREMENT.  {printf("Token: AUTO_INCREMENT\n");}
 %left OR.
 %left AND.
 %right NOT.
-%left BETWEEN IN NE EQ.
+%left BETWEEN IN ISNULL NOTNULL NE EQ.
 %left GT LE LT GE.
 
-expr(A) ::= expr(X) AND|OR(OP) expr(Y).       { A; builderAddExpressions(builder, X, Y, OP); }
-expr(A) ::= expr(X) LT|GT|GE|LE(OP) expr(Y).  { A; builderAddExpressions(builder, X, Y, OP); }
-expr(A) ::= expr(X) EQ|NE(OP) expr(Y).        { A; builderAddExpressions(builder, X, Y, OP); }
+expr ::= expr AND|OR(OP) expr. { builderStartNestedExpr(builder, OP);}
+expr ::= term(X) NE|EQ(OP) term(Y). { builderAddValueExpr(builder, OP, X, Y); }
 
-term(A) ::= .   {A; printf("term\n");}
+term(A) ::= name(X) DOT column_id(Y). { (void)A; (void)X; (void)Y; }
+term(A) ::= column_id(X). { (void)A; (void)X; printf("expression term \n"); }
+term(A) ::= INTEGER|FLOAT.{ (void)A; }
 
 // DROP TABLE STATEMENT ///////////////////////////////////////////////////////
 
@@ -114,7 +115,7 @@ select_column ::= name(X) DOT name(Y) as_clause(Z). {
 }
 
 as_clause(A) ::= AS name(X).  { A = X; }
-as_clause(A) ::= .            { A = nullptr; }
+as_clause(A) ::= .            { A = nullptr; printf("Empty AS\n"); }
 
 select_table ::= FROM table_references where_clause group_by_clause.
 select_table ::= FROM name(A).  { A; }
@@ -123,16 +124,17 @@ table_references ::= table_references COMMA table_reference.
 table_references ::= table_reference.
 
 // TODO: consider other clauses
-table_reference ::= name(X) as_clause(Y). {X; Y;}
+table_reference ::= name(X) as_clause(Y). {X; Y; printf("Table reference\n"); }
+table_reference ::= . { printf("Empty table reference\n"); }
 
-where_clause ::= WHERE search_condition.
+where_clause ::= WHERE search_condition. { printf("WHERE clause\n"); }
 
 group_by_clause ::= .
 
 // TODO: consider other predicates
 search_condition ::= comparison_predicate.
 
-comparison_predicate ::= expr(X). { builderAddSelectPredicate(builder, X); }
+comparison_predicate ::= expr. { builderGeneratePredicates(builder); }
 
 // UPDATE STATEMENT ///////////////////////////////////////////////////////////
 

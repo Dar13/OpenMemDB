@@ -90,9 +90,9 @@ void builderAddQualifiedSelectColumn(StatementBuilder* builder,
     query->output_columns.push_back(*output_column);
 }
 
-void builderAddSelectPredicate(StatementBuilder* builder, SQLToken expr)
+void builderGeneratePredicates(StatementBuilder* builder)
 {
-    // TODO: Create a tree of Expression objects as needed
+    printf("Generating predicates for statement\n");
 }
 
 // Generic-ish helper functions ///////////////////////////////////////////////
@@ -156,9 +156,20 @@ void builderAddColumnType(StatementBuilder* builder, std::string* column_type)
     printf("Exiting builderAddColumnType\n");
 }
 
-void builderAddExpressions(StatementBuilder* builder,
-                           SQLToken left, SQLToken right, SQLToken op)
+void builderStartNestedExpr(StatementBuilder* builder, SQLToken operation)
 {
+    if(builder == nullptr)
+    {
+	return; 
+    }
+
+    printf("Starting nested expression: [%s]\n", operation->c_str());
+}
+
+void builderAddValueExpr(StatementBuilder* builder,
+	SQLToken operation, SQLToken left_term, SQLToken right_term)
+{
+    printf("Adding value expression\n");
 }
 
 void builderClean(StatementBuilder* builder)
