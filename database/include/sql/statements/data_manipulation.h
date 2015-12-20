@@ -6,51 +6,47 @@
 #include <vector>
 #include <string>
 
-// Boost include
-#include <boost/variant.hpp>
-
 // Project includes
 #include "data/data_store.h"
+
+#include "util/types.h"
 
 // Forward declaration
 struct Expression;
 
-template <typename T>
-struct RangeValue
+struct DataRange
 {
-  T start;
-  T end;
+    Data start;
+    Data end;
 };
 
-template <class S>
-using ExpectedValue = boost::variant<S, RangeValue<S>>;
+class ExpressionValue
+{
+public:
+    bool is_range;
+
+    Data getValue() { return value; }
+    DataRange getRange() { return (DataRange){range_start, range_end}; }
+
+private:
+    Data value;
+    Data range_start;
+    Data range_end;
+};
 
 enum class ExpressionOperation : int32_t
 {
     NO_OP = 0,
     EQUALS,
+    NOT_EQUALS,
     LESSER,
     LESSER_EQUALS,
     GREATER,
     GREATER_EQUALS,
     IN,
-    BETWEEN
-};
-
-struct BasePredicate
-{
-    std::string table;
-    uint32_t column_idx;
-
-    ExpressionOperation operation;
-
-    /* TODO: bool evaluate(DataRecord& record);*/
-};
-
-template <class E>
-struct Predicate : public BasePredicate
-{
-    ExpectedValue<E> value;
+    BETWEEN,
+    AND,
+    OR
 };
 
 struct ColumnReference
@@ -59,13 +55,45 @@ struct ColumnReference
     uint32_t column_idx;
 };
 
+struct Predicate
+{
+    // TODO: Do a profile run on this virtual, it may be too expensive
+    virtual bool evaluate();
+};
+
+struct NestedPredicate : public Predicate
+{
+    ExpressionOperation op;
+    Predicate* left_child;
+    Predicate* right_child;
+
+    bool evaluate();
+};
+
+struct ValuePredicate : public Predicate
+{
+    ExpressionOperation op;
+    ColumnReference column;
+    ExpressionValue expected_value;
+
+    bool evaluate();
+};
+
+struct ColumnPredicate : public Predicate
+{
+    ExpressionOperation op;
+    ColumnReference left_column;
+    ColumnReference right_column;
+
+    bool evaluate();
+};
+
 struct SelectQuery
 {
     /* TODO (if needed): std::vector<Table*> source_tables;*/
     std::vector<ColumnReference> source_columns;
     std::vector<std::string> output_columns;
-    std::vector<BasePredicate*> predicates;
-    Expression* expr;
+    std::vector<Predicate*> predicates;
 };
 
 // TODO: UPDATE, INSERT INTO & DELETE statements

@@ -29,7 +29,7 @@ struct StatementBuilder
     void* statement;
 };
 
-enum class ExprFlags : uint32_t
+enum class ExpressionFlags : uint32_t
 {
     EMPTY       = 0x0,
     COLUMN_REF  = 0x1,
@@ -43,10 +43,10 @@ struct Expression
     Expression* right;
     ExpressionOperation op;
   
-    ExprFlags flags;
+    ExpressionFlags flags;
   
     DataType value_type;
-    void* value;
+    Data value;
 };
 
 // Table management functions

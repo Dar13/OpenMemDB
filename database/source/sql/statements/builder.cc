@@ -71,9 +71,10 @@ void builderAddQualifiedSelectColumn(StatementBuilder* builder,
         output_column = source_column;
     }
   
-    /* TODO: Calculate source_column's index within the given table */
     ColumnReference source;
     source.table = *table;
+    /* TODO: Calculate source_column's index within the given table */
+    source.column_idx = 0;
   
     if(builder->type != SQLStatement::SELECT && builder->statement == nullptr)
     {
@@ -83,7 +84,7 @@ void builderAddQualifiedSelectColumn(StatementBuilder* builder,
   
     SelectQuery* query = reinterpret_cast<SelectQuery*>(builder->statement);
   
-    // Push the previously calculated stuff into the query object
+    // Push the previously calculated information into the query object
     query->source_columns.push_back(source);
 
     query->output_columns.push_back(*output_column);
