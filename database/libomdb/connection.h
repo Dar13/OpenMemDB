@@ -102,7 +102,7 @@ namespace libomdb{
      * @param query The query to execute
      * @return A ResultSet representing the results of the query.
      */
-    libmem::ResultSet executeQuery(std::string query);
+    libomdb::Result executeQuery(std::string query);
     
 
     /**
