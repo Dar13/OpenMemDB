@@ -38,7 +38,7 @@ namespace libomdb {
   typedef std::vector<int64_t> ResultRow;
 
   typedef struct MetaDataColumn {
-    std::string name;
+    std::string label;
     SQL_TYPE type; //TODO Make this a SQL_TYPE from Neils types     
   } MetaDataColumn;
 
@@ -77,7 +77,7 @@ namespace libomdb {
    private:
     
     /** The actual meta data */
-    std::vector<MetaDataColumn> data;   
+    std::vector<MetaDataColumn> m_data;   
   };
 
   
