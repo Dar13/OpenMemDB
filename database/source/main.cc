@@ -16,7 +16,7 @@ int main(int argc, char** argv)
 {
   setupTokenMappings();
   //parse("CREATE TABLE test (user_id INTEGER, is_admin BOOLEAN);");
-  parse("SELECT A.* FROM A WHERE x = 1;");
+  parse("SELECT A.* FROM A WHERE A.x = 1;");
 
   DataStore data;
 

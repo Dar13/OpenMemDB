@@ -35,7 +35,7 @@ cmd_list ::= end_cmd.
 end_cmd ::= SEMICOLON.  { printf("semicolon found\n");}
 end_cmd ::= explain cmdx SEMICOLON. { printf("command found and semicolon found\n");}
 
-explain ::= . { printf("explain\n"); }
+explain ::= . { }
 
 cmdx ::= cmd.
 
@@ -91,9 +91,18 @@ column_constraints ::= AUTO_INCREMENT.  {printf("Token: AUTO_INCREMENT\n");}
 expr ::= expr AND|OR(OP) expr. { builderStartNestedExpr(builder, OP);}
 expr ::= term(X) NE|EQ(OP) term(Y). { builderAddValueExpr(builder, OP, X, Y); }
 
-term(A) ::= name(X) DOT column_id(Y). { (void)A; (void)X; (void)Y; }
-term(A) ::= column_id(X). { (void)A; (void)X; printf("expression term \n"); }
-term(A) ::= INTEGER|FLOAT.{ (void)A; }
+term(A) ::= name(X) DOT column_id(Y). { 
+    std::string* tmp = new (std::nothrow) std::string();
+    // TODO: Error handling
+    *tmp = (*X->text + "." + *Y->text);
+    A = new (std::nothrow) TokenData(tmp, X->text, Y->text);
+    // TODO: Error handling
+}
+term(A) ::= column_id(X). { (void)A; (void)X; printf("expression term\n"); }
+term(A) ::= INTEGER|FLOAT(X).
+{ 
+  A = X;
+}
 
 // DROP TABLE STATEMENT ///////////////////////////////////////////////////////
 

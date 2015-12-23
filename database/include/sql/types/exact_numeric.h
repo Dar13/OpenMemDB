@@ -11,10 +11,6 @@
 
 #include <util/types.h>
 
-typedef uint16_t SQLSmallIntType;
-typedef uint32_t SQLIntegerType;
-typedef uint64_t SQLBigIntType;
-
 template <typename T>
 class SQLExactNumeric : public SQLNullable
 {

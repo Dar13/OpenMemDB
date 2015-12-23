@@ -19,26 +19,21 @@
 
 #include "util/types.h"
 
-struct StatementBuilder
-{
-    StatementBuilder()
-        : type(SQLStatement::INVALID), statement(nullptr)
-    {}
-  
-    SQLStatement type;
-    void* statement;
-};
-
 enum class ExpressionFlags : uint32_t
 {
     EMPTY       = 0x0,
-    COLUMN_REF  = 0x1,
-    LITERAL     = 0x2,
-    COMPOUND    = 0x4
+    COLUMN      = 0x1,
+    VALUE       = 0x2,
+    OPERATION   = 0x4,
+    NESTED      = 0x8
 };
 
 struct Expression
 {
+    Expression() 
+        : left(nullptr), right(nullptr), 
+          op(ExpressionOperation::NO_OP), flags(ExpressionFlags::EMPTY) 
+    {}
     Expression* left;
     Expression* right;
     ExpressionOperation op;
@@ -49,26 +44,37 @@ struct Expression
     Data value;
 };
 
+struct StatementBuilder
+{
+    StatementBuilder()
+        : type(SQLStatement::INVALID), statement(nullptr)
+    {}
+  
+    SQLStatement type;
+    void* statement;
+    Expression* expr_tree;
+};
+
 // Table management functions
-void builderStartCreateTable(StatementBuilder* builder, SQLToken table_name);
-void builderStartDropTable(StatementBuilder* builder, SQLToken table_name);
+void builderStartCreateTable(StatementBuilder* builder, Token table_name);
+void builderStartDropTable(StatementBuilder* builder, Token table_name);
 
 // Query management function
 void builderStartSelectQuery(StatementBuilder* builder);
 void builderGeneratePredicates(StatementBuilder* builder);
-void builderAddSelectAllColumns(StatementBuilder* builder, SQLToken table);
+void builderAddSelectAllColumns(StatementBuilder* builder, Token table);
 void builderAddQualifiedSelectColumn(StatementBuilder* builder,
-                                     SQLToken table, SQLToken source_column,
-                                     SQLToken output_column);
+                                     Token table, Token source_column,
+                                     Token output_column);
 void builderFinishSelectQuery(StatementBuilder* builder);
 
 // Somewhat generic helper functions
-void builderAddColumnName(StatementBuilder* builder, SQLToken column_name);
-void builderAddColumnType(StatementBuilder* builder, SQLToken column_type);
-void builderAddTableName(StatementBuilder* builder, SQLToken table_name);
-void builderStartNestedExpr(StatementBuilder* builder, SQLToken operation);
+void builderAddColumnName(StatementBuilder* builder, Token column_name);
+void builderAddColumnType(StatementBuilder* builder, Token column_type);
+void builderAddTableName(StatementBuilder* builder, Token table_name);
+void builderStartNestedExpr(StatementBuilder* builder, Token operation);
 void builderAddValueExpr(StatementBuilder* builder,
-        SQLToken operation, SQLToken left_term, SQLToken right_term);
+        Token operation, Token left_term, Token right_term);
 
 // Overall builder management
 void builderClean(StatementBuilder* builder);

@@ -6,10 +6,10 @@
 
 static DataType getSQLType(std::string* type);
 
-void builderStartCreateTable(StatementBuilder* builder, std::string* table_name)
+void builderStartCreateTable(StatementBuilder* builder, Token table_name)
 {
     CreateTableCommand* command = new CreateTableCommand;
-    command->table_name = *table_name;
+    command->table_name = *table_name->text;
   
     builder->type = SQLStatement::CREATE_TABLE;
     builder->statement = command;
@@ -17,10 +17,10 @@ void builderStartCreateTable(StatementBuilder* builder, std::string* table_name)
     printf("Builder started for CREATE TABLE statement\n");
 }
 
-void builderStartDropTable(StatementBuilder* builder, std::string* table_name)
+void builderStartDropTable(StatementBuilder* builder, Token table_name)
 {
     DropTableCommand* command = new DropTableCommand;
-    command->table_name = *table_name;
+    command->table_name = *table_name->text;
   
     builder->type = SQLStatement::DROP_TABLE;
     builder->statement = command;
@@ -39,7 +39,7 @@ void builderStartSelectQuery(StatementBuilder* builder)
 }
 
 // SELECT helper functions ////////////////////////////////////////////////////
-void builderAddSelectAllColumns(StatementBuilder* builder, SQLToken table)
+void builderAddSelectAllColumns(StatementBuilder* builder, Token table)
 {
     // Don't want to override a currently active statement
     if(builder->type == SQLStatement::INVALID &&
@@ -61,8 +61,8 @@ void builderAddSelectAllColumns(StatementBuilder* builder, SQLToken table)
 }
 
 void builderAddQualifiedSelectColumn(StatementBuilder* builder,
-                                     SQLToken table, SQLToken source_column,
-                                     SQLToken output_column)
+                                     Token table, Token source_column,
+                                     Token output_column)
 {
     // This means the output column should be named the same as the 
     // source column
@@ -72,7 +72,7 @@ void builderAddQualifiedSelectColumn(StatementBuilder* builder,
     }
   
     ColumnReference source;
-    source.table = *table;
+    source.table = *table->text;
     /* TODO: Calculate source_column's index within the given table */
     source.column_idx = 0;
   
@@ -87,7 +87,7 @@ void builderAddQualifiedSelectColumn(StatementBuilder* builder,
     // Push the previously calculated information into the query object
     query->source_columns.push_back(source);
 
-    query->output_columns.push_back(*output_column);
+    query->output_columns.push_back(*output_column->text);
 }
 
 void builderGeneratePredicates(StatementBuilder* builder)
@@ -97,7 +97,7 @@ void builderGeneratePredicates(StatementBuilder* builder)
 
 // Generic-ish helper functions ///////////////////////////////////////////////
 
-void builderAddColumnName(StatementBuilder* builder, std::string* column_name)
+void builderAddColumnName(StatementBuilder* builder, Token column_name)
 {
     printf("Entered buildAddColumnName\n");
   
@@ -106,7 +106,7 @@ void builderAddColumnName(StatementBuilder* builder, std::string* column_name)
         case SQLStatement::CREATE_TABLE:
         {
             CreateTableCommand* cmd = (CreateTableCommand*)builder->statement;
-            cmd->column_names.push_back(*column_name);
+            cmd->column_names.push_back(*column_name->text);
         }
         break;
   
@@ -126,10 +126,10 @@ void builderAddColumnName(StatementBuilder* builder, std::string* column_name)
     printf("Exiting builderAddColumnName\n");
 }
 
-void builderAddColumnType(StatementBuilder* builder, std::string* column_type)
+void builderAddColumnType(StatementBuilder* builder, Token column_type)
 {
     printf("Entered builderAddColumnType\n");
-    DataType type = getSQLType(column_type);
+    DataType type = getSQLType(column_type->text);
   
     switch(builder->type)
     {
@@ -156,20 +156,38 @@ void builderAddColumnType(StatementBuilder* builder, std::string* column_type)
     printf("Exiting builderAddColumnType\n");
 }
 
-void builderStartNestedExpr(StatementBuilder* builder, SQLToken operation)
+void builderStartNestedExpr(StatementBuilder* builder, Token operation)
 {
     if(builder == nullptr)
     {
 	return; 
     }
 
-    printf("Starting nested expression: [%s]\n", operation->c_str());
+    printf("Starting nested expression: [%s]\n", operation->text->c_str());
+
 }
 
 void builderAddValueExpr(StatementBuilder* builder,
-	SQLToken operation, SQLToken left_term, SQLToken right_term)
+	Token operation, Token left_term, Token right_term)
 {
-    printf("Adding value expression\n");
+    printf("Adding value expression: %s %s %s\n",
+            left_term->text->c_str(),
+            operation->text->c_str(),
+            right_term->text->c_str());
+
+    /*
+    if(builder->expr == nullptr)
+    {
+        builder->expr = new Expression();
+        builder->expr->flags = OPERATION;
+        builder->expr->op = getOperation(operation);
+        
+    }
+    else
+    {
+
+    }
+    */
 }
 
 void builderClean(StatementBuilder* builder)
@@ -177,7 +195,13 @@ void builderClean(StatementBuilder* builder)
     // DEBUG
     printf("builderClean called\n");
 
-    delete builder->statement;
+    switch(builder->type)
+    {
+        // TODO: Finish this
+        default:
+            // Throw error
+            break;
+    }
 
     builder->statement = nullptr;
     builder->type = SQLStatement::INVALID;
@@ -223,4 +247,3 @@ DataType getSQLType(std::string* type)
   
     return DataType::NONE;
 }
-

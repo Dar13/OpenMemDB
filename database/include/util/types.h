@@ -44,19 +44,19 @@ union Data
 
     struct
     {
-        uint16_t data;
+        int16_t data;
         uint64_t pad : 41;
     } short_data;
     
     struct
     {
-        uint32_t data;
+        int32_t data;
         uint64_t pad : 25;
     } int_data;
 
     struct
     {
-        uint64_t data : 57;
+        int64_t data : 57;
     } long_data;
 
     struct

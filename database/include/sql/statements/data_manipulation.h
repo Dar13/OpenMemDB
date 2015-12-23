@@ -11,6 +11,8 @@
 
 #include "util/types.h"
 
+#include "sql/common.h"
+
 // Forward declaration
 struct Expression;
 
@@ -47,12 +49,6 @@ enum class ExpressionOperation : int32_t
     BETWEEN,
     AND,
     OR
-};
-
-struct ColumnReference
-{
-    std::string table;
-    uint32_t column_idx;
 };
 
 struct Predicate

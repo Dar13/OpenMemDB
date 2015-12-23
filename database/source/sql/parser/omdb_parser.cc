@@ -63,7 +63,7 @@ void parse(std::string input)
 
 void token_print(Token token)
 {
-  printf("Token: %s\n", token->c_str());
+  //printf("Token: %s\n", token->c_str());
 }
 
 std::vector<TokenPair> tokenize(std::string input)
@@ -79,7 +79,7 @@ std::vector<TokenPair> tokenize(std::string input)
 
   while(itr != input.end())
   {
-    if(isSQLIdentifierChar(*itr))
+    if(isSQLAlphabeticChar(*itr))
     {
       // Continue through the string until whitespace or non-identifier char found
       std::string::iterator next = itr + 1;
@@ -89,10 +89,21 @@ std::vector<TokenPair> tokenize(std::string input)
         next++;
       }
 
-      pair.token = new std::string(itr, next);
-      if(keywords.find(*pair.token) != keywords.end())
+      std::string* token = new (std::nothrow) std::string(itr, next);
+      if(token == nullptr)
       {
-        pair.token_type = keywords[*pair.token];
+          // TODO: Error handling
+      }
+
+      pair.token = new (std::nothrow) TokenData(token);
+      if(pair.token == nullptr)
+      {
+          // TODO: Error handling
+      }
+
+      if(keywords.find(*pair.token->text) != keywords.end())
+      {
+        pair.token_type = keywords[*pair.token->text];
       }
       else
       {
@@ -100,7 +111,6 @@ std::vector<TokenPair> tokenize(std::string input)
       }
 
       itr = next;
-
       tokens.push_back(pair);
 
       continue;
@@ -109,6 +119,7 @@ std::vector<TokenPair> tokenize(std::string input)
     {
         if(isSQLNumericChar(*itr))
         {
+            // TODO: Handle hexadecimal numbers
             std::string::iterator next = itr + 1;
 
             while(next != input.end() && (isSQLNumericChar(*next) || *next == '.'))
@@ -116,92 +127,128 @@ std::vector<TokenPair> tokenize(std::string input)
                 next++;
             }
 
-            pair.token = new std::string(itr, next);
-            if(pair.token->find('.') != std::string::npos)
+            std::string* token = new (std::nothrow) std::string(itr, next);
+            if(token == nullptr)
+            {
+                // TODO: Error handling
+            }
+
+            if(token->find('.') == std::string::npos)
             {
                 pair.token_type = TK_INTEGER;
+                int64_t value = std::stoll(*token, nullptr, 10);
+                
+                pair.token = new (std::nothrow) TokenData(token, value);
+                if(pair.token == nullptr)
+                {
+                    // TODO: Error handling
+                }
             }
             else
             {
                 pair.token_type = TK_FLOAT;
+                float value = std::stof(*token);
+
+                pair.token = new (std::nothrow) TokenData(token, value);
+                if(pair.token == nullptr)
+                {
+                    // TODO: Error handling
+                }
             }
 
             itr = next;
             tokens.push_back(pair);
+
             continue;
         }
             
       if(isSQLSymbolChar(*itr))
       {
+          pair.token = new TokenData();
         // Finish out the symbol
         switch(*itr)
         {
           case '(':
-            pair.token = new std::string("(");
+            pair.token->text = new std::string("(");
             pair.token_type = TK_LPAREN;
             break;
           case ')':
-            pair.token = new std::string(")");
+            pair.token->text = new std::string(")");
             pair.token_type = TK_RPAREN;
             break;
           case ';':
-            pair.token = new std::string(";");
+            pair.token->text = new std::string(";");
             pair.token_type = TK_SEMICOLON;
             break;
           case ',':
-            pair.token = new std::string(",");
+            pair.token->text = new std::string(",");
             pair.token_type = TK_COMMA;
             break;
           case '.':
-            pair.token = new std::string(".");
+            pair.token->text = new std::string(".");
             pair.token_type = TK_DOT;
             break;
           case '*':
-            pair.token = new std::string("*");
+            pair.token->text = new std::string("*");
             pair.token_type = TK_ASTERISK;
             break;
           case '=':
-            pair.token = new std::string("=");
+            pair.token->text = new std::string("=");
             pair.token_type = TK_EQ;
             break;
           case '!':
             if(*(itr + 1) == '=')
             {
-                pair.token = new std::string("!=");
+                pair.token->text = new std::string("!=");
                 pair.token_type = TK_NE;
+
+                pair.token->is_operation = true;
+                pair.token->operation = static_cast<uint16_t>(ExpressionOperation::NOT_EQUALS);
             }
             else
             {
-                pair.token = new std::string("!");
+                pair.token->text = new std::string("!");
                 pair.token_type = TK_NOT;
             }
             break;
           case '<':
             if(*(itr + 1) == '=')
             {
-                pair.token = new std::string("<=");
+                pair.token->text = new std::string("<=");
                 pair.token_type = TK_LE;
+
+                pair.token->is_operation = true;
+                pair.token->operation = static_cast<uint16_t>(ExpressionOperation::LESSER_EQUALS);
             }
             else
             {
-                pair.token = new std::string("<");
+                pair.token->text = new std::string("<");
                 pair.token_type = TK_LT;
+
+                pair.token->is_operation = true;
+                pair.token->operation = static_cast<uint16_t>(ExpressionOperation::LESSER);
             }
             break;
           case '>':
             if(*(itr + 1) == '=')
             {
-                pair.token = new std::string(">=");
+                pair.token->text = new std::string(">=");
                 pair.token_type = TK_GE;
+
+                pair.token->is_operation = true;
+                pair.token->operation = static_cast<uint16_t>(ExpressionOperation::GREATER_EQUALS);
             }
             else
             {
-                pair.token = new std::string(">");
+                pair.token->text = new std::string(">");
                 pair.token_type = TK_GT;
+
+                pair.token->is_operation = true;
+                pair.token->operation = static_cast<uint16_t>(ExpressionOperation::GREATER);
             }
             break;
           default:
-            pair.token = new std::string("ILLEGAL");
+            pair.token->text = new std::string("ILLEGAL");
             pair.token_type = TK_ILLEGAL;
             break;
         }
