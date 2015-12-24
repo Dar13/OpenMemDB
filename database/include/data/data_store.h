@@ -13,6 +13,7 @@
 // Project includes
 #include "sql/types/common.h"
 #include "sql/statements/data_definition.h"
+#include "sql/statements/data_manipulation.h"
 #include "util/types.h"
 #include "hash_functor.h"
 
@@ -24,9 +25,15 @@ using Record = tervel::containers::wf::vector::Vector<Data>;
 
 using DataTable = tervel::containers::wf::vector::Vector<Record*>;
 
+// This is just a copy of a record
+using RecordData = std::vector<Data>;
+
+using MultiRecordData = std::vector<RecordData>;
+
 // Schema definition
 struct TableSchema
 {
+    // TODO: Table constraints (AUTO_INCREMENT, etc)
     std::vector<SQLColumn> columns;
 };
 
@@ -45,7 +52,37 @@ using TableMap = tervel::containers::wf::HashMap<std::string,
                                                  SchemaTablePair*, 
                                                  TableHashFunctor<std::string, SchemaTablePair*>>;
 
+enum class ResultStatus : uint32_t
+{
+    SUCCESS = 0,
+    ERR_MEM_ALLOC,
+    INVALID_TABLE,
+    INVALID_DATA,
+    INVALID_RECORD
+};
 
+// TODO: Does this need to exist? Does a secondary error code?
+enum class ManipStatus : uint32_t
+{
+    SUCCESS = 0,
+};
+
+// TODO: Refactor this to that this paradigm is used throughout
+template <typename T>
+struct Result
+{
+    Result(ResultStatus s, T res) : status(s), result(res) {}
+    ResultStatus status;
+    T result;
+};
+
+// Some common Result types
+
+using DataResult = Result<Data>;
+using RecordResult = Result<RecordData>;
+using MultiRecordResult = Result<MultiRecordData>;
+using ManipResult = Result<ManipStatus>;
+using UintResult = Result<uint32_t>;
 
 /**
  *  @brief The interface into the data that is shared between all worker threads.
@@ -53,7 +90,8 @@ using TableMap = tervel::containers::wf::HashMap<std::string,
 class DataStore
 {
 public:
-    enum Error : uint32_t
+    // TODO: Rename this
+    enum class Error : uint32_t
     {
         SUCCESS = 0,
         MEM_ALLOC,
@@ -65,17 +103,34 @@ public:
         : table_name_mapping(64)
     {}
 
-    Error createTable(CreateTableCommand table_info);
+    ManipResult createTable(CreateTableCommand table_info);
 
-    Error deleteTable(std::string table_name);
+    ManipResult deleteTable(std::string table_name);
 
-    DataTable* getTable(std::string table_name);
+    UintResult getColumnIndex(std::string table_name, std::string column_name);
 
-    TableSchema* getTableSchema(std::string table_name);
+    DataResult updateData(Predicate* predicates,
+                          std::string table_name,
+                          uint32_t column_idx,
+                          Data value);
 
-    Error getRow(std::string table_name, uint32_t row_id, Record** record);
+    DataResult getData(Predicate* predicates,
+                       std::string table_name,
+                       uint32_t column_idx);
+
+    ManipResult insertRecord(std::string table_name,
+                             RecordData record);
+
+    ManipResult updateRecord(Predicate* predicates, 
+                             std::string table_name,
+                             RecordData record);
+
+    MultiRecordResult getRecords(Predicate* predicates,
+                                 std::string table_name);
 
 private:
+    SchemaTablePair* getTablePair(std::string table_name);
+
     TableMap table_name_mapping;
 };
 

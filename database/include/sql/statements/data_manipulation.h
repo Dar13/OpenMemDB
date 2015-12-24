@@ -38,35 +38,29 @@ private:
 
 struct Predicate
 {
-    // TODO: Do a profile run on this virtual, it may be too expensive
-    virtual bool evaluate();
+public:
+    ExpressionOperation op;
 };
 
 struct NestedPredicate : public Predicate
 {
-    ExpressionOperation op;
+public:
     Predicate* left_child;
     Predicate* right_child;
-
-    bool evaluate();
 };
 
 struct ValuePredicate : public Predicate
 {
-    ExpressionOperation op;
+public:
     ColumnReference column;
     ExpressionValue expected_value;
-
-    bool evaluate();
 };
 
 struct ColumnPredicate : public Predicate
 {
-    ExpressionOperation op;
+public:
     ColumnReference left_column;
     ColumnReference right_column;
-
-    bool evaluate();
 };
 
 struct SelectQuery
