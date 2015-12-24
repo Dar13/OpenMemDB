@@ -4,6 +4,9 @@
 
 #include <cstdio>
 
+// Debugging functions
+static void printExpressionTree(Expression* expr);
+
 static DataType getSQLType(std::string* type);
 
 void builderStartCreateTable(StatementBuilder* builder, Token table_name)
@@ -175,19 +178,48 @@ void builderAddValueExpr(StatementBuilder* builder,
             operation->text->c_str(),
             right_term->text->c_str());
 
-    /*
     if(builder->expr == nullptr)
     {
-        builder->expr = new Expression();
-        builder->expr->flags = OPERATION;
-        builder->expr->op = getOperation(operation);
-        
+        builder->expr = new (std::nothrow) Expression();
+        builder->expr->flags = ExpressionFlags::OPERATION;
+        builder->expr->op = getOperation(*operation->text);
+
+	Expression* left = new (std::nothrow) Expression();
+	if(left_term->is_column)
+	{
+	    left->flags = ExpressionFlags::COLUMN;
+	    left->table_name = new std::string(*left_term->table_name);
+	    left->table_column = new std::string(*left_term->column_name);
+	}
+	else
+	{
+	    left->flags = ExpressionFlags::VALUE;
+	    left->value = left_term->value;
+	}
+
+	Expression* right = new (std::nothrow) Expression();
+	if(right_term->is_column)
+	{
+	    right->flags = ExpressionFlags::COLUMN;
+	    right->table_name = new (std::nothrow) std::string(*right_term->table_name);
+	    right->table_column = new (std::nothrow) std::string(*right_term->column_name);
+	}
+	else
+	{
+	    right->flags = ExpressionFlags::VALUE;
+	    right->value = right_term->value;
+	}
+
+	builder->expr->left = left;
+	builder->expr->right = right;
+
+	printf("Expression made?\n");
     }
     else
     {
-
     }
-    */
+
+    printExpressionTree(builder->expr);
 }
 
 void builderClean(StatementBuilder* builder)
@@ -246,4 +278,50 @@ DataType getSQLType(std::string* type)
     }
   
     return DataType::NONE;
+}
+
+// Debugging function
+// TODO: Document this
+void printExpressionTree(Expression* expr)
+{
+    if(expr->left != nullptr)
+    {
+	printExpressionTree(expr->left);
+    }
+
+    switch(expr->flags)
+    {
+	case ExpressionFlags::COLUMN:
+	    printf("Column: %s.%s\n",
+		   expr->table_name->c_str(),
+		   expr->table_column->c_str());
+	    break;
+	case ExpressionFlags::VALUE:
+	    switch(expr->value.type)
+	    {
+		case DataType::SMALL_INT:
+		case DataType::INTEGER:
+		case DataType::BIG_INT:
+		    printf("Value: %ld\n", expr->value.long_data.data);
+		    break;
+		case DataType::FLOAT:
+		    printf("Value: %f\n", expr->value.float_data.data);
+		    break;
+		default:
+		    printf("Unrecognized data type\n");
+		    break;
+	    }
+	    break;
+	case ExpressionFlags::OPERATION:
+	    printf("Operation: %s\n", getOperationString(expr->op).c_str());
+	    break;
+	default:
+	    printf("Unknown flag. Expr = %p\n", expr);
+	    break;
+    }
+
+    if(expr->right != nullptr)
+    {
+	printExpressionTree(expr->right);
+    }
 }

@@ -105,6 +105,21 @@ struct TokenData
     std::string* column_name;
 };
 
+enum class ExpressionOperation : int32_t
+{
+    NO_OP = 0,
+    EQUALS,
+    NOT_EQUALS,
+    LESSER,
+    LESSER_EQUALS,
+    GREATER,
+    GREATER_EQUALS,
+    IN,
+    BETWEEN,
+    AND,
+    OR
+};
+
 /**
  *  \brief The datatype passed into the parser from the tokenizer
  */
@@ -157,6 +172,12 @@ inline bool isSQLNumericChar(unsigned char ch)
 }
 
 int strnicmp(const char* left, const char* right, int n);
+
+void initializeOperationMap();
+
+ExpressionOperation getOperation(std::string op);
+
+std::string getOperationString(ExpressionOperation op);
 
 /**
  *  \brief A base class that implements the nullable property in SQL.

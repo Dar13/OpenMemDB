@@ -39,6 +39,9 @@ struct Expression
     ExpressionOperation op;
   
     ExpressionFlags flags;
+
+    std::string* table_name;
+    std::string* table_column;
   
     DataType value_type;
     Data value;
@@ -52,7 +55,7 @@ struct StatementBuilder
   
     SQLStatement type;
     void* statement;
-    Expression* expr_tree;
+    Expression* expr;
 };
 
 // Table management functions

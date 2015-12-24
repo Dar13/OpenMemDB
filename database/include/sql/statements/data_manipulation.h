@@ -36,21 +36,6 @@ private:
     Data range_end;
 };
 
-enum class ExpressionOperation : int32_t
-{
-    NO_OP = 0,
-    EQUALS,
-    NOT_EQUALS,
-    LESSER,
-    LESSER_EQUALS,
-    GREATER,
-    GREATER_EQUALS,
-    IN,
-    BETWEEN,
-    AND,
-    OR
-};
-
 struct Predicate
 {
     // TODO: Do a profile run on this virtual, it may be too expensive
