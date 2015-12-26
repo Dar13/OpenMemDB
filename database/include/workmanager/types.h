@@ -22,13 +22,13 @@ typedef struct
 {
     uint32_t job_number;    //!< The job number that's associated to this result
     uint64_t result;        // TODO: Make this into a real result
-} Result;
+} JobResult;
 
 //! Typedef of a function pointer that returns a @refer Result and takes an integer.
-typedef Result (*JobFunctor)(int);
+typedef JobResult (*JobFunctor)(int);
 
 //! Convenient typedef for the job concept.
-typedef std::packaged_task<Result(int)> Job;
+typedef std::packaged_task<JobResult(int)> Job;
 
 /**
  *  @brief Additional data that allows for inter-thread communication.

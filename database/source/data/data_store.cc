@@ -100,6 +100,15 @@ ManipResult DataStore::updateRecord(Predicate* predicates,
 MultiRecordResult DataStore::getRecords(Predicate* predicates,
                                         std::string table_name)
 {
+    // Get the table pair
+    SchemaTablePair* table_pair = getTablePair(table_name);
+    if(table_pair == nullptr)
+    {
+	// TODO: Error handling
+    }
+
+    DataTable* table = table_pair->table;
+
     // Evaluate predicates and return all rows that satisfy the predicates'
     // conditions.
     //
@@ -108,11 +117,35 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
     {
         MultiRecordData data;
 
+	int64_t table_len = table->size(0);
+	if(table_len == 0)
+	{
+	    // Finished, table is empty
+	    // TODO: Return empty result
+	}
+
+	for(int64_t i = 0; i < table_len; i++)
+	{
+	    // Get the current row pointer
+	    Record* row = nullptr;
+	    
+	    // This essentially waits for an access to become available.
+	    // TODO: Is this wait-free?
+	    while(!table->at(i, row))
+	    {}
+
+	    RecordData record_copy = copyRecord(row);
+	    data.push_back(record_copy);
+	}
+
+	return MultiRecordResult(ResultStatus::SUCCESS, data);
     }
     else
     {
         // TODO: Actually evaluate the predicates
     }
+
+    return MultiRecordResult(ResultStatus::INVALID_TABLE, MultiRecordData());
 }
 
 SchemaTablePair* DataStore::getTablePair(std::string table_name)
@@ -129,4 +162,29 @@ SchemaTablePair* DataStore::getTablePair(std::string table_name)
     }
 
     return nullptr;
+}
+
+RecordData DataStore::copyRecord(Record* record)
+{
+    if(record == nullptr) { return RecordData();}
+
+    RecordData copy;
+
+    // TODO: Is this dereference safe?
+    int64_t record_len = record->size(0);
+
+    for(int64_t i = 0; i < record_len; i++)
+    {
+	TervelData data = {0};
+
+	// Pull the current value of the data from the record
+	while(!record->at(i, data.value))
+	{}
+
+	// TODO: This is ugly af, rethink this naming scheme in Data/TervelData
+	copy.push_back(data.data.value);
+    }
+
+    // Return the copied data
+    return copy;
 }

@@ -80,6 +80,13 @@ union Data
 // Apparently the attribute is unnecessary.
 } /*__attribute__((PACKED))*/ ;
 
+// TODO: Document this
+struct DataRange
+{
+    Data start;
+    Data end;
+};
+
 /**
  *  @brief A wrapper of the Data union to be used in Tervel. This data type must
  *  not be larger than 64 bits in size.
@@ -92,7 +99,7 @@ union TervelData
         Data value;
     } data;
 
-    uint64_t value;
+    int64_t value;
 
 // Apparently the attribute is unnecessary.
 } /*__attribute__((PACKED))*/ ;

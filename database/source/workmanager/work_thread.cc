@@ -47,9 +47,9 @@ void WorkThread::Run(WorkThreadData* data)
  */
 Job WorkThread::GenerateJob(int job_num, std::string command)
 {
-    Job job([job_num, command] (int test) -> Result
+    Job job([job_num, command] (int test) -> JobResult
             {
-                Result res;
+                JobResult res;
                 res.job_number = job_num;
 
                 printf("Command: %s\n", command.c_str());

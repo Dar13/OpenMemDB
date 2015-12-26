@@ -16,6 +16,7 @@ typedef uint16_t SQLSmallIntType;
 typedef uint32_t SQLIntegerType;
 typedef uint64_t SQLBigIntType;
 
+// TODO: Redo this enum's naming
 enum class SQLConstraintType : uint32_t
 {
   SQL_NO_CONSTRAINT = 0,
@@ -50,12 +51,14 @@ struct SQLColumn
     SQLConstraint constraint;
 };
 
+// TODO: Document this
 struct ColumnReference
 {
     std::string table;
     uint32_t column_idx;
 };
 
+// TODO: Document this
 struct TokenData
 {
     TokenData()
@@ -118,6 +121,51 @@ enum class ExpressionOperation : int32_t
     BETWEEN,
     AND,
     OR
+};
+
+class ExpressionValue
+{
+public:
+    bool is_range;
+
+    Data getValue() { return value; }
+    DataRange getRange() { return (DataRange){range_start, range_end}; }
+
+private:
+    Data value;
+    Data range_start;
+    Data range_end;
+};
+
+// TODO: Document this
+struct Predicate
+{
+public:
+    ExpressionOperation op;
+};
+
+// TODO: Document this
+struct NestedPredicate : public Predicate
+{
+public:
+    Predicate* left_child;
+    Predicate* right_child;
+};
+
+// TODO: Document this
+struct ValuePredicate : public Predicate
+{
+public:
+    ColumnReference column;
+    ExpressionValue expected_value;
+};
+
+// TODO: Document this
+struct ColumnPredicate : public Predicate
+{
+public:
+    ColumnReference left_column;
+    ColumnReference right_column;
 };
 
 /**

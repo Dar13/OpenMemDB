@@ -60,7 +60,7 @@ private:
     std::array<WorkThreadData, 8> m_thread_data;
 
     //! Holds the futures for currently running jobs
-    std::vector<std::future<Result>> m_thread_results;
+    std::vector<std::future<JobResult>> m_thread_results;
 
     //! The listening server socket file descriptor
     uint32_t m_server_socket_fd;

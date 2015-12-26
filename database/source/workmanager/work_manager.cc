@@ -69,10 +69,10 @@ int32_t WorkManager::Run()
     omdb::NetworkStatus status;
 
     // Here's where we store the results
-    std::vector<Result> results;
+    std::vector<JobResult> results;
 
     // Quick lambda for use in std::remove_if()
-    auto check_future_result = [&results] (std::future<Result>& res) -> bool
+    auto check_future_result = [&results] (std::future<JobResult>& res) -> bool
     {
         if(res.valid() &&
            res.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
@@ -137,7 +137,7 @@ int32_t WorkManager::Run()
                                                check_future_result),
                                 m_thread_results.end());
 
-        for(Result res : results)
+        for(JobResult res : results)
         {
             omdb::Connection conn;
             if(m_job_to_connection.find(res.job_number) != m_job_to_connection.end())
@@ -146,7 +146,7 @@ int32_t WorkManager::Run()
             }
             else
             {
-                printf("Warning! Result exists without a valid connection\n");
+                printf("Warning! JobResult exists without a valid connection\n");
                 continue;
             }
 

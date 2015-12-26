@@ -11,23 +11,24 @@
 #include <boost/variant.hpp>
 
 // Project includes
+#include "hash_functor.h"
+#include "util/types.h"
 #include "sql/types/common.h"
 #include "sql/statements/data_definition.h"
 #include "sql/statements/data_manipulation.h"
-#include "util/types.h"
-#include "hash_functor.h"
 
 // Some typedefs(C++11-style) so that we don't have all that meaningless
 // namespace and template junk pop up everywhere.
 // Table data definitions
 
-using Record = tervel::containers::wf::vector::Vector<Data>;
+using Record = tervel::containers::wf::vector::Vector<int64_t>;
 
 using DataTable = tervel::containers::wf::vector::Vector<Record*>;
 
 // This is just a copy of a record
 using RecordData = std::vector<Data>;
 
+// TODO: Is there a more efficient way?
 using MultiRecordData = std::vector<RecordData>;
 
 // Schema definition
@@ -67,7 +68,7 @@ enum class ManipStatus : uint32_t
     SUCCESS = 0,
 };
 
-// TODO: Refactor this to that this paradigm is used throughout
+// TODO: Refactor so that this paradigm is used throughout
 template <typename T>
 struct Result
 {
@@ -130,6 +131,7 @@ public:
 
 private:
     SchemaTablePair* getTablePair(std::string table_name);
+    RecordData copyRecord(Record* record);
 
     TableMap table_name_mapping;
 };

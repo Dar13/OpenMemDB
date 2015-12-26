@@ -14,13 +14,39 @@
  */
 int main(int argc, char** argv)
 {
-  setupTokenMappings();
-  //parse("CREATE TABLE test (user_id INTEGER, is_admin BOOLEAN);");
-  parse("SELECT A.* FROM A WHERE A.x = 1;");
+    tervel::Tervel* tervel_test = new tervel::Tervel(8);
+    tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);
+    DataStore data;
 
-  DataStore data;
+    CreateTableCommand test_table;
+    test_table.table_name = "TestTable";
 
-  return 1;
+    SQLColumn a_col;
+    a_col.name = "A";
+    a_col.type = INTEGER;
+    a_col.constraint.type = SQLConstraintType::SQL_NO_CONSTRAINT;
+
+    SQLColumn b_col;
+    b_col.name = "B";
+    b_col.type = INTEGER;
+    b_col.constraint.type = SQLConstraintType::SQL_NO_CONSTRAINT;
+
+    test_table.columns.push_back(a_col);
+    test_table.columns.push_back(b_col);
+
+    printf("Tervel initialized, test CREATE TABLE setup\n");
+
+    auto err = data.createTable(test_table);
+    if(err.status != ResultStatus::SUCCESS)
+    {
+	printf("Failed to create table\n");
+    }
+    else
+    {
+	printf("Empty table created\n");
+    }
+
+    return 1;
 
   // TODO: Handle passed in parameters
   printf("Arguments passed in:\n");
