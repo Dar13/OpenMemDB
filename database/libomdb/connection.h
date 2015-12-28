@@ -85,7 +85,7 @@ namespace libomdb{
     * Disconnects the connection object.
     * @param connection The connection object to terminate
     */
-    static void disconnect(libomdb::Connection connection);
+    void disconnect();
 
 
     
