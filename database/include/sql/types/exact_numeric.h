@@ -24,21 +24,22 @@ public:
     SQLExactNumeric(T value, bool nullable = true)
         : SQLNullable(false, nullable), m_data(value) {}
 
-    SQLExactNumeric(Data value)
+    SQLExactNumeric(TervelData value)
         : SQLNullable(false, true)
     {
-        if(value.null == 1)
+        if(value.data.null == 1)
         {
             m_is_null = true;
             return;
         }
 
-        switch(value.type)
+        switch(value.data.type)
         {
             case SMALL_INT:
                 if(sizeof(T) == sizeof(SQLSmallIntType))
                 {
-                    m_data = value.short_data.data;
+                    ShortData short_data = static_cast<ShortData>(value.data.value);
+                    m_data = short_data.value;
                 }
                 else
                 {
@@ -48,7 +49,8 @@ public:
             case INTEGER:
                 if(sizeof(T) == sizeof(SQLIntegerType))
                 {
-                    m_data = value.int_data.data;
+                    IntData int_data = static_cast<IntData>(value.data.value);
+                    m_data = int_data.value;
                 }
                 else
                 {
@@ -58,7 +60,7 @@ public:
             case BIG_INT:
                 if(sizeof(T) == sizeof(SQLBigIntType))
                 {
-                    m_data = value.long_data.data;
+                    m_data = value.data.value;
                 }
                 else
                 {

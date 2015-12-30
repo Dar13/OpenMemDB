@@ -44,7 +44,7 @@ struct Expression
     std::string* table_column;
   
     DataType value_type;
-    Data value;
+    TervelData value;
 };
 
 struct StatementBuilder

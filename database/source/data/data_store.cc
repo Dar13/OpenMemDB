@@ -76,7 +76,7 @@ UintResult DataStore::getColumnIndex(std::string table_name, std::string column_
 
 DataResult DataStore::updateData(Predicate* predicates,
                       std::string table_name, uint32_t column_idx,
-                      Data value)
+                      TervelData value)
 {
     // TODO: This function doesn't really make sense to have...
 }
@@ -89,6 +89,35 @@ DataResult DataStore::getData(Predicate* predicates,
 
 ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
 {
+    // Get the table
+    SchemaTablePair* table_pair = getTablePair(table_name);
+    if(table_pair == nullptr)
+    {
+        return ManipResult(ResultStatus::INVALID_TABLE, ManipStatus::FAILURE);
+    }
+
+    // Insert into the table
+    Record* new_record = new (std::nothrow) Record(record.size());
+    if(new_record == nullptr)
+    {
+        return ManipResult(ResultStatus::ERR_MEM_ALLOC, ManipStatus::FAILURE);
+    }
+
+    for(auto data : record)
+    {
+        TervelData terv_data = { .value = 0 };
+        terv_data.data.value = data.data.value;
+        printf("Inserting %ld\n", terv_data.value);
+        size_t ret = new_record->push_back_w_ra(terv_data.value);
+        printf("Pushback returned %lu\n", ret);
+    }
+
+    // TODO: Handle table constraints
+    size_t ret = table_pair->table->push_back_w_ra(new_record);
+    printf("Pushback returned %lu\n", ret);
+    printf("Record address %p\n", new_record);
+
+    return ManipResult(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
 }
 
 ManipResult DataStore::updateRecord(Predicate* predicates,
@@ -117,28 +146,30 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
     {
         MultiRecordData data;
 
-	int64_t table_len = table->size(0);
-	if(table_len == 0)
-	{
-	    // Finished, table is empty
-	    // TODO: Return empty result
-	}
+	    int64_t table_len = table->size(0);
+	    if(table_len == 0)
+	    {
+	        // Finished, table is empty
+	        // TODO: Return empty result
+	    }
 
-	for(int64_t i = 0; i < table_len; i++)
-	{
-	    // Get the current row pointer
-	    Record* row = nullptr;
-	    
-	    // This essentially waits for an access to become available.
-	    // TODO: Is this wait-free?
-	    while(!table->at(i, row))
-	    {}
+	    for(int64_t i = 0; i < table_len; i++)
+	    {
+	        // Get the current row pointer
+	        Record* row = nullptr;
+	        
+	        // This essentially waits for an access to become available.
+	        // TODO: Is this wait-free?
+	        while(!table->at(i, row))
+	        {}
 
-	    RecordData record_copy = copyRecord(row);
-	    data.push_back(record_copy);
-	}
+            printf("Retrieved record address: %p\n", row);
 
-	return MultiRecordResult(ResultStatus::SUCCESS, data);
+	        RecordData record_copy = copyRecord(row);
+	        data.push_back(record_copy);
+	    }
+
+	    return MultiRecordResult(ResultStatus::SUCCESS, data);
     }
     else
     {
@@ -175,14 +206,22 @@ RecordData DataStore::copyRecord(Record* record)
 
     for(int64_t i = 0; i < record_len; i++)
     {
-	TervelData data = {0};
+	    TervelData data = {0};
 
-	// Pull the current value of the data from the record
-	while(!record->at(i, data.value))
-	{}
+        int64_t tervel_data = 0;
 
-	// TODO: This is ugly af, rethink this naming scheme in Data/TervelData
-	copy.push_back(data.data.value);
+	    // Pull the current value of the data from the record
+	    while(!record->at(i, tervel_data))
+	    {
+            printf("Waiting for retrieval\n");
+        }
+
+        data.value = tervel_data;
+
+        printf("Retrieved value: %ld\n", tervel_data);
+
+	    // TODO: This is ugly af, rethink this naming scheme in Data/TervelData
+	    copy.push_back(data);
     }
 
     // Return the copied data

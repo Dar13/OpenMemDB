@@ -20,16 +20,17 @@ SQLBoolean::SQLBoolean(bool value)
     : SQLNullable(false, true), m_value(value ? SQL_TRUE : SQL_FALSE)
 {}
 
-SQLBoolean::SQLBoolean(Data value)
+SQLBoolean::SQLBoolean(TervelData value)
     : SQLNullable(false, true)
 {
-    if(value.null == 1 || value.type == BOOLEAN)
+    if(value.data.null == 1 || value.data.type == BOOLEAN)
     {
         m_is_null = true;
         return;
     }
 
-    m_value = (BooleanValue)(value.boolean_data.data);
+    // TODO: Convert to BooleanData and then pull it out?
+    m_value = (BooleanValue)(value.data.value);
 }
 
 SQLBoolean::SQLBoolean(BooleanValue value)

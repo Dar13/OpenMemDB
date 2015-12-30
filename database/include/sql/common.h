@@ -38,7 +38,7 @@ struct SQLConstraint
 {
   SQLConstraintType type;
   uint16_t column_idx;
-  Data value;
+  TervelData value;
   const char* ref_table;
   uint16_t ref_column_idx;
 };
@@ -72,22 +72,29 @@ struct TokenData
     TokenData(std::string* str, bool val)
         : text(str), is_value(true), is_operation(false), is_column(false)
     {
-        value.type = BOOLEAN;
-        value.boolean_data.data = val;
+        value.data.type = BOOLEAN;
+        if(val)
+        {
+            value.data.value = 1;
+        }
+        else
+        {
+            value.data.value = 0;
+        }
     }
     
     TokenData(std::string* str, int64_t val)
         : text(str), is_value(true), is_operation(false), is_column(false)
     {
-        value.type = BIG_INT;
-        value.long_data.data = val;
+        value.data.type = BIG_INT;
+        value.data.value = val;
     }
 
     TokenData(std::string* str, float val)
         : text(str), is_value(true), is_operation(false), is_column(false)
     {
-        value.type = FLOAT;
-        value.float_data.data = val;
+        value.data.type = FLOAT;
+        value.data.value = static_cast<int64_t>(val);
     }
 
     TokenData(std::string* str, std::string* table, std::string* column)
@@ -98,7 +105,7 @@ struct TokenData
     std::string* text;
 
     bool is_value;
-    Data value;
+    TervelData value;
 
     bool is_operation;
     uint16_t operation;
@@ -128,13 +135,13 @@ class ExpressionValue
 public:
     bool is_range;
 
-    Data getValue() { return value; }
+    TervelData getValue() { return value; }
     DataRange getRange() { return (DataRange){range_start, range_end}; }
 
 private:
-    Data value;
-    Data range_start;
-    Data range_end;
+    TervelData value;
+    TervelData range_start;
+    TervelData range_end;
 };
 
 // TODO: Document this

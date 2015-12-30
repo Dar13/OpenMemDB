@@ -26,7 +26,7 @@ public:
     SQLDate();
     SQLDate(const SQLDate& other);
     SQLDate(uint16_t year, uint8_t month, uint8_t day, bool nullable = true);
-    SQLDate(Data value);
+    SQLDate(TervelData value);
   
     //! Year
     uint16_t m_year;
@@ -62,7 +62,7 @@ public:
     SQLTime();
     SQLTime(const SQLTime& time);
     SQLTime(uint16_t hour, uint16_t minute, uint32_t second, bool nullable = true);
-    SQLTime(Data value);
+    SQLTime(TervelData value);
   
     //! Hour of the day
     uint16_t m_hour;

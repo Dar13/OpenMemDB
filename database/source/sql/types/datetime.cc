@@ -39,18 +39,20 @@ SQLDate::SQLDate(uint16_t year, uint8_t month, uint8_t day, bool nullable)
  *
  *  \param[in] value    A Data variant to use when constructing this object
  */
-SQLDate::SQLDate(Data value)
+SQLDate::SQLDate(TervelData value)
     : SQLNullable(false, true)
 {
-    if(value.null == 1 || value.type != DATE)
+    if(value.data.null == 1 || value.data.type != DATE)
     {
         m_is_null = true;
         return;
     }
 
-    m_year = value.date_data.year;
-    m_month = value.date_data.month;
-    m_day = value.date_data.day;
+    DateData date_data = { .value = value.data.value };
+
+    m_year = date_data.year;
+    m_month = date_data.month;
+    m_day = date_data.day;
 }
 
 /**
@@ -198,24 +200,26 @@ SQLTime::SQLTime(uint16_t hour, uint16_t minute, uint32_t second, bool nullable)
  *
  *  \param[in] value      The Data variant to use when constructing the object
  */
-SQLTime::SQLTime(Data value)
+SQLTime::SQLTime(TervelData value)
     : SQLNullable(false, true)
 {
-    if(value.null == 1 || value.type != TIME)
+    if(value.data.null == 1 || value.data.type != TIME)
     {
         m_is_null = true;
         return;
     }
 
-    m_hour = value.time_data.hour;
-    m_minute = value.time_data.minute;
-    m_second = value.time_data.second;
+    TimeData time_data = { .value = value.data.value};
 
-    if(value.time_data.tz_hour != 0 || value.time_data.tz_minute != 0)
+    m_hour = time_data.hour;
+    m_minute = time_data.minute;
+    m_second = time_data.second;
+
+    if(time_data.tz_hour != 0 || time_data.tz_minute)
     {
         m_with_timezone = true;
-        m_tz_hour = value.time_data.tz_hour;
-        m_tz_minute = value.time_data.tz_minute;
+        m_tz_hour = time_data.tz_hour;
+        m_tz_minute = time_data.tz_minute;
     }
 }
 

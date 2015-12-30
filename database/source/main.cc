@@ -39,11 +39,55 @@ int main(int argc, char** argv)
     auto err = data.createTable(test_table);
     if(err.status != ResultStatus::SUCCESS)
     {
-	printf("Failed to create table\n");
+	    printf("Failed to create table\n");
     }
     else
     {
-	printf("Empty table created\n");
+	    printf("Empty table created\n");
+    }
+
+    RecordData test_data;
+
+    TervelData t_d = { .value = 0 };
+    t_d.data.type = INTEGER;
+    t_d.data.value = 1;
+    printf("Inserting value: %ld\n", t_d.data.value);
+    printf("Inserting congregate value: %ld\n", t_d.value);
+    test_data.push_back(t_d);
+
+    TervelData t_dd = { .value = 0 };
+    t_dd.data.type = INTEGER;
+    t_dd.data.value = 2;
+    printf("Inserting value: %ld\n", t_dd.data.value);
+    printf("Inserting congregate value: %ld\n", t_dd.value);
+    test_data.push_back(t_dd);
+
+    auto insert_err = data.insertRecord("TestTable", test_data);
+    if(insert_err.status != ResultStatus::SUCCESS)
+    {
+        printf("Failed to insert record\n");
+    }
+    else
+    {
+        printf("Record inserted\n");
+    }
+
+    MultiRecordResult records = data.getRecords(nullptr, "TestTable");
+    if(records.status == ResultStatus::SUCCESS)
+    {
+        for(auto record : records.result)
+        {
+            printf("Record:\n");
+            for(auto data : record)
+            {
+                IntData int_data = { .value = data.data.value };
+                printf(" - %ld\n", int_data.data);
+            }
+        }
+    }
+    else
+    {
+        printf("Unable to retrieve records\n");
     }
 
     return 1;

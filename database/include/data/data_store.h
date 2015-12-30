@@ -26,7 +26,7 @@ using Record = tervel::containers::wf::vector::Vector<int64_t>;
 using DataTable = tervel::containers::wf::vector::Vector<Record*>;
 
 // This is just a copy of a record
-using RecordData = std::vector<Data>;
+using RecordData = std::vector<TervelData>;
 
 // TODO: Is there a more efficient way?
 using MultiRecordData = std::vector<RecordData>;
@@ -66,6 +66,7 @@ enum class ResultStatus : uint32_t
 enum class ManipStatus : uint32_t
 {
     SUCCESS = 0,
+    FAILURE
 };
 
 // TODO: Refactor so that this paradigm is used throughout
@@ -79,7 +80,7 @@ struct Result
 
 // Some common Result types
 
-using DataResult = Result<Data>;
+using DataResult = Result<TervelData>;
 using RecordResult = Result<RecordData>;
 using MultiRecordResult = Result<MultiRecordData>;
 using ManipResult = Result<ManipStatus>;
@@ -113,7 +114,7 @@ public:
     DataResult updateData(Predicate* predicates,
                           std::string table_name,
                           uint32_t column_idx,
-                          Data value);
+                          TervelData value);
 
     DataResult getData(Predicate* predicates,
                        std::string table_name,

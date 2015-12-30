@@ -297,15 +297,18 @@ void printExpressionTree(Expression* expr)
 		   expr->table_column->c_str());
 	    break;
 	case ExpressionFlags::VALUE:
-	    switch(expr->value.type)
+	    switch(expr->value.data.type)
 	    {
 		case DataType::SMALL_INT:
 		case DataType::INTEGER:
 		case DataType::BIG_INT:
-		    printf("Value: %ld\n", expr->value.long_data.data);
+            printf("Value: %ld\n", expr->value.data.value);
 		    break;
 		case DataType::FLOAT:
-		    printf("Value: %f\n", expr->value.float_data.data);
+            {
+                FloatData float_data = { .value = expr->value.data.value};
+                printf("Value: %f\n", float_data.data);
+            }
 		    break;
 		default:
 		    printf("Unrecognized data type\n");

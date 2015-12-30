@@ -5,6 +5,7 @@
 #ifndef OMDB_UTIL_TYPES_H
 #define OMDB_UTIL_TYPES_H
 
+// TODO: Document this
 enum DataType : int8_t
 {
     NONE = -1,
@@ -17,56 +18,71 @@ enum DataType : int8_t
     TIME
 };
 
-/**
- *  @brief A discriminated union of possible data types usable in a Tervel container
- *
- *  @detail This is necessary because of Tervel's containers only holding 64 bits.
- */
-union Data
+// TODO: Document the classes below
+union BooleanData
 {
-    // Any warnings thrown from this line need to carefully evaluated.
-    // This currently holds values up to 7, and the maximum value defined in DataType
-    // is 6.
-    DataType type : 3;
-    uint64_t null : 1;
-
     struct
     {
-        uint64_t data : 2;
-        uint64_t pad : 57;
-    } boolean_data;
+        uint8_t data;
+        uint64_t pad : 56;
+    };
 
+    uint64_t value;
+};
+
+union FloatData
+{
     struct
     {
         float data;
-        uint64_t pad : 25;
-    } float_data;
+        uint32_t pad;
+    };
 
+    uint64_t value;
+};
+
+union ShortData
+{
     struct
     {
         int16_t data;
-        uint64_t pad : 41;
-    } short_data;
-    
+        uint64_t pad : 48;
+    };
+
+    uint64_t value;
+};
+
+union IntData
+{
     struct
     {
         int32_t data;
-        uint64_t pad : 25;
-    } int_data;
+        int32_t pad;
+    };
 
-    struct
-    {
-        int64_t data : 57;
-    } long_data;
+    uint64_t value;
+};
 
+struct LongData
+{
+    int64_t value;
+};
+
+union DateData
+{
     struct
     {
         uint16_t year;
         uint8_t month;
         uint8_t day;
-        uint64_t pad : 25;
-    } date_data;
+        uint32_t pad;
+    };
 
+    uint64_t value;
+};
+
+union TimeData
+{
     struct
     {
         uint8_t hour;
@@ -74,18 +90,13 @@ union Data
         uint8_t second;
         int8_t tz_hour;
         int8_t tz_minute;
-        uint64_t pad : 17;
-    } time_data;
+        uint32_t pad : 24;
+    };
 
-// Apparently the attribute is unnecessary.
-} /*__attribute__((PACKED))*/ ;
-
-// TODO: Document this
-struct DataRange
-{
-    Data start;
-    Data end;
+    uint64_t value;
 };
+
+
 
 /**
  *  @brief A wrapper of the Data union to be used in Tervel. This data type must
@@ -95,13 +106,20 @@ union TervelData
 {
     struct 
     {
-        uint64_t tervel_status : 3;
-        Data value;
+        int64_t tervel_status : 3;
+        int64_t type : 3;
+        int64_t null : 1;
+
+        int64_t value : 57;
     } data;
 
     int64_t value;
+};
 
-// Apparently the attribute is unnecessary.
-} /*__attribute__((PACKED))*/ ;
-
+// TODO: Document this
+struct DataRange
+{
+    TervelData start;
+    TervelData end;
+};
 #endif
