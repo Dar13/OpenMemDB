@@ -30,6 +30,7 @@ THE SOFTWARE.
 #include <unistd.h>
 #include <string>
 #include <fstream>
+#include <iostream>
 
 
 #include "connection.h"
@@ -53,12 +54,40 @@ libomdb::Connection buildConnectionObj(int socket, char* buffer) {
   
 }
 
-
 libomdb::Connection errorConnection() {
   //TODO: Build an invlaid connection
 }
 
+libomdb::CommandResult parseCommandResult(std::string result) {
+  //TODO: build CommandResult
+}
 
+libomdb::Result parseQueryResult(std::string result) {
+  //TODO: build Result
+}
+
+std::string sendMessage(std::string message, int socket) {
+  // Need to convert message to c string in order to send it.
+  const char* c_message = message.c_str();
+  std::cout << "Attempting to send message to socket" << socket << std::endl;
+  int bytes_sent = send(socket, c_message, sizeof c_message, 0);
+  std::cout<< "Bytes sent: " << bytes_sent << std::endl;
+  if (bytes_sent == -1) {
+    perror("send");
+    return NULL;
+  }
+
+  // Wait for receipt of message;
+  char result[MAXDATASIZE];
+  int bytes_recieved = recv(socket, result, sizeof(result), 0);
+  std::cout << "Bytes recieved: " << bytes_recieved << std::endl;
+  if (bytes_recieved == -1) {
+    perror("recv");
+    return NULL;
+  }
+
+  return result;
+}
 
 /*************************************************************************
  * ConnectionMetaData Implementations                                    *
@@ -172,13 +201,13 @@ void libomdb::Connection::disconnect() {
 
 
 libomdb::CommandResult libomdb::Connection::executeCommand(std::string command) {
-  
+  return parseCommandResult(sendMessage(command, this->m_socket_fd));
 }
 
 
 
 libomdb::Result libomdb::Connection::executeQuery(std::string query) {
-  
+  return parseQueryResult(sendMessage(query, this->m_socket_fd));
 }
 
 
