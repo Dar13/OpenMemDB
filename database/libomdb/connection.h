@@ -26,7 +26,7 @@ THE SOFTWARE.
 #include <string>
 
 // Project includes.
-#include "resultset.h"
+#include "result.h"
 
 
 namespace libomdb{
@@ -117,7 +117,7 @@ namespace libomdb{
     uint16_t m_socket_fd;
 
     /** The meta data object that describes the connection */
-    libomdb::ConnectionMetaData m_metaData;    
+    libomdb::ConnectionMetaData m_metaData;
   };  
 
 }

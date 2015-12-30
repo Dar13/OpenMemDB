@@ -1,0 +1,189 @@
+/*
+The MIT License (MIT)
+Copyright (c) 2015 University of Central Florida's Computer Software Engineering
+Scalable & Secure Systems (CSE - S3) Lab
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+
+
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <string>
+#include <fstream>
+
+
+#include "connection.h"
+
+#define MAXDATASIZE 100
+
+/*************************************************************************
+ * Private Helper Functions                                              *
+ *************************************************************************/
+void *get_in_addr(struct sockaddr *sa)
+{
+    if (sa->sa_family == AF_INET) {
+        return &(((struct sockaddr_in*)sa)->sin_addr);
+    }
+
+    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+libomdb::Connection buildConnectionObj(int socket, char* buffer) {
+  // TODO: Parse connection string and create new Connection object
+  
+}
+
+
+libomdb::Connection errorConnection() {
+  //TODO: Build an invlaid connection
+}
+
+
+
+/*************************************************************************
+ * ConnectionMetaData Implementations                                    *
+ *************************************************************************/
+std::string libomdb::ConnectionMetaData::getDbName() {
+  return this->m_databaseName;
+}
+
+
+bool libomdb::ConnectionMetaData::isValid() {
+  return this->m_isValid;
+}
+
+
+
+/*************************************************************************
+ * Connection Implementations                                            *
+ *************************************************************************/
+
+
+
+  // TODO: Break up this monstrosity. 
+libomdb::Connection libomdb::Connection::connect(std::string hostname, 
+                                                 uint16_t port, 
+                                                 std::string db) {
+  int sockfd, numbytes;
+  char buf[MAXDATASIZE];
+  struct addrinfo hints, *servinfo, *p;
+  int rv;
+  char s[INET6_ADDRSTRLEN];
+
+  // Convert hostname to c string
+  const char* connection_ip = hostname.c_str();
+
+  //Convert port to c string.
+  const char* port_string = std::to_string(port).c_str();
+
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+
+  if ((rv = getaddrinfo(connection_ip, port_string,
+                        &hints, &servinfo)) != 0) {
+    fprintf(stderr, "getaddrinfo: %d\n", rv);
+    fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+    return errorConnection();
+  }
+
+  // loop through all the results and connect to the first we can
+  for(p = servinfo; p != NULL; p = p->ai_next) {
+    if ((sockfd = socket(p->ai_family, p->ai_socktype,
+                                p->ai_protocol)) == -1) {
+        perror("client: socket");
+        continue;
+      }
+
+    if (::connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+      close(sockfd);
+      perror("client: connect");
+      continue;
+    }
+
+    break;
+  }
+
+  if (p == NULL) {
+    fprintf(stderr, "client: failed to connect\n");
+    return errorConnection();
+  }
+
+  inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr),
+                                                          s, sizeof s);
+  printf("client: connecting to %s\n", s);
+  freeaddrinfo(servinfo); // all done with this structure
+
+  if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
+    perror("recv");
+    return errorConnection();
+  }
+
+  buf[numbytes] = '\0';
+
+  printf("client: received '%s'\n",buf);
+  std::string dbConnectString = "k:"+db;
+  const char* dbString = dbConnectString.c_str();
+  // Sending the name of the database to the server.
+  int bytesSent = send(sockfd, dbString, dbConnectString.length(), 0);
+  if (bytesSent == -1) {
+    perror("send");
+    return errorConnection();
+  }
+
+  int bytesReceived = recv(sockfd, buf, MAXDATASIZE -1, 0);
+  if (bytesReceived == -1) {
+    perror("recv");
+    return errorConnection();
+  }
+
+  buf[bytesReceived] = '\0';
+  printf("client received response from server: %s\n", buf);
+
+  return buildConnectionObj(sockfd, buf);
+}
+
+
+
+void libomdb::Connection::disconnect() {
+  close(this->m_socket_fd);
+}
+
+
+
+libomdb::CommandResult libomdb::Connection::executeCommand(std::string command) {
+  
+}
+
+
+
+libomdb::Result libomdb::Connection::executeQuery(std::string query) {
+  
+}
+
+
+
+libomdb::ConnectionMetaData libomdb::Connection::getMetaData() {
+  return this->m_metaData;
+}
+
