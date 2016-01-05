@@ -44,6 +44,9 @@ namespace libomdb{
    */  
   class ConnectionMetaData {
    public:
+
+    /** Builds new ConnectionMetaData object */
+    ConnectionMetaData(std::string dbName, bool isValid);
     
     /** Gets the name of the connected database */
     std::string getDbName();    
@@ -111,14 +114,37 @@ namespace libomdb{
      */
     libomdb::ConnectionMetaData getMetaData();
 
+    /**
+     * Sets the meta-data to the passed in object
+     * @param data The ConnectionMetaData object for the related Connection object
+     */
+    void setMetaData(ConnectionMetaData data);
+
+    /**
+     * Creates a connection object that is invalid used on errors
+     * @return An invalid connection object
+     *
+     * // Cannot figure out how to not do this in the .h Be my guest to fix. C++ is annoying.
+     */
+    static Connection errorConnection() {
+      return Connection(0, ConnectionMetaData(NULL, false));
+    }
+
    private:
+
+    /**
+     * Private constructor to create object
+     * @param socket_fd The file descriptor used to communicate with the object
+     * @param metaData  The ConnectionMetaData object describing the Connection.
+     */
+    Connection(uint64_t socket_fd, ConnectionMetaData metaData);
 
     /** The file desciptor used to communicate over */
     uint16_t m_socket_fd;
 
     /** The meta data object that describes the connection */
     libomdb::ConnectionMetaData m_metaData;
-  };  
+  };
 
 }
 

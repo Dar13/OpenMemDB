@@ -54,9 +54,6 @@ libomdb::Connection buildConnectionObj(int socket, char* buffer) {
   
 }
 
-libomdb::Connection errorConnection() {
-  //TODO: Build an invlaid connection
-}
 
 libomdb::CommandResult parseCommandResult(std::string result) {
   //TODO: build CommandResult
@@ -92,6 +89,9 @@ std::string sendMessage(std::string message, int socket) {
 /*************************************************************************
  * ConnectionMetaData Implementations                                    *
  *************************************************************************/
+libomdb::ConnectionMetaData::ConnectionMetaData(std::string dbName, bool isValid)
+        :m_databaseName(dbName), m_isValid(isValid) {}
+
 std::string libomdb::ConnectionMetaData::getDbName() {
   return this->m_databaseName;
 }
@@ -201,12 +201,14 @@ void libomdb::Connection::disconnect() {
 
 
 libomdb::CommandResult libomdb::Connection::executeCommand(std::string command) {
+  //TODO: Need to build string that can be parsed by server
   return parseCommandResult(sendMessage(command, this->m_socket_fd));
 }
 
 
 
 libomdb::Result libomdb::Connection::executeQuery(std::string query) {
+  //TODO: Need to build string that can be parsed by server
   return parseQueryResult(sendMessage(query, this->m_socket_fd));
 }
 
@@ -216,3 +218,10 @@ libomdb::ConnectionMetaData libomdb::Connection::getMetaData() {
   return this->m_metaData;
 }
 
+void libomdb::Connection::setMetaData(libomdb::ConnectionMetaData data) {
+  this->m_metaData = data;
+}
+
+
+libomdb::Connection::Connection(uint64_t socket_fd, ConnectionMetaData metaData)
+        :m_metaData(metaData), m_socket_fd(socket_fd) {}
