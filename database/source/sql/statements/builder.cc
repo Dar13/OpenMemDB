@@ -100,63 +100,37 @@ void builderGeneratePredicates(StatementBuilder* builder)
 
 // Generic-ish helper functions ///////////////////////////////////////////////
 
-void builderAddColumnName(StatementBuilder* builder, Token column_name)
+void builderAddColumn(StatementBuilder* builder, Token column_name,
+                      Token column_type, Token column_constraints)
 {
-    printf("Entered buildAddColumnName\n");
-  
-    switch(builder->type)
-    {
-        case SQLStatement::CREATE_TABLE:
-        {
-            CreateTableCommand* cmd = (CreateTableCommand*)builder->statement;
-            cmd->column_names.push_back(*column_name->text);
-        }
-        break;
-  
-        case SQLStatement::SELECT:
-        {
-            SelectQuery* query = (SelectQuery*)builder->statement;
-            // TODO: Finish this...
-        }
-        break;
-  
-        case SQLStatement::INVALID:
-        default:
-            printf("There isn't a statement being built...\n");
-            break;
-    }
-  
-    printf("Exiting builderAddColumnName\n");
-}
+    printf("Entered builderAddColumn\n");
 
-void builderAddColumnType(StatementBuilder* builder, Token column_type)
-{
-    printf("Entered builderAddColumnType\n");
-    DataType type = getSQLType(column_type->text);
-  
     switch(builder->type)
     {
         case SQLStatement::CREATE_TABLE:
         {
             CreateTableCommand* cmd = (CreateTableCommand*)builder->statement;
-            cmd->column_types.push_back(type);
+            SQLColumn column;
+            column.name = *(column_name->text);
+            column.type = getSQLType(column_type->text);
+            // TODO: Column constraints
+            (void)column_constraints;
+
+            cmd->columns.push_back(column);
         }
         break;
-  
         case SQLStatement::SELECT:
         {
-            SelectQuery* query = (SelectQuery*)builder->statement;
-            // TODO: Finish this...
         }
         break;
-  
+
         case SQLStatement::INVALID:
         default:
-            printf("There isn't a statement being built...\n");
-            break;
+        {}
+        break;
     }
-  
-    printf("Exiting builderAddColumnType\n");
+
+    printf("Exit builderAddColumn\n");
 }
 
 void builderStartNestedExpr(StatementBuilder* builder, Token operation)

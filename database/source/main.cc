@@ -18,32 +18,23 @@ int main(int argc, char** argv)
     tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);
     DataStore data;
 
-    CreateTableCommand test_table;
-    test_table.table_name = "TestTable";
+    std::string create_table = "CREATE TABLE TestTable (A INTEGER, B INTEGER);";
 
-    SQLColumn a_col;
-    a_col.name = "A";
-    a_col.type = INTEGER;
-    a_col.constraint.type = SQLConstraintType::SQL_NO_CONSTRAINT;
+    setupTokenMappings();
+    StatementBuilder parse_result = parse(create_table);
 
-    SQLColumn b_col;
-    b_col.name = "B";
-    b_col.type = INTEGER;
-    b_col.constraint.type = SQLConstraintType::SQL_NO_CONSTRAINT;
-
-    test_table.columns.push_back(a_col);
-    test_table.columns.push_back(b_col);
-
-    printf("Tervel initialized, test CREATE TABLE setup\n");
-
-    auto err = data.createTable(test_table);
-    if(err.status != ResultStatus::SUCCESS)
+    if(parse_result.valid && parse_result.type == SQLStatement::CREATE_TABLE)
     {
-	    printf("Failed to create table\n");
-    }
-    else
-    {
-	    printf("Empty table created\n");
+        CreateTableCommand* create_table = reinterpret_cast<CreateTableCommand*>(parse_result.statement);
+        auto err = data.createTable(*create_table);
+        if(err.status == ResultStatus::SUCCESS)
+        {
+            printf("Table created\n");
+        }
+        else
+        {
+            printf("Unable to create table!\n");
+        }
     }
 
     RecordData test_data;

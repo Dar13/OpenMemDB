@@ -34,7 +34,6 @@ using MultiRecordData = std::vector<RecordData>;
 // Schema definition
 struct TableSchema
 {
-    // TODO: Table constraints (AUTO_INCREMENT, etc)
     std::vector<SQLColumn> columns;
 };
 

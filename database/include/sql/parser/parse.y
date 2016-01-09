@@ -50,7 +50,12 @@ create_table_args ::= LPAREN column_list RPAREN .
 column_list ::= column_list COMMA column.
 column_list ::= column.
 
-column(A) ::= column_id(X) type column_args.  {A = X; builderAddColumnName(builder, X);}
+column(A) ::= column_id(X) type(Y) column_args(Z).
+{
+  (void)A;
+
+  builderAddColumn(builder, X, Y, Z);
+}
 
 column_id(A) ::= name(X).   {A = X;}
 
@@ -62,20 +67,20 @@ name(A) ::= id(X).      {A = X; token_print(X);}
 name(A) ::= STRING(X).  {A = X; token_print(X);}
 
 %type typetoken {Token}
-type ::= .
-type ::= typetoken(X).  {X;}
+type(A) ::= . { A = nullptr; }
+type(A) ::= typetoken(X).  {A = X;}
 
 typetoken(A) ::= typename(X).   {A = X;}
 
 %type typename {Token}
-typename(A) ::= ids(X). {A; builderAddColumnType(builder, X);}
+typename(A) ::= ids(X). {A = X;}
 
 column_args ::= column_args column_constraints.
 column_args ::= .
 
-column_constraints ::= DEFAULT LPAREN expr(X) RPAREN. {X; printf("col_const\n");}
-column_constraints ::= DEFAULT term(X).               {X; printf("col_const\n");}
-//column_constraints ::= DEFAULT id(X).                 {X; printf("col_const\n");}
+column_constraints ::= DEFAULT LPAREN expr(X) RPAREN. {(void)X; printf("col_const\n");}
+column_constraints ::= DEFAULT term(X).               {(void)X; printf("col_const\n");}
+//column_constraints ::= DEFAULT id(X).               {(void)X; printf("col_const\n");}
 
 column_constraints ::= NOT NULL.        {printf("Token: NOT NULL\n");}
 column_constraints ::= UNIQUE.          {printf("Token: UNIQUE\n");}
@@ -98,7 +103,7 @@ term(A) ::= name(X) DOT column_id(Y). {
     A = new (std::nothrow) TokenData(tmp, X->text, Y->text);
     // TODO: Error handling
 }
-term(A) ::= column_id(X). { (void)A; (void)X; printf("expression term\n"); }
+term(A) ::= column_id(X). { A = X; printf("expression term\n"); }
 term(A) ::= INTEGER|FLOAT(X).
 { 
   A = X;
@@ -127,15 +132,21 @@ as_clause(A) ::= AS name(X).  { A = X; }
 as_clause(A) ::= .            { A = nullptr; printf("Empty AS\n"); }
 
 select_table ::= FROM table_references where_clause group_by_clause.
-select_table ::= FROM name(A).  { A; }
+select_table ::= FROM name(A).  { (void)A; }
 
 table_references ::= table_references COMMA table_reference.
 table_references ::= table_reference.
 
-// TODO: consider other clauses
-table_reference ::= name(X) as_clause(Y). {X; Y; printf("Table reference\n"); }
+table_reference ::= name(X) as_clause(Y). 
+{
+  (void)X; 
+  (void)Y; 
+  printf("Table reference: %s as %s\n", X->text->c_str(), Y->text->c_str());
+}
+
 table_reference ::= . { printf("Empty table reference\n"); }
 
+// TODO: consider other clauses
 where_clause ::= WHERE search_condition. { printf("WHERE clause\n"); }
 
 group_by_clause ::= .

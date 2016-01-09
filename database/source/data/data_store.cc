@@ -1,6 +1,8 @@
-#include "data/data_store.h"
-#include <iostream>
+// C standard library includes
+#include <cstdio>
 
+// Project includes
+#include "data/data_store.h"
 
 //creates an empty table
 ManipResult DataStore::createTable(CreateTableCommand table_info)

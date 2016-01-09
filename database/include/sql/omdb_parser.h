@@ -40,7 +40,9 @@ std::vector<TokenPair> tokenize(std::string input);
 
 struct Parse;
 
-void parse(std::string input);
+class DataStore;
+
+StatementBuilder parse(std::string input);
 
 #define NEVER(X) 0
 

@@ -5,9 +5,12 @@
 #ifndef OMDB_SQL_COMMON_H
 #define OMDB_SQL_COMMON_H
 
+// C standard library includes
 #include <cstdint>
 
+// C++ standard library includes
 #include <string>
+#include <vector>
 
 // Project includes
 #include <util/types.h>
@@ -48,7 +51,7 @@ struct SQLColumn
 {
     std::string name;
     DataType type;
-    SQLConstraint constraint;
+    std::vector<SQLConstraint> constraint;
 };
 
 // TODO: Document this

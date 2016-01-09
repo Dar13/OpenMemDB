@@ -50,9 +50,10 @@ struct Expression
 struct StatementBuilder
 {
     StatementBuilder()
-        : type(SQLStatement::INVALID), statement(nullptr)
+        : type(SQLStatement::INVALID), statement(nullptr), valid(false)
     {}
   
+    bool valid;
     SQLStatement type;
     void* statement;
     Expression* expr;
@@ -72,6 +73,10 @@ void builderAddQualifiedSelectColumn(StatementBuilder* builder,
 void builderFinishSelectQuery(StatementBuilder* builder);
 
 // Somewhat generic helper functions
+void builderAddColumn(StatementBuilder* builder, 
+                      Token column_name, 
+                      Token column_type, 
+                      Token column_constraints);
 void builderAddColumnName(StatementBuilder* builder, Token column_name);
 void builderAddColumnType(StatementBuilder* builder, Token column_type);
 void builderAddTableName(StatementBuilder* builder, Token table_name);

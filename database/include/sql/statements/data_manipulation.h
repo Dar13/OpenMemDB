@@ -20,6 +20,7 @@ struct SelectQuery
 {
     /* TODO (if needed): std::vector<Table*> source_tables;*/
     std::vector<ColumnReference> source_columns;
+    std::vector<std::string> tables;
     std::vector<std::string> output_columns;
     std::vector<Predicate*> predicates;
 };

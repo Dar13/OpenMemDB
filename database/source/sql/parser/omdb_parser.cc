@@ -4,14 +4,18 @@
 #include <map>
 #include "sql/omdb_parser.h"
 
+#include "data/data_store.h"
+
 #include "../source/sql/parser/parse.c"
 
 static thread_local std::map<std::string, int> keywords;
-static thread_local StatementBuilder builder;
 
-void parse(std::string input)
+StatementBuilder parse(std::string input)
 {
+    // TODO: Is there a way to re-use the parse tree?
     void* parser = ParseAlloc(malloc);
+
+    StatementBuilder builder;
 
     Token token;
     int token_id = 0;
@@ -28,37 +32,16 @@ void parse(std::string input)
 
     if(builder.statement == nullptr)
     {
+        builder.valid = false;
         printf("Failed to parse statement!\n");
     }
     else
     {
+        builder.valid = true;
         printf("Statement parse was successful!\n");
     }
 
-    switch(builder.type)
-    {
-        case SQLStatement::CREATE_TABLE:
-        {
-            CreateTableCommand* create = reinterpret_cast<CreateTableCommand*>(builder.statement);
-        }
-            break;
-        case SQLStatement::DROP_TABLE:
-        {
-            DropTableCommand* drop = reinterpret_cast<DropTableCommand*>(builder.statement);
-        }
-            break;
-        case SQLStatement::SELECT:
-        {
-            SelectQuery* query = reinterpret_cast<SelectQuery*>(builder.statement);
-        }
-            break;
-        // TODO: The other statements
-        case SQLStatement::UPDATE:
-        case SQLStatement::INSERT_INTO:
-        case SQLStatement::DELETE:
-        default:
-            break;
-    }
+    return builder;
 }
 
 void token_print(Token token)
