@@ -56,11 +56,11 @@ libomdb::Connection buildConnectionObj(int socket, char* buffer) {
 
 
 libomdb::CommandResult parseCommandResult(std::string result) {
-  //TODO: build CommandResult
+  //TODO: build CommandResult requires parsing neils string
 }
 
 libomdb::Result parseQueryResult(std::string result) {
-  //TODO: build Result
+  //TODO: build Result, requires parsing Neils stirng
 }
 
 std::string sendMessage(std::string message, int socket) {
