@@ -97,6 +97,7 @@ expr ::= expr AND|OR(OP) expr. { builderStartNestedExpr(builder, OP);}
 expr ::= term(X) NE|EQ(OP) term(Y). { builderAddValueExpr(builder, OP, X, Y); }
 
 term(A) ::= name(X) DOT column_id(Y). { 
+    printf("reference Term handling\n");
     std::string* tmp = new (std::nothrow) std::string();
     // TODO: Error handling
     *tmp = (*X->text + "." + *Y->text);
@@ -106,6 +107,7 @@ term(A) ::= name(X) DOT column_id(Y). {
 term(A) ::= column_id(X). { A = X; printf("expression term\n"); }
 term(A) ::= INTEGER|FLOAT(X).
 { 
+  printf("Numeric term handling\n");
   A = X;
 }
 
@@ -134,14 +136,16 @@ as_clause(A) ::= .            { A = nullptr; printf("Empty AS\n"); }
 select_table ::= FROM table_references where_clause group_by_clause.
 select_table ::= FROM name(A).  { (void)A; }
 
-table_references ::= table_references COMMA table_reference.
-table_references ::= table_reference.
+table_references ::= table_references COMMA table_reference(X). { (void)X; }
+table_references ::= table_reference(X). { (void)X; }
 
-table_reference ::= name(X) as_clause(Y). 
+table_reference(A) ::= name(X) as_clause(Y). 
 {
+  printf("Non-empty table reference\n");
+  (void)A;
   (void)X; 
   (void)Y; 
-  printf("Table reference: %s as %s\n", X->text->c_str(), Y->text->c_str());
+  //printf("Table reference: %s as %s\n", X->text->c_str(), Y->text->c_str());
 }
 
 table_reference ::= . { printf("Empty table reference\n"); }

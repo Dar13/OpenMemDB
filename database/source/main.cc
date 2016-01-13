@@ -18,9 +18,21 @@ int main(int argc, char** argv)
     tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);
     DataStore data;
 
+    setupTokenMappings();
+
+    std::string test_select = "SELECT A.* FROM A WHERE A.x = 1 AND A.y = 2;";
+    StatementBuilder select_parse = parse(test_select);
+    if(select_parse.valid && select_parse.type == SQLStatement::SELECT)
+    {
+        printf("Select parsed!\n");
+    }
+    else
+    {
+        printf("Select not parsed!\n");
+    }
+
     std::string create_table = "CREATE TABLE TestTable (A INTEGER, B INTEGER);";
 
-    setupTokenMappings();
     StatementBuilder parse_result = parse(create_table);
 
     if(parse_result.valid && parse_result.type == SQLStatement::CREATE_TABLE)

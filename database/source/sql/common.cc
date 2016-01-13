@@ -3,21 +3,6 @@
 #include <map>
 #include <cctype>
 
-static thread_local std::map<std::string, ExpressionOperation> operation_map;
-
-void initializeOperationMap()
-{
-    operation_map["="] = ExpressionOperation::EQUALS;
-    operation_map["<"] = ExpressionOperation::LESSER;
-    operation_map["<="] = ExpressionOperation::LESSER_EQUALS;
-    operation_map[">"] = ExpressionOperation::GREATER;
-    operation_map[">="] = ExpressionOperation::GREATER_EQUALS;
-    operation_map["IN"] = ExpressionOperation::IN;
-    operation_map["BETWEEN"] = ExpressionOperation::BETWEEN;
-    operation_map["AND"] = ExpressionOperation::AND;
-    operation_map["OR"] = ExpressionOperation::OR;
-}
-
 /*
  *  This table was taken from SQLite3, with the following comment:
  *
@@ -126,25 +111,3 @@ int strnicmp(const char* left, const char* right, int n)
   return (n < 0) ? 0 : (tolower(*str_left) - tolower(*str_right));
 }
 
-ExpressionOperation getOperation(std::string op)
-{
-    if(operation_map.find(op) == operation_map.end())
-    {
-	return operation_map[op];
-    }
-
-    return ExpressionOperation::NO_OP;
-}
-
-std::string getOperationString(ExpressionOperation op)
-{
-    for(auto itr = operation_map.begin();
-	itr != operation_map.end();
-	itr++)
-    {
-	if(itr->second == op)
-	{
-	    return itr->first;
-	}
-    }
-}

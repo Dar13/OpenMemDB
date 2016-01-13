@@ -4,10 +4,10 @@
 
 #include <cstdio>
 
-// Debugging functions
-static void printExpressionTree(Expression* expr);
-
+// Helper functions
 static DataType getSQLType(std::string* type);
+
+static Expression* createExpression(Token op, Token left, Token right);
 
 void builderStartCreateTable(StatementBuilder* builder, Token table_name)
 {
@@ -137,11 +137,21 @@ void builderStartNestedExpr(StatementBuilder* builder, Token operation)
 {
     if(builder == nullptr)
     {
-	return; 
+        printf("This shouldn't happen\n");
+        // TODO: Assert?
+	    return; 
     }
 
     printf("Starting nested expression: [%s]\n", operation->text->c_str());
 
+    if(isExprFlagContained(builder->expr->flags, ExpressionFlags::NESTED))
+    {
+        builder->expr->op = static_cast<ExpressionOperation>(operation->operation);
+        printf("Nested operation = %u\n", (uint32_t)builder->expr->op);
+        builder->expr->flags = ExpressionFlags::NESTED;
+    }
+
+    printExpressionTree(builder->expr);
 }
 
 void builderAddValueExpr(StatementBuilder* builder,
@@ -154,46 +164,108 @@ void builderAddValueExpr(StatementBuilder* builder,
 
     if(builder->expr == nullptr)
     {
+        builder->expr = createExpression(operation, left_term, right_term);
+        if(builder->expr == nullptr)
+        {
+            printf("Fatal error, unable to generate value expression\n");
+            return;
+        }
+        /*
         builder->expr = new (std::nothrow) Expression();
         builder->expr->flags = ExpressionFlags::OPERATION;
         builder->expr->op = getOperation(*operation->text);
 
-	Expression* left = new (std::nothrow) Expression();
-	if(left_term->is_column)
-	{
-	    left->flags = ExpressionFlags::COLUMN;
-	    left->table_name = new std::string(*left_term->table_name);
-	    left->table_column = new std::string(*left_term->column_name);
-	}
-	else
-	{
-	    left->flags = ExpressionFlags::VALUE;
-	    left->value = left_term->value;
-	}
+	    Expression* left = new (std::nothrow) Expression();
+	    if(left_term->is_column)
+	    {
+	        left->flags = ExpressionFlags::COLUMN;
+	        left->table_name = new std::string(*left_term->table_name);
+	        left->table_column = new std::string(*left_term->column_name);
+	    }
+	    else
+	    {
+	        left->flags = ExpressionFlags::VALUE;
+	        left->value = left_term->value;
+	    }
 
-	Expression* right = new (std::nothrow) Expression();
-	if(right_term->is_column)
-	{
-	    right->flags = ExpressionFlags::COLUMN;
-	    right->table_name = new (std::nothrow) std::string(*right_term->table_name);
-	    right->table_column = new (std::nothrow) std::string(*right_term->column_name);
-	}
-	else
-	{
-	    right->flags = ExpressionFlags::VALUE;
-	    right->value = right_term->value;
-	}
+	    Expression* right = new (std::nothrow) Expression();
+	    if(right_term->is_column)
+	    {
+	        right->flags = ExpressionFlags::COLUMN;
+	        right->table_name = new (std::nothrow) std::string(*right_term->table_name);
+	        right->table_column = new (std::nothrow) std::string(*right_term->column_name);
+	    }
+	    else
+	    {
+	        right->flags = ExpressionFlags::VALUE;
+	        right->value = right_term->value;
+	    }
 
-	builder->expr->left = left;
-	builder->expr->right = right;
-
-	printf("Expression made?\n");
+	    builder->expr->left = left;
+	    builder->expr->right = right;
+        */
     }
     else
     {
+        printf("Non-null builder->expr\n");
+        // Create nested expression and set the previous to the left child
+        Expression* right = createExpression(operation, left_term, right_term);
+        if(right == nullptr)
+        {
+            printf("Fatal error, unable to generate value expression\n");
+            return;
+        }
+
+        Expression* parent = new (std::nothrow) Expression();
+        if(parent == nullptr)
+        {
+            printf("Fatal error, unable to generate value expression\n");
+            return;
+        }
+
+        parent->flags = ExpressionFlags::NESTED | ExpressionFlags::EMPTY;
+        parent->left = builder->expr;
+        parent->right = right;
+
+        builder->expr = parent;
     }
 
     printExpressionTree(builder->expr);
+}
+
+Expression* createExpression(Token op, Token left, Token right)
+{
+    Expression* parent = new (std::nothrow) Expression(op);
+    if(parent)
+    {
+        Expression* left_expr = new (std::nothrow) Expression(left);
+        if(left_expr)
+        {
+            parent->left = left_expr;
+        }
+        else
+        {
+            delete parent;
+            return nullptr;
+        }
+
+        Expression* right_expr = new (std::nothrow) Expression(right);
+        if(right_expr)
+        {
+            parent->right = right_expr;
+        }
+        else
+        {
+            delete parent;
+            return nullptr;
+        }
+    }
+    else
+    {
+        return nullptr;
+    }
+
+    return parent;
 }
 
 void builderClean(StatementBuilder* builder)
@@ -252,53 +324,4 @@ DataType getSQLType(std::string* type)
     }
   
     return DataType::NONE;
-}
-
-// Debugging function
-// TODO: Document this
-void printExpressionTree(Expression* expr)
-{
-    if(expr->left != nullptr)
-    {
-	printExpressionTree(expr->left);
-    }
-
-    switch(expr->flags)
-    {
-	case ExpressionFlags::COLUMN:
-	    printf("Column: %s.%s\n",
-		   expr->table_name->c_str(),
-		   expr->table_column->c_str());
-	    break;
-	case ExpressionFlags::VALUE:
-	    switch(expr->value.data.type)
-	    {
-		case DataType::SMALL_INT:
-		case DataType::INTEGER:
-		case DataType::BIG_INT:
-            printf("Value: %ld\n", expr->value.data.value);
-		    break;
-		case DataType::FLOAT:
-            {
-                FloatData float_data = { .value = expr->value.data.value};
-                printf("Value: %f\n", float_data.data);
-            }
-		    break;
-		default:
-		    printf("Unrecognized data type\n");
-		    break;
-	    }
-	    break;
-	case ExpressionFlags::OPERATION:
-	    printf("Operation: %s\n", getOperationString(expr->op).c_str());
-	    break;
-	default:
-	    printf("Unknown flag. Expr = %p\n", expr);
-	    break;
-    }
-
-    if(expr->right != nullptr)
-    {
-	printExpressionTree(expr->right);
-    }
 }

@@ -911,81 +911,87 @@ static void yy_reduce(
       case 29: /* term ::= name DOT column_id */
 #line 99 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { 
+    printf("reference Term handling\n");
     std::string* tmp = new (std::nothrow) std::string();
     // TODO: Error handling
     *tmp = (*yymsp[-2].minor.yy0->text + "." + *yymsp[0].minor.yy0->text);
     yygotominor.yy0 = new (std::nothrow) TokenData(tmp, yymsp[-2].minor.yy0->text, yymsp[0].minor.yy0->text);
     // TODO: Error handling
 }
-#line 921 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 922 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 30: /* term ::= column_id */
-#line 106 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 107 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { yygotominor.yy0 = yymsp[0].minor.yy0; printf("expression term\n"); }
-#line 926 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 927 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 31: /* term ::= INTEGER|FLOAT */
-#line 108 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 109 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { 
+  printf("Numeric term handling\n");
   yygotominor.yy0 = yymsp[0].minor.yy0;
 }
-#line 933 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 935 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 32: /* cmd ::= DROP TABLE name */
-#line 114 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 116 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 {builderStartDropTable(builder, yymsp[0].minor.yy0);}
-#line 938 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 940 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 38: /* select_column ::= name DOT ASTERISK */
-#line 126 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 128 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { builderAddSelectAllColumns(builder, yymsp[-2].minor.yy0); }
-#line 943 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 945 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 39: /* select_column ::= name DOT name as_clause */
-#line 127 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 129 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 {
   builderAddQualifiedSelectColumn(builder, yymsp[-3].minor.yy0, yymsp[-1].minor.yy0, yymsp[0].minor.yy0);
 }
-#line 950 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 952 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 40: /* as_clause ::= AS name */
-#line 131 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 133 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { yygotominor.yy0 = yymsp[0].minor.yy0; }
-#line 955 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 957 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 41: /* as_clause ::= */
-#line 132 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 134 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { yygotominor.yy0 = nullptr; printf("Empty AS\n"); }
-#line 960 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 962 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 43: /* select_table ::= FROM name */
-#line 135 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+      case 44: /* table_references ::= table_references COMMA table_reference */ yytestcase(yyruleno==44);
+      case 45: /* table_references ::= table_reference */ yytestcase(yyruleno==45);
+#line 137 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { (void)yymsp[0].minor.yy0; }
-#line 965 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 969 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 46: /* table_reference ::= name as_clause */
-#line 141 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 143 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 {
+  printf("Non-empty table reference\n");
+  (void)yygotominor.yy0;
   (void)yymsp[-1].minor.yy0; 
   (void)yymsp[0].minor.yy0; 
-  printf("Table reference: %s as %s\n", yymsp[-1].minor.yy0->text->c_str(), yymsp[0].minor.yy0->text->c_str());
+  //printf("Table reference: %s as %s\n", yymsp[-1].minor.yy0->text->c_str(), yymsp[0].minor.yy0->text->c_str());
 }
-#line 974 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 980 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 47: /* table_reference ::= */
-#line 147 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 151 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { printf("Empty table reference\n"); }
-#line 979 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 985 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 48: /* where_clause ::= WHERE search_condition */
-#line 150 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 154 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { printf("WHERE clause\n"); }
-#line 984 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 990 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 51: /* comparison_predicate ::= expr */
-#line 157 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 161 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { builderGeneratePredicates(builder); }
-#line 989 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 995 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       default:
       /* (0) input ::= cmd_list */ yytestcase(yyruleno==0);
@@ -1004,8 +1010,6 @@ static void yy_reduce(
       /* (36) select_columns ::= select_columns COMMA select_column */ yytestcase(yyruleno==36);
       /* (37) select_columns ::= select_column */ yytestcase(yyruleno==37);
       /* (42) select_table ::= FROM table_references where_clause group_by_clause */ yytestcase(yyruleno==42);
-      /* (44) table_references ::= table_references COMMA table_reference */ yytestcase(yyruleno==44);
-      /* (45) table_references ::= table_reference */ yytestcase(yyruleno==45);
       /* (49) group_by_clause ::= */ yytestcase(yyruleno==49);
       /* (50) search_condition ::= comparison_predicate */ yytestcase(yyruleno==50);
         break;
@@ -1057,7 +1061,7 @@ static void yy_parse_failed(
 
   printf("Parse failed!\n");
   builderClean(builder);
-#line 1061 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 1065 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
   ParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 #endif /* YYNOERRORRECOVERY */
@@ -1082,7 +1086,7 @@ static void yy_syntax_error(
       printf("possible token: %s\n", yyTokenName[i]);
     }
   }
-#line 1086 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 1090 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
   ParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 
@@ -1104,7 +1108,7 @@ static void yy_accept(
 #line 26 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 
   printf("Parse accepts input!\n");
-#line 1108 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 1112 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
   ParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 

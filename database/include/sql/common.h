@@ -14,6 +14,7 @@
 
 // Project includes
 #include <util/types.h>
+#include "statements/expression.h"
 
 typedef uint16_t SQLSmallIntType;
 typedef uint32_t SQLIntegerType;
@@ -61,78 +62,6 @@ struct ColumnReference
     uint32_t column_idx;
 };
 
-// TODO: Document this
-struct TokenData
-{
-    TokenData()
-        : text(nullptr), is_value(false), is_operation(false), is_column(false)
-    {}
-
-    TokenData(std::string* str)
-        : text(str), is_value(false), is_operation(false), is_column(false)
-    {}
-
-    TokenData(std::string* str, bool val)
-        : text(str), is_value(true), is_operation(false), is_column(false)
-    {
-        value.data.type = BOOLEAN;
-        if(val)
-        {
-            value.data.value = 1;
-        }
-        else
-        {
-            value.data.value = 0;
-        }
-    }
-    
-    TokenData(std::string* str, int64_t val)
-        : text(str), is_value(true), is_operation(false), is_column(false)
-    {
-        value.data.type = BIG_INT;
-        value.data.value = val;
-    }
-
-    TokenData(std::string* str, float val)
-        : text(str), is_value(true), is_operation(false), is_column(false)
-    {
-        value.data.type = FLOAT;
-        value.data.value = static_cast<int64_t>(val);
-    }
-
-    TokenData(std::string* str, std::string* table, std::string* column)
-        : text(str), is_value(false), is_operation(false), is_column(true),
-        table_name(table), column_name(column)
-    {}
-
-    std::string* text;
-
-    bool is_value;
-    TervelData value;
-
-    bool is_operation;
-    uint16_t operation;
-
-    bool is_column;
-    std::string* table_name;
-    std::string* column_name;
-};
-
-enum class ExpressionOperation : int32_t
-{
-    NO_OP = 0,
-    EQUALS,
-    NOT_EQUALS,
-    LESSER,
-    LESSER_EQUALS,
-    GREATER,
-    GREATER_EQUALS,
-    IN,
-    BETWEEN,
-    AND,
-    OR
-};
-
 class ExpressionValue
 {
 public:
@@ -177,11 +106,6 @@ public:
     ColumnReference left_column;
     ColumnReference right_column;
 };
-
-/**
- *  \brief The datatype passed into the parser from the tokenizer
- */
-typedef TokenData* Token;
 
 enum class SQLStatement : uint16_t
 {
@@ -232,10 +156,6 @@ inline bool isSQLNumericChar(unsigned char ch)
 int strnicmp(const char* left, const char* right, int n);
 
 void initializeOperationMap();
-
-ExpressionOperation getOperation(std::string op);
-
-std::string getOperationString(ExpressionOperation op);
 
 /**
  *  \brief A base class that implements the nullable property in SQL.

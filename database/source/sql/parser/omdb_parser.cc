@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <map>
 #include "sql/omdb_parser.h"
+#include "sql/statements/expression.h"
 
 #include "data/data_store.h"
 
@@ -87,6 +88,13 @@ std::vector<TokenPair> tokenize(std::string input)
       if(keywords.find(*pair.token->text) != keywords.end())
       {
         pair.token_type = keywords[*pair.token->text];
+
+        ExpressionOperation op = getOperation(*pair.token->text);
+        if(op != ExpressionOperation::NO_OP)
+        {
+            pair.token->is_operation = true;
+            pair.token->operation = static_cast<uint16_t>(op);
+        }
       }
       else
       {
@@ -177,6 +185,9 @@ std::vector<TokenPair> tokenize(std::string input)
             break;
           case '=':
             pair.token->text = new std::string("=");
+            pair.token->is_operation = true;
+            pair.token->operation = static_cast<uint16_t>(ExpressionOperation::EQUALS);
+
             pair.token_type = TK_EQ;
             break;
           case '!':

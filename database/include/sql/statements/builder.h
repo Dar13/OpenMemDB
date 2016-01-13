@@ -19,38 +19,11 @@
 
 #include "util/types.h"
 
-enum class ExpressionFlags : uint32_t
-{
-    EMPTY       = 0x0,
-    COLUMN      = 0x1,
-    VALUE       = 0x2,
-    OPERATION   = 0x4,
-    NESTED      = 0x8
-};
-
-struct Expression
-{
-    Expression() 
-        : left(nullptr), right(nullptr), 
-          op(ExpressionOperation::NO_OP), flags(ExpressionFlags::EMPTY) 
-    {}
-    Expression* left;
-    Expression* right;
-    ExpressionOperation op;
-  
-    ExpressionFlags flags;
-
-    std::string* table_name;
-    std::string* table_column;
-  
-    DataType value_type;
-    TervelData value;
-};
-
 struct StatementBuilder
 {
     StatementBuilder()
-        : type(SQLStatement::INVALID), statement(nullptr), valid(false)
+        : type(SQLStatement::INVALID), statement(nullptr), valid(false),
+          expr(nullptr)
     {}
   
     bool valid;
