@@ -12,7 +12,8 @@ enum class ResultStatus : uint32_t
     ERROR_INVALID_TABLE,
     ERROR_INVALID_DATA,
     ERROR_INVALID_RECORD,
-    ERROR_SYNTAX
+    ERROR_SYNTAX,
+    ERROR_INVALID_COLUMN
 };
 
 // TODO: Refactor so that this paradigm is used throughout

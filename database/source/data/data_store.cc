@@ -83,7 +83,7 @@ UintResult DataStore::getColumnIndex(std::string table_name, std::string column_
             }
         }
 
-        // TODO: Error code for not finding the column in the table?
+	return UintResult(ResultStatus::ERROR_INVALID_COLUMN, 0);
     }
 
     // Table name doesn't exist in the table name map
@@ -149,7 +149,7 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
     SchemaTablePair* table_pair = getTablePair(table_name);
     if(table_pair == nullptr)
     {
-	// TODO: Error handling
+	return MultiRecordResult(ResultStatus::ERROR_INVALID_TABLE, MultiRecordData);
     }
 
     DataTable* table = table_pair->table;
@@ -166,7 +166,7 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
 	    if(table_len == 0)
 	    {
 	        // Finished, table is empty
-	        // TODO: Return empty result
+		return MultiRecordResult(ResultStatus::SUCCESS, MultiRecordData);
 	    }
 
 	    for(int64_t i = 0; i < table_len; i++)
@@ -179,7 +179,7 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
 	        while(!table->at(i, row))
 	        {}
 
-            printf("Retrieved record address: %p\n", row);
+            	printf("Retrieved record address: %p\n", row);
 
 	        RecordData record_copy = copyRecord(row);
 	        data.push_back(record_copy);
@@ -222,13 +222,13 @@ RecordData DataStore::copyRecord(Record* record)
 
     for(int64_t i = 0; i < record_len; i++)
     {
-	    TervelData data = {.value = 0};
+	TervelData data = {.value = 0};
 
         int64_t tervel_data = 0;
 
-	    // Pull the current value of the data from the record
-	    while(!record->at(i, tervel_data))
-	    {
+	// Pull the current value of the data from the record
+	while(!record->at(i, tervel_data))
+	{
             printf("Waiting for retrieval\n");
         }
 
@@ -236,8 +236,8 @@ RecordData DataStore::copyRecord(Record* record)
 
         printf("Retrieved value: %ld\n", tervel_data);
 
-	    // TODO: This is ugly af, rethink this naming scheme in Data/TervelData
-	    copy.push_back(data);
+	// TODO: This is ugly af, rethink this naming scheme in Data/TervelData
+	copy.push_back(data);
     }
 
     // Return the copied data
