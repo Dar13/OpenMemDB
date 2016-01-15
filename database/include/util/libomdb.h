@@ -9,7 +9,7 @@
 
 #define MESSAGE_SIZE 300
 
-const int THE_TERMINATOR = 0xFF;
+const uint8_t THE_TERMINATOR = 0xFF;
 
 /**
  * Enum used to describe the type of packet being sent
