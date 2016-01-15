@@ -33,7 +33,7 @@ $(EXEC): $(OBJECTS)
 
 clean:
 	rm -f $(EXEC)
-	rm $(OBJECTS)
+	rm -f $(OBJECTS)
 
 lemon:
 	make -C $(TOOLS_DIR)/lemon
