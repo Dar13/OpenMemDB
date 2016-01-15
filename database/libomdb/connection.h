@@ -27,10 +27,10 @@ THE SOFTWARE.
 
 // Project includes.
 #include "result.h"
-
+#include "../include/util/libomdb.h"
 
 namespace libomdb{
-  
+
   /** Represents result of database command */
   typedef struct CommandResult {
     bool isSuccess;

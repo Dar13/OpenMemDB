@@ -49,11 +49,28 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-libomdb::Connection buildConnectionObj(int socket, char* buffer) {
-  // TODO: Parse connection string and create new Connection object
-  
+/**
+ * Builds a network packet with the passed in parameters.
+ * This network packet is necessary to send data across sockets.
+ * @param type The type of command being passed.
+ * @param command The command being sent to the server
+ * @return a NetworkPacket containing the information to be sent across the socket.
+ */
+NetworkPacket buildPacket(CommandType type, std::string command) {
+  NetworkPacket networkPacket;
+  // command needs to be made into char[]
+  strncpy(networkPacket.message, command.c_str(), sizeof(networkPacket.message));
+  networkPacket.message[sizeof(networkPacket.message) -1] = 0;
+  networkPacket.commandType = type;
+  networkPacket.terminator = THE_TERMINATOR;
+
+  return networkPacket;
 }
 
+libomdb::Connection buildConnectionObj(int socket, char* buffer) {
+  // TODO: Parse connection string and create new Connection object
+
+}
 
 libomdb::CommandResult parseCommandResult(std::string result) {
   //TODO: build CommandResult requires parsing neils string
@@ -63,6 +80,11 @@ libomdb::Result parseQueryResult(std::string result) {
   //TODO: build Result, requires parsing Neils stirng
 }
 
+/**
+ * Sends message across the socket passed in
+ * @param message The message to send to the server
+ * @param socket The file descriptor of the listening socket
+ */
 std::string sendMessage(std::string message, int socket) {
   // Need to convert message to c string in order to send it.
   const char* c_message = message.c_str();
@@ -201,15 +223,17 @@ void libomdb::Connection::disconnect() {
 
 
 libomdb::CommandResult libomdb::Connection::executeCommand(std::string command) {
-  //TODO: Need to build string that can be parsed by server
+  NetworkPacket packet = buildPacket(DB_COMMAND, command);
   return parseCommandResult(sendMessage(command, this->m_socket_fd));
+  // TODO: Change command to packet when sendMessage is fixed
 }
 
 
 
 libomdb::Result libomdb::Connection::executeQuery(std::string query) {
-  //TODO: Need to build string that can be parsed by server
+  NetworkPacket packet = buildPacket(SQL_STATEMENT, query);
   return parseQueryResult(sendMessage(query, this->m_socket_fd));
+  // TODO: Change query to packet when sendMessage is fixed
 }
 
 
