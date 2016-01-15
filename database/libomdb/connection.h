@@ -139,11 +139,12 @@ namespace libomdb{
      */
     Connection(uint64_t socket_fd, ConnectionMetaData metaData);
 
-    /** The file desciptor used to communicate over */
-    uint16_t m_socket_fd;
-
     /** The meta data object that describes the connection */
     libomdb::ConnectionMetaData m_metaData;
+
+    /** The file descriptor used to communicate over */
+    uint16_t m_socket_fd;
+
   };
 
 }

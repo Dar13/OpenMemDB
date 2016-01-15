@@ -85,11 +85,14 @@ libomdb::Result parseQueryResult(std::string result) {
  * @param message The message to send to the server
  * @param socket The file descriptor of the listening socket
  */
-std::string sendMessage(std::string message, int socket) {
+std::string sendMessage(NetworkPacket packet, int socket) {
   // Need to convert message to c string in order to send it.
-  const char* c_message = message.c_str();
+  char message[MESSAGE_SIZE];
+  memcpy(message, &packet, sizeof(packet));
+  std::cout << "Message being sent: " << message <<std::endl;
+  // const char* c_message = message.c_str();
   std::cout << "Attempting to send message to socket" << socket << std::endl;
-  int bytes_sent = send(socket, c_message, sizeof c_message, 0);
+  int bytes_sent = send(socket, message, sizeof message, 0);
   std::cout<< "Bytes sent: " << bytes_sent << std::endl;
   if (bytes_sent == -1) {
     perror("send");
@@ -99,7 +102,7 @@ std::string sendMessage(std::string message, int socket) {
   // Wait for receipt of message;
   char result[MAXDATASIZE];
   int bytes_recieved = recv(socket, result, sizeof(result), 0);
-  std::cout << "Bytes recieved: " << bytes_recieved << std::endl;
+  std::cout << "Bytes relieved: " << bytes_recieved << std::endl;
   if (bytes_recieved == -1) {
     perror("recv");
     return NULL;
@@ -224,7 +227,7 @@ void libomdb::Connection::disconnect() {
 
 libomdb::CommandResult libomdb::Connection::executeCommand(std::string command) {
   NetworkPacket packet = buildPacket(DB_COMMAND, command);
-  return parseCommandResult(sendMessage(command, this->m_socket_fd));
+  return parseCommandResult(sendMessage(packet, this->m_socket_fd));
   // TODO: Change command to packet when sendMessage is fixed
 }
 
@@ -232,7 +235,7 @@ libomdb::CommandResult libomdb::Connection::executeCommand(std::string command) 
 
 libomdb::Result libomdb::Connection::executeQuery(std::string query) {
   NetworkPacket packet = buildPacket(SQL_STATEMENT, query);
-  return parseQueryResult(sendMessage(query, this->m_socket_fd));
+  return parseQueryResult(sendMessage(packet, this->m_socket_fd));
   // TODO: Change query to packet when sendMessage is fixed
 }
 
