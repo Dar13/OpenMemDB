@@ -98,7 +98,7 @@ std::string getOperationString(ExpressionOperation op)
 	    }
     }
 
-    return "";
+    return "NOOP";
 }
 
 static void print_expr(Expression* expr)
@@ -144,7 +144,7 @@ static void print_expr(Expression* expr)
 // TODO: Document this
 void printExpressionTree(Expression* expr, int indent)
 {
-    printf("Expression evaluates to following expression: ");
+    printf("Expression tree evaluates to following expression: ");
     if(expr == nullptr)
     {
         return;

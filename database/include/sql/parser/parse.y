@@ -158,7 +158,7 @@ group_by_clause ::= .
 // TODO: consider other predicates
 search_condition ::= comparison_predicate.
 
-comparison_predicate ::= expr. { builderGeneratePredicates(builder); }
+comparison_predicate ::= expr. { }
 
 // UPDATE STATEMENT ///////////////////////////////////////////////////////////
 

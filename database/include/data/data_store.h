@@ -14,6 +14,7 @@
 #include "hash_functor.h"
 #include "util/types.h"
 #include "sql/types/common.h"
+#include "sql/predicate.h"
 #include "sql/statements/data_definition.h"
 #include "sql/statements/data_manipulation.h"
 

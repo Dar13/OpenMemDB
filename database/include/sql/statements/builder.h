@@ -38,7 +38,6 @@ void builderStartDropTable(StatementBuilder* builder, Token table_name);
 
 // Query management function
 void builderStartSelectQuery(StatementBuilder* builder);
-void builderGeneratePredicates(StatementBuilder* builder);
 void builderAddSelectAllColumns(StatementBuilder* builder, Token table);
 void builderAddQualifiedSelectColumn(StatementBuilder* builder,
                                      Token table, Token source_column,

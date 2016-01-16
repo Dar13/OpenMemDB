@@ -55,58 +55,6 @@ struct SQLColumn
     std::vector<SQLConstraint> constraint;
 };
 
-// TODO: Document this
-struct ColumnReference
-{
-    std::string table;
-    uint32_t column_idx;
-};
-
-class ExpressionValue
-{
-public:
-    bool is_range;
-
-    TervelData getValue() { return value; }
-    DataRange getRange() { return (DataRange){range_start, range_end}; }
-
-private:
-    TervelData value;
-    TervelData range_start;
-    TervelData range_end;
-};
-
-// TODO: Document this
-struct Predicate
-{
-public:
-    ExpressionOperation op;
-};
-
-// TODO: Document this
-struct NestedPredicate : public Predicate
-{
-public:
-    Predicate* left_child;
-    Predicate* right_child;
-};
-
-// TODO: Document this
-struct ValuePredicate : public Predicate
-{
-public:
-    ColumnReference column;
-    ExpressionValue expected_value;
-};
-
-// TODO: Document this
-struct ColumnPredicate : public Predicate
-{
-public:
-    ColumnReference left_column;
-    ColumnReference right_column;
-};
-
 enum class SQLStatement : uint16_t
 {
   INVALID = 0,
