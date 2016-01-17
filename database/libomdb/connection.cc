@@ -54,17 +54,17 @@ void *get_in_addr(struct sockaddr *sa)
  * This network packet is necessary to send data across sockets.
  * @param type The type of command being passed.
  * @param command The command being sent to the server
- * @return a NetworkPacket containing the information to be sent across the socket.
+ * @return a CommandPacket containing the information to be sent across the socket.
  */
-NetworkPacket buildPacket(CommandType type, std::string command) {
-  NetworkPacket networkPacket;
+CommandPacket buildPacket(CommandType type, std::string command) {
+  CommandPacket commandPacket;
   // command needs to be made into char[]
-  strncpy(networkPacket.message, command.c_str(), sizeof(networkPacket.message));
-  networkPacket.message[sizeof(networkPacket.message) -1] = 0;
-  networkPacket.commandType = type;
-  networkPacket.terminator = THE_TERMINATOR;
+  strncpy(commandPacket.message, command.c_str(), sizeof(commandPacket.message));
+  commandPacket.message[sizeof(commandPacket.message) -1] = 0;
+  commandPacket.commandType = type;
+  commandPacket.terminator = THE_TERMINATOR;
 
-  return networkPacket;
+  return commandPacket;
 }
 
 libomdb::Connection buildConnectionObj(int socket, char* buffer) {
@@ -78,6 +78,7 @@ libomdb::CommandResult parseCommandResult(std::string result) {
 
 libomdb::Result parseQueryResult(std::string result) {
   //TODO: build Result, requires parsing Neils stirng
+  // The result packet comes in two stages, first the ResultMetaDataPacket. Then the ResultPacket.
 }
 
 /**
@@ -85,7 +86,7 @@ libomdb::Result parseQueryResult(std::string result) {
  * @param message The message to send to the server
  * @param socket The file descriptor of the listening socket
  */
-std::string sendMessage(NetworkPacket packet, int socket) {
+std::string sendMessage(CommandPacket packet, int socket) {
   // Need to convert message to c string in order to send it.
   char message[MESSAGE_SIZE];
   memcpy(message, &packet, sizeof(packet));
@@ -226,7 +227,7 @@ void libomdb::Connection::disconnect() {
 
 
 libomdb::CommandResult libomdb::Connection::executeCommand(std::string command) {
-  NetworkPacket packet = buildPacket(DB_COMMAND, command);
+  CommandPacket packet = buildPacket(CommandType::DB_COMMAND, command);
   return parseCommandResult(sendMessage(packet, this->m_socket_fd));
   // TODO: Change command to packet when sendMessage is fixed
 }
@@ -234,7 +235,7 @@ libomdb::CommandResult libomdb::Connection::executeCommand(std::string command) 
 
 
 libomdb::Result libomdb::Connection::executeQuery(std::string query) {
-  NetworkPacket packet = buildPacket(SQL_STATEMENT, query);
+  CommandPacket packet = buildPacket(CommandType::SQL_STATEMENT, query);
   return parseQueryResult(sendMessage(packet, this->m_socket_fd));
   // TODO: Change query to packet when sendMessage is fixed
 }
