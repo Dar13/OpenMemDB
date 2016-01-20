@@ -12,17 +12,16 @@
 #include "util/types.h"
 
 #include "sql/common.h"
+#include "sql/statements/common.h"
 
-// Forward declaration
-struct Expression;
-
-struct SelectQuery
+struct SelectQuery : public ParsedStatement
 {
-    /* TODO (if needed): std::vector<Table*> source_tables;*/
+    SelectQuery() : ParsedStatement(SQLStatement::SELECT), predicate(nullptr) {}
+
     std::vector<ColumnReference> source_columns;
     std::vector<std::string> tables;
     std::vector<std::string> output_columns;
-    std::vector<Predicate*> predicates;
+    Predicate* predicate;
 };
 
 // TODO: UPDATE, INSERT INTO & DELETE statements

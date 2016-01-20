@@ -22,13 +22,13 @@
 struct StatementBuilder
 {
     StatementBuilder()
-        : type(SQLStatement::INVALID), statement(nullptr), valid(false),
-          expr(nullptr)
+        : statement(nullptr), valid(false),
+          expr(nullptr), started(false)
     {}
   
+    bool started;
     bool valid;
-    SQLStatement type;
-    void* statement;
+    ParsedStatement* statement;
     Expression* expr;
 };
 

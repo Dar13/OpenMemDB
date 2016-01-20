@@ -10,7 +10,7 @@ ManipResult DataStore::createTable(CreateTableCommand table_info)
     if(table_info.columns.size() <= 0)
     {
         // TODO: Returns an error code, statement cannot execute
-        return ManipResult(ResultStatus::INVALID_TABLE,
+        return ManipResult(ResultStatus::ERROR_INVALID_TABLE,
                            ManipStatus::SUCCESS);
     }
 
@@ -48,10 +48,24 @@ ManipResult DataStore::deleteTable(std::string table_name)
     if(!table_name_mapping.remove(table_name))
     {
         // TODO: Update with appropriate ManipStatus value
-        return ManipResult(ResultStatus::INVALID_TABLE, ManipStatus::SUCCESS);
+        return ManipResult(ResultStatus::ERROR_INVALID_TABLE, ManipStatus::SUCCESS);
     }
 
     return ManipResult(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
+}
+
+SchemaResult DataStore::getTableSchema(std::string table_name)
+{
+    SchemaTablePair* pair = getTablePair(table_name);
+    if(pair == nullptr)
+    {
+        return SchemaResult(ResultStatus::ERROR_INVALID_TABLE, TableSchema());
+    }
+    else
+    {
+        TableSchema schema = *pair->schema;
+        return SchemaResult(ResultStatus::SUCCESS, schema);
+    }
 }
 
 UintResult DataStore::getColumnIndex(std::string table_name, std::string column_name)
@@ -73,7 +87,7 @@ UintResult DataStore::getColumnIndex(std::string table_name, std::string column_
     }
 
     // Table name doesn't exist in the table name map
-    return UintResult(ResultStatus::INVALID_TABLE, 0);
+    return UintResult(ResultStatus::ERROR_INVALID_TABLE, 0);
 }
 
 DataResult DataStore::updateData(Predicate* predicates,
@@ -95,14 +109,14 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
     SchemaTablePair* table_pair = getTablePair(table_name);
     if(table_pair == nullptr)
     {
-        return ManipResult(ResultStatus::INVALID_TABLE, ManipStatus::FAILURE);
+        return ManipResult(ResultStatus::ERROR_INVALID_TABLE, ManipStatus::FAILURE);
     }
 
     // Insert into the table
     Record* new_record = new (std::nothrow) Record(record.size());
     if(new_record == nullptr)
     {
-        return ManipResult(ResultStatus::ERR_MEM_ALLOC, ManipStatus::FAILURE);
+        return ManipResult(ResultStatus::ERROR_MEM_ALLOC, ManipStatus::FAILURE);
     }
 
     for(auto data : record)
@@ -178,7 +192,7 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
         // TODO: Actually evaluate the predicates
     }
 
-    return MultiRecordResult(ResultStatus::INVALID_TABLE, MultiRecordData());
+    return MultiRecordResult(ResultStatus::ERROR_INVALID_TABLE, MultiRecordData());
 }
 
 SchemaTablePair* DataStore::getTablePair(std::string table_name)

@@ -20,24 +20,13 @@ int main(int argc, char** argv)
 
     setupTokenMappings();
 
-    std::string test_select = "SELECT A.* FROM A WHERE A.x = 1 AND A.y = 2;";
-    StatementBuilder select_parse = parse(test_select);
-    if(select_parse.valid && select_parse.type == SQLStatement::SELECT)
-    {
-        printf("Select parsed!\n");
-    }
-    else
-    {
-        printf("Select not parsed!\n");
-    }
-
     std::string create_table = "CREATE TABLE TestTable (A INTEGER, B INTEGER);";
 
-    StatementBuilder parse_result = parse(create_table);
+    ParseResult parse_result = parse(create_table, &data);
 
-    if(parse_result.valid && parse_result.type == SQLStatement::CREATE_TABLE)
+    if(parse_result.status == ResultStatus::SUCCESS)
     {
-        CreateTableCommand* create_table = reinterpret_cast<CreateTableCommand*>(parse_result.statement);
+        CreateTableCommand* create_table = reinterpret_cast<CreateTableCommand*>(parse_result.result);
         auto err = data.createTable(*create_table);
         if(err.status == ResultStatus::SUCCESS)
         {
@@ -73,6 +62,19 @@ int main(int argc, char** argv)
     else
     {
         printf("Record inserted\n");
+    }
+
+    std::string select_data = "SELECT TestTable.* FROM TestTable WHERE TestTable.x = 1;";
+    parse_result = parse(select_data, &data);
+
+    if(parse_result.status == ResultStatus::SUCCESS)
+    {
+        SelectQuery* query = reinterpret_cast<SelectQuery*>(parse_result.result);
+        printf("Select parse success\n");
+    }
+    else
+    {
+        printf("Select parse failed\n");
     }
 
     MultiRecordResult records = data.getRecords(nullptr, "TestTable");

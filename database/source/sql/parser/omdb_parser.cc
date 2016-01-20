@@ -11,7 +11,7 @@
 
 static thread_local std::map<std::string, int> keywords;
 
-StatementBuilder parse(std::string input)
+ParseResult parse(std::string input, DataStore* data_store)
 {
     // TODO: Is there a way to re-use the parse tree?
     void* parser = ParseAlloc(malloc);
@@ -31,18 +31,20 @@ StatementBuilder parse(std::string input)
     Parse(parser, 0, nullptr, &builder);
     ParseFree(parser, free);
 
-    if(builder.statement == nullptr)
+    if(builder.statement == nullptr || !builder.valid)
     {
-        builder.valid = false;
         printf("Failed to parse statement!\n");
+        return ParseResult(ResultStatus::ERROR_SYNTAX, nullptr);
     }
     else
     {
-        builder.valid = true;
+        setupStatement(builder.statement, builder.expr, data_store);
+
         printf("Statement parse was successful!\n");
+        return ParseResult(ResultStatus::SUCCESS, builder.statement);
     }
 
-    return builder;
+    return ParseResult(ResultStatus::ERROR_SYNTAX, nullptr);
 }
 
 void token_print(Token token)

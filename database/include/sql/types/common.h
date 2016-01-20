@@ -1,7 +1,7 @@
 /* TODO: File header */
 
 #ifndef SQL_TYPES_COMMON_H
-#ifndef SQL_TYPES_COMMON_H
+#define SQL_TYPES_COMMON_H
 
 #include "boolean.h"
 #include "datetime.h"
@@ -19,5 +19,4 @@ enum SQLTypes
   SQL_TIMESTAMP
 };
 
-#endif
 #endif

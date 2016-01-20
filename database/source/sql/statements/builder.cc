@@ -14,8 +14,9 @@ void builderStartCreateTable(StatementBuilder* builder, Token table_name)
     CreateTableCommand* command = new CreateTableCommand;
     command->table_name = *table_name->text;
   
-    builder->type = SQLStatement::CREATE_TABLE;
+    builder->started = true;
     builder->statement = command;
+    builder->valid = true;
   
     printf("Builder started for CREATE TABLE statement\n");
 }
@@ -25,18 +26,24 @@ void builderStartDropTable(StatementBuilder* builder, Token table_name)
     DropTableCommand* command = new DropTableCommand;
     command->table_name = *table_name->text;
   
-    builder->type = SQLStatement::DROP_TABLE;
+    builder->started = true;
     builder->statement = command;
+    builder->valid = true;
   
     printf("Builder started/done for DROP TABLE statement\n");
 }
 
 void builderStartSelectQuery(StatementBuilder* builder)
 {
-    SelectQuery* query = new SelectQuery();
+    SelectQuery* query = new (std::nothrow) SelectQuery();
+    if(query == nullptr)
+    {
+        // TODO: Error handling
+    }
   
-    builder->type = SQLStatement::SELECT;
+    builder->started = true;
     builder->statement = query;
+    builder->valid = true;
   
     printf("Builder started for SELECT statement\n");
 }
@@ -45,22 +52,22 @@ void builderStartSelectQuery(StatementBuilder* builder)
 void builderAddSelectAllColumns(StatementBuilder* builder, Token table)
 {
     // Don't want to override a currently active statement
-    if(builder->type == SQLStatement::INVALID &&
-       builder->statement == nullptr)
+    if(!builder->started)
     {
         builderStartSelectQuery(builder);
     }
 
-    if(builder->type != SQLStatement::SELECT)
+    if(builder->statement == nullptr)
     {
-        // Error!
-        printf("Statement is already being built!\n");
-        return;
+        // TODO: Error handling
     }
 
     // TODO: Add all columns in the given table to this query
+    switch(builder->statement->type)
+    {
+    }
 
-    printf("AddSelectAllColumns called\n");
+    printf("AddSelectAllColumns called for table %s\n", table->text->c_str());
 }
 
 void builderAddQualifiedSelectColumn(StatementBuilder* builder,
@@ -79,10 +86,14 @@ void builderAddQualifiedSelectColumn(StatementBuilder* builder,
     /* TODO: Calculate source_column's index within the given table */
     source.column_idx = 0;
   
-    if(builder->type != SQLStatement::SELECT && builder->statement == nullptr)
+    if(!builder->started)
     {
         // Start the SELECT statement then
         builderStartSelectQuery(builder);
+    }
+    else
+    {
+        // TODO: Error handling
     }
   
     SelectQuery* query = reinterpret_cast<SelectQuery*>(builder->statement);
@@ -105,7 +116,12 @@ void builderAddColumn(StatementBuilder* builder, Token column_name,
 {
     printf("Entered builderAddColumn\n");
 
-    switch(builder->type)
+    if(!builder->started)
+    {
+        // TODO: What do?
+    }
+
+    switch(builder->statement->type)
     {
         case SQLStatement::CREATE_TABLE:
         {
@@ -120,8 +136,7 @@ void builderAddColumn(StatementBuilder* builder, Token column_name,
         }
         break;
         case SQLStatement::SELECT:
-        {
-        }
+        { }
         break;
 
         case SQLStatement::INVALID:
@@ -170,40 +185,6 @@ void builderAddValueExpr(StatementBuilder* builder,
             printf("Fatal error, unable to generate value expression\n");
             return;
         }
-        /*
-        builder->expr = new (std::nothrow) Expression();
-        builder->expr->flags = ExpressionFlags::OPERATION;
-        builder->expr->op = getOperation(*operation->text);
-
-	    Expression* left = new (std::nothrow) Expression();
-	    if(left_term->is_column)
-	    {
-	        left->flags = ExpressionFlags::COLUMN;
-	        left->table_name = new std::string(*left_term->table_name);
-	        left->table_column = new std::string(*left_term->column_name);
-	    }
-	    else
-	    {
-	        left->flags = ExpressionFlags::VALUE;
-	        left->value = left_term->value;
-	    }
-
-	    Expression* right = new (std::nothrow) Expression();
-	    if(right_term->is_column)
-	    {
-	        right->flags = ExpressionFlags::COLUMN;
-	        right->table_name = new (std::nothrow) std::string(*right_term->table_name);
-	        right->table_column = new (std::nothrow) std::string(*right_term->column_name);
-	    }
-	    else
-	    {
-	        right->flags = ExpressionFlags::VALUE;
-	        right->value = right_term->value;
-	    }
-
-	    builder->expr->left = left;
-	    builder->expr->right = right;
-        */
     }
     else
     {
@@ -273,16 +254,14 @@ void builderClean(StatementBuilder* builder)
     // DEBUG
     printf("builderClean called\n");
 
-    switch(builder->type)
+    if(builder->started)
     {
-        // TODO: Finish this
-        default:
-            // Throw error
-            break;
+        delete builder->statement;
     }
 
     builder->statement = nullptr;
-    builder->type = SQLStatement::INVALID;
+
+    builder->started = false;
 }
 
 DataType getSQLType(std::string* type)

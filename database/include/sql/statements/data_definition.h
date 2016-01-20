@@ -9,17 +9,20 @@
 
 // Project includes
 #include "sql/common.h"
+#include "sql/statements/common.h"
 #include "util/types.h"
 
-struct CreateTableCommand
+struct CreateTableCommand : public ParsedStatement
 {
-  std::string table_name;
-  std::vector<SQLColumn> columns;
+    CreateTableCommand() : ParsedStatement(SQLStatement::CREATE_TABLE) {}
+    std::string table_name;
+    std::vector<SQLColumn> columns;
 };
 
-struct DropTableCommand
+struct DropTableCommand : public ParsedStatement
 {
-  std::string table_name;
+    DropTableCommand() : ParsedStatement(SQLStatement::DROP_TABLE) {}
+    std::string table_name;
 };
 
 #endif

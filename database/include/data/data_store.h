@@ -13,6 +13,7 @@
 // Project includes
 #include "hash_functor.h"
 #include "util/types.h"
+#include "util/result.h"
 #include "sql/types/common.h"
 #include "sql/predicate.h"
 #include "sql/statements/data_definition.h"
@@ -53,14 +54,6 @@ using TableMap = tervel::containers::wf::HashMap<std::string,
                                                  SchemaTablePair*, 
                                                  TableHashFunctor<std::string, SchemaTablePair*>>;
 
-enum class ResultStatus : uint32_t
-{
-    SUCCESS = 0,
-    ERR_MEM_ALLOC,
-    INVALID_TABLE,
-    INVALID_DATA,
-    INVALID_RECORD
-};
 
 // TODO: Does this need to exist? Does a secondary error code?
 enum class ManipStatus : uint32_t
@@ -69,22 +62,12 @@ enum class ManipStatus : uint32_t
     FAILURE
 };
 
-// TODO: Refactor so that this paradigm is used throughout
-template <typename T>
-struct Result
-{
-    Result(ResultStatus s, T res) : status(s), result(res) {}
-    ResultStatus status;
-    T result;
-};
-
-// Some common Result types
-
+// Some common Result types for this module
 using DataResult = Result<TervelData>;
 using RecordResult = Result<RecordData>;
 using MultiRecordResult = Result<MultiRecordData>;
 using ManipResult = Result<ManipStatus>;
-using UintResult = Result<uint32_t>;
+using SchemaResult = Result<TableSchema>;
 
 /**
  *  @brief The interface into the data that is shared between all worker threads.
@@ -92,15 +75,6 @@ using UintResult = Result<uint32_t>;
 class DataStore
 {
 public:
-    // TODO: Rename this
-    enum class Error : uint32_t
-    {
-        SUCCESS = 0,
-        MEM_ALLOC,
-        INVALID_SCHEMA,
-        INVALID_TABLE
-    };
-
     DataStore()
         : table_name_mapping(64)
     {}
@@ -110,6 +84,8 @@ public:
     ManipResult deleteTable(std::string table_name);
 
     UintResult getColumnIndex(std::string table_name, std::string column_name);
+
+    SchemaResult getTableSchema(std::string table_name);
 
     DataResult updateData(Predicate* predicates,
                           std::string table_name,

@@ -4,24 +4,12 @@
 
 #include "sql/predicate.h"
 
-static Predicate* makePredicateFromExpressionSubtree(Expression* expr);
+#include "data/data_store.h"
 
 /**
  *
  */
-Predicate* getPredicateFromExpression(Expression* expr)
-{
-    if(expr == nullptr)
-    {
-        return nullptr;
-    }
-
-    Predicate* root = makePredicateFromExpressionSubtree(expr);
-
-    return root;
-}
-
-Predicate* makePredicateFromExpressionSubtree(Expression* expr)
+Predicate* makePredicateFromExpression(Expression* expr, DataStore* data_store)
 {
     if(expr == nullptr)
     {
@@ -33,6 +21,33 @@ Predicate* makePredicateFromExpressionSubtree(Expression* expr)
     ExpressionFlags type = expr->flags & (ExpressionFlags::NESTED | 
                                           ExpressionFlags::COLUMN |
                                           ExpressionFlags::VALUE);
+
+    if(type == ExpressionFlags::NESTED)
+    {
+        NestedPredicate* nested_pred = new (std::nothrow) NestedPredicate;
+        if(nested_pred == nullptr)
+        {
+            // TODO: Error handling
+        }
+
+        Predicate* left = makePredicateFromExpression(expr->left, data_store);
+        Predicate* right = makePredicateFromExpression(expr->right, data_store);
+
+        if(left == nullptr || right ==  nullptr)
+        {
+            delete left;
+            delete right;
+            delete pred;
+            pred = nullptr;
+        }
+        else
+        {
+            nested_pred->left_child = left;
+            nested_pred->right_child = right;
+        }
+
+        pred = nested_pred;
+    }
 
     if(type == ExpressionFlags::OPERATION)
     {
@@ -50,20 +65,17 @@ Predicate* makePredicateFromExpressionSubtree(Expression* expr)
             left_ref.table = *left->table_name;
             right_ref.table = *right->table_name;
 
-            // TODO: Make this work
-            /*
-            auto res = data_store->getColumnIdx(left_ref.table, *left->column_name);
+            auto res = data_store->getColumnIndex(left_ref.table, *left->table_column);
             if(res.status == ResultStatus::SUCCESS)
             {
                 left_ref.column_idx = res.result;
             }
 
-            res = data_store->getColumnIdx(right_ref.table, *right->column_name);
+            res = data_store->getColumnIndex(right_ref.table, *right->table_column);
             if(res.status == ResultStatus::SUCCESS)
             {
                 right_ref.column_idx = res.result;
             }
-            */
 
             col_pred->left_column = left_ref;
             col_pred->right_column = right_ref;
@@ -81,19 +93,18 @@ Predicate* makePredicateFromExpressionSubtree(Expression* expr)
 
                 ColumnReference col;
                 col.table = *right->table_name;
-                // TODO: Make this possible
-                /*
-                auto res = data_store->getColumnIndex(col.table_name, 
-                                                         *right->table_column);
-                if(res.status == SUCCESS)
+                auto res = data_store->getColumnIndex(col.table, 
+                                                      *right->table_column);
+                if(res.status == ResultStatus::SUCCESS)
                 {
                     col.column_idx = res.result;
                 }
                 else
                 {
                     // TODO: Error handling
+                    delete pred;
+                    pred = nullptr;
                 }
-                */
 
                 val_pred->column = col;
             }
@@ -103,19 +114,18 @@ Predicate* makePredicateFromExpressionSubtree(Expression* expr)
 
                 ColumnReference col;
                 col.table = *left->table_name;
-                // TODO: Make this possible
-                /*
-                auto res = data_store->getColumnIndex(col.table_name, 
+                auto res = data_store->getColumnIndex(col.table, 
                                                       *left->table_column);
-                if(res.status == SUCCESS)
+                if(res.status == ResultStatus::SUCCESS)
                 {
                     col.column_idx = res.result;
                 }
                 else
                 {
                     // TODO: Error handling
+                    delete pred;
+                    pred = nullptr;
                 }
-                */
 
                 val_pred->column = col;
             }
@@ -125,4 +135,34 @@ Predicate* makePredicateFromExpressionSubtree(Expression* expr)
     }
 
     return pred;
+}
+
+void setupStatement(ParsedStatement* statement, Expression* expr, DataStore* data_store)
+{
+    if(statement == nullptr || expr == nullptr)
+    {
+        // TODO: Make an error propagate back up
+        return;
+    }
+
+    switch(statement->type)
+    {
+        case SQLStatement::SELECT:
+            {
+                SelectQuery* query = reinterpret_cast<SelectQuery*>(statement);
+                query->predicate = makePredicateFromExpression(expr, data_store);
+            }
+            break;
+        case SQLStatement::UPDATE:
+            // TODO
+            break;
+        case SQLStatement::INSERT_INTO:
+            // TODO
+            break;
+        case SQLStatement::DELETE:
+            // TODO
+            break;
+        default:
+            break;
+    }
 }

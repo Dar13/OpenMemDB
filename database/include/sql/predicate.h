@@ -5,7 +5,10 @@
 #ifndef SQL_PREDICATE_H
 #define SQL_PREDICATE_H
 
+#include "statements/common.h"
 #include "statements/expression.h"
+
+class DataStore;
 
 /* TODO: Consider moving this to a static heap to prevent dealing with
  * dynamic memory allocation errors and their propagation.
@@ -57,6 +60,13 @@ public:
 struct NestedPredicate : public Predicate
 {
 public:
+    NestedPredicate() : left_child(nullptr), right_child(nullptr) {}
+    ~NestedPredicate()
+    {
+        delete left_child;
+        delete right_child;
+    }
+
     Predicate* left_child;
     Predicate* right_child;
 };
@@ -77,6 +87,8 @@ public:
     ColumnReference right_column;
 };
 
-Predicate* getPredicateFromExpression(Expression* expr);
+Predicate* getPredicateFromExpression(Expression* expr, DataStore* data_store);
+
+void setupStatement(ParsedStatement* statement, Expression* expr, DataStore* data_store);
 
 #endif

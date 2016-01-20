@@ -13,6 +13,8 @@
 
 // Project includes
 #include "parser/parse.h"
+#include "util/result.h"
+#include "statements/common.h"
 #include "statements/builder.h"
 #include "statements/data_definition.h"
 
@@ -32,6 +34,8 @@ struct TokenPair
   uint32_t token_type;
 };
 
+using ParseResult = Result<ParsedStatement*>;
+
 void setupTokenMappings();
 
 void token_print(Token token);
@@ -42,7 +46,7 @@ struct Parse;
 
 class DataStore;
 
-StatementBuilder parse(std::string input);
+ParseResult parse(std::string input, DataStore* data_store);
 
 #define NEVER(X) 0
 
