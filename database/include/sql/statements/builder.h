@@ -22,8 +22,8 @@
 struct StatementBuilder
 {
     StatementBuilder()
-        : statement(nullptr), valid(false),
-          expr(nullptr), started(false)
+        : started(false), valid(false), statement(nullptr),
+          expr(nullptr)
     {}
   
     bool started;

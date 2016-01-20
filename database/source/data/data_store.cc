@@ -222,7 +222,7 @@ RecordData DataStore::copyRecord(Record* record)
 
     for(int64_t i = 0; i < record_len; i++)
     {
-	    TervelData data = {0};
+	    TervelData data = {.value = 0};
 
         int64_t tervel_data = 0;
 

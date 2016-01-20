@@ -72,16 +72,6 @@ bool SQLDate::IsValid()
 }
 
 /**
- *  \brief Extracts a SQL DATE object from a SQL TIMESTAMP.
- *
- *  \param[in] timestamp  The SQL TIMESTAMP object
- */
-SQLDate SQLDate::fromTimestamp(SQLTimestamp& timestamp)
-{
-    return SQLDate(timestamp.m_date);
-}
-
-/**
  *  \brief Assigns the given SQL DATE object value to this object
  */
 SQLDate& SQLDate::operator=(SQLDate& other)
@@ -252,58 +242,13 @@ bool SQLTime::IsValid()
     return true;
 }
 
-/**
- *  \brief Extract a SQL TIME from a timestamp without a time zone displacement.
- *
- *  \param[in] timestamp      The SQL TIMESTAMP object
- *  \param[in] with_timezone  Determines whether to return a SQL TIME with or
- *                            without a time zone displacement.
- */
-SQLTime SQLTime::fromTimestamp(SQLTimestamp& timestamp, bool with_timezone)
+SQLBoolean operator==(const SQLTime& lhs, const SQLTime& rhs)
 {
-    if(with_timezone)
+    if(lhs.IsNull() || rhs.IsNull())
     {
-        // TODO: Requires conversion from timestamp no timezone to timestamp with timezone
-        //
-        // Formula goes:
-        //  SourceTimestamp -> Timestamp with time zone -> Time with time zone
+        return SQLBoolean(SQL_UNKNOWN);
     }
-    else
-    {
-        SQLTime ret_val(timestamp.m_time);
-        ret_val.m_with_timezone = false;
-  
-        return ret_val;
-    }
-}
 
-/**
- *  \brief Extract a SQL TIME from a timestamp with a time zone displacement.
- *
- *  \param[in] timestamp      The SQL TIMESTAMP object
- *  \param[in] with_timezone  Determines whether to return a SQL TIME with or
- *                            without a time zone displacment.
- */
-SQLTime SQLTime::fromTimestampTZ(SQLTimestamp& timestamp, bool with_timezone)
-{
-    if(with_timezone)
-    {
-        SQLTime ret(timestamp.m_time);
-        return ret;
-    }
-    else
-    {
-        // TODO: Requires conversion from timestamp with timezone to timestamp no timezone
-        //
-        // Formula goes:
-        //  SourceTimestamp -> Timestamp w/o time zone -> Time w/o time zone
-  
-        return SQLTime();
-    }
-}
-
-bool operator==(const SQLTime& lhs, const SQLTime& rhs)
-{
     if(lhs.m_hour == rhs.m_hour && lhs.m_minute == rhs.m_minute &&
        lhs.m_second == rhs.m_second)
     {
@@ -311,50 +256,77 @@ bool operator==(const SQLTime& lhs, const SQLTime& rhs)
         {
             if(lhs.m_tz_hour == rhs.m_tz_hour && lhs.m_tz_minute && rhs.m_tz_minute)
             {
-                return true;
+                return SQLBoolean(SQL_TRUE);
             }
             else
             {
-                return false;
+                return SQLBoolean(SQL_FALSE);
             }
         }
   
         if(!lhs.m_with_timezone && !rhs.m_with_timezone)
         {
-            return true;
+            return SQLBoolean(SQL_TRUE);
         }
         else
         {
-            return false;
+            return SQLBoolean(SQL_FALSE);
         }
     }
     else
     {
-        return false;
+        return SQLBoolean(SQL_FALSE);
     }
 }
 
-bool operator!=(const SQLTime& lhs, const SQLTime& rhs)
+SQLBoolean operator!=(const SQLTime& lhs, const SQLTime& rhs)
 {
     return !(lhs == rhs);
 }
 
-bool operator< (const SQLTime& lhs, const SQLTime& rhs)
+SQLBoolean operator< (const SQLTime& lhs, const SQLTime& rhs)
 {
-    assert(false);
+    if(lhs.IsNull() || rhs.IsNull())
+    {
+        return SQLBoolean(SQL_UNKNOWN);
+    }
+
+    if(lhs.m_hour < rhs.m_hour)
+    {
+        return SQLBoolean(SQL_TRUE);
+    }
+    else
+    {
+        if(lhs.m_hour == rhs.m_hour &&
+           lhs.m_minute < rhs.m_minute)
+        {
+            return SQLBoolean(SQL_TRUE);
+        }
+        else
+        {
+            if(lhs.m_hour == rhs.m_hour &&
+               lhs.m_minute == rhs.m_minute &&
+               lhs.m_second < rhs.m_second)
+            {
+                return SQLBoolean(SQL_TRUE);
+            }
+        }
+    }
+
+    return SQLBoolean(SQL_FALSE);
 }
 
-bool operator<=(const SQLTime& lhs, const SQLTime& rhs)
+SQLBoolean operator<=(const SQLTime& lhs, const SQLTime& rhs)
 {
-    assert(false);
+    return (lhs < rhs || lhs == rhs);
 }
 
-bool operator> (const SQLTime& lhs, const SQLTime& rhs)
+SQLBoolean operator> (const SQLTime& lhs, const SQLTime& rhs)
 {
-    assert(false);
+    return !(lhs <= rhs);
 }
 
-bool operator>=(const SQLTime& lhs, const SQLTime& rhs)
+SQLBoolean operator>=(const SQLTime& lhs, const SQLTime& rhs)
 {
-    assert(false);
+    return !(lhs < rhs);
 }

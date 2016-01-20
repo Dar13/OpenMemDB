@@ -107,10 +107,10 @@ union TervelData
     struct 
     {
         int64_t tervel_status : 3;
-        int64_t type : 3;
-        int64_t null : 1;
+        uint64_t type : 3;
+        uint64_t null : 1;
 
-        int64_t value : 57;
+        uint64_t value : 57;
     } data;
 
     int64_t value;

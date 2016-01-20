@@ -65,6 +65,16 @@ void builderAddSelectAllColumns(StatementBuilder* builder, Token table)
     // TODO: Add all columns in the given table to this query
     switch(builder->statement->type)
     {
+        case SQLStatement::SELECT:
+            break;
+        case SQLStatement::UPDATE:
+            break;
+        case SQLStatement::INSERT_INTO:
+            break;
+        case SQLStatement::DELETE:
+            break;
+        default:
+            break;
     }
 
     printf("AddSelectAllColumns called for table %s\n", table->text->c_str());
@@ -102,11 +112,6 @@ void builderAddQualifiedSelectColumn(StatementBuilder* builder,
     query->source_columns.push_back(source);
 
     query->output_columns.push_back(*output_column->text);
-}
-
-void builderGeneratePredicates(StatementBuilder* builder)
-{
-    printf("Generating predicates for statement\n");
 }
 
 // Generic-ish helper functions ///////////////////////////////////////////////

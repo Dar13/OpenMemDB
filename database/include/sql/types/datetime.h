@@ -39,8 +39,6 @@ public:
   
     bool IsValid();
   
-    static SQLDate fromTimestamp(SQLTimestamp& timestamp);
-  
     SQLDate& operator=(SQLDate& other);
 };
 
@@ -87,38 +85,16 @@ public:
   
     bool IsValid();
   
-    static SQLTime fromTimestamp(SQLTimestamp& timestamp, bool with_timezone = false);
-    static SQLTime fromTimestampTZ(SQLTimestamp& timestamp, bool with_timezone = false);
-  
     SQLTime& operator=(SQLTime& other);
 };
 
-bool operator==(const SQLTime& lhs, const SQLTime& rhs);
-bool operator!=(const SQLTime& lhs, const SQLTime& rhs);
+SQLBoolean operator==(const SQLTime& lhs, const SQLTime& rhs);
+SQLBoolean operator!=(const SQLTime& lhs, const SQLTime& rhs);
 
-bool operator< (const SQLTime& lhs, const SQLTime& rhs);
-bool operator<=(const SQLTime& lhs, const SQLTime& rhs);
+SQLBoolean operator< (const SQLTime& lhs, const SQLTime& rhs);
+SQLBoolean operator<=(const SQLTime& lhs, const SQLTime& rhs);
 
-bool operator> (const SQLTime& lhs, const SQLTime& rhs);
-bool operator>=(const SQLTime& lhs, const SQLTime& rhs);
-
-/**
- *  \brief Representation of the SQL:2003 TIMESTAMP data type
- */
-class SQLTimestamp : public SQLNullable
-{
-public:
-    SQLTimestamp();
-    SQLTimestamp(const SQLTimestamp& other);
-    SQLTimestamp(SQLDate date, SQLTime time, bool nullable);
-  
-    SQLDate m_date;
-    SQLTime m_time;
-  
-    bool IsValid();
-  
-    static SQLTimestamp fromDate(SQLDate& date, bool with_timezone = false);
-    static SQLTimestamp fromTime(SQLDate& time, bool with_timezone = false);
-};
+SQLBoolean operator> (const SQLTime& lhs, const SQLTime& rhs);
+SQLBoolean operator>=(const SQLTime& lhs, const SQLTime& rhs);
 
 #endif

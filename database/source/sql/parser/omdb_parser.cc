@@ -18,9 +18,6 @@ ParseResult parse(std::string input, DataStore* data_store)
 
     StatementBuilder builder;
 
-    Token token;
-    int token_id = 0;
-
     // Tokenize the input string
     std::vector<TokenPair> tokens = tokenize(input);
 
@@ -49,7 +46,7 @@ ParseResult parse(std::string input, DataStore* data_store)
 
 void token_print(Token token)
 {
-  //printf("Token: %s\n", token->c_str());
+    printf("Token: %s\n", token->text->c_str());
 }
 
 std::vector<TokenPair> tokenize(std::string input)
