@@ -149,7 +149,7 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
     SchemaTablePair* table_pair = getTablePair(table_name);
     if(table_pair == nullptr)
     {
-	return MultiRecordResult(ResultStatus::ERROR_INVALID_TABLE, MultiRecordData);
+	    return MultiRecordResult(ResultStatus::ERROR_INVALID_TABLE, MultiRecordData());
     }
 
     DataTable* table = table_pair->table;
@@ -166,7 +166,7 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
 	    if(table_len == 0)
 	    {
 	        // Finished, table is empty
-		return MultiRecordResult(ResultStatus::SUCCESS, MultiRecordData);
+		return MultiRecordResult(ResultStatus::SUCCESS, MultiRecordData());
 	    }
 
 	    for(int64_t i = 0; i < table_len; i++)
