@@ -125,11 +125,6 @@ std::vector<libomdb::MetaDataColumn> parseMetaData(ResultMetaDataPacket packet) 
 }
 
 
-libomdb::Connection buildConnectionObj(int socket, char* buffer) {
-  // TODO: Parse connection string and create new Connection object
-
-}
-
 libomdb::CommandResult parseCommandResult(ResultHolder result) {
   //TODO: build CommandResult requires parsing neils string
 }
@@ -223,7 +218,13 @@ bool libomdb::ConnectionMetaData::isValid() {
 /*************************************************************************
  * Connection Implementations                                            *
  *************************************************************************/
+libomdb::Connection libomdb::Connection::buildConnectionObj(uint16_t socket, char* buffer) {
+  // TODO: Parse connection string and create new Connection object
+  ConnectionPacket packet = DeserializeConnectionPacket(buffer);
+  libomdb::ConnectionMetaData* connectionMetaData = new libomdb::ConnectionMetaData(packet.name, true);
+  return  *new libomdb::Connection(socket, *connectionMetaData);
 
+}
 
 
   // TODO: Break up this monstrosity. 
@@ -306,7 +307,7 @@ libomdb::Connection libomdb::Connection::connect(std::string hostname,
   buf[bytesReceived] = '\0';
   printf("client received response from server: %s\n", buf);
 
-  return buildConnectionObj(sockfd, buf);
+  return libomdb::Connection::buildConnectionObj(sockfd, buf);
 }
 
 

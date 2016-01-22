@@ -72,6 +72,14 @@ namespace libomdb{
   class Connection {
    public:
 
+    /**
+     * Builds connection object
+     * @param socket_fd The file desciptor of the socket to communicate over
+     * @param serializedPacket The serialized packer returned from the server that describes the connection
+     * @return A Connection object representing the passed in values.
+     */
+    static Connection buildConnectionObj(uint16_t socket_fd, char* serializedPacket);
+
    /**
     * Connects to specified location and returns object representing
     * connection

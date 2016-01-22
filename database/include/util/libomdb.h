@@ -47,6 +47,7 @@ struct CommandPacket {
 
 struct ConnectionPacket {
   PacketType type;
+  /** The name of the database */
   char name[DB_NAME_LEN]; // The name of the database connected to.
 };
 
