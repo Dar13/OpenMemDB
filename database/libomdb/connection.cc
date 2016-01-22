@@ -96,9 +96,10 @@ std::vector<libomdb::ResultRow> parseData(ResultPacket packet) {
   for (uint i = 0; i < numberOfRows; ++i) {
     libomdb::ResultRow row;
     for (uint j = 0; j < packet.rowLen; ++i) {
-      int64_t* col;
+      int64_t* col = new int64_t;
       memcpy(col, dataPointer, 8); //Move the next 8 bytes into col
       row.push_back(*col);
+      delete(col); // TODO: Do I need this?
       dataPointer += 2; // Move pointer up 8 bytes. dataPointer++ moves 4 bytes?
     }
     rows.push_back(row);
@@ -125,8 +126,18 @@ std::vector<libomdb::MetaDataColumn> parseMetaData(ResultMetaDataPacket packet) 
 }
 
 
+/**
+ * Parses a ResultHolder and builds a CommandResult from the contents
+ * @param result The ResultHolder to parse
+ * @return A CommandResult with parsed data
+ */
 libomdb::CommandResult parseCommandResult(ResultHolder result) {
-  //TODO: build CommandResult requires parsing neils string
+  //ResultMetaDataPacket metaDataPacket = DeserializeResultMetaDataPacket(result.metaDataPacket);
+  ResultPacket packet = DeserializeResultPacket(result.resultPacket);
+  libomdb::CommandResult commandResult;
+  commandResult.isSuccess = packet.status == ResultStatus::OK;
+  commandResult.numAffected = packet.resultSize; // TODO: Confirm with neil
+  return commandResult;
 }
 
 
@@ -219,7 +230,6 @@ bool libomdb::ConnectionMetaData::isValid() {
  * Connection Implementations                                            *
  *************************************************************************/
 libomdb::Connection libomdb::Connection::buildConnectionObj(uint16_t socket, char* buffer) {
-  // TODO: Parse connection string and create new Connection object
   ConnectionPacket packet = DeserializeConnectionPacket(buffer);
   libomdb::ConnectionMetaData* connectionMetaData = new libomdb::ConnectionMetaData(packet.name, true);
   return  *new libomdb::Connection(socket, *connectionMetaData);
