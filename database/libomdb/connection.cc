@@ -80,16 +80,28 @@ CommandPacket buildPacket(CommandType type, std::string command) {
 }
 
 
-
+/**
+ * Parses result packet and builds a vector of ResultRow s
+ * @param packet The result packet to parse
+ * @return a vector<ResultRow> containing the parsed data
+ */
 std::vector<libomdb::ResultRow> parseData(ResultPacket packet) {
   std::vector<libomdb::ResultRow> rows;
   // Each of the columns is 64bits, packet.resultSize is number of bytes
   // 8 bits to a byte, so 8 bytes per column, therefore number of columns
   // is packet.resultSize / 8
-  for (int i = 0; i < packet.resultSize; i += 8) {
-    for (int j = 0; j < packet.rowLen; j++) {
-      //TODO: Finish this. I'm going to bed
+  uint32_t rowSizeInBytes = packet.rowLen * 8;
+  uint32_t numberOfRows = (packet.resultSize / rowSizeInBytes);
+  uint64_t* dataPointer = &packet.data[0];
+  for (uint i = 0; i < numberOfRows; ++i) {
+    libomdb::ResultRow row;
+    for (uint j = 0; j < packet.rowLen; ++i) {
+      int64_t* col;
+      memcpy(col, dataPointer, 8); //Move the next 8 bytes into col
+      row.push_back(*col);
+      dataPointer += 2; // Move pointer up 8 bytes. dataPointer++ moves 4 bytes?
     }
+    rows.push_back(row);
   }
 
   return rows;
@@ -104,7 +116,7 @@ std::vector<libomdb::ResultRow> parseData(ResultPacket packet) {
  */
 std::vector<libomdb::MetaDataColumn> parseMetaData(ResultMetaDataPacket packet) {
   std::vector<libomdb::MetaDataColumn> metaDataColumns;
-  for (int i = 0; i < packet.numColumns; ++i) {
+  for (uint i = 0; i < packet.numColumns; ++i) {
     libomdb::MetaDataColumn column;
     column.label = std::string(packet.columns[i].name);
     column.sqlType = packet.columns[i].type;
