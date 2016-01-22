@@ -64,13 +64,32 @@ int main(int argc, char** argv)
         printf("Record inserted\n");
     }
 
-    std::string select_data = "SELECT TestTable.* FROM TestTable WHERE TestTable.x = 1;";
+    std::string select_data = "SELECT TestTable.* FROM TestTable WHERE TestTable.A = 1;";
     parse_result = parse(select_data, &data);
 
     if(parse_result.status == ResultStatus::SUCCESS)
     {
         SelectQuery* query = reinterpret_cast<SelectQuery*>(parse_result.result);
         printf("Select parse success\n");
+
+        auto select_result = data.getRecords(query->predicate, std::string("TestTable"));
+        if(select_result.status == ResultStatus::SUCCESS)
+        {
+            printf("SELECT is successful!\n");
+            printf("Rows retrieved: %zu\n", select_result.result.size());
+            for(RecordData record : select_result.result)
+            {
+                for(TervelData data : record)
+                {
+                    printf("%lu,", data.data.value);
+                }
+                printf("\n");
+            }
+        }
+        else
+        {
+            printf("SELECT failed!\n");
+        }
     }
     else
     {

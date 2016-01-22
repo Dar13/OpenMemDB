@@ -110,6 +110,8 @@ private:
     SchemaTablePair* getTablePair(std::string table_name);
     RecordData copyRecord(Record* record);
 
+    MultiRecordData searchTable(DataTable* table, ValuePredicate* value_pred);
+
     TableMap table_name_mapping;
 };
 

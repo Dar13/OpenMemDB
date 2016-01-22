@@ -122,7 +122,11 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
     for(auto data : record)
     {
         TervelData terv_data = { .value = 0 };
-        terv_data.data.value = data.data.value;
+
+        // Ensure Tervel's bits are zeroed and then copy the rest of the data over
+        data.data.tervel_status = 0;
+        terv_data.value = data.value;
+
         printf("Inserting %ld\n", terv_data.value);
         size_t ret = new_record->push_back_w_ra(terv_data.value);
         printf("Pushback returned %lu\n", ret);
@@ -166,7 +170,7 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
 	    if(table_len == 0)
 	    {
 	        // Finished, table is empty
-		return MultiRecordResult(ResultStatus::SUCCESS, MultiRecordData());
+		    return MultiRecordResult(ResultStatus::SUCCESS, MultiRecordData());
 	    }
 
 	    for(int64_t i = 0; i < table_len; i++)
@@ -179,7 +183,7 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
 	        while(!table->at(i, row))
 	        {}
 
-            	printf("Retrieved record address: %p\n", row);
+            printf("Retrieved record address: %p\n", row);
 
 	        RecordData record_copy = copyRecord(row);
 	        data.push_back(record_copy);
@@ -189,7 +193,38 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
     }
     else
     {
+        MultiRecordData data;
+
         // TODO: Actually evaluate the predicates
+        if(predicates->type == PredicateType::NESTED)
+        {
+            // TODO: Handle multiple predicates
+        }
+        else
+        {
+            switch(predicates->type)
+            {
+                case PredicateType::VALUE:
+                    {
+                        ValuePredicate* val_pred = reinterpret_cast<ValuePredicate*>(predicates);
+                        if(val_pred->column.table != table_name)
+                        {
+                            // TODO: Handle this
+                        }
+                        else
+                        {
+                            MultiRecordData data = searchTable(table_pair->table,
+                                                               val_pred);
+                            return MultiRecordResult(ResultStatus::SUCCESS, data);
+                        }
+                    }
+                    break;
+                case PredicateType::COLUMN:
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     return MultiRecordResult(ResultStatus::ERROR_INVALID_TABLE, MultiRecordData());
@@ -211,6 +246,50 @@ SchemaTablePair* DataStore::getTablePair(std::string table_name)
     return nullptr;
 }
 
+MultiRecordData DataStore::searchTable(DataTable* table,
+                                  ValuePredicate* value_pred)
+{
+    MultiRecordData data;
+    if(table == nullptr || value_pred == nullptr)
+    {
+        return MultiRecordData();
+    }
+
+    // This assumes table maps to the table name in the value predicate
+    int64_t table_len = table->size(0);
+    if(table_len == 0)
+    {
+        return MultiRecordData();
+    }
+
+    for(int64_t idx = 0; idx < table_len; idx++)
+    {
+        Record* row = nullptr;
+
+        while(!table->at(idx, row)) {}
+
+        RecordData record = copyRecord(row);
+
+        if(record.size() <= value_pred->column.column_idx)
+        {
+            // TODO: Propagate error up? This should be caught earlier
+            return MultiRecordData();
+        }
+
+        ExpressionValue row_value(record.at(value_pred->column.column_idx));
+
+        if(evaluateOperation(value_pred->op, 
+                             value_pred->expected_value,
+                             row_value).IsTrue())
+        {
+            printf("Record matches predicate!\n");
+            data.push_back(record);
+        }
+    }
+
+    return data;
+}
+
 RecordData DataStore::copyRecord(Record* record)
 {
     if(record == nullptr) { return RecordData();}
@@ -222,13 +301,13 @@ RecordData DataStore::copyRecord(Record* record)
 
     for(int64_t i = 0; i < record_len; i++)
     {
-	TervelData data = {.value = 0};
+        TervelData data = {.value = 0};
 
         int64_t tervel_data = 0;
 
-	// Pull the current value of the data from the record
-	while(!record->at(i, tervel_data))
-	{
+	    // Pull the current value of the data from the record
+	    while(!record->at(i, tervel_data))
+	    {
             printf("Waiting for retrieval\n");
         }
 
@@ -236,8 +315,8 @@ RecordData DataStore::copyRecord(Record* record)
 
         printf("Retrieved value: %ld\n", tervel_data);
 
-	// TODO: This is ugly af, rethink this naming scheme in Data/TervelData
-	copy.push_back(data);
+	    // TODO: This is ugly af, rethink this naming scheme in Data/TervelData
+	    copy.push_back(data);
     }
 
     // Return the copied data

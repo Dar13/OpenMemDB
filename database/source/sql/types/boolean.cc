@@ -46,6 +46,11 @@ bool SQLBoolean::IsUnknown() const
     return (IsNull() || m_value == SQL_UNKNOWN);
 }
 
+bool SQLBoolean::IsTrue() const
+{
+    return (!IsNull() && m_value == SQL_TRUE);
+}
+
 SQLBoolean& SQLBoolean::operator=(SQLBoolean other)
 {
     this->m_value = other.m_value;

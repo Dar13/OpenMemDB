@@ -18,11 +18,7 @@ Predicate* makePredicateFromExpression(Expression* expr, DataStore* data_store)
 
     Predicate* pred = nullptr;
 
-    ExpressionFlags type = expr->flags & (ExpressionFlags::NESTED | 
-                                          ExpressionFlags::COLUMN |
-                                          ExpressionFlags::VALUE);
-
-    if(type == ExpressionFlags::NESTED)
+    if(isExprFlagContained(expr->flags, ExpressionFlags::NESTED))
     {
         NestedPredicate* nested_pred = new (std::nothrow) NestedPredicate;
         if(nested_pred == nullptr)
@@ -33,6 +29,7 @@ Predicate* makePredicateFromExpression(Expression* expr, DataStore* data_store)
         Predicate* left = makePredicateFromExpression(expr->left, data_store);
         Predicate* right = makePredicateFromExpression(expr->right, data_store);
 
+        // Something failed, return nullptr to signify failure
         if(left == nullptr || right ==  nullptr)
         {
             delete left;
@@ -49,7 +46,7 @@ Predicate* makePredicateFromExpression(Expression* expr, DataStore* data_store)
         pred = nested_pred;
     }
 
-    if(type == ExpressionFlags::OPERATION)
+    if(isExprFlagContained(expr->flags, ExpressionFlags::OPERATION))
     {
         Expression* left = expr->left;
         Expression* right = expr->right;
@@ -65,26 +62,51 @@ Predicate* makePredicateFromExpression(Expression* expr, DataStore* data_store)
             left_ref.table = *left->table_name;
             right_ref.table = *right->table_name;
 
+            // TODO: Error handling
             auto res = data_store->getColumnIndex(left_ref.table, *left->table_column);
             if(res.status == ResultStatus::SUCCESS)
             {
                 left_ref.column_idx = res.result;
             }
 
+            // TODO: Error handling
             res = data_store->getColumnIndex(right_ref.table, *right->table_column);
             if(res.status == ResultStatus::SUCCESS)
             {
                 right_ref.column_idx = res.result;
             }
 
-            col_pred->left_column = left_ref;
-            col_pred->right_column = right_ref;
+            TableSchema left_schema = data_store->getTableSchema(left_ref.table).result;
+            TableSchema right_schema = data_store->getTableSchema(right_ref.table).result;
 
-            pred = col_pred;
+            // Make sure the two types can actually be compared.
+            // Note: All integer types can always be compared to each other, 
+            // which is why the if-statement checks for if both types are 
+            // integral. The if-statement should short-circuit if both are equal
+            DataType left_type = left_schema.columns.at(left_ref.column_idx).type;
+            DataType right_type = right_schema.columns.at(right_ref.column_idx).type;
+            if((left_type == right_type) ||
+               ((left_type >= SMALL_INT && left_type <= BIG_INT) &&
+                (right_type >= SMALL_INT && right_type <= BIG_INT)))
+            {
+                col_pred->left_column = left_ref;
+                col_pred->right_column = right_ref;
+
+                pred = col_pred;
+            }
+            else
+            {
+                // The types can't be compared, signify failure and clean up
+                delete col_pred;
+                pred = nullptr;
+            }
         }
         else
         {
             ValuePredicate* val_pred = new (std::nothrow) ValuePredicate;
+            val_pred->op = expr->op;
+
+            TableSchema table_schema;
 
             // TODO: Handle the value_type?
             if(isExprFlagContained(left->flags, ExpressionFlags::VALUE))
@@ -98,15 +120,16 @@ Predicate* makePredicateFromExpression(Expression* expr, DataStore* data_store)
                 if(res.status == ResultStatus::SUCCESS)
                 {
                     col.column_idx = res.result;
+                    val_pred->column = col;
+
+                    table_schema = data_store->getTableSchema(col.table).result;
                 }
                 else
                 {
                     // TODO: Error handling
-                    delete pred;
-                    pred = nullptr;
+                    delete val_pred;
+                    val_pred = nullptr;
                 }
-
-                val_pred->column = col;
             }
             else
             {
@@ -119,18 +142,56 @@ Predicate* makePredicateFromExpression(Expression* expr, DataStore* data_store)
                 if(res.status == ResultStatus::SUCCESS)
                 {
                     col.column_idx = res.result;
+                    val_pred->column = col;
+
+                    auto schema_result = data_store->getTableSchema(col.table);
+                    if(schema_result.status == ResultStatus::SUCCESS)
+                    {
+                        table_schema = schema_result.result;
+                    }
+                    else
+                    {
+                        delete val_pred;
+                        val_pred = nullptr;
+                    }
                 }
                 else
                 {
                     // TODO: Error handling
-                    delete pred;
-                    pred = nullptr;
+                    delete val_pred;
+                    val_pred = nullptr;
                 }
-
-                val_pred->column = col;
             }
 
-            pred = val_pred;
+            if(val_pred)
+            {
+                DataType col_type = table_schema.columns.at(val_pred->column.column_idx).type;
+                DataType val_type;
+                if(val_pred->expected_value.is_range)
+                {
+                    // TODO: Handle ranges properly
+                }
+                else
+                {
+                    val_type = (DataType)val_pred->expected_value.getValue().data.type;
+                }
+
+                if((val_type == col_type) ||
+                   ((val_type >= SMALL_INT && val_type <= BIG_INT) &&
+                    (col_type >= SMALL_INT && val_type <= BIG_INT)))
+                {
+                    pred = val_pred;
+                }
+                else
+                {
+                    delete val_pred;
+                    pred = nullptr;
+                }
+            }
+            else
+            {
+                pred = nullptr;
+            }
         }
     }
 
@@ -165,4 +226,51 @@ void setupStatement(ParsedStatement* statement, Expression* expr, DataStore* dat
         default:
             break;
     }
+}
+
+SQLBoolean evaluateOperation(ExpressionOperation op,
+                             ExpressionValue lhs, ExpressionValue rhs)
+{
+    switch(op)
+    {
+        case ExpressionOperation::EQUALS:
+            return (lhs == rhs);
+
+        case ExpressionOperation::NOT_EQUALS:
+            return (lhs != rhs);
+
+        default:
+            printf("Operation not implemented!\n");
+            return SQL_FALSE;
+    }
+}
+
+SQLBoolean operator==(ExpressionValue& lhs, ExpressionValue& rhs)
+{
+    if(lhs.is_range || rhs.is_range)
+    {
+        // TODO: Can you even compare ranges?
+        return SQL_UNKNOWN;
+    }
+
+    // You can't compare against a NULL value
+    if(lhs.getValue().data.null || rhs.getValue().data.null)
+    {
+        return SQL_UNKNOWN;
+    }
+
+    // TODO: Verify this works for floats
+    // This should work for the integral types as the bit layouts should be 
+    // the same for equivalent values.
+    if(lhs.getValue().data.value == rhs.getValue().data.value)
+    {
+        return SQL_TRUE;
+    }
+
+    return SQL_FALSE;
+}
+
+SQLBoolean operator!=(ExpressionValue& lhs, ExpressionValue& rhs)
+{
+    return !(lhs == rhs);
 }

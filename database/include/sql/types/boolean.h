@@ -33,6 +33,7 @@ public:
     SQLBoolean& operator=(SQLBoolean other);
   
     bool IsUnknown() const;
+    bool IsTrue() const;
 private:
 };
 

@@ -41,6 +41,9 @@ private:
     TervelData range_end;
 };
 
+SQLBoolean operator==(ExpressionValue& lhs, ExpressionValue& rhs);
+SQLBoolean operator!=(ExpressionValue& lhs, ExpressionValue& rhs);
+
 // TODO: Document this
 struct ColumnReference
 {
@@ -52,6 +55,10 @@ struct ColumnReference
 struct Predicate
 {
 public:
+    Predicate(PredicateType type) 
+        : type(type), op(ExpressionOperation::NO_OP) 
+    {}
+
     PredicateType type;
     ExpressionOperation op;
 };
@@ -60,7 +67,11 @@ public:
 struct NestedPredicate : public Predicate
 {
 public:
-    NestedPredicate() : left_child(nullptr), right_child(nullptr) {}
+    NestedPredicate() 
+        : Predicate(PredicateType::NESTED), 
+        left_child(nullptr), right_child(nullptr)
+    {}
+
     ~NestedPredicate()
     {
         delete left_child;
@@ -75,6 +86,10 @@ public:
 struct ValuePredicate : public Predicate
 {
 public:
+    ValuePredicate()
+        : Predicate(PredicateType::VALUE)
+    {}
+
     ColumnReference column;
     ExpressionValue expected_value;
 };
@@ -83,6 +98,10 @@ public:
 struct ColumnPredicate : public Predicate
 {
 public:
+    ColumnPredicate()
+        : Predicate(PredicateType::COLUMN)
+    {}
+
     ColumnReference left_column;
     ColumnReference right_column;
 };
@@ -90,5 +109,7 @@ public:
 Predicate* getPredicateFromExpression(Expression* expr, DataStore* data_store);
 
 void setupStatement(ParsedStatement* statement, Expression* expr, DataStore* data_store);
+
+SQLBoolean evaluateOperation(ExpressionOperation op, ExpressionValue lhs, ExpressionValue rhs);
 
 #endif

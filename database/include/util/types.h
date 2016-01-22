@@ -122,4 +122,5 @@ struct DataRange
     TervelData start;
     TervelData end;
 };
+
 #endif

@@ -33,7 +33,21 @@ struct TokenData
             value.data.value = 0;
         }
     }
+
+    TokenData(std::string* str, int16_t val)
+        : text(str), is_value(true), is_operation(false), is_column(false)
+    {
+        value.data.type = SMALL_INT;
+        value.data.value = val;
+    }
     
+    TokenData(std::string* str, int32_t val)
+        : text(str), is_value(true), is_operation(false), is_column(false)
+    {
+        value.data.type = INTEGER;
+        value.data.value = val;
+    }
+
     TokenData(std::string* str, int64_t val)
         : text(str), is_value(true), is_operation(false), is_column(false)
     {

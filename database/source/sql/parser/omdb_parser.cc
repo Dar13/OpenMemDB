@@ -123,6 +123,7 @@ std::vector<TokenPair> tokenize(std::string input)
                 // TODO: Error handling
             }
 
+            // Check for floating-point numbers
             if(token->find('.') == std::string::npos)
             {
                 pair.token_type = TK_INTEGER;
