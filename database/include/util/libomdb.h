@@ -69,7 +69,8 @@ struct ResultMetaDataPacket {
 struct ResultPacket {
   ResultStatus status;
   uint32_t resultSize;  // Size in bytes that he data array will be
-  uint64_t* data;       // Length of the row in columns, number of columns in the row
+  uint8_t rowLen;       // Length of the row in columns, number of columns in the row
+  uint64_t* data;
   uint8_t terminator;
 };
 
