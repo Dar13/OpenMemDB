@@ -37,6 +37,18 @@ THE SOFTWARE.
 
 #define MAXDATASIZE 100
 
+
+/************************************************************************
+ * Temp struct holder for results
+ ************************************************************************/
+/** Used to hold result before parsing into objects **/
+struct ResultHolder {
+  char metaDataPacket[MESSAGE_SIZE];
+  char resultPacket[MESSAGE_SIZE];
+};
+
+
+
 /*************************************************************************
  * Private Helper Functions                                              *
  *************************************************************************/
@@ -67,26 +79,75 @@ CommandPacket buildPacket(CommandType type, std::string command) {
   return commandPacket;
 }
 
+
+
+std::vector<libomdb::ResultRow> parseData(ResultPacket packet) {
+  std::vector<libomdb::ResultRow> rows;
+  // Each of the columns is 64bits, packet.resultSize is number of bytes
+  // 8 bits to a byte, so 8 bytes per column, therefore number of columns
+  // is packet.resultSize / 8
+  for (int i = 0; i < packet.resultSize; i += 8) {
+    for (int j = 0; j < packet.rowLen; j++) {
+      //TODO: Finish this. I'm going to bed
+    }
+  }
+
+  return rows;
+}
+
+
+/**
+ * Parses a ResultMetaDataPacket and builds a list of MetaDataColumns which is
+ * the core of the ResultMetaData class.
+ * @param packet
+ * @return A vector<MetaDataColumn> describing a result set
+ */
+std::vector<libomdb::MetaDataColumn> parseMetaData(ResultMetaDataPacket packet) {
+  std::vector<libomdb::MetaDataColumn> metaDataColumns;
+  for (int i = 0; i < packet.numColumns; ++i) {
+    libomdb::MetaDataColumn column;
+    column.label = std::string(packet.columns[i].name);
+    column.sqlType = packet.columns[i].type;
+  }
+  return metaDataColumns;
+}
+
+
 libomdb::Connection buildConnectionObj(int socket, char* buffer) {
   // TODO: Parse connection string and create new Connection object
 
 }
 
-libomdb::CommandResult parseCommandResult(std::string result) {
+libomdb::CommandResult parseCommandResult(ResultHolder result) {
   //TODO: build CommandResult requires parsing neils string
 }
 
-libomdb::Result parseQueryResult(std::string result) {
-  //TODO: build Result, requires parsing Neils stirng
-  // The result packet comes in two stages, first the ResultMetaDataPacket. Then the ResultPacket.
+
+/**
+ * TODO: Add error checking
+ */
+libomdb::Result parseQueryResult(ResultHolder holder) {
+  ResultMetaDataPacket resultMetaDataPacket =
+      DeserializeResultMetaDataPacket(holder.metaDataPacket);
+
+  ResultPacket resultPacket = DeserializeResultPacket(holder.resultPacket);
+
+  // Build result object;
+  std::vector<libomdb::ResultRow> rows = parseData(resultPacket);
+  std::vector<libomdb::MetaDataColumn> metaDataColumns =
+      parseMetaData(resultMetaDataPacket);
+  libomdb::ResultMetaData metaData =
+      libomdb::ResultMetaData::buildResultMetaDataObject(metaDataColumns);
+  return libomdb::Result::buildResultObject(rows, metaData);
 }
+
 
 /**
  * Sends message across the socket passed in
  * @param message The message to send to the server
  * @param socket The file descriptor of the listening socket
  */
-std::string sendMessage(CommandPacket packet, int socket) {
+ResultHolder sendMessage(CommandPacket packet, int socket) {
   // Need to convert message to c string in order to send it.
   char message[MESSAGE_SIZE];
   memcpy(message, &packet, sizeof(packet));
@@ -97,19 +158,37 @@ std::string sendMessage(CommandPacket packet, int socket) {
   std::cout<< "Bytes sent: " << bytes_sent << std::endl;
   if (bytes_sent == -1) {
     perror("send");
-    return NULL;
+    ResultHolder emptyHolder;
+    return emptyHolder;
   }
 
   // Wait for receipt of message;
-  char result[MAXDATASIZE];
-  int bytes_recieved = recv(socket, result, sizeof(result), 0);
+  /*
+   * Results will now come in this order:
+   * 1.) ResultMetaDataPacket
+   * 2.) ResultPacket
+   *
+   * Build a struct containing both and return it.
+   */
+  ResultHolder holder;
+
+  int bytes_recieved = recv(socket, holder.metaDataPacket, sizeof(holder.metaDataPacket), 0);
   std::cout << "Bytes relieved: " << bytes_recieved << std::endl;
   if (bytes_recieved == -1) {
     perror("recv");
-    return NULL;
+    ResultHolder emptyHolder;
+    return emptyHolder;
   }
 
-  return result;
+  // Now receive result packet
+  bytes_recieved = recv(socket, holder.resultPacket, sizeof(holder.resultPacket), 0);
+  if (bytes_recieved == -1) {
+    perror("recv");
+    ResultHolder emptyHolder;
+    return emptyHolder;
+  }
+
+  return holder;
 }
 
 /*************************************************************************
@@ -229,7 +308,6 @@ void libomdb::Connection::disconnect() {
 libomdb::CommandResult libomdb::Connection::executeCommand(std::string command) {
   CommandPacket packet = buildPacket(CommandType::DB_COMMAND, command);
   return parseCommandResult(sendMessage(packet, this->m_socket_fd));
-  // TODO: Change command to packet when sendMessage is fixed
 }
 
 
@@ -237,7 +315,6 @@ libomdb::CommandResult libomdb::Connection::executeCommand(std::string command) 
 libomdb::Result libomdb::Connection::executeQuery(std::string query) {
   CommandPacket packet = buildPacket(CommandType::SQL_STATEMENT, query);
   return parseQueryResult(sendMessage(packet, this->m_socket_fd));
-  // TODO: Change query to packet when sendMessage is fixed
 }
 
 

@@ -28,6 +28,7 @@ THE SOFTWARE.
 // Project includes.
 #include "result.h"
 #include "../include/util/libomdb.h"
+#include "../include/util/serializion_helper.h"
 
 namespace libomdb{
 
@@ -36,7 +37,6 @@ namespace libomdb{
     bool isSuccess;
     int numAffected;
   } CommandResult;
-
 
 
   /**

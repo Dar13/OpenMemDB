@@ -39,7 +39,8 @@ namespace libomdb {
 
   typedef struct MetaDataColumn {
     std::string label;
-    SQL_TYPE type; //TODO Make this a SQL_TYPE from Neils types     
+    SQL_TYPE type; //TODO Make this a SQL_TYPE from Neils types
+    uint16_t sqlType;
   } MetaDataColumn;
 
   
@@ -73,7 +74,14 @@ namespace libomdb {
      * @return The type of the data stored at the index.
      */ 
     SQL_TYPE getColumnType(int index); //TODO: Replace with neils types
-    
+
+    /**
+     * Builds a ResultMetaData object from passed in values
+     * @data
+     */
+    //TODO: Provide implementation
+    static ResultMetaData buildResultMetaDataObject(std::vector<MetaDataColumn> data);
+
    private:
     
     /** The actual meta data */
@@ -107,6 +115,15 @@ namespace libomdb {
      * @returns true if the next row exists false otherwise.
      */
     bool next();            
+
+    /**
+     * Creates Result object from passe in values
+     * @param rows The rows to include in the the Result object
+     * @param metaData The metaData object for the Result
+     */
+    // TODO: Provide implementation
+    static Result buildResultObject(std::vector<ResultRow> rows,
+                                    ResultMetaData metaData);
 
    private:
 
