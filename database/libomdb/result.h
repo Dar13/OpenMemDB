@@ -79,11 +79,12 @@ namespace libomdb {
      * Builds a ResultMetaData object from passed in values
      * @data
      */
-    //TODO: Provide implementation
     static ResultMetaData buildResultMetaDataObject(std::vector<MetaDataColumn> data);
 
    private:
-    
+    /** Private constructor */
+    ResultMetaData(std::vector<MetaDataColumn> m_data);
+
     /** The actual meta data */
     std::vector<MetaDataColumn> m_data;   
   };
@@ -126,6 +127,7 @@ namespace libomdb {
                                     ResultMetaData metaData);
 
    private:
+    Result(std::vector<ResultRow> rows, ResultMetaData resultMetaData);
 
     /** The rows returned from the database */
     std::vector<ResultRow> m_rows;

@@ -25,6 +25,9 @@ THE SOFTWARE.
 /************************************************************************
  * ResultMetaData Implementations                                       *
  ************************************************************************/
+libomdb::ResultMetaData::ResultMetaData(std::vector<MetaDataColumn> data)
+  :m_data(data){}
+
 uint32_t libomdb::ResultMetaData::getColumnCount() {
   return this->m_data.size();
 }
@@ -39,10 +42,26 @@ libomdb::SQL_TYPE libomdb::ResultMetaData::getColumnType(int index) {
   return this->m_data.at(index).type;
 }
 
-
+libomdb::ResultMetaData libomdb::ResultMetaData::buildResultMetaDataObject(
+    std::vector<MetaDataColumn> data) {
+  libomdb::ResultMetaData* resultMetaData = new libomdb::ResultMetaData(data);
+  return *resultMetaData;
+}
 /*************************************************************************
  * Result Implementations                                                *
  *************************************************************************/
+libomdb::Result::Result(std::vector<ResultRow> rows,
+                        ResultMetaData resultMetaData)
+    :m_rows(rows), m_metaData(resultMetaData) {}
+
+
+libomdb::Result libomdb::Result::buildResultObject(std::vector<ResultRow> rows,
+                                                   ResultMetaData metaData) {
+  libomdb::Result* result = new libomdb::Result(rows, metaData);
+  return *result;
+}
+
+
 libomdb::ResultMetaData libomdb::Result::getMetaData() {
   return this->m_metaData;
 }
