@@ -101,7 +101,7 @@ std::vector<libomdb::ResultRow> parseData(ResultPacket packet) {
       int64_t* col = new int64_t;
       memcpy(col, dataPointer, 8); //Move the next 8 bytes into col
       row.push_back(*col);
-      delete(col); // TODO: Do I need this?
+      delete(col);
       dataPointer += 8; // Move pointer up 8 bytes. dataPointer++ moves 1 byte
     }
     rows.push_back(row);

@@ -122,7 +122,6 @@ namespace libomdb {
      * @param rows The rows to include in the the Result object
      * @param metaData The metaData object for the Result
      */
-    // TODO: Provide implementation
     static Result buildResultObject(std::vector<ResultRow> rows,
                                     ResultMetaData metaData);
 

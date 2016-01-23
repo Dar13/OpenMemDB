@@ -19,7 +19,8 @@ const uint32_t MAX_NUM_COLUMNS = 20;
  */
 enum class CommandType: uint8_t {
   SQL_STATEMENT = 0x01,
-  DB_COMMAND = 0x02
+  DB_COMMAND = 0x02,
+  INVALID_COMMAND
 };
 
 
@@ -27,7 +28,8 @@ enum class PacketType: uint8_t {
   NONE = 0,
   COMMAND,
   RESULT_METADATA,
-  RESULT_DATA
+  RESULT_DATA,
+  INVALID_PACKET
 };
 
 
