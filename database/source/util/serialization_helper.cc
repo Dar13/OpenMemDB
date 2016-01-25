@@ -89,12 +89,19 @@ ResultStatus mapStringToResultStatus(char* status) {
  *****************************************************************/
 
 char* SerializeCommandPacket(CommandPacket packet) {
-  
+  // Take command packet and turn into char*
+  //char serializedCommandPacket[sizeof(packet)];
+  char* serializedCommandPacket;
+  memcpy(serializedCommandPacket, &packet, sizeof(packet));
+  return serializedCommandPacket;
 }
 
 
 char* SerializeConnectionPacket(ConnectionPacket packet){
-
+  //char serializedConnectionPacket[sizeof(packet)];
+  char* serializedConnectionPacket;
+  memcpy(serializedConnectionPacket, &packet, sizeof(packet));
+  return serializedConnectionPacket;
 }
 
 
