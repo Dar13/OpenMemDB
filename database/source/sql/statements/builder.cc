@@ -91,11 +91,6 @@ void builderAddQualifiedSelectColumn(StatementBuilder* builder,
         output_column = source_column;
     }
   
-    ColumnReference source;
-    source.table = *table->text;
-    /* TODO: Calculate source_column's index within the given table */
-    source.column_idx = 0;
-  
     if(!builder->started)
     {
         // Start the SELECT statement then
@@ -104,6 +99,21 @@ void builderAddQualifiedSelectColumn(StatementBuilder* builder,
     else
     {
         // TODO: Error handling
+    }
+
+    ColumnReference source;
+    source.table = *table->text;
+
+    auto res = builder->data_store->getColumnIndex(source.table, *source_column->text);
+    if(res.status == ResultStatus::SUCCESS)
+    {
+        source.column_idx = res.result;
+    }
+    else
+    {
+        // TODO: Error handling
+        printf("%s: Error encountered finding column index! Error code = %d\n",
+                __FUNCTION__, res.status);
     }
   
     SelectQuery* query = reinterpret_cast<SelectQuery*>(builder->statement);

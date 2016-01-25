@@ -17,6 +17,7 @@ ParseResult parse(std::string input, DataStore* data_store)
     void* parser = ParseAlloc(malloc);
 
     StatementBuilder builder;
+    builder.data_store = data_store;
 
     // Tokenize the input string
     std::vector<TokenPair> tokens = tokenize(input);

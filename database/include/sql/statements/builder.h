@@ -19,6 +19,10 @@
 
 #include "util/types.h"
 
+// Forward declaration
+class DataStore;
+
+// TODO: Document this
 struct StatementBuilder
 {
     StatementBuilder()
@@ -30,6 +34,7 @@ struct StatementBuilder
     bool valid;
     ParsedStatement* statement;
     Expression* expr;
+    DataStore* data_store;
 };
 
 // Table management functions
