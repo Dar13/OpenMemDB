@@ -51,3 +51,8 @@ lemon
 # generic temp file
 *.tmp
 *.temp
+
+#GTAGS
+GPATH
+GRTAGS
+GTAGS
