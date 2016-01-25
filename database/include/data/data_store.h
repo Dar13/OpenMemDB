@@ -3,6 +3,9 @@
 #ifndef DATA_STORE_H
 #define DATA_STORE_H
 
+// STL includes
+#include <map>
+
 // Tervel includes
 #include <tervel/containers/wf/vector/vector.hpp>
 #include <tervel/containers/wf/hash-map/wf_hash_map.h>
@@ -33,12 +36,13 @@ using RecordData = std::vector<TervelData>;
 // TODO: Is there a more efficient way?
 using MultiRecordData = std::vector<RecordData>;
 
-// Schema definition
+// TODO: Document this
 struct TableSchema
 {
     std::vector<SQLColumn> columns;
 };
 
+// TODO: Document this
 struct SchemaTablePair
 {
     SchemaTablePair(DataTable* t, TableSchema* s)
@@ -48,6 +52,8 @@ struct SchemaTablePair
     DataTable* table;
     TableSchema* schema;
 };
+
+using MultipleTableRecordData = std::map<std::string, MultiRecordData>;
 
 // The mack-daddy, the mapping of table names to tables/schemas.
 using TableMap = tervel::containers::wf::HashMap<std::string, 
@@ -111,6 +117,8 @@ private:
     RecordData copyRecord(Record* record);
 
     MultiRecordData searchTable(DataTable* table, ValuePredicate* value_pred);
+    MultipleTableRecordData searchTable(std::string table_first, std::string table_second, 
+                                ColumnPredicate* col_pred);
 
     TableMap table_name_mapping;
 };

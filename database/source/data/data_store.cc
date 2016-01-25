@@ -291,6 +291,59 @@ MultiRecordData DataStore::searchTable(DataTable* table,
     return data;
 }
 
+MultipleTableRecordData DataStore::searchTable(std::string table_first, std::string table_second,
+        ColumnPredicate* col_pred)
+{
+    auto default_res = MultipleTableRecordData();
+    auto result = MultipleTableRecordData();
+
+    auto f_table_pair = getTablePair(table_first);
+    auto s_table_pair = getTablePair(table_second);
+
+    if(f_table_pair == nullptr || s_table_pair == nullptr || col_pred == nullptr)
+    {
+        return default_res;
+    }
+
+    DataTable* f_table = f_table_pair->table;
+    DataTable* s_table = s_table_pair->table;
+
+    int64_t first_len = f_table->size(0);
+    int64_t second_len = s_table->size(0);
+    if(first_len == 0 || second_len == 0)
+    {
+        return default_res;
+    }
+
+    for(int64_t first_idx = 0; first_idx < first_len; first_idx++)
+    {
+        Record* f_record = nullptr;
+
+        while(!f_table->at(first_idx, f_record)) {}
+
+        RecordData f_data = copyRecord(f_record);
+
+        for(int64_t second_idx = 0; second_idx < second_len; second_idx++)
+        {
+            Record* s_record = nullptr;
+
+            while(!s_table->at(second_idx, s_record)) {}
+
+            RecordData s_data = copyRecord(s_record);
+
+            TervelData f_value = f_data[col_pred->left_column.column_idx];
+            TervelData s_value = s_data[col_pred->right_column.column_idx];
+            if(f_value.data.value == s_value.data.value)
+            {
+                result[table_first].push_back(f_data);
+                result[table_second].push_back(s_data);
+            }
+        }
+    }
+
+    return default_res;
+}
+
 RecordData DataStore::copyRecord(Record* record)
 {
     if(record == nullptr) { return RecordData();}
