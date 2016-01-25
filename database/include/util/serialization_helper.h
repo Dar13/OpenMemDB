@@ -4,7 +4,7 @@
  * @author Mike McGee
  */
 
-#ifndef OPENMEMDB_SERIALIZATONION_HELPER_H
+#ifndef OPENMEMDB_SERIALIZATION_HELPER_H
 #define OPENMEMDB_SERIALIZATION_HELPER_H
 
 #include "libomdb.h"
@@ -57,7 +57,7 @@ CommandPacket DeserializeCommandPacket(char* serializedPacket);
  * @param serializedPacket The char* representing the ConnectionPacket
  * @return A ConnectionPacket with the data from the serializedPacket
  */
-ConnectionPacket DeserializeConnectionPacket(char* serializedPacket);
+ConnectionPacket DeserializeConnectionPacket(const char* serializedPacket);
 
 /**
  * Converts char* to ResultMetaDataPacket
@@ -72,4 +72,4 @@ ResultMetaDataPacket DeserializeResultMetaDataPacket(char* serializedPacket);
  * @return A ResultPacket with the data from the serializedPacket
  */
 ResultPacket DeserializeResultPacket(char* serializedPacket);
-#endif //OPENMEMDB_SERIALIZION_HELPER_H
+#endif //OPENMEMDB_SERIALIZATION_HELPER_H
