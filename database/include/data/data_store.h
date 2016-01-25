@@ -53,7 +53,7 @@ struct SchemaTablePair
     TableSchema* schema;
 };
 
-using MultipleTableRecordData = std::map<std::string, MultiRecordData>;
+using MultiTableRecordData = std::map<std::string, MultiRecordData>;
 
 // The mack-daddy, the mapping of table names to tables/schemas.
 using TableMap = tervel::containers::wf::HashMap<std::string, 
@@ -114,11 +114,15 @@ public:
 
 private:
     SchemaTablePair* getTablePair(std::string table_name);
+
+	RecordData copyRecord(DataTable* table, int64_t row_idx);
     RecordData copyRecord(Record* record);
 
     MultiRecordData searchTable(DataTable* table, ValuePredicate* value_pred);
-    MultipleTableRecordData searchTable(std::string table_first, std::string table_second, 
+    MultiTableRecordData searchTable(std::string table_first, std::string table_second, 
                                 ColumnPredicate* col_pred);
+
+	MultiTableRecordData searchTables(NestedPredicate* pred);
 
     TableMap table_name_mapping;
 };

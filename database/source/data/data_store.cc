@@ -1,10 +1,13 @@
 // C standard library includes
-//
 #include <cstdio>
+
+// STL includes
+#include <stack>
 
 // Project includes
 #include "data/data_store.h"
 
+// TODO: Doxygenify this documentation
 //creates an empty table
 ManipResult DataStore::createTable(CreateTableCommand table_info)
 {
@@ -41,6 +44,9 @@ ManipResult DataStore::createTable(CreateTableCommand table_info)
     return ManipResult(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
 }
 
+/**
+ * TODO
+ */
 ManipResult DataStore::deleteTable(std::string table_name)
 {
     // Remove the table from the table name map
@@ -55,6 +61,9 @@ ManipResult DataStore::deleteTable(std::string table_name)
     return ManipResult(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
 }
 
+/**
+ * TODO
+ */
 SchemaResult DataStore::getTableSchema(std::string table_name)
 {
     SchemaTablePair* pair = getTablePair(table_name);
@@ -69,6 +78,9 @@ SchemaResult DataStore::getTableSchema(std::string table_name)
     }
 }
 
+/**
+ * TODO
+ */
 UintResult DataStore::getColumnIndex(std::string table_name, std::string column_name)
 {
     SchemaTablePair* table_pair = getTablePair(table_name);
@@ -84,7 +96,7 @@ UintResult DataStore::getColumnIndex(std::string table_name, std::string column_
             }
         }
 
-	return UintResult(ResultStatus::ERROR_INVALID_COLUMN, 0);
+		return UintResult(ResultStatus::ERROR_INVALID_COLUMN, 0);
     }
 
     // Table name doesn't exist in the table name map
@@ -104,6 +116,9 @@ DataResult DataStore::getData(Predicate* predicates,
     // TODO: This function doesn't really make sense to have...
 }
 
+/**
+ * TODO
+ */
 ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
 {
     // Get the table
@@ -141,12 +156,18 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
     return ManipResult(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
 }
 
+/**
+ * TODO
+ */
 ManipResult DataStore::updateRecord(Predicate* predicates,
                          std::string table_name,
                          RecordData record)
 {
 }
 
+/**
+ * TODO
+ */
 MultiRecordResult DataStore::getRecords(Predicate* predicates,
                                         std::string table_name)
 {
@@ -231,6 +252,9 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
     return MultiRecordResult(ResultStatus::ERROR_INVALID_TABLE, MultiRecordData());
 }
 
+/**
+ * TODO
+ */
 SchemaTablePair* DataStore::getTablePair(std::string table_name)
 {
     TableMap::ValueAccessor hash_accessor;
@@ -247,6 +271,9 @@ SchemaTablePair* DataStore::getTablePair(std::string table_name)
     return nullptr;
 }
 
+/**
+ * TODO
+ */
 MultiRecordData DataStore::searchTable(DataTable* table,
                                   ValuePredicate* value_pred)
 {
@@ -291,11 +318,14 @@ MultiRecordData DataStore::searchTable(DataTable* table,
     return data;
 }
 
-MultipleTableRecordData DataStore::searchTable(std::string table_first, std::string table_second,
+/**
+ * TODO
+ */
+MultiTableRecordData DataStore::searchTable(std::string table_first, std::string table_second,
         ColumnPredicate* col_pred)
 {
-    auto default_res = MultipleTableRecordData();
-    auto result = MultipleTableRecordData();
+    auto default_res = MultiTableRecordData();
+    auto result = MultiTableRecordData();
 
     auto f_table_pair = getTablePair(table_first);
     auto s_table_pair = getTablePair(table_second);
@@ -317,19 +347,11 @@ MultipleTableRecordData DataStore::searchTable(std::string table_first, std::str
 
     for(int64_t first_idx = 0; first_idx < first_len; first_idx++)
     {
-        Record* f_record = nullptr;
-
-        while(!f_table->at(first_idx, f_record)) {}
-
-        RecordData f_data = copyRecord(f_record);
+        RecordData f_data = copyRecord(f_table, first_idx);
 
         for(int64_t second_idx = 0; second_idx < second_len; second_idx++)
         {
-            Record* s_record = nullptr;
-
-            while(!s_table->at(second_idx, s_record)) {}
-
-            RecordData s_data = copyRecord(s_record);
+            RecordData s_data = copyRecord(s_table, second_idx);
 
             TervelData f_value = f_data[col_pred->left_column.column_idx];
             TervelData s_value = s_data[col_pred->right_column.column_idx];
@@ -344,6 +366,9 @@ MultipleTableRecordData DataStore::searchTable(std::string table_first, std::str
     return default_res;
 }
 
+/**
+ * TODO
+ */
 RecordData DataStore::copyRecord(Record* record)
 {
     if(record == nullptr) { return RecordData();}
@@ -370,9 +395,97 @@ RecordData DataStore::copyRecord(Record* record)
         printf("Retrieved value: %ld\n", tervel_data);
 
 	    // TODO: This is ugly af, rethink this naming scheme in Data/TervelData
+		// Clear out any Tervel status bits so as to make later comparisons trivial
+		data.data.tervel_status = 0;
 	    copy.push_back(data);
     }
 
     // Return the copied data
     return copy;
+}
+
+/**
+ * TODO
+ */
+MultiTableRecordData DataStore::searchTables(NestedPredicate* pred)
+{
+	auto result = MultiTableRecordData();
+
+	// This assumes the nested predicate given has two children
+	Predicate* left = pred->left_child;
+	switch(left->type)
+	{
+		case PredicateType::NESTED:
+			{
+				auto nest_pred = reinterpret_cast<NestedPredicate*>(left);
+				auto nested_result = searchTables(nest_pred);
+				// TODO: Union with existing data in result.
+			}
+			break;
+		case PredicateType::COLUMN:
+			{
+				ColumnPredicate* col_pred = reinterpret_cast<ColumnPredicate*>(left);
+				auto column_result = searchTable(col_pred->left_column.table,
+						col_pred->right_column.table, col_pred);
+				// TODO: Union with existing data in result.
+			}
+			break;
+		case PredicateType::VALUE:
+			{
+				ValuePredicate* val_pred = reinterpret_cast<ValuePredicate*>(left);
+				auto table_pair = getTablePair(val_pred->column.table);
+				auto value_result = searchTable(table_pair->table, val_pred);
+				// TODO: Union with existing data in result.
+			}
+			break;
+	}
+
+	Predicate* right = pred->right_child;
+	switch(right->type)
+	{
+		case PredicateType::NESTED:
+			{
+				auto nest_pred = reinterpret_cast<NestedPredicate*>(right);
+				auto nested_result = searchTables(nest_pred);
+				// TODO: Union with existing data in result.
+			}
+			break;
+		case PredicateType::COLUMN:
+			{
+				ColumnPredicate* col_pred = reinterpret_cast<ColumnPredicate*>(right);
+				auto column_result = searchTable(col_pred->left_column.table,
+						col_pred->right_column.table, col_pred);
+				// TODO: Union with existing data in result.
+			}
+			break;
+		case PredicateType::VALUE:
+			{
+				ValuePredicate* val_pred = reinterpret_cast<ValuePredicate*>(right);
+				auto table_pair = getTablePair(val_pred->column.table);
+				auto value_result = searchTable(table_pair->table, val_pred);
+				// TODO: Union with existing data in result.
+			}
+			break;
+	}
+
+	return result;
+}
+
+/**
+ * TODO
+ */
+RecordData DataStore::copyRecord(DataTable* table, int64_t row_idx)
+{
+	if(table == nullptr)
+	{
+		// TODO: Error handling?
+		return RecordData();
+	}
+
+	Record* record = nullptr;
+
+	// TODO: Handle non-trivial failure case (e.g. row_idx > table->size())
+	while(!table->at(row_idx, record)) {}
+
+	return copyRecord(record);
 }
