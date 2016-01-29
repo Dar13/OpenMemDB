@@ -51,3 +51,7 @@ lemon
 # generic temp file
 *.tmp
 *.temp
+
+# Project files (Eclipse)
+*.cproject
+*.project
