@@ -124,6 +124,8 @@ private:
 
 	MultiTableRecordData searchTables(NestedPredicate* pred);
 
+    void schemaChecker(TableSchema schema, std::vector<SQLColumn> column);
+
     TableMap table_name_mapping;
 };
 

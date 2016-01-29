@@ -69,8 +69,8 @@ ManipResult DataStore::deleteTable(std::string table_name)
         return ManipResult(ResultStatus::ERROR_INVALID_TABLE, ManipStatus::FAILURE);
     }
 
-    DataTable *table = &table_pair.table;
-    TableSchema *schema = &table_pair.schema;
+    DataTable *table = table_pair->table;
+    TableSchema *schema = table_pair->schema;
     //delete table from pair
     //delete schema from pair
     //delete pair (schema and table)
