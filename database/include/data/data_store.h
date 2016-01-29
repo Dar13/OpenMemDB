@@ -1,10 +1,28 @@
-/* TODO: File header */
+/* Copyright (c) 2016 Neil Moore, Jason Stavrinaky, Micheal McGee, Robert Medina
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this 
+ * software and associated documentation files (the "Software"), to deal in the Software 
+ * without restriction, including without limitation the rights to use, copy, modify, 
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to 
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all copies 
+ * or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
+ * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE 
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE 
+ * USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 
 #ifndef DATA_STORE_H
 #define DATA_STORE_H
 
 // STL includes
 #include <map>
+#include <atomic>
 
 // Tervel includes
 #include <tervel/containers/wf/vector/vector.hpp>
@@ -24,11 +42,12 @@
 
 // Some typedefs(C++11-style) so that we don't have all that meaningless
 // namespace and template junk pop up everywhere.
-// Table data definitions
 
+// Table data definitions
 using Record = tervel::containers::wf::vector::Vector<int64_t>;
 
 using DataTable = tervel::containers::wf::vector::Vector<Record*>;
+using RecordVector = tervel::containers::wf::vector::Vector<Record*>;
 
 // This is just a copy of a record
 using RecordData = std::vector<TervelData>;
@@ -36,23 +55,50 @@ using RecordData = std::vector<TervelData>;
 // TODO: Is there a more efficient way?
 using MultiRecordData = std::vector<RecordData>;
 
-// TODO: Document this
+/**
+ * \brief The schema that a table must adhere to.
+ *
+ * TODO: Table constraints?
+ */
 struct TableSchema
 {
+    //! A vector of column definitions according to the SQL standard
     std::vector<SQLColumn> columns;
 };
 
-// TODO: Document this
+/**
+ *  \brief A struct defining a table stored in the data store.
+ *
+ *  \detail Holds a wait-free vector of pointers to data records as well as a record counter
+ *  to be used for row identification.
+ */
+struct Table
+{
+    //! The wait-free vector of pointers to the records stored in this table
+    RecordVector records;
+
+    //! An atomic counter that allows for the database to distinguish between two duplicate records
+    std::atomic<uint64_t> record_counter;
+};
+
+
+/**
+ *  \brief A struct that binds a table's schema to its data.
+ */
 struct SchemaTablePair
 {
     SchemaTablePair(DataTable* t, TableSchema* s)
         : table(t), schema(s)
     {}
 
+    //! The data that adheres to the schema
     DataTable* table;
+
+    //! The table's schema
     TableSchema* schema;
 };
 
+//! A typedef that allows returning multiple sets of records from multiple tables
 using MultiTableRecordData = std::map<std::string, MultiRecordData>;
 
 // The mack-daddy, the mapping of table names to tables/schemas.
