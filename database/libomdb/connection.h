@@ -26,11 +26,12 @@ THE SOFTWARE.
 #include <string>
 
 // Project includes.
-#include "resultset.h"
-
+#include "result.h"
+#include "../include/util/libomdb.h"
+#include "serializationion_helper.h"
 
 namespace libomdb{
-  
+
   /** Represents result of database command */
   typedef struct CommandResult {
     bool isSuccess;
@@ -38,12 +39,14 @@ namespace libomdb{
   } CommandResult;
 
 
-
   /**
    * Class that represents the 
    */  
   class ConnectionMetaData {
    public:
+
+    /** Builds new ConnectionMetaData object */
+    ConnectionMetaData(std::string dbName, bool isValid);
     
     /** Gets the name of the connected database */
     std::string getDbName();    
@@ -69,6 +72,14 @@ namespace libomdb{
   class Connection {
    public:
 
+    /**
+     * Builds connection object
+     * @param socket_fd The file desciptor of the socket to communicate over
+     * @param serializedPacket The serialized packer returned from the server that describes the connection
+     * @return A Connection object representing the passed in values.
+     */
+    static Connection buildConnectionObj(uint16_t socket_fd, char* serializedPacket);
+
    /**
     * Connects to specified location and returns object representing
     * connection
@@ -85,7 +96,7 @@ namespace libomdb{
     * Disconnects the connection object.
     * @param connection The connection object to terminate
     */
-    static void disconnect(libomdb::Connection connection);
+    void disconnect();
 
 
     
@@ -102,7 +113,7 @@ namespace libomdb{
      * @param query The query to execute
      * @return A ResultSet representing the results of the query.
      */
-    libmem::ResultSet executeQuery(std::string query);
+    libomdb::Result executeQuery(std::string query);
     
 
     /**
@@ -111,14 +122,38 @@ namespace libomdb{
      */
     libomdb::ConnectionMetaData getMetaData();
 
+    /**
+     * Sets the meta-data to the passed in object
+     * @param data The ConnectionMetaData object for the related Connection object
+     */
+    void setMetaData(ConnectionMetaData data);
+
+    /**
+     * Creates a connection object that is invalid used on errors
+     * @return An invalid connection object
+     *
+     * // Cannot figure out how to not do this in the .h Be my guest to fix. C++ is annoying.
+     */
+    static Connection errorConnection() {
+      return Connection(0, ConnectionMetaData(NULL, false));
+    }
+
    private:
 
-    /** The file desciptor used to communicate over */
-    uint16_t m_socket_fd;
+    /**
+     * Private constructor to create object
+     * @param socket_fd The file descriptor used to communicate with the object
+     * @param metaData  The ConnectionMetaData object describing the Connection.
+     */
+    Connection(uint64_t socket_fd, ConnectionMetaData metaData);
 
     /** The meta data object that describes the connection */
-    libomdb::ConnectionMetaData m_metaData;    
-  };  
+    libomdb::ConnectionMetaData m_metaData;
+
+    /** The file descriptor used to communicate over */
+    uint16_t m_socket_fd;
+
+  };
 
 }
 

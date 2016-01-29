@@ -26,14 +26,6 @@ THE SOFTWARE.
 #include <vector>
 #include <string>
 
-// Boost includes
-#include <boost/variant.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/serialization/utility.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/variant.hpp>
-
 // Project includes
 
 namespace libomdb {
@@ -42,14 +34,13 @@ namespace libomdb {
   enum SQL_TYPE {
     BOOLEAN
   };
-  
-  typedef boost::variant<int, std::string> DataValue;
 
-  typedef std::vector<DataValue> ResultRow;
+  typedef std::vector<int64_t> ResultRow;
 
   typedef struct MetaDataColumn {
-    std::string name;
-    SQL_TYPE type; //TODO Make this a SQL_TYPE from Neils types     
+    std::string label;
+    SQL_TYPE type; //TODO Make this a SQL_TYPE from Neils types
+    uint16_t sqlType;
   } MetaDataColumn;
 
   
@@ -83,11 +74,19 @@ namespace libomdb {
      * @return The type of the data stored at the index.
      */ 
     SQL_TYPE getColumnType(int index); //TODO: Replace with neils types
-    
+
+    /**
+     * Builds a ResultMetaData object from passed in values
+     * @data
+     */
+    static ResultMetaData buildResultMetaDataObject(std::vector<MetaDataColumn> data);
+
    private:
-    
+    /** Private constructor */
+    ResultMetaData(std::vector<MetaDataColumn> m_data);
+
     /** The actual meta data */
-    std::vector<MetaDataColumn> data;   
+    std::vector<MetaDataColumn> m_data;   
   };
 
   
@@ -109,7 +108,7 @@ namespace libomdb {
      * Gets the value of the column at the passed in index
      * @param index The index of the column to get the value of
      */
-    DataValue getValue(int index);
+    int64_t getValue(int index);
 
 
     /**
@@ -118,7 +117,16 @@ namespace libomdb {
      */
     bool next();            
 
+    /**
+     * Creates Result object from passe in values
+     * @param rows The rows to include in the the Result object
+     * @param metaData The metaData object for the Result
+     */
+    static Result buildResultObject(std::vector<ResultRow> rows,
+                                    ResultMetaData metaData);
+
    private:
+    Result(std::vector<ResultRow> rows, ResultMetaData resultMetaData);
 
     /** The rows returned from the database */
     std::vector<ResultRow> m_rows;
