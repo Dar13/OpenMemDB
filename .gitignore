@@ -55,3 +55,8 @@ lemon
 # Project files (Eclipse)
 *.cproject
 *.project
+
+# GTAGS
+GPATH
+GRTAGS
+GTAGS
