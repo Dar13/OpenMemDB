@@ -91,7 +91,7 @@ ResultStatus mapStringToResultStatus(char* status) {
 char* SerializeCommandPacket(CommandPacket packet) {
   // Take command packet and turn into char*
   //char serializedCommandPacket[sizeof(packet)];
-  char* serializedCommandPacket;
+  char* serializedCommandPacket = new char[sizeof(packet)];
   memcpy(serializedCommandPacket, &packet, sizeof(packet));
   return serializedCommandPacket;
 }
@@ -99,7 +99,7 @@ char* SerializeCommandPacket(CommandPacket packet) {
 
 char* SerializeConnectionPacket(ConnectionPacket packet){
   //char serializedConnectionPacket[sizeof(packet)];
-  char* serializedConnectionPacket;
+  char* serializedConnectionPacket = new char[sizeof(packet)];
   memcpy(serializedConnectionPacket, &packet, sizeof(packet));
   return serializedConnectionPacket;
 }
@@ -120,13 +120,19 @@ char* SerializeResultPacket(ResultPacket packet){
 
 
 CommandPacket DeserializeCommandPacket(char* serializedPacket){
-
+  CommandPacket commandPacket;
+  char* type = new char[sizeof(CommandType)];
+  memcpy(type, &serializedPacket[0], sizeof(CommandType));
+  memcpy(commandPacket.message, &serializedPacket[1], DB_NAME_LEN);
+  commandPacket.commandType = mapStringToCommandType(type);
+  delete(type);
+  return commandPacket;
 }
 
 
 ConnectionPacket DeserializeConnectionPacket(const char* serializedPacket){
   ConnectionPacket connectionPacket;
-  char* type;
+  char* type = new char[sizeof(ConnectionPacket)];
   memcpy(type, &serializedPacket[0], sizeof(uint8_t));
   memcpy(connectionPacket.name, &serializedPacket[1], DB_NAME_LEN);
   connectionPacket.type = mapStringToPacketType(type);
