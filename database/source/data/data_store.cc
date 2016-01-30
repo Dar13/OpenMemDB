@@ -197,7 +197,7 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
     }
 
     // TODO: Handle table constraints
-    size_t ret = table_pair->table->push_back_w_ra(new_record);
+    size_t ret = table_pair->table->records.push_back_w_ra(new_record);
     printf("Pushback returned %lu\n", ret);
     printf("Record address %p\n", new_record);
 
@@ -227,6 +227,7 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
     }
 
     DataTable* table = table_pair->table;
+    RecordVector& records = table->records;
 
     // Evaluate predicates and return all rows that satisfy the predicates'
     // conditions.
@@ -236,7 +237,7 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
     {
         MultiRecordData data;
 
-	    int64_t table_len = table->size(0);
+	    int64_t table_len = records.size(0);
 	    if(table_len == 0)
 	    {
 	        // Finished, table is empty
@@ -250,7 +251,7 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
 	        
 	        // This essentially waits for an access to become available.
 	        // TODO: Is this wait-free?
-	        while(!table->at(i, row))
+	        while(!records.at(i, row))
 	        {}
 
             printf("Retrieved record address: %p\n", row);
@@ -332,7 +333,7 @@ MultiRecordData DataStore::searchTable(DataTable* table,
     }
 
     // This assumes table maps to the table name in the value predicate
-    int64_t table_len = table->size(0);
+    int64_t table_len = table->records.size(0);
     if(table_len == 0)
     {
         return MultiRecordData();
@@ -342,7 +343,7 @@ MultiRecordData DataStore::searchTable(DataTable* table,
     {
         Record* row = nullptr;
 
-        while(!table->at(idx, row)) {}
+        while(!table->records.at(idx, row)) {}
 
         RecordData record = copyRecord(row);
 
@@ -383,11 +384,11 @@ MultiTableRecordData DataStore::searchTable(std::string table_first, std::string
         return default_res;
     }
 
-    DataTable* f_table = f_table_pair->table;
-    DataTable* s_table = s_table_pair->table;
+    RecordVector& f_table = f_table_pair->table->records;
+    RecordVector& s_table = s_table_pair->table->records;
 
-    int64_t first_len = f_table->size(0);
-    int64_t second_len = s_table->size(0);
+    int64_t first_len = f_table.size(0);
+    int64_t second_len = s_table.size(0);
     if(first_len == 0 || second_len == 0)
     {
         return default_res;
@@ -522,18 +523,12 @@ MultiTableRecordData DataStore::searchTables(NestedPredicate* pred)
 /**
  * TODO
  */
-RecordData DataStore::copyRecord(DataTable* table, int64_t row_idx)
+RecordData DataStore::copyRecord(RecordVector& table, int64_t row_idx)
 {
-	if(table == nullptr)
-	{
-		// TODO: Error handling?
-		return RecordData();
-	}
-
 	Record* record = nullptr;
 
 	// TODO: Handle non-trivial failure case (e.g. row_idx > table->size())
-	while(!table->at(row_idx, record)) {}
+	while(!table.at(row_idx, record)) {}
 
 	return copyRecord(record);
 }

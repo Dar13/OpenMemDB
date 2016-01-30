@@ -46,7 +46,6 @@
 // Table data definitions
 using Record = tervel::containers::wf::vector::Vector<int64_t>;
 
-using DataTable = tervel::containers::wf::vector::Vector<Record*>;
 using RecordVector = tervel::containers::wf::vector::Vector<Record*>;
 
 // This is just a copy of a record
@@ -72,12 +71,13 @@ struct TableSchema
  *  \detail Holds a wait-free vector of pointers to data records as well as a record counter
  *  to be used for row identification.
  */
-struct Table
+struct DataTable
 {
     //! The wait-free vector of pointers to the records stored in this table
     RecordVector records;
 
-    //! An atomic counter that allows for the database to distinguish between two duplicate records
+    //! An atomic counter that allows for the database to distinguish between 
+    //! two duplicate records
     std::atomic<uint64_t> record_counter;
 };
 
@@ -161,7 +161,7 @@ public:
 private:
     SchemaTablePair* getTablePair(std::string table_name);
 
-	RecordData copyRecord(DataTable* table, int64_t row_idx);
+	RecordData copyRecord(RecordVector& table, int64_t row_idx);
     RecordData copyRecord(Record* record);
 
     MultiRecordData searchTable(DataTable* table, ValuePredicate* value_pred);
