@@ -28,7 +28,7 @@ all: $(SOURCES) $(EXEC)
 $(EXEC): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 
-.cc.o:
+%.o : %.cc
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
