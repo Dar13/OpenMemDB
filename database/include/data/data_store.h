@@ -83,6 +83,13 @@ using MultiRecordData = std::vector<RecordData>;
 using MultiRecordCopies = std::vector<RecordCopy>;
 
 /**
+ *  \brief A mapping from a table name to a set of \refer RecordCopy objects
+ *
+ *  \detail THIS IS FOR INTERNAL USE ONLY
+ */
+using MultiTableRecordCopies = std::map<std::string, MultiRecordCopies>;
+
+/**
  * \brief The schema that a table must adhere to.
  *
  * TODO: Table constraints?
@@ -201,7 +208,7 @@ private:
                                 ColumnPredicate* col_pred);
                                 */
 
-	MultiTableRecordData searchTables(NestedPredicate* pred);
+	MultiTableRecordCopies searchTables(NestedPredicate* pred);
 
     void schemaChecker(TableSchema schema, std::vector<SQLColumn> column);
 

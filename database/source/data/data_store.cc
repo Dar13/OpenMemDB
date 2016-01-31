@@ -278,7 +278,9 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
                     NestedPredicate* nested_pred = reinterpret_cast<NestedPredicate*>(predicates);
                     // Keeping this able to handle multiple tables in case we decide
                     // to implement multiple-table queries
-                    MultiTableRecordData data = searchTables(nested_pred);
+                    MultiTableRecordCopies copies = searchTables(nested_pred);
+                    MultiTableRecordData data;
+                    // TODO: Process copies back into the final data
                     return MultiRecordResult(ResultStatus::SUCCESS, data.at(table_name));
                 }
                 break;
@@ -474,9 +476,11 @@ RecordCopy DataStore::copyRecord(Record* record)
 /**
  * TODO
  */
-MultiTableRecordData DataStore::searchTables(NestedPredicate* pred)
+MultiTableRecordCopies DataStore::searchTables(NestedPredicate* pred)
 {
-	auto result = MultiTableRecordData();
+	auto result = MultiTableRecordCopies();
+    auto left_result = MultiTableRecordCopies();
+    auto right_result = MultiTableRecordCopies();
 
 	// This assumes the nested predicate given has two children
 	Predicate* left = pred->left_child;
@@ -485,19 +489,17 @@ MultiTableRecordData DataStore::searchTables(NestedPredicate* pred)
 		case PredicateType::NESTED:
 			{
 				auto nest_pred = reinterpret_cast<NestedPredicate*>(left);
-				auto nested_result = searchTables(nest_pred);
-				// TODO: Union with existing data in result.
+				left_result = searchTables(nest_pred);
 			}
 			break;
 		case PredicateType::COLUMN:
 			{
-				ColumnPredicate* col_pred = reinterpret_cast<ColumnPredicate*>(left);
                 /*
+				ColumnPredicate* col_pred = reinterpret_cast<ColumnPredicate*>(left);
 				auto column_result = searchTable(col_pred->left_column.table,
 						col_pred->right_column.table, col_pred);
                         */
                 printf("Column to column predicates are not supported!\n");
-				// TODO: Union with existing data in result.
 			}
 			break;
 		case PredicateType::VALUE:
@@ -505,7 +507,7 @@ MultiTableRecordData DataStore::searchTables(NestedPredicate* pred)
 				ValuePredicate* val_pred = reinterpret_cast<ValuePredicate*>(left);
 				auto table_pair = getTablePair(val_pred->column.table);
 				auto value_result = searchTable(table_pair->table, val_pred);
-				// TODO: Union with existing data in result.
+                left_result[val_pred->column.table] = value_result;
 			}
 			break;
 	}
@@ -516,19 +518,17 @@ MultiTableRecordData DataStore::searchTables(NestedPredicate* pred)
 		case PredicateType::NESTED:
 			{
 				auto nest_pred = reinterpret_cast<NestedPredicate*>(right);
-				auto nested_result = searchTables(nest_pred);
-				// TODO: Union with existing data in result.
+				right_result = searchTables(nest_pred);
 			}
 			break;
 		case PredicateType::COLUMN:
 			{
-				ColumnPredicate* col_pred = reinterpret_cast<ColumnPredicate*>(right);
                 /*
+				ColumnPredicate* col_pred = reinterpret_cast<ColumnPredicate*>(right);
 				auto column_result = searchTable(col_pred->left_column.table,
 						col_pred->right_column.table, col_pred);
                         */
                 printf("Column to column predicates are not supported!\n");
-				// TODO: Union with existing data in result.
 			}
 			break;
 		case PredicateType::VALUE:
@@ -536,10 +536,58 @@ MultiTableRecordData DataStore::searchTables(NestedPredicate* pred)
 				ValuePredicate* val_pred = reinterpret_cast<ValuePredicate*>(right);
 				auto table_pair = getTablePair(val_pred->column.table);
 				auto value_result = searchTable(table_pair->table, val_pred);
-				// TODO: Union with existing data in result.
+                right_result[val_pred->column.table] = value_result;
 			}
 			break;
 	}
+
+    // Join the two results based on the nested predicate operation
+    auto comp_copy = [] (RecordCopy a, RecordCopy b) {
+        return a.id < b.id;
+    };
+
+    for(auto l_itr : left_result)
+    {
+        for(auto r_itr : right_result)
+        {
+            if(r_itr.first != l_itr.first)
+            {
+                continue;
+            }
+
+            auto join = MultiRecordCopies();
+            if(l_itr.second.size() > r_itr.second.size())
+            {
+                join.reserve(l_itr.second.size());
+            }
+            else
+            {
+                join.reserve(r_itr.second.size());
+            }
+
+            // The ranges have to be sorted
+            std::sort(l_itr.second.begin(), l_itr.second.end(), comp_copy);
+            std::sort(r_itr.second.begin(), r_itr.second.end(), comp_copy);
+
+            // Perform the appropriate set operation
+            switch(pred->op)
+            {
+                case ExpressionOperation::AND:
+                    std::set_intersection(l_itr.second.begin(), l_itr.second.end(),
+                            r_itr.second.begin(), r_itr.second.end(),
+                            join.begin(), comp_copy);
+                    break;
+                case ExpressionOperation::OR:
+                    std::set_union(l_itr.second.begin(), l_itr.second.end(),
+                            r_itr.second.begin(), r_itr.second.end(),
+                            join.begin(), comp_copy);
+                    break;
+                default:
+                    printf("Invalid operation used to join sets!\n");
+                    break;
+            }
+        }
+    }
 
 	return result;
 }

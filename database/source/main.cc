@@ -79,7 +79,7 @@ int main(int argc, char** argv)
         printf("Record inserted\n");
     }
 
-    std::string select_data = "SELECT TestTable.* FROM TestTable WHERE TestTable.A = 1;";
+    std::string select_data = "SELECT TestTable.* FROM TestTable WHERE TestTable.A = 1 OR TestTable.B = 2;";
     parse_result = parse(select_data, &data);
 
     if(parse_result.status == ResultStatus::SUCCESS)
