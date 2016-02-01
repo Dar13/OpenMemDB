@@ -293,4 +293,7 @@ void setupTokenMappings()
   keywords["DEFAULT"] = TK_DEFAULT;
   keywords["AND"] = TK_AND;
   keywords["OR"] = TK_OR;
+  keywords["VALUES"] = TK_VALUES;
+  keywords["INSERT"] = TK_INSERT;
+  keywords["INTO"] = TK_INTO;
 }

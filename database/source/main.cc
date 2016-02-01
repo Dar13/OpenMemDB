@@ -79,6 +79,17 @@ int main(int argc, char** argv)
         printf("Record inserted\n");
     }
 
+	std::string insert_test = "INSERT INTO TestTable VALUES (1, 2);";
+	auto insert_parse = parse(insert_test, &data);
+	if(insert_parse.status == ResultStatus::SUCCESS)
+	{
+		printf("INSERT INTO statement parsed!\n");
+	}
+	else
+	{
+		printf("INSERT INTO statement failed to parse!\n");
+	}
+
     std::string select_data = "SELECT TestTable.* FROM TestTable WHERE TestTable.A = 1 OR TestTable.B = 2;";
     parse_result = parse(select_data, &data);
 
