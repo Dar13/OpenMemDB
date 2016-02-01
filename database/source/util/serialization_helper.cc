@@ -51,10 +51,10 @@ void deserializeResultColumnsAndTerminator(ResultMetaDataPacket* packet,
 
 // Need to map to enums from strings.
 CommandType mapStringToCommandType(char* type) {
-  if (strcmp(type, "SQL_STATEMENT") == 0) {
-    return CommandType::SQL_STATEMENT;
-  } else if (strcmp(type, "DB_COMMAND") == 0) {
-    return CommandType::DB_COMMAND;
+  CommandType commandType = static_cast<CommandType>(type[0]);
+  //CommandType commandType = static_cast<CommandType>(std::stoi(typeString));
+  if (commandType == CommandType::DB_COMMAND || commandType == CommandType::SQL_STATEMENT) {
+    return commandType;
   }
 
   return CommandType::INVALID_COMMAND;
