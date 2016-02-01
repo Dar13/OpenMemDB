@@ -280,7 +280,14 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
                     // to implement multiple-table queries
                     MultiTableRecordCopies copies = searchTables(nested_pred);
                     MultiTableRecordData data;
+					for(auto itr : copies[table_name])
+					{
+						printf("Record %lu\n", itr.id);
+						data[table_name].push_back(itr.data);
+					}
+
                     // TODO: Process copies back into the final data
+					printf("Table name = %s\n", table_name.c_str());
                     return MultiRecordResult(ResultStatus::SUCCESS, data.at(table_name));
                 }
                 break;
@@ -452,10 +459,7 @@ RecordCopy DataStore::copyRecord(Record* record)
         int64_t tervel_data = 0;
 
 	    // Pull the current value of the data from the record
-	    while(!record->at(i, tervel_data))
-	    {
-            printf("Waiting for retrieval\n");
-        }
+	    while(!record->at(i, tervel_data)) {}
 
         data.value = tervel_data;
 
@@ -542,7 +546,7 @@ MultiTableRecordCopies DataStore::searchTables(NestedPredicate* pred)
 	}
 
     // Join the two results based on the nested predicate operation
-    auto comp_copy = [] (RecordCopy a, RecordCopy b) {
+    auto comp_copy = [] (RecordCopy a, RecordCopy b) -> bool {
         return a.id < b.id;
     };
 
@@ -555,15 +559,10 @@ MultiTableRecordCopies DataStore::searchTables(NestedPredicate* pred)
                 continue;
             }
 
-            auto join = MultiRecordCopies();
-            if(l_itr.second.size() > r_itr.second.size())
-            {
-                join.reserve(l_itr.second.size());
-            }
-            else
-            {
-                join.reserve(r_itr.second.size());
-            }
+			// Assume worst case size for join
+			// TODO: Make this a bit more intelligent
+			size_t num_join_records = l_itr.second.size() + r_itr.second.size();
+            auto join = MultiRecordCopies(num_join_records);
 
             // The ranges have to be sorted
             std::sort(l_itr.second.begin(), l_itr.second.end(), comp_copy);
@@ -586,8 +585,11 @@ MultiTableRecordCopies DataStore::searchTables(NestedPredicate* pred)
                     printf("Invalid operation used to join sets!\n");
                     break;
             }
+
+			result[l_itr.first] = join;
         }
     }
+
 
 	return result;
 }

@@ -58,6 +58,7 @@ Predicate* makePredicateFromExpression(Expression* expr, DataStore* data_store)
             nested_pred->right_child = right;
         }
 
+	nested_pred->op = expr->op;
         pred = nested_pred;
     }
 

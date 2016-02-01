@@ -61,6 +61,7 @@ using RecordData = std::vector<TervelData>;
  */
 struct RecordCopy
 {
+	RecordCopy() : id(0) {}
     RecordCopy(RecordData&& data)
     {
         id = data.back().data.value;
