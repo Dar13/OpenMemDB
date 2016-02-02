@@ -180,6 +180,28 @@ void builderAddColumn(StatementBuilder* builder, Token column_name,
     printf("Exit builderAddColumn\n");
 }
 
+void builderAddTableName(StatementBuilder* builder, Token table_name)
+{
+    if(!builder->started)
+    {
+        printf("%s: Builder hasn't been started!\n", __FUNCTION__);
+        return;
+    }
+
+    switch(builder->statement->type)
+    {
+        case SQLStatement::INSERT_INTO:
+            {
+                InsertCommand* insert = reinterpret_cast<InsertCommand*>(builder->statement);
+                insert->table = *table_name->text;
+            }
+            break;
+        default:
+            printf("%s: SQL statement being built isn't supported!\n", __FUNCTION__);
+            break;
+    }
+}
+
 void builderStartNestedExpr(StatementBuilder* builder, Token operation)
 {
     if(builder == nullptr)

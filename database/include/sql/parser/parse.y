@@ -185,18 +185,15 @@ comparison_predicate ::= expr. { }
 
 cmd ::= INSERT INTO insert_table VALUES LPAREN insert_values RPAREN.
 
-insert_table(A) ::= name(X). { printf("insert_table: A=%p, X=%p\n", A, X); }
+insert_table(A) ::= name(X). { A=X; printf("Starting INSERT INTO statement parse\n"); }
 
-insert_values(A) ::= insert_values COMMA insert_term(X).
-{
-	A = X;
-	printf("Multiple insert values\n");
-}
+insert_values ::= insert_values COMMA insert_term.
+insert_values ::= insert_term.
 
-insert_term(A) ::= INTEGER|FLOAT.
+insert_term(A) ::= INTEGER|FLOAT(X).
 {
-	(void)A;
-	printf("Insert term is an integer or float\n");
+  A = X;
+  printf("Insert term is an integer or float\n");
 }
 
 // DELETE STATEMENT ///////////////////////////////////////////////////////////

@@ -78,6 +78,10 @@ void builderAddQualifiedSelectColumn(StatementBuilder* builder,
                                      Token output_column);
 void builderFinishSelectQuery(StatementBuilder* builder);
 
+// Insert command functions
+void builderStartInsertCommand(StatementBuilder* builder);
+void builderAddDataItem(StatementBuilder* builder, Token data);
+
 // Somewhat generic helper functions
 void builderAddColumn(StatementBuilder* builder, 
                       Token column_name, 

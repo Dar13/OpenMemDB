@@ -22,6 +22,7 @@
 
 #include "sql/types/common.h"
 
+// TODO: Document this
 class ParsedStatement
 {
 public:

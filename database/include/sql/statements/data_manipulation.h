@@ -41,6 +41,14 @@ struct SelectQuery : public ParsedStatement
     Predicate* predicate;
 };
 
-// TODO: UPDATE, INSERT INTO & DELETE statements
+struct InsertCommand : public ParsedStatement
+{
+    InsertCommand() : ParsedStatement(SQLStatement::INSERT_INTO) {}
+
+    std::vector<TervelData> data;
+    std::string table;
+};
+
+// TODO: UPDATE & DELETE statements
 
 #endif
