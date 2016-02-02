@@ -97,7 +97,7 @@ ManipResult DataStore::deleteTable(std::string table_name)
     delete table_pair;
 
     //Remove table contents
-    int64_t table_len = table->size(0);
+    int64_t table_len = table->records.size(0);
     if(table_len == 0)
     {
 	 // Finished, table is empty
@@ -109,10 +109,8 @@ ManipResult DataStore::deleteTable(std::string table_name)
 	{
 	    // Get the current row pointer
 	    Record* row = nullptr;
-	    while(!table->pop_back(row))
-	    {
-		delete row;
-	    }
+	    while(!table->records.pop_back_w_ra(row)) {}
+	    delete row;
 	}
     }
 
