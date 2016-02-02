@@ -26,16 +26,6 @@
 // Project includes
 #include "data/data_store.h"
 
-//TODO: Test schema checker for more constraints
-//Checks if the column type matches the data type and constraint of the schema for that column
-//Should return error codes depending on the conflict (probably ManipResult)
-//think about this: parsing contraints, error codes, type of contraints, efficency of SQLColumn, memory
-void DataStore::schemaChecker(TableSchema schema, std::vector<SQLColumn> column)
-{
-	//check data type
-	//check constraint
-}
-
 // TODO: Doxygenify this documentation
 //creates an empty table
 ManipResult DataStore::createTable(CreateTableCommand table_info)
@@ -88,14 +78,6 @@ ManipResult DataStore::deleteTable(std::string table_name)
         return ManipResult(ResultStatus::ERROR_INVALID_TABLE, ManipStatus::FAILURE);
     }
 
-    DataTable *table = table_pair->table;
-    TableSchema *schema = table_pair->schema;
-    //delete table from pair
-    //delete schema from pair
-    //delete pair (schema and table)
-    //delete table from table_mapping
-
-    /*
     // Remove the table from the table name map
     // TODO: Perform proper memory clean-up after removal from mapping
     // TODO: What does access_counter != 0 mean?
@@ -105,8 +87,39 @@ ManipResult DataStore::deleteTable(std::string table_name)
         return ManipResult(ResultStatus::ERROR_INVALID_TABLE, ManipStatus::SUCCESS);
     }
 
+    TableSchema *schema = table_pair->schema;
+    DataTable *table = table_pair->table;
+
+    //Remove schema
+    delete schema;
+    
+    //Remove pair
+    delete table_pair;
+
+    //Remove table contents
+    int64_t table_len = table->size(0);
+    if(table_len == 0)
+    {
+	 // Finished, table is empty
+         return ManipResult(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
+    }
+    else
+    {
+	for(int64_t i = 0; i < table_len; i++)
+	{
+	    // Get the current row pointer
+	    Record* row = nullptr;
+	    while(!table->pop_back(row))
+	    {
+		delete row;
+	    }
+	}
+    }
+
+    //Remove table
+    delete table;
+    
     return ManipResult(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
-    */
 }
 
 /**
