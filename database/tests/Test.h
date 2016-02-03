@@ -21,7 +21,7 @@ class Test
     
     Test& with(int testMode);
     Test& test(); // return TestResult
-    Test& generateCases();
+    Test& generateCases(int complexity, int amount);
    
    private:
 
@@ -33,7 +33,7 @@ class Test
     
     // CREATE TABLE test
     string generateCreateStatement(int complexity);
-    vector<string> generateCreateCases(int complexity);
+    vector<string> generateCreateCases(int complexity, int amount);
 
     // SELECT Test, just templates for now, we need to do create table, and insert tests first
     string generateSelectStatement(int complexity);
