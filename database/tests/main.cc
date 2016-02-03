@@ -10,7 +10,7 @@ int main()
     int testMode = MODE_CREATE;
     
     test.with(testMode)
-        .generateCases()
+        .generateCases(0, 10)
         .test();
     
 	return 1;
