@@ -8,6 +8,7 @@
 
 #include "../../include/util/serialization_helper.h"
 #include "../../include/util/libomdb.h"
+#include "../result.h"
 
 bool testCommandPacketSerialization();
 bool testConnectionPacketSerialization();
@@ -19,8 +20,10 @@ int main (int argc, char** argv) {
 
   bool commandPassed = testCommandPacketSerialization();
   bool connectionPassed = testConnectionPacketSerialization();
+  bool resultMetaDataPassed = testResultMetaDataPacketSerialization();
   std::cout << "Command Serialization Passed: " << commandPassed << std::endl;
   std::cout << "Connection Serialization Passed: " << connectionPassed << std::endl;
+  std::cout << "ResultMetaData Serialization Passed: " << resultMetaDataPassed <<std::endl;
 
   return 0;
 }
@@ -61,5 +64,26 @@ bool testResultPacketSerialization() {
 }
 
 bool testResultMetaDataPacketSerialization() {
+  std::string TAG("ResultMetaDataPacket Test: ");
+  ResultMetaDataPacket resultMetaDataPacket;
+  resultMetaDataPacket.type = PacketType::RESULT_METADATA;
+  resultMetaDataPacket.status = ResultStatus::OK;
+  libomdb::MetaDataColumn metaDataColumns[5];
+  for (int i = 0; i < 5; ++i) {
+    libomdb::MetaDataColumn metaDataColumn;
+    metaDataColumn.label = "test label"+i;
+    metaDataColumn.sqlType = 1;
+    metaDataColumns[i] = metaDataColumn;
+  }
+  resultMetaDataPacket.numColumns = 5;
+  resultMetaDataPacket.terminator = THE_TERMINATOR;
+
+  // Serialize packet
+  char* serializedPacket = SerializeResultMetaDataPacket(resultMetaDataPacket);
+  std::cout << serializedPacket << std::endl;
+
+  // Deserialize packet
+  ResultMetaDataPacket deserializedPacket = DeserializeResultMetaDataPacket(serializedPacket);
+  std::cout << TAG << "Num columns: "<< deserializedPacket.numColumns << std::endl;
 
 }

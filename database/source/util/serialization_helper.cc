@@ -142,7 +142,7 @@ ConnectionPacket DeserializeConnectionPacket(const char* serializedPacket){
 }
 
 
-ResultMetaDataPacket DeserializeResultMetaDataPacket(const char* serializedPacket){
+ResultMetaDataPacket DeserializeResultMetaDataPacket(char* serializedPacket){
   ResultMetaDataPacket metaDataPacket;
   char* type;
   char* status;
