@@ -124,7 +124,7 @@ term(A) ::= name(X) DOT column_id(Y). {
     // TODO: Error handling
 }
 term(A) ::= column_id(X). { A = X; printf("expression term\n"); }
-term(A) ::= INTEGER|FLOAT(X).
+term(A) ::= INTEGER|FLOAT|DATE|TIME(X).
 { 
   printf("Numeric term handling\n");
   A = X;
@@ -190,7 +190,7 @@ insert_table(A) ::= name(X). { A=X; printf("Starting INSERT INTO statement parse
 insert_values ::= insert_values COMMA insert_term.
 insert_values ::= insert_term.
 
-insert_term(A) ::= INTEGER|FLOAT(X).
+insert_term(A) ::= INTEGER|FLOAT|DATE|TIME(X).
 {
   A = X;
   printf("Insert term is an integer or float\n");

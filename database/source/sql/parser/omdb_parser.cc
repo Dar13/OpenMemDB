@@ -19,6 +19,9 @@
 
 #include <cstdlib>
 #include <map>
+
+#include "util/stdlib.h"
+
 #include "sql/omdb_parser.h"
 #include "sql/statements/expression.h"
 
@@ -127,9 +130,81 @@ std::vector<TokenPair> tokenize(std::string input)
     {
         if(isSQLNumericChar(*itr))
         {
-            // TODO: Handle hexadecimal numbers
             std::string::iterator next = itr + 1;
 
+			while(next != input.end() && isSQLNumericChar(*next))
+			{
+				next++;
+			}
+
+			switch(*next)
+			{
+				case 'x':
+					// TODO: Hexadecimal case
+					break;
+				case '.':
+				{
+					pair.token_type = TK_FLOAT;
+					
+					auto test = next + 1;
+					if(test == input.end() || !isSQLNumericChar(*test))
+					{
+						// Not a float, is an integer followed by a dot
+						// TODO: Generate two tokens
+					}
+					else
+					{
+						while(next != input.end() && isSQLNumericChar(*next)) { next++; }
+						std::string* token = new (std::nothrow) std::string(itr, next);
+						float value = std::stof(*token);
+
+						pair.token = new (std::nothrow) TokenData(token, value);
+					}
+				}
+					break;
+				case ':':
+				{
+					pair.token_type = TK_TIME;
+				}
+					break;
+				case '-':
+				{
+					pair.token_type = TK_DATE;
+					auto test = next;
+					if(safe_advance(test, input.end(), 5))
+					{
+						if(checkDateFormat(std::string(itr, test)))
+						{
+							// Make a token
+						}
+						else
+						{
+							pair.token_type = TK_ILLEGAL;
+							pair.token = new (std::nothrow) TokenData(nullptr, 0);
+						}
+					}
+					else
+					{
+						pair.token_type = TK_ILLEGAL;
+						pair.token = new (std::nothrow) TokenData(nullptr, 0);
+					}
+
+				}
+					break;
+				default:
+				{
+					// End token
+					pair.token_type = TK_INTEGER;
+					
+					std::string* token = new (std::nothrow) std::string(itr, next);
+					int64_t value = std::stoll(*token, nullptr, 10);
+					pair.token = new (std::nothrow) TokenData(token, value);
+
+				}
+					break;
+			}
+
+			/*
             while(next != input.end() && (isSQLNumericChar(*next) || *next == '.'))
             {
                 next++;
@@ -164,6 +239,7 @@ std::vector<TokenPair> tokenize(std::string input)
                     // TODO: Error handling
                 }
             }
+			*/
 
             itr = next;
             tokens.push_back(pair);
