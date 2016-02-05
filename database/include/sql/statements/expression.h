@@ -67,8 +67,8 @@ struct Expression
   
     ExpressionFlags flags;
 
-    std::string* table_name;
-    std::string* table_column;
+    std::string table_name;
+    std::string table_column;
   
     DataType value_type;
     TervelData value;

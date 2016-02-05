@@ -28,14 +28,14 @@
 struct TokenData
 {
     TokenData()
-        : text(nullptr), is_value(false), is_operation(false), is_column(false)
+        : text(""), is_value(false), is_operation(false), is_column(false)
     {}
 
-    TokenData(std::string* str)
-        : text(str), is_value(false), is_operation(false), is_column(false)
+    TokenData(std::string str)
+        : text(std::move(str)), is_value(false), is_operation(false), is_column(false)
     {
         // Special case, the NULL represents a typeless NULL value
-        if(*text == "NULL")
+        if(text == "NULL")
         {
             is_value = true;
             value = TervelData { .value = 0 };
@@ -43,8 +43,8 @@ struct TokenData
         }
     }
 
-    TokenData(std::string* str, bool val)
-        : text(str), is_value(true), is_operation(false), is_column(false)
+    TokenData(std::string str, bool val)
+        : text(std::move(str)), is_value(true), is_operation(false), is_column(false)
     {
         value.data.type = BOOLEAN;
         if(val)
@@ -57,40 +57,40 @@ struct TokenData
         }
     }
 
-    TokenData(std::string* str, int16_t val)
-        : text(str), is_value(true), is_operation(false), is_column(false)
+    TokenData(std::string str, int16_t val)
+        : text(std::move(str)), is_value(true), is_operation(false), is_column(false)
     {
         value.data.type = SMALL_INT;
         value.data.value = val;
     }
     
-    TokenData(std::string* str, int32_t val)
-        : text(str), is_value(true), is_operation(false), is_column(false)
+    TokenData(std::string str, int32_t val)
+        : text(std::move(str)), is_value(true), is_operation(false), is_column(false)
     {
         value.data.type = INTEGER;
         value.data.value = val;
     }
 
-    TokenData(std::string* str, int64_t val)
-        : text(str), is_value(true), is_operation(false), is_column(false)
+    TokenData(std::string str, int64_t val)
+        : text(std::move(str)), is_value(true), is_operation(false), is_column(false)
     {
         value.data.type = BIG_INT;
         value.data.value = val;
     }
 
-    TokenData(std::string* str, float val)
-        : text(str), is_value(true), is_operation(false), is_column(false)
+    TokenData(std::string str, float val)
+        : text(std::move(str)), is_value(true), is_operation(false), is_column(false)
     {
         value.data.type = FLOAT;
         value.data.value = static_cast<int64_t>(val);
     }
 
-    TokenData(std::string* str, std::string* table, std::string* column)
-        : text(str), is_value(false), is_operation(false), is_column(true),
-        table_name(table), column_name(column)
+    TokenData(std::string str, std::string table, std::string column)
+        : text(std::move(str)), is_value(false), is_operation(false), is_column(true),
+        table_name(std::move(table)), column_name(std::move(column))
     {}
 
-    std::string* text;
+    std::string text;
 
     bool is_value;
     TervelData value;
@@ -99,8 +99,8 @@ struct TokenData
     uint16_t operation;
 
     bool is_column;
-    std::string* table_name;
-    std::string* column_name;
+    std::string table_name;
+    std::string column_name;
 };
 
 /**

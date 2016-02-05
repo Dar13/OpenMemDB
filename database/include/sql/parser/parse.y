@@ -117,9 +117,7 @@ expr ::= term(X) NE|EQ(OP) term(Y). { builderAddValueExpr(builder, OP, X, Y); }
 
 term(A) ::= name(X) DOT column_id(Y). { 
     printf("reference Term handling\n");
-    std::string* tmp = new (std::nothrow) std::string();
-    // TODO: Error handling
-    *tmp = (*X->text + "." + *Y->text);
+    std::string tmp = std::string(X->text + "." + Y->text);
     A = new (std::nothrow) TokenData(tmp, X->text, Y->text);
     // TODO: Error handling
 }
