@@ -104,9 +104,15 @@ char* SerializeConnectionPacket(ConnectionPacket packet){
   return serializedConnectionPacket;
 }
 
-
 char* SerializeResultMetaDataPacket(ResultMetaDataPacket packet){
+  char* buffer = new (std::nothrow) char[sizeof(ResultMetaDataPacket)];
+  if(buffer == nullptr) {
+    printf("ERROR: Failed to allocate memory for packet buffer!\n");
+    return nullptr;
+  }
 
+  memcpy(buffer, &packet, sizeof(ResultMetaDataPacket));
+  return buffer;
 }
 
 
@@ -144,19 +150,7 @@ ConnectionPacket DeserializeConnectionPacket(const char* serializedPacket){
 
 ResultMetaDataPacket DeserializeResultMetaDataPacket(char* serializedPacket){
   ResultMetaDataPacket metaDataPacket;
-  char* type;
-  char* status;
-  uint32_t* numColumns = new uint32_t;
-  memcpy(type, &serializedPacket[0], sizeof(uint8_t));
-  memcpy(status, &serializedPacket[1], sizeof(uint8_t));
-  memcpy(numColumns, &serializedPacket[2], sizeof(uint32_t));
-  metaDataPacket.type = mapStringToPacketType(type);
-  metaDataPacket.status = mapStringToResultStatus(status);
-  metaDataPacket.numColumns = *numColumns;
-  delete(type);
-  delete(status);
-  delete(numColumns);
-  deserializeResultColumnsAndTerminator(&metaDataPacket, serializedPacket, 6);
+  memcpy(&metaDataPacket, serializedPacket, sizeof(ResultMetaDataPacket));
   return metaDataPacket;
 }
 

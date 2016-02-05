@@ -45,7 +45,7 @@ bool testConnectionPacketSerialization() {
   // Make a packet, serialize it, then deserialize it and check for
   // expected results
   ConnectionPacket connectionPacket;
-  memcpy(connectionPacket.name, "db_name", sizeof("db_name"));
+  strcpy(connectionPacket.name, "db_name");
   connectionPacket.type = PacketType::COMMAND; // Because there is not CONNECTION type
   std::cout << "Name of db: " << connectionPacket.name << std::endl;
   char* serializedConnectionPacket = SerializeConnectionPacket(connectionPacket);
@@ -57,6 +57,8 @@ bool testConnectionPacketSerialization() {
   assert(deserializedConnectionPacket.type == PacketType::COMMAND);
 
   assert(strcmp(deserializedConnectionPacket.name, "db_name") == 0);
+
+  delete serializedConnectionPacket;
 }
 
 bool testResultPacketSerialization() {
@@ -66,15 +68,18 @@ bool testResultPacketSerialization() {
 bool testResultMetaDataPacketSerialization() {
   std::string TAG("ResultMetaDataPacket Test: ");
   ResultMetaDataPacket resultMetaDataPacket;
+  memset(&resultMetaDataPacket, 0, sizeof(resultMetaDataPacket));
   resultMetaDataPacket.type = PacketType::RESULT_METADATA;
   resultMetaDataPacket.status = ResultStatus::OK;
-  libomdb::MetaDataColumn metaDataColumns[5];
+
   for (int i = 0; i < 5; ++i) {
-    libomdb::MetaDataColumn metaDataColumn;
-    metaDataColumn.label = "test label"+i;
-    metaDataColumn.sqlType = 1;
-    metaDataColumns[i] = metaDataColumn;
+    std::string label = "test label" + std::to_string(i);
+
+    resultMetaDataPacket.columns[i].type = 1;
+    size_t len = (label.length() > COL_NAME_LEN) ? COL_NAME_LEN : label.length();
+    memcpy(resultMetaDataPacket.columns[i].name, label.c_str(), len);
   }
+
   resultMetaDataPacket.numColumns = 5;
   resultMetaDataPacket.terminator = THE_TERMINATOR;
 
@@ -86,4 +91,12 @@ bool testResultMetaDataPacketSerialization() {
   ResultMetaDataPacket deserializedPacket = DeserializeResultMetaDataPacket(serializedPacket);
   std::cout << TAG << "Num columns: "<< deserializedPacket.numColumns << std::endl;
 
+  assert(deserializedPacket.type == PacketType::RESULT_METADATA);
+  assert(deserializedPacket.numColumns == 5);
+  for (ResultColumn col: deserializedPacket.columns) {
+    std::cout << "Column name:" << col.name << std::endl;
+    std::cout << "Column type:" << col.type << std::endl;
+  }
+
+  delete serializedPacket;
 }
