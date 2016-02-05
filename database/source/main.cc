@@ -84,6 +84,14 @@ int main(int argc, char** argv)
 	if(insert_parse.status == ResultStatus::SUCCESS)
 	{
 		printf("INSERT INTO statement parsed!\n");
+        InsertCommand* cmd = reinterpret_cast<InsertCommand*>(insert_parse.result);
+
+        printf("Data to be inserted: ");
+        for(data : cmd->data)
+        {
+            printf("%lu, ", data.data.value);
+        }
+        printf("\n");
 	}
 	else
 	{

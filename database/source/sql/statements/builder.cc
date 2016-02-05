@@ -65,6 +65,18 @@ void builderStartSelectQuery(StatementBuilder* builder)
     printf("Builder started for SELECT statement\n");
 }
 
+void builderStartInsertCommand(StatementBuilder* builder)
+{
+    InsertCommand* cmd = new (std::nothrow) InsertCommand();
+    // TODO: Error handling
+
+    builder->started = true;
+    builder->statement = cmd;
+    builder->valid = true;
+
+    printf("Builder started for INSERT INTO statement\n");
+}
+
 // SELECT helper functions ////////////////////////////////////////////////////
 void builderAddSelectAllColumns(StatementBuilder* builder, Token table)
 {
@@ -139,6 +151,22 @@ void builderAddQualifiedSelectColumn(StatementBuilder* builder,
     query->source_columns.push_back(source);
 
     query->output_columns.push_back(*output_column->text);
+}
+
+// Insert command helper functions ////////////////////////////////////////////
+
+void builderAddDataItem(StatementBuilder* builder, Token data)
+{
+    if(data->is_value && builder->started)
+    {
+        InsertCommand* cmd = reinterpret_cast<InsertCommand*>(builder->statement);
+
+        cmd->data.push_back(data->value);
+    }
+}
+
+void builderFinishInsertCommand(StatementBuilder* builder)
+{
 }
 
 // Generic-ish helper functions ///////////////////////////////////////////////

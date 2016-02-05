@@ -33,7 +33,15 @@ struct TokenData
 
     TokenData(std::string* str)
         : text(str), is_value(false), is_operation(false), is_column(false)
-    {}
+    {
+        // Special case, the NULL represents a typeless NULL value
+        if(*text == "NULL")
+        {
+            is_value = true;
+            value = TervelData { .value = 0 };
+            value.data.null = 1;
+        }
+    }
 
     TokenData(std::string* str, bool val)
         : text(str), is_value(true), is_operation(false), is_column(false)

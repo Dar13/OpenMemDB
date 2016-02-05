@@ -132,16 +132,13 @@ std::vector<TokenPair> tokenize(std::string input)
         {
             std::string::iterator next = itr + 1;
 
-			while(next != input.end() && isSQLNumericChar(*next))
+			while(next != input.end() && (isSQLNumericChar(*next) || *next == 'x'))
 			{
 				next++;
 			}
 
 			switch(*next)
 			{
-				case 'x':
-					// TODO: Hexadecimal case
-					break;
 				case '.':
 				{
 					pair.token_type = TK_FLOAT;
@@ -165,6 +162,9 @@ std::vector<TokenPair> tokenize(std::string input)
 				case ':':
 				{
 					pair.token_type = TK_TIME;
+                    pair.token = nullptr;
+
+                    // TODO
 				}
 					break;
 				case '-':
@@ -176,6 +176,18 @@ std::vector<TokenPair> tokenize(std::string input)
 						if(checkDateFormat(std::string(itr, test)))
 						{
 							// Make a token
+                            pair.token_type = TK_DATE;
+                            std::string* token = new (std::nothrow) std::string(itr, test);
+                            pair.token = new (std::nothrow) TokenData(token);
+                            pair.token->is_value = true;
+                            TervelData data = { .value = 0 };
+                            DateData date = { .value = 0 };
+
+                            date.year = std::stoul(token->substr(0, 4), nullptr, 10);
+                            date.month = std::stoul(token->substr(5, 2), nullptr, 10);
+                            date.day = std::stoul(token->substr(8, 2), nullptr, 10);
+
+                            data.data.value = date.value;
 						}
 						else
 						{
@@ -197,7 +209,17 @@ std::vector<TokenPair> tokenize(std::string input)
 					pair.token_type = TK_INTEGER;
 					
 					std::string* token = new (std::nothrow) std::string(itr, next);
-					int64_t value = std::stoll(*token, nullptr, 10);
+
+                    int64_t value = 0;
+                    if(token->find('x') != std::string::npos)
+                    {
+                        value = std::stoll(*token, nullptr, 16);
+                    }
+                    else
+                    {
+					    value = std::stoll(*token, nullptr, 10);
+                    }
+
 					pair.token = new (std::nothrow) TokenData(token, value);
 
 				}
@@ -372,4 +394,5 @@ void setupTokenMappings()
   keywords["VALUES"] = TK_VALUES;
   keywords["INSERT"] = TK_INSERT;
   keywords["INTO"] = TK_INTO;
+  keywords["NULL"] = TK_NULL;
 }

@@ -1009,17 +1009,21 @@ static void yy_reduce(
 #line 1010 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 53: /* insert_table ::= name */
-#line 188 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
-{ yygotominor.yy0=yymsp[0].minor.yy0; printf("Starting INSERT INTO statement parse\n"); }
-#line 1015 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 189 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+{ 
+  yygotominor.yy0=yymsp[0].minor.yy0; 
+  builderStartInsertCommand(builder);
+  printf("Starting INSERT INTO statement parse\n");
+}
+#line 1019 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 56: /* insert_term ::= INTEGER|FLOAT|DATE|TIME */
-#line 194 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 199 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 {
   yygotominor.yy0 = yymsp[0].minor.yy0;
-  printf("Insert term is an integer or float\n");
+  builderAddDataItem(builder, yymsp[0].minor.yy0);
 }
-#line 1023 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 1027 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       default:
       /* (0) input ::= cmd_list */ yytestcase(yyruleno==0);
@@ -1092,7 +1096,7 @@ static void yy_parse_failed(
 
   printf("Parse failed!\n");
   builderClean(builder);
-#line 1096 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 1100 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
   ParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 #endif /* YYNOERRORRECOVERY */
@@ -1117,7 +1121,7 @@ static void yy_syntax_error(
       printf("possible token: %s\n", yyTokenName[i]);
     }
   }
-#line 1121 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 1125 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
   ParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 
@@ -1139,7 +1143,7 @@ static void yy_accept(
 #line 45 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 
   printf("Parse accepts input!\n");
-#line 1143 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 1147 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
   ParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 

@@ -81,6 +81,7 @@ void builderFinishSelectQuery(StatementBuilder* builder);
 // Insert command functions
 void builderStartInsertCommand(StatementBuilder* builder);
 void builderAddDataItem(StatementBuilder* builder, Token data);
+void builderFinishInsertcommand(StatementBuilder* builder);
 
 // Somewhat generic helper functions
 void builderAddColumn(StatementBuilder* builder, 

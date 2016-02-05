@@ -7,7 +7,7 @@
 
 // TODO: Document this
 template <typename T>
-bool safe_advance(T itr, T end, size_t distance)
+bool safe_advance(T& itr, T end, size_t distance)
 {
 	while(itr != end && distance > 0)
 	{
