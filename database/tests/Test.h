@@ -25,20 +25,6 @@ class Test
    
    private:
 
-    // Randomized string creation
-    string generateString(const int len);
-
-    // Randomized ints
-    int generateInt(const int max);
-    
-    // CREATE TABLE test
-    string generateCreateStatement(int complexity);
-    vector<string> generateCreateCases(int complexity, int amount);
-
-    // SELECT Test, just templates for now, we need to do create table, and insert tests first
-    string generateSelectStatement(int complexity);
-    vector<string> generateSelectCases(int complexity);
-
 
     void clean();
 
