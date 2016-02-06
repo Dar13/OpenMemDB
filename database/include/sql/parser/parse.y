@@ -187,8 +187,9 @@ cmd ::= INSERT INTO insert_table VALUES LPAREN insert_values RPAREN.
 
 insert_table(A) ::= name(X). 
 { 
-  A=X; 
+  A = X; 
   builderStartInsertCommand(builder);
+  builderAddTableName(builder, A);
   printf("Starting INSERT INTO statement parse\n");
 }
 

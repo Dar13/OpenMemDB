@@ -35,6 +35,7 @@ struct TokenData
         : text(std::move(str)), is_value(false), is_operation(false), is_column(false)
     {
         // Special case, the NULL represents a typeless NULL value
+        value.value = 0; // Initialize the struct to be all 0's
         if(text == "NULL")
         {
             is_value = true;
@@ -46,6 +47,7 @@ struct TokenData
     TokenData(std::string str, bool val)
         : text(std::move(str)), is_value(true), is_operation(false), is_column(false)
     {
+        value.value = 0; // Initialize the struct to be all 0's
         value.data.type = BOOLEAN;
         if(val)
         {
@@ -60,6 +62,7 @@ struct TokenData
     TokenData(std::string str, int16_t val)
         : text(std::move(str)), is_value(true), is_operation(false), is_column(false)
     {
+        value.value = 0; // Initialize the struct to be all 0's
         value.data.type = SMALL_INT;
         value.data.value = val;
     }
@@ -67,6 +70,7 @@ struct TokenData
     TokenData(std::string str, int32_t val)
         : text(std::move(str)), is_value(true), is_operation(false), is_column(false)
     {
+        value.value = 0; // Initialize the struct to be all 0's
         value.data.type = INTEGER;
         value.data.value = val;
     }
@@ -74,6 +78,7 @@ struct TokenData
     TokenData(std::string str, int64_t val)
         : text(std::move(str)), is_value(true), is_operation(false), is_column(false)
     {
+        value.value = 0; // Initialize the struct to be all 0's
         value.data.type = BIG_INT;
         value.data.value = val;
     }
@@ -81,6 +86,7 @@ struct TokenData
     TokenData(std::string str, float val)
         : text(std::move(str)), is_value(true), is_operation(false), is_column(false)
     {
+        value.value = 0; // Initialize the struct to be all 0's
         value.data.type = FLOAT;
         value.data.value = static_cast<int64_t>(val);
     }

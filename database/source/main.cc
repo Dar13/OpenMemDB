@@ -54,6 +54,7 @@ int main(int argc, char** argv)
         }
     }
 
+    /*
     RecordData test_data;
 
     TervelData t_d = { .value = 0 };
@@ -79,6 +80,7 @@ int main(int argc, char** argv)
     {
         printf("Record inserted\n");
     }
+    */
 
 	std::string insert_test = "INSERT INTO TestTable VALUES (1, 2);";
 	auto insert_parse = parse(insert_test, &data);
@@ -87,12 +89,23 @@ int main(int argc, char** argv)
 		printf("INSERT INTO statement parsed!\n");
         std::unique_ptr<InsertCommand> cmd(reinterpret_cast<InsertCommand*>(insert_parse.result));
 
+        printf("Inserting into %s\n", cmd->table.c_str());
         printf("Data to be inserted: ");
         for(data : cmd->data)
         {
             printf("%lu, ", data.data.value);
         }
         printf("\n");
+
+        auto insert_err = data.insertRecord(cmd->table, cmd->data);
+        if(insert_err.status != ResultStatus::SUCCESS)
+        {
+            printf("Failed to insert record into Data Store!\n");
+        }
+        else
+        {
+            printf("Record inserted!\n");
+        }
 	}
 	else
 	{
