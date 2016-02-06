@@ -111,6 +111,21 @@ struct DataTable
 {
     //! The constructor that initializes the record counter to a sane value
     DataTable() : record_counter(0) {}
+    ~DataTable()
+    {
+        // Remove table contents
+        int64_t table_len = records.size(0);
+        if(table_len != 0)
+        {
+	        for(int64_t i = 0; i < table_len; i++)
+	        {
+	            // Get the current row pointer
+	            Record* row = nullptr;
+	            while(!records.pop_back_w_ra(row)) {}
+	            delete row;
+	        }
+        }
+    }
 
     //! The wait-free vector of pointers to the records stored in this table
     RecordVector records;
@@ -131,7 +146,7 @@ struct SchemaTablePair
     {}
 
     //! The data that adheres to the schema
-    DataTable* table;
+    std::shared_ptr<DataTable> table;
 
     //! The table's schema
     TableSchema* schema;
@@ -203,7 +218,7 @@ private:
 	RecordCopy copyRecord(RecordVector& table, int64_t row_idx);
     RecordCopy copyRecord(Record* record);
 
-    MultiRecordCopies searchTable(DataTable* table, ValuePredicate* value_pred);
+    MultiRecordCopies searchTable(std::shared_ptr<DataTable>& table, ValuePredicate* value_pred);
     /*
     MultiTableRecordData searchTable(std::string table_first, std::string table_second, 
                                 ColumnPredicate* col_pred);

@@ -79,8 +79,7 @@ ManipResult DataStore::deleteTable(std::string table_name)
     }
 
     // Remove the table from the table name map
-    // TODO: Perform proper memory clean-up after removal from mapping
-    // TODO: What does access_counter != 0 mean?
+    // TODO: Have Tervel return a true return code rather than a boolean
     if(!table_name_mapping.remove(table_name))
     {
         // TODO: Update with appropriate ManipStatus value
@@ -88,7 +87,6 @@ ManipResult DataStore::deleteTable(std::string table_name)
     }
 
     TableSchema *schema = table_pair->schema;
-    DataTable *table = table_pair->table;
 
     //Remove schema
     delete schema;
@@ -96,6 +94,11 @@ ManipResult DataStore::deleteTable(std::string table_name)
     //Remove pair
     delete table_pair;
 
+    // We're going to rely on the shared_ptr within SchemaTablePair
+    // to delete the data table. The row-by-row delete will be done within the
+    // DataTable destructor.
+
+    /*
     //Remove table contents
     int64_t table_len = table->records.size(0);
     if(table_len == 0)
@@ -116,6 +119,7 @@ ManipResult DataStore::deleteTable(std::string table_name)
 
     //Remove table
     delete table;
+    */
     
     return ManipResult(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
 }
@@ -244,7 +248,7 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
 	    return MultiRecordResult(ResultStatus::ERROR_INVALID_TABLE, MultiRecordData());
     }
 
-    DataTable* table = table_pair->table;
+    auto table = table_pair->table;
     RecordVector& records = table->records;
 
     // Evaluate predicates and return all rows that satisfy the predicates'
@@ -359,7 +363,7 @@ SchemaTablePair* DataStore::getTablePair(std::string table_name)
 /**
  *	\brief Searches the given table for records that satisfies the given predicate
  */
-MultiRecordCopies DataStore::searchTable(DataTable* table,
+MultiRecordCopies DataStore::searchTable(std::shared_ptr<DataTable>& table,
                                   ValuePredicate* value_pred)
 {
     MultiRecordCopies data;

@@ -20,7 +20,9 @@
 #ifndef OMDB_UTIL_TYPES_H
 #define OMDB_UTIL_TYPES_H
 
-// TODO: Document this
+/**
+ *  \brief Enumeration of the data types supported by the database.
+ */
 enum DataType : int8_t
 {
     NONE = -1,
@@ -33,7 +35,13 @@ enum DataType : int8_t
     TIME
 };
 
-// TODO: Document the classes below
+/* The following classes use a technique called "type punning" to efficiently
+ * store data while still allowing for easy access to it via the struct
+ * member interface. */
+
+/**
+ *  \brief Representation of the boolean data type in memory
+ */
 union BooleanData
 {
     struct
@@ -45,6 +53,9 @@ union BooleanData
     uint64_t value;
 };
 
+/**
+ *  \brief Representation of the float data type in memory
+ */
 union FloatData
 {
     struct
@@ -56,6 +67,9 @@ union FloatData
     uint64_t value;
 };
 
+/**
+ *  \brief Representation of the short integer (16-bit integer) data type in memory
+ */
 union ShortData
 {
     struct
@@ -67,6 +81,9 @@ union ShortData
     uint64_t value;
 };
 
+/**
+ *  \brief Representation of the integer (32-bit integer) data type in memory
+ */
 union IntData
 {
     struct
@@ -78,11 +95,17 @@ union IntData
     uint64_t value;
 };
 
+/**
+ *  \brief Representation of the long integer (64-bit integer) data type in memory
+ */
 struct LongData
 {
     int64_t value;
 };
 
+/**
+ *  \brief Representation of an ISO 8601 date in memory
+ */
 union DateData
 {
     struct
@@ -96,6 +119,9 @@ union DateData
     uint64_t value;
 };
 
+/**
+ *  \brief Representation of an ISO 8601 time in memory
+ */
 union TimeData
 {
     struct
@@ -111,8 +137,6 @@ union TimeData
     uint64_t value;
 };
 
-
-
 /**
  *  @brief A wrapper of the Data union to be used in Tervel. This data type must
  *  not be larger than 64 bits in size.
@@ -121,17 +145,22 @@ union TervelData
 {
     struct 
     {
-        int64_t tervel_status : 3;
-        uint64_t type : 3;
-        uint64_t null : 1;
+        int64_t tervel_status : 3;  //!< Tervel requires this be given to them
+        uint64_t type : 3;          //!< This is mapped to \refer DataType
+        uint64_t null : 1;          //!< Set if the value is NULL
 
-        uint64_t value : 57;
+        uint64_t value : 57;        //!< 
     } data;
 
     int64_t value;
 };
 
-// TODO: Document this
+// If this triggers, something has gone really wrong
+static_assert(8 == sizeof(TervelData), "TervelData must be exactly 64 bits long");
+
+/**
+ *  \brief Defines a lower and upper bound for a range of data
+ */
 struct DataRange
 {
     TervelData start;
