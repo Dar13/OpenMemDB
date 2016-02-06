@@ -139,7 +139,7 @@ of performance.
 \section{Project Motivation}
 As hardware reaches the limits in Moore's Law and processors stop becoming faster and faster
 and instead focus on becoming more and more parallel, algorithms and the software that implement
-them must adapt in order to maximize both performance and hardware utilization.
+them must adapt to maximize both performance and hardware utilization.
 \par\vspace{\baselineskip}
 % Graphic showing Moore's Law tapering off (graph of GHz and number of cores?)
 %\includegraphics{graphics/Moores_Law_core_freq_comparison.png}
@@ -807,7 +807,7 @@ data in the form of nested vectors.
 \par\vspace{\baselineskip}
 
 The advantage of column based tables are faster data access, better compression, and better parallel processing.
-In order to change a column from a row store architecture, each row in the table must be search in order to find the
+To change a column in a row store architecture, each row in the table must be searched to find the
 column and then it requires to change the value. This makes it slow to check for integrity constraints. Column store
 is a simply search through one vector row or column. Column vectors are very similar to each other value, which allows
 for easy compression of data, unlike row vectors which could contain many different data types. In column store, data
@@ -1316,7 +1316,7 @@ must be unique to their own scopes. The output from Huffman's algortihm is a var
 a symbol into a prefix.
 \par\vspace{\baselineskip}
 Based on a given set of sybols with weights, Huffman's Algortihm determines the minimalistic required prefix coding
-table in order to represent the data set. This algorithm starts by creating a binary tree of nodes. These nodes
+table to represent the data set. This algorithm starts by creating a binary tree of nodes. These nodes
 are stored in a regular array which size depends on the symbol placed into the node. Initally all nodes are leaf
 nodes and all those nodes contain the symbol and the weight of the symbol. Internal nodes contain a symbol weight
 and links to two child nodes. Here is an example of a text that is initalized into Huffman's algorithm with the
@@ -1527,7 +1527,7 @@ such as memory corruption. \cite{newerror}
    \item It allocates a block of memory that can house the provided class or data type
    \item If the given class or data type has a constructor, call it
   \end{itemize}
-  In order to provide the programmer fine-grained control over the memory allocation process, C++
+  To provide the programmer fine-grained control over the memory allocation process, C++
   provides a way to overload the default new operator and use a custom memory allocator. This is referred to
   as \inlinecode{operator new} so as to differentiate it from the default new operator.
   \par\vspace{\baselineskip}
@@ -1612,7 +1612,7 @@ by 2 or 4 times for 2 or 4 cores, respectively.
 Of course, in reality the speed up is less than that. We have memory latency, I/O, locks
 (more on that in the next section), ''inter-processor communication and coordination``\citep[p. 13]{artofmulti},
 and much more to worry about. Still, the gain from parallelization is often large enough to spend
-the time to implement. In order to decide whether or not it is worth it, we can make estimates of
+the time to implement. To decide whether or not it is worth it, we can make estimates of
 how much of the code can be parallelized.
 
 \par\vspace{\baselineskip}
@@ -1829,7 +1829,7 @@ two types of non-blocking algorithms. These are defined as:
 	\item \textit{Lock-free}: Ensures at least one thread makes progress in a finite amount of time.
 	\item \textit{Wait-free}: Ensures all threads make progress in a finite amount of time.
 \end{itemize}
-In order to take advantage of modern processors, we implement a wait-free data store module.
+To take advantage of modern processors, we implement a wait-free data store module.
 After some research, we have discovered that no current DBMS uses wait-free data
 structures, at most they are lock-free. The core of OpenMemDB relies on non-blocking algorithms and data
 structures. Non-blocking properties ensure a massively parallelizable database architecture.
@@ -2189,7 +2189,7 @@ Upon completion Lemon will produce between one and three files.\\ Those files ar
 \end{itemize}
 Lemon does not generate a complete program, it only creates a few subroutines that
 implement a parser. It is up to the developer to call those subroutines in an appropriate
-way in order to produce a complete system. In order to use a Lemon generated parser the
+way to produce a complete system. To use a Lemon generated parser the
 developer must first create the parser as follows:
 \begin{lstlisting}
 	void *pParser = ParseAlloc( malloc );
@@ -2327,7 +2327,7 @@ synchronization-related operations (e.g.locking and latching), even when only a
 single client thread is running.`` \cite{soares2015database}
 \par\vspace{\baselineskip}
 There have been several attempts to solve this problem. Some of which will sacrifice
-some data consistency in order to achieve better performance. Still others
+some data consistency to achieve better performance. Still others
 remain fully ACID compliant and attempt to parallelize individual steps in the
 DBMS or solely use multiple threads when executing query plans. Then there are those
 that attempt to implement some level of lock freedom into their DBMS.
@@ -2433,7 +2433,7 @@ known and less well documented DBMS that are worthy of note:
     lightning fast speeds using a series of patented algorithms
     that enable in-memory acceleration. While every workload
     is different, dashDB only requires RAM size to be 5 percent
-    of the original pre-load source data size in order to run at
+    of the original pre-load source data size to run at
 in-memory optimized speeds.
 \item Actionable compression: dashDB performs a broad range
     of operations—including joins and predicate evaluations—
@@ -2481,7 +2481,7 @@ nable dashDB to maximize hardware performance.
 
   \item GemFire is a distributed, in-memory, shared-nothing, NoSQL key-value store.
   GemFire is designed for working with operational data needed by real time
-  applications. It is not meant for working on very large quantities. In order to
+  applications. It is not meant for working on very large quantities. To
   achieve massive speeds GemFire relies on being primarily, not fully,
   main memory based. " It uses highly-concurrent main-memory data structures to avoid
   lock contention and a data distribution
@@ -2553,7 +2553,7 @@ nable dashDB to maximize hardware performance.
   \item SAP HANA
   is short for "High Performance Analytic Appliance" and is an in-memory,
   column-oriented, relational database management system. SAP HANA employs a
-  massively parallel in-memory architecture in order to eliminate the I/O bottleneck
+  massively parallel in-memory architecture to eliminate the I/O bottleneck
   that slows disk backed database management systems.
   \par\vspace{\baselineskip}
   An example of a massively parallel layout can be seen in Figure~\ref{fig:saphana_architecture}
@@ -2572,11 +2572,11 @@ nable dashDB to maximize hardware performance.
 %% A summary describing the overall architecture should go here. Followed by subsections
 %% for each major piece.
 OpenMemDB is a SQL compliant database that utilizes advanced multiprocessor techniques and non-blocking
-data structures to offer high scalability and guaranteed high throughput. In order to accomplish this
+data structures to offer high scalability and guaranteed high throughput. To accomplish this
 multiple components are necessary to meet the technical requirements of the project. OpenMemDB is 
 comprised of an application connector API, SQL Engine, Data Store, and Work Manager.
 It is necessary for the client to be able to communicate with the database through the connector, 
-dubbed libomdb. On the server since the client is using SQL in order to provide
+dubbed libomdb. On the server since the client is using SQL to provide
 statements to the database a SQL Engine is necessary to correctly and efficently parse
 such statements into a type of representation that the database can then understand and evaluate.
 It is also important that certain statements be distributed in an organized manner. More specifically, 
@@ -2598,7 +2598,7 @@ from clients via SQL statements.
   \par\vspace{\baselineskip}
   
   libomdb is broken in to two main operations: connecting to a database, and performing
-  operations on the database that you are connected to. In order to connect to the database
+  operations on the database that you are connected to. To connect to the database
   the application developer will call the
   \inlinecode{connect()} method that is provided by the libomdb API.
   This method will return a \inlinecode{Connection} object that can
@@ -2616,7 +2616,7 @@ from clients via SQL statements.
     \label{fig:lib_class}
   \end{figure}
 
-  In order to connect to a database the application developer must provide the
+  To connect to a database the application developer must provide the
   host-name of the server, the port the server is listening on, and the name of the
   database that is being connected to. These are provided as arguments to the
   \inlinecode{connect(host-name, port-number, database-name)}
@@ -3018,7 +3018,7 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
   object which is a C++11 construct that can generate the previously mentioned \inlinecode{std::future<Result>}.
   The generated future object is stored in the afore-mentioned vector and the job is then passed to a selected
   worker thread to be evaluated. The selection process for where this job is placed is the work load distribution
-  task that the Work Manager is responsible for. In order to do this accurately, the Work Manager implements
+  task that the Work Manager is responsible for. To do this accurately, the Work Manager implements
   uses a heuristic algorithm that estimates the computation needed to fulfill that query or command
   and then places the job in the thread pool in a way that balances overall system load.
   \par\vspace{\baselineskip}
@@ -3108,9 +3108,9 @@ occur, it will be handled internally and not by the programmer.
 \par\vspace{\baselineskip}
 Whenever a \inlinecode{boost::variant} object is created the default constructor makes the first type its first bounded type.
 A discriminated union container is defined by instantiating \inlinecode{boost::variant} with the desired argument types.
-These types are called bounded types and derive from the BoundedType concept. In order to limit the different
+These types are called bounded types and derive from the BoundedType concept. To limit the different
 types that bounded types can accept the \inlinecode{BOOST_VARIANT_LIMIT_TYPES} must be manipulated to reflect this.
-In order to retrieve data types from \inlinecode{boost::variant} there are multiple functions available in order to accomplish this task.
+To retrieve data types from \inlinecode{boost::variant} there are multiple functions available in order to accomplish this task.
 Value retrieval can be accomplish by using the get function. Get takes in a type as an argument and returns the first
 data value in a \inlinecode{boost::variant} object that matches with that data type.
 \par\vspace{\baselineskip}
