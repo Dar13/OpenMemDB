@@ -37,22 +37,20 @@ static thread_local std::map<std::string, ExpressionOperation> operation_map = {
 
 Expression::Expression() 
     : left(nullptr), right(nullptr), 
-      op(ExpressionOperation::NO_OP), flags(ExpressionFlags::EMPTY),
-      table_name(nullptr), table_column(nullptr)
+      op(ExpressionOperation::NO_OP), flags(ExpressionFlags::EMPTY)
 {}
 
 Expression::Expression(Token tok)
     : left(nullptr), right(nullptr), op(ExpressionOperation::NO_OP),
-      flags(ExpressionFlags::EMPTY),
-      table_name(nullptr), table_column(nullptr)
+      flags(ExpressionFlags::EMPTY)
 {
     if(tok)
     {
         if(tok->is_column)
         {
             flags = ExpressionFlags::COLUMN;
-            table_name = new std::string(*tok->table_name);
-            table_column = new std::string(*tok->column_name);
+            table_name = std::string(tok->table_name);
+            table_column = std::string(tok->column_name);
         }
         else
         {
@@ -123,7 +121,7 @@ static void print_expr(Expression* expr)
         switch(expr->flags)
         {
             case ExpressionFlags::COLUMN:
-                std::cout << *expr->table_name << "." << *expr->table_column;
+                std::cout << expr->table_name << "." << expr->table_column;
                 break;
             case ExpressionFlags::VALUE:
                 switch(expr->value.data.type)

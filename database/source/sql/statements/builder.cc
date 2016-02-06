@@ -29,7 +29,7 @@ static Expression* createExpression(Token op, Token left, Token right);
 void builderStartCreateTable(StatementBuilder* builder, Token table_name)
 {
     CreateTableCommand* command = new CreateTableCommand;
-    command->table_name = *table_name->text;
+    command->table_name = table_name->text;
   
     builder->started = true;
     builder->statement = command;
@@ -41,7 +41,7 @@ void builderStartCreateTable(StatementBuilder* builder, Token table_name)
 void builderStartDropTable(StatementBuilder* builder, Token table_name)
 {
     DropTableCommand* command = new DropTableCommand;
-    command->table_name = *table_name->text;
+    command->table_name = table_name->text;
   
     builder->started = true;
     builder->statement = command;
@@ -65,6 +65,18 @@ void builderStartSelectQuery(StatementBuilder* builder)
     printf("Builder started for SELECT statement\n");
 }
 
+void builderStartInsertCommand(StatementBuilder* builder)
+{
+    InsertCommand* cmd = new (std::nothrow) InsertCommand();
+    // TODO: Error handling
+
+    builder->started = true;
+    builder->statement = cmd;
+    builder->valid = true;
+
+    printf("Builder started for INSERT INTO statement\n");
+}
+
 // SELECT helper functions ////////////////////////////////////////////////////
 void builderAddSelectAllColumns(StatementBuilder* builder, Token table)
 {
@@ -84,17 +96,12 @@ void builderAddSelectAllColumns(StatementBuilder* builder, Token table)
     {
         case SQLStatement::SELECT:
             break;
-        case SQLStatement::UPDATE:
-            break;
-        case SQLStatement::INSERT_INTO:
-            break;
-        case SQLStatement::DELETE:
-            break;
         default:
+            // TODO: Error handling?
             break;
     }
 
-    printf("AddSelectAllColumns called for table %s\n", table->text->c_str());
+    printf("AddSelectAllColumns called for table %s\n", table->text.c_str());
 }
 
 void builderAddQualifiedSelectColumn(StatementBuilder* builder,
@@ -119,9 +126,9 @@ void builderAddQualifiedSelectColumn(StatementBuilder* builder,
     }
 
     ColumnReference source;
-    source.table = *table->text;
+    source.table = table->text;
 
-    auto res = builder->data_store->getColumnIndex(source.table, *source_column->text);
+    auto res = builder->data_store->getColumnIndex(source.table, source_column->text);
     if(res.status == ResultStatus::SUCCESS)
     {
         source.column_idx = res.result;
@@ -138,7 +145,23 @@ void builderAddQualifiedSelectColumn(StatementBuilder* builder,
     // Push the previously calculated information into the query object
     query->source_columns.push_back(source);
 
-    query->output_columns.push_back(*output_column->text);
+    query->output_columns.push_back(output_column->text);
+}
+
+// Insert command helper functions ////////////////////////////////////////////
+
+void builderAddDataItem(StatementBuilder* builder, Token data)
+{
+    if(data->is_value && builder->started)
+    {
+        InsertCommand* cmd = reinterpret_cast<InsertCommand*>(builder->statement);
+
+        cmd->data.push_back(data->value);
+    }
+}
+
+void builderFinishInsertCommand(StatementBuilder* builder)
+{
 }
 
 // Generic-ish helper functions ///////////////////////////////////////////////
@@ -159,8 +182,8 @@ void builderAddColumn(StatementBuilder* builder, Token column_name,
         {
             CreateTableCommand* cmd = (CreateTableCommand*)builder->statement;
             SQLColumn column;
-            column.name = *(column_name->text);
-            column.type = getSQLType(column_type->text);
+            column.name = column_name->text;
+            column.type = getSQLType(&column_type->text);
             // TODO: Column constraints
             (void)column_constraints;
 
@@ -180,6 +203,28 @@ void builderAddColumn(StatementBuilder* builder, Token column_name,
     printf("Exit builderAddColumn\n");
 }
 
+void builderAddTableName(StatementBuilder* builder, Token table_name)
+{
+    if(!builder->started)
+    {
+        printf("%s: Builder hasn't been started!\n", __FUNCTION__);
+        return;
+    }
+
+    switch(builder->statement->type)
+    {
+        case SQLStatement::INSERT_INTO:
+            {
+                InsertCommand* insert = reinterpret_cast<InsertCommand*>(builder->statement);
+                insert->table = table_name->text;
+            }
+            break;
+        default:
+            printf("%s: SQL statement being built isn't supported!\n", __FUNCTION__);
+            break;
+    }
+}
+
 void builderStartNestedExpr(StatementBuilder* builder, Token operation)
 {
     if(builder == nullptr)
@@ -189,7 +234,7 @@ void builderStartNestedExpr(StatementBuilder* builder, Token operation)
 	    return; 
     }
 
-    printf("Starting nested expression: [%s]\n", operation->text->c_str());
+    printf("Starting nested expression: [%s]\n", operation->text.c_str());
 
     if(isExprFlagContained(builder->expr->flags, ExpressionFlags::NESTED))
     {
@@ -205,9 +250,9 @@ void builderAddValueExpr(StatementBuilder* builder,
 	Token operation, Token left_term, Token right_term)
 {
     printf("Adding value expression: %s %s %s\n",
-            left_term->text->c_str(),
-            operation->text->c_str(),
-            right_term->text->c_str());
+            left_term->text.c_str(),
+            operation->text.c_str(),
+            right_term->text.c_str());
 
     if(builder->expr == nullptr)
     {

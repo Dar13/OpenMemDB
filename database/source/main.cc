@@ -41,7 +41,8 @@ int main(int argc, char** argv)
 
     if(parse_result.status == ResultStatus::SUCCESS)
     {
-        CreateTableCommand* create_table = reinterpret_cast<CreateTableCommand*>(parse_result.result);
+        std::unique_ptr<CreateTableCommand> create_table(reinterpret_cast<CreateTableCommand*>(parse_result.result));
+        //CreateTableCommand* create_table = reinterpret_cast<CreateTableCommand*>(parse_result.result);
         auto err = data.createTable(*create_table);
         if(err.status == ResultStatus::SUCCESS)
         {
@@ -53,6 +54,7 @@ int main(int argc, char** argv)
         }
     }
 
+    /*
     RecordData test_data;
 
     TervelData t_d = { .value = 0 };
@@ -78,12 +80,32 @@ int main(int argc, char** argv)
     {
         printf("Record inserted\n");
     }
+    */
 
 	std::string insert_test = "INSERT INTO TestTable VALUES (1, 2);";
 	auto insert_parse = parse(insert_test, &data);
 	if(insert_parse.status == ResultStatus::SUCCESS)
 	{
 		printf("INSERT INTO statement parsed!\n");
+        std::unique_ptr<InsertCommand> cmd(reinterpret_cast<InsertCommand*>(insert_parse.result));
+
+        printf("Inserting into %s\n", cmd->table.c_str());
+        printf("Data to be inserted: ");
+        for(data : cmd->data)
+        {
+            printf("%lu, ", data.data.value);
+        }
+        printf("\n");
+
+        auto insert_err = data.insertRecord(cmd->table, cmd->data);
+        if(insert_err.status != ResultStatus::SUCCESS)
+        {
+            printf("Failed to insert record into Data Store!\n");
+        }
+        else
+        {
+            printf("Record inserted!\n");
+        }
 	}
 	else
 	{
@@ -95,8 +117,8 @@ int main(int argc, char** argv)
 
     if(parse_result.status == ResultStatus::SUCCESS)
     {
-        SelectQuery* query = reinterpret_cast<SelectQuery*>(parse_result.result);
         printf("Select parse success\n");
+        std::unique_ptr<SelectQuery> query(reinterpret_cast<SelectQuery*>(parse_result.result));
 
         auto select_result = data.getRecords(query->predicate, std::string("TestTable"));
         if(select_result.status == ResultStatus::SUCCESS)
@@ -138,6 +160,19 @@ int main(int argc, char** argv)
     else
     {
         printf("Unable to retrieve records\n");
+    }
+
+    std::string drop_table = "DROP TABLE TestTable;";
+    auto drop_parse_result = parse(drop_table, &data);
+    if(drop_parse_result.status == ResultStatus::SUCCESS)
+    {
+        printf("Drop table statement parsed!\n");
+        std::unique_ptr<DropTableCommand> cmd(reinterpret_cast<DropTableCommand*>(drop_parse_result.result));
+        data.deleteTable(cmd->table_name);
+    }
+    else
+    {
+        printf("Drop table statement didn't successfully parse!\n");
     }
 
     return 1;

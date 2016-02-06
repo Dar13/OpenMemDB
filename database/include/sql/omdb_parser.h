@@ -31,6 +31,7 @@
 // Project includes
 #include "parser/parse.h"
 #include "util/result.h"
+#include "util/common.h"
 #include "statements/common.h"
 #include "statements/builder.h"
 #include "statements/data_definition.h"

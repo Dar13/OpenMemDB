@@ -75,18 +75,18 @@ Predicate* makePredicateFromExpression(Expression* expr, DataStore* data_store)
             ColumnReference left_ref;
             ColumnReference right_ref;
 
-            left_ref.table = *left->table_name;
-            right_ref.table = *right->table_name;
+            left_ref.table = left->table_name;
+            right_ref.table = right->table_name;
 
             // TODO: Error handling
-            auto res = data_store->getColumnIndex(left_ref.table, *left->table_column);
+            auto res = data_store->getColumnIndex(left_ref.table, left->table_column);
             if(res.status == ResultStatus::SUCCESS)
             {
                 left_ref.column_idx = res.result;
             }
 
             // TODO: Error handling
-            res = data_store->getColumnIndex(right_ref.table, *right->table_column);
+            res = data_store->getColumnIndex(right_ref.table, right->table_column);
             if(res.status == ResultStatus::SUCCESS)
             {
                 right_ref.column_idx = res.result;
@@ -130,9 +130,9 @@ Predicate* makePredicateFromExpression(Expression* expr, DataStore* data_store)
                 val_pred->expected_value = ExpressionValue(left->value);
 
                 ColumnReference col;
-                col.table = *right->table_name;
+                col.table = right->table_name;
                 auto res = data_store->getColumnIndex(col.table, 
-                                                      *right->table_column);
+                                                      right->table_column);
                 if(res.status == ResultStatus::SUCCESS)
                 {
                     col.column_idx = res.result;
@@ -152,9 +152,9 @@ Predicate* makePredicateFromExpression(Expression* expr, DataStore* data_store)
                 val_pred->expected_value = ExpressionValue(right->value);
 
                 ColumnReference col;
-                col.table = *left->table_name;
+                col.table = left->table_name;
                 auto res = data_store->getColumnIndex(col.table, 
-                                                      *left->table_column);
+                                                      left->table_column);
                 if(res.status == ResultStatus::SUCCESS)
                 {
                     col.column_idx = res.result;

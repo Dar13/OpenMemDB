@@ -116,15 +116,15 @@ expr ::= expr AND|OR(OP) expr. { builderStartNestedExpr(builder, OP);}
 expr ::= term(X) NE|EQ(OP) term(Y). { builderAddValueExpr(builder, OP, X, Y); }
 
 term(A) ::= name(X) DOT column_id(Y). { 
-    printf("reference Term handling\n");
-    std::string* tmp = new (std::nothrow) std::string();
-    // TODO: Error handling
-    *tmp = (*X->text + "." + *Y->text);
-    A = new (std::nothrow) TokenData(tmp, X->text, Y->text);
-    // TODO: Error handling
+    X->table_name = X->text;
+    X->column_name = Y->text;
+    X->text = X->text + "." + Y->text;
+    printf("Reference: %s.%s\n", X->table_name.c_str(), X->column_name.c_str());
+    X->is_column = true;
+    A = X;
 }
 term(A) ::= column_id(X). { A = X; printf("expression term\n"); }
-term(A) ::= INTEGER|FLOAT(X).
+term(A) ::= INTEGER|FLOAT|DATE|TIME(X).
 { 
   printf("Numeric term handling\n");
   A = X;
@@ -185,18 +185,21 @@ comparison_predicate ::= expr. { }
 
 cmd ::= INSERT INTO insert_table VALUES LPAREN insert_values RPAREN.
 
-insert_table(A) ::= name(X). { printf("insert_table: A=%p, X=%p\n", A, X); }
-
-insert_values(A) ::= insert_values COMMA insert_term(X).
-{
-	A = X;
-	printf("Multiple insert values\n");
+insert_table(A) ::= name(X). 
+{ 
+  A = X; 
+  builderStartInsertCommand(builder);
+  builderAddTableName(builder, A);
+  printf("Starting INSERT INTO statement parse\n");
 }
 
-insert_term(A) ::= INTEGER|FLOAT.
+insert_values ::= insert_values COMMA insert_term.
+insert_values ::= insert_term.
+
+insert_term(A) ::= INTEGER|FLOAT|DATE|TIME|NULL(X).
 {
-	(void)A;
-	printf("Insert term is an integer or float\n");
+  A = X;
+  builderAddDataItem(builder, X);
 }
 
 // DELETE STATEMENT ///////////////////////////////////////////////////////////
