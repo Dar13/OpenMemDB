@@ -49,6 +49,11 @@ ParseResult parse(std::string input, DataStore* data_store)
     Parse(parser, 0, nullptr, &builder);
     ParseFree(parser, free);
 
+    for(auto token_pair : tokens)
+    {
+        delete token_pair.token;
+    }
+
     if(builder.statement == nullptr || !builder.valid)
     {
         printf("Failed to parse statement!\n");
@@ -57,6 +62,10 @@ ParseResult parse(std::string input, DataStore* data_store)
     else
     {
         setupStatement(builder.statement, builder.expr, data_store);
+
+        // Assume the expression tree was consumed, clean it up
+        delete builder.expr;
+        builder.expr = nullptr;
 
         printf("Statement parse was successful!\n");
         return ParseResult(ResultStatus::SUCCESS, builder.statement);
@@ -369,6 +378,7 @@ void setupTokenMappings()
 {
   // TODO: Update this as necessary
   keywords["CREATE"] = TK_CREATE;
+  keywords["DROP"] = TK_DROP;
   keywords["TABLE"] = TK_TABLE;
   keywords["AS"] = TK_AS;
   keywords["WHERE"] = TK_WHERE;

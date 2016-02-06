@@ -96,13 +96,8 @@ void builderAddSelectAllColumns(StatementBuilder* builder, Token table)
     {
         case SQLStatement::SELECT:
             break;
-        case SQLStatement::UPDATE:
-            break;
-        case SQLStatement::INSERT_INTO:
-            break;
-        case SQLStatement::DELETE:
-            break;
         default:
+            // TODO: Error handling?
             break;
     }
 

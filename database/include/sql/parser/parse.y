@@ -116,10 +116,12 @@ expr ::= expr AND|OR(OP) expr. { builderStartNestedExpr(builder, OP);}
 expr ::= term(X) NE|EQ(OP) term(Y). { builderAddValueExpr(builder, OP, X, Y); }
 
 term(A) ::= name(X) DOT column_id(Y). { 
-    printf("reference Term handling\n");
-    std::string tmp = std::string(X->text + "." + Y->text);
-    A = new (std::nothrow) TokenData(tmp, X->text, Y->text);
-    // TODO: Error handling
+    X->table_name = X->text;
+    X->column_name = Y->text;
+    X->text = X->text + "." + Y->text;
+    printf("Reference: %s.%s\n", X->table_name.c_str(), X->column_name.c_str());
+    X->is_column = true;
+    A = X;
 }
 term(A) ::= column_id(X). { A = X; printf("expression term\n"); }
 term(A) ::= INTEGER|FLOAT|DATE|TIME(X).

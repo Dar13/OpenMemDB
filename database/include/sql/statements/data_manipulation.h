@@ -35,6 +35,22 @@ struct SelectQuery : public ParsedStatement
 {
     SelectQuery() : ParsedStatement(SQLStatement::SELECT), predicate(nullptr) {}
 
+    ~SelectQuery()
+    {
+        if(predicate)
+        {
+            switch (predicate->type)
+            {
+                case PredicateType::NESTED:
+                    delete reinterpret_cast<NestedPredicate*>(predicate);
+                    break;
+                default:
+                    delete predicate;
+                    break;
+            }
+        }
+    }
+
     std::vector<ColumnReference> source_columns;
     std::vector<std::string> tables;
     std::vector<std::string> output_columns;
