@@ -20,6 +20,7 @@ THE SOFTWARE.
 */
 
 #include <cstring>
+#include <cstdio>
 
 #include "../../include/util/libomdb.h"
 
@@ -117,7 +118,9 @@ char* SerializeResultMetaDataPacket(ResultMetaDataPacket packet){
 
 
 char* SerializeResultPacket(ResultPacket packet){
-
+  char* buffer = new (std::nothrow) char[sizeof(ResultPacket) + packet.resultSize];
+  memcpy(buffer, &packet, sizeof(ResultPacket) + packet.resultSize);
+  return buffer;
 }
 
 /*****************************************************************
@@ -155,7 +158,7 @@ ResultMetaDataPacket DeserializeResultMetaDataPacket(char* serializedPacket){
 }
 
 
-ResultPacket DeserializeResultPacket(const char* serializedPacket){
+ResultPacket DeserializeResultPacket(char* serializedPacket){
   ResultPacket resultPacket;
   char* status;
   uint32_t* resultSize = new uint32_t;

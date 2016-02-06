@@ -21,10 +21,11 @@ int main (int argc, char** argv) {
   bool commandPassed = testCommandPacketSerialization();
   bool connectionPassed = testConnectionPacketSerialization();
   bool resultMetaDataPassed = testResultMetaDataPacketSerialization();
+  bool resultPassed = testResultPacketSerialization();
   std::cout << "Command Serialization Passed: " << commandPassed << std::endl;
   std::cout << "Connection Serialization Passed: " << connectionPassed << std::endl;
   std::cout << "ResultMetaData Serialization Passed: " << resultMetaDataPassed <<std::endl;
-
+  std::cout << "Result Serialization Passed: " << resultPassed << std::endl;
   return 0;
 }
 
@@ -39,6 +40,8 @@ bool testCommandPacketSerialization() {
   assert(deserializedCommandPacket.commandType == CommandType::DB_COMMAND);
 
   assert(strcmp(deserializedCommandPacket.message, "command message") == 0);
+
+  return true;
 }
 
 bool testConnectionPacketSerialization() {
@@ -59,10 +62,42 @@ bool testConnectionPacketSerialization() {
   assert(strcmp(deserializedConnectionPacket.name, "db_name") == 0);
 
   delete serializedConnectionPacket;
+
+  return true;
 }
 
 bool testResultPacketSerialization() {
+  // Create result packet
+  ResultPacket resultPacket;
+  resultPacket.status = ResultStatus::OK;
+  resultPacket.resultSize = 64;
+  resultPacket.rowLen = 4;
+  resultPacket.terminator = THE_TERMINATOR;
+  // Put data in the packer
+  uint64_t* resultPacketData = new uint64_t[8];
+  for (int i = 0; i < resultPacket.resultSize/sizeof(uint64_t); ++i) {
+    resultPacketData[i] = (uint64_t)i;
+    std::cout << resultPacketData[i] << std::endl;
+  }
+  resultPacket.data = resultPacketData;
+  // Serialize the result packet
+  char* serializedResultPacket = SerializeResultPacket(resultPacket);
 
+  // Deserialize result packet
+  ResultPacket deserializedResultPacket = DeserializeResultPacket(serializedResultPacket);
+
+  // Assert some values
+  assert(deserializedResultPacket.status == ResultStatus::OK);
+  assert(deserializedResultPacket.resultSize == 64);
+  assert(deserializedResultPacket.rowLen == 4);
+  assert(deserializedResultPacket.terminator == THE_TERMINATOR);
+
+  // Print some of the result data
+  int numData = deserializedResultPacket.resultSize / sizeof(uint64_t);
+  for (int i = 0; i < numData; ++i) {
+    std::cout << deserializedResultPacket.data[i] << std::endl;
+  }
+  return true;
 }
 
 bool testResultMetaDataPacketSerialization() {
@@ -99,4 +134,6 @@ bool testResultMetaDataPacketSerialization() {
   }
 
   delete serializedPacket;
+
+  return true;
 }
