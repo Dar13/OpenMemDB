@@ -1,0 +1,109 @@
+\documentclass[letter,11pt]{article}
+%\documentclass[letter,10pt]{scrartcl}
+
+\usepackage[utf8]{inputenc}
+\usepackage[pass,letterpaper]{geometry}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{float}
+\usepackage{bigfoot}
+\usepackage[square,sort,comma,numbers]{natbib}
+\usepackage{titling}
+\usepackage{mathtools}
+\usepackage{helvet}
+
+\setlength{\parindent}{0cm}
+
+\title{OpenMemDB: A wait-free database\thanks{Sponsor: Dr. Damian Dechev}}
+\author{Michael McGee \and Robert Medina \and Neil Moore \and Jason Stavrinaky}
+\date{2/1/2016}
+
+\pdfinfo{%
+  /Title    (OpenMemDB: A wait-free database)
+  /Author   (Mike McGee, Neil Moore, Robert Medina, Jason Stavrinaky)
+  /Creator  ()
+  /Producer ()
+  /Subject  ()
+  /Keywords ()
+}
+
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\newpage
+
+\pagenumbering{roman}
+\tableofcontents
+\newpage
+
+\pagenumbering{arabic}
+
+\section{Introduction}
+While hard drives are getting faster, they are still relatively slow when compared 
+with main memory while memory is getting cheaper. Memory is following a long running 
+pattern where it has precipitiously dropped from costing thousands of dollars for a few 
+megabytes to about \$40 for 8 gigabytes \cite{jcmit}. With this trend, we can take 
+advantage and design extremely fast databases. While there are many applications for 
+which current database solutions are fast enough (website logins for example), these 
+solutions leave something to be desired for massively concurrent systems with high throughput
+requirements such as real-time analytics on large datasets. While the largest of 
+these datasets are still too large for main memory, some datasets are finally able
+to fit into main memory in modern systems due to the cheapness and advancement of 
+memory module technology. Making it possible for a data analysis algorithm to make 
+full use of the database server's processing power to extract and manipulate data
+would make that analysis quicker and efficient in terms of hardware use.
+\par\vspace{\baselineskip}
+A real-world example of this need for fast and high throughput databases is demonstrated by Zynga, 
+the developers of Words with Friends and Farmville, faced a problem where their 
+database was not able to supply their data analysis algorithm problem. With so 
+many users, their database solution was not fast enough to provide real time analytics. 
+There were just too many transactions going on at once. They 
+remedied this by switching to MemSQL: a closed-source in-memory database. With this 
+solution, Zynga can ``make decisions based on billions of data points in real-time to 
+provide better in-game personalization and overall customer satisfaction''. \cite{MemSQL} 
+
+\subsection{Motivation}
+
+\section{Related Works}
+Over the last 30 years the there has been tremendous advancements in computing
+hardware. "Processors are thousands of times faster and memory is thousands of
+times times larger"\cite{stonebraker2007end}. Most technologies have advanced 
+along with hardware, however database management systems have struggled to improve
+at a similar rate. This is mostly due to concurrency issues. "Existing studies show
+that current database engines can spend more than 30\% of time in 
+synchronization-related operations (e.g.locking and latching), even when only a 
+single client thread is running."\cite{soares2015database}
+\par\vspace{\baselineskip}
+There have been several attempts to solve this problem. Some of which will sacrifice
+some data consistency in order to achieve a higher better performance. Still others
+remain fully ACID compliant and attempt to parallelize individual steps in the 
+DBMS or solely use multiple threads when executing query plans. Then there are those
+that attempt to implement some level of lock freedom into their DBMS.
+\par\vspace{\baselineskip}
+\subsection{MemSQL and VoltDB}
+MemSQL\footnote{MemSQL can be configured as a Columnstore that stores data on disk}
+and VoltDB are both fully in memory DBMS as is OpenMemDB. This is where the
+similarities end as far as OpenMemDB is concerned. MemSQL and VoltDB on the other 
+hand both use distributed systems to achieve performance gains. MemSQL differs from 
+VoltDB in a few ways, the most important being it's use of lock free data structures
+for storing data and its storing of pre-compiled commonly used queries\cite{MemSQL}.
+VoltDB tries to make its performance gains by what they call "Concurreny through
+scheduling"\cite{VoltDB}. This is the process of using a single-threaded pipeline 
+that performs the task it was scheduled. This limits the need for locking during
+transactions by intelligently scheduling the transactions so that locks are not
+necessary.
+\par\vspace{\baselineskip}
+OpenMemDB aims to take a different approach, one that is fully wait free. The goal is 
+to use powerful wait free data structures that will allow for a massively parallel 
+DBMS that can scale with the addition of processors and memory. It is our assumption 
+that the achievement of a fully weight free DBMS will achieve the performance gains 
+that have been lacking in the DBMS world while eliminating the complexity of 
+distributed systems, all while retaining full ACID compliance.
+
+\newpage
+\bibliography{WorkshopPaper}
+\bibliographystyle{acm}
+\newpage
+
+\end{document}
