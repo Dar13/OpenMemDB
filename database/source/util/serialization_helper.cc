@@ -21,6 +21,7 @@ THE SOFTWARE.
 
 #include <cstring>
 #include <cstdio>
+#include <iostream>
 
 #include "../../include/util/libomdb.h"
 
@@ -119,7 +120,8 @@ char* SerializeResultMetaDataPacket(ResultMetaDataPacket packet){
 
 char* SerializeResultPacket(ResultPacket packet){
   char* buffer = new (std::nothrow) char[sizeof(ResultPacket) + packet.resultSize];
-  memcpy(buffer, &packet, sizeof(ResultPacket) + packet.resultSize);
+  std::cout << "memcpying " << sizeof(ResultPacket) + packet.resultSize << std::endl;
+  memcpy(buffer, &packet, (sizeof(ResultPacket) + packet.resultSize));
   return buffer;
 }
 
@@ -159,24 +161,7 @@ ResultMetaDataPacket DeserializeResultMetaDataPacket(char* serializedPacket){
 
 
 ResultPacket DeserializeResultPacket(char* serializedPacket){
-  ResultPacket resultPacket;
-  char* status;
-  uint32_t* resultSize = new uint32_t;
-  uint8_t* rowLen = new uint8_t;
-  memcpy(status, &serializedPacket[0], sizeof(uint8_t));
-  memcpy(resultSize, &serializedPacket[1], sizeof(uint32_t));
-  memcpy(rowLen, &serializedPacket[5], sizeof(uint8_t));
-  // Need to loop until terminator hit, memcpy 8 bytes at a time
-  uint64_t* resultData = new uint64_t;
-  memcpy(resultData, &serializedPacket[6], *resultSize);
-  // memcpy terminator some how??
-  resultPacket.status = mapStringToResultStatus(status);
-  resultPacket.resultSize = *resultSize;
-  resultPacket.rowLen = *rowLen;
-  resultPacket.data = resultData;
-  delete(status);
-  delete(resultSize);
-  delete(rowLen);
-  delete(resultData);
-  return resultPacket;
+//  ResultPacket resultPacket;
+//  memcpy(resultPacket, serializedPacket, sizeof(ResultPacket));
+//  return resultPacket;
 }
