@@ -119,9 +119,12 @@ char* SerializeResultMetaDataPacket(ResultMetaDataPacket packet){
 
 
 char* SerializeResultPacket(ResultPacket packet){
-  char* buffer = new (std::nothrow) char[sizeof(ResultPacket) + packet.resultSize];
-  std::cout << "memcpying " << sizeof(ResultPacket) + packet.resultSize << std::endl;
-  memcpy(buffer, &packet, (sizeof(ResultPacket) + packet.resultSize));
+  size_t size = 6 + packet.resultSize + 1;
+  char* buffer = new (std::nothrow) char[size];
+  memset(buffer, 0, size);
+  memcpy(buffer, &packet, sizeof(char) * 5);
+  memcpy(buffer + 5, &packet.data, packet.resultSize);
+  buffer[size - 1] = THE_TERMINATOR;
   return buffer;
 }
 
