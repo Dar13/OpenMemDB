@@ -20,6 +20,8 @@
 #ifndef DATA_HASH_FUNCTOR_H
 #define DATA_HASH_FUNCTOR_H
 
+#include <functional>
+
 /**
  *  \brief An object that implements various helper functions needed by Tervel's
  *         hash map implementation.
@@ -29,7 +31,10 @@ struct TableHashFunctor
 {
   Key hash(Key k)
   {
-    // TODO: Implement an actual hash algorithm
+    // Using a proper hashing algorithm is useless
+    // It's a waste of cycles due to the compare of most types being so expensive.
+    // If Tervel used an integral-type internal storage of keys, this would be 
+    // worthy of a hashing algorithm.
     return k;
   }
 

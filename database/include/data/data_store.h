@@ -61,7 +61,7 @@ using RecordData = std::vector<TervelData>;
  */
 struct RecordCopy
 {
-	RecordCopy() : id(0) {}
+    RecordCopy() : id(0) {}
     RecordCopy(RecordData&& data)
     {
         id = data.back().data.value;
@@ -161,11 +161,16 @@ using TableMap = tervel::containers::wf::HashMap<std::string,
                                                  TableHashFunctor<std::string, SchemaTablePair*>>;
 
 
-// TODO: Does this need to exist? Does a secondary error code?
 enum class ManipStatus : uint32_t
 {
     SUCCESS = 0,
-    FAILURE
+    ERR,
+    ERR_NO_MEMORY,
+    ERR_TABLE_NOT_EXIST,
+    ERR_TABLE_CMD_INVALID,
+    ERR_CONTENTION,
+    ERR_PARTIAL,
+    ERR_PARTIAL_CONTENTION,
 };
 
 // Some common Result types for this module
