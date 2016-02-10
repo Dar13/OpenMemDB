@@ -70,11 +70,11 @@ bool testResultPacketSerialization() {
   // Create result packet
   ResultPacket resultPacket;
   resultPacket.status = ResultStatus::OK;
-  resultPacket.resultSize = 64;
+  resultPacket.resultSize = 32;
   resultPacket.rowLen = 4;
   resultPacket.terminator = THE_TERMINATOR;
   // Put data in the packer
-  uint64_t* resultPacketData = new uint64_t[8];
+  uint64_t* resultPacketData = new uint64_t[4];
   for (int i = 0; i < resultPacket.resultSize/sizeof(uint64_t); ++i) {
     resultPacketData[i] = (uint64_t)i;
     std::cout << resultPacketData[i] << std::endl;
@@ -87,8 +87,9 @@ bool testResultPacketSerialization() {
   ResultPacket deserializedResultPacket = DeserializeResultPacket(serializedResultPacket);
 
   // Assert some values
+  std::cout << "Result Status: " << (int)deserializedResultPacket.status << std::endl;
   assert(deserializedResultPacket.status == ResultStatus::OK);
-  assert(deserializedResultPacket.resultSize == 64);
+  assert(deserializedResultPacket.resultSize == 32);
   assert(deserializedResultPacket.rowLen == 4);
   assert(deserializedResultPacket.terminator == THE_TERMINATOR);
 

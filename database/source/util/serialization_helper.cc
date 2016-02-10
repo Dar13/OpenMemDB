@@ -119,12 +119,24 @@ char* SerializeResultMetaDataPacket(ResultMetaDataPacket packet){
 
 
 char* SerializeResultPacket(ResultPacket packet){
-  size_t size = 6 + packet.resultSize + 1;
+  for(int i = 0; i < sizeof(ResultPacket); i++)
+  {
+    printf("%x ", ((char*)&packet)[i]);
+  }
+  printf("\n");
+
+  size_t size = 8 + packet.resultSize + 1;
   char* buffer = new (std::nothrow) char[size];
   memset(buffer, 0, size);
-  memcpy(buffer, &packet, sizeof(char) * 5);
-  memcpy(buffer + 5, &packet.data, packet.resultSize);
+  memcpy(buffer, &packet, sizeof(char) * 8);
+  memcpy(buffer + 9, &packet.data, packet.resultSize);
   buffer[size - 1] = THE_TERMINATOR;
+
+  for(int i = 0; i < size; i++)
+  {
+    printf("%x ", buffer[i]);
+  }
+  printf("\n");
   return buffer;
 }
 
