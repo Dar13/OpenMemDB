@@ -64,8 +64,6 @@ solution, Zynga can ``make decisions based on billions of data points in real-ti
 provide better in-game personalization and overall customer satisfaction''. \cite{MemSQL} 
 
 \subsection{Motivation}
-
-\section{Related Works}
 Over the last 30 years the there has been tremendous advancements in computing
 hardware. "Processors are thousands of times faster and memory is thousands of
 times times larger"\cite{stonebraker2007end}. Most technologies have advanced 
@@ -75,26 +73,34 @@ that current database engines can spend more than 30\% of time in
 synchronization-related operations (e.g.locking and latching), even when only a 
 single client thread is running."\cite{soares2015database}
 \par\vspace{\baselineskip}
-There have been several attempts to solve this problem. Some of which will sacrifice
-some data consistency in order to achieve a higher better performance. Still others
+OpenMemDB solves this problem by implementing a data-store using only wait-free data
+structures. This leads to performance that scales with increasing threads. OpenMemDB also
+resides completely in-memory and therefore avoids all of the slow downs associated with
+going to disk.
+\par\vspace{\baselineskip}
+
+\section{Related Work}
+There have been some attempts to increase the performance of database management
+systems in recent years. Some solutions will sacrifice
+some data consistency in order to achieve better performance. Still others
 remain fully ACID compliant and attempt to parallelize individual steps in the 
 DBMS or solely use multiple threads when executing query plans. Then there are those
 that attempt to implement some level of lock freedom into their DBMS.
 \par\vspace{\baselineskip}
 \subsection{MemSQL and VoltDB}
 MemSQL\footnote{MemSQL can be configured as a Columnstore that stores data on disk}
-and VoltDB are both fully in memory DBMS as is OpenMemDB. This is where the
+and VoltDB are both fully in-memory DBMS as is OpenMemDB. This is where the
 similarities end as far as OpenMemDB is concerned. MemSQL and VoltDB on the other 
 hand both use distributed systems to achieve performance gains. MemSQL differs from 
-VoltDB in a few ways, the most important being it's use of lock free data structures
+VoltDB in a few ways, the most important being its use of lock-free data structures
 for storing data and its storing of pre-compiled commonly used queries\cite{MemSQL}.
 VoltDB tries to make its performance gains by what they call "Concurreny through
-scheduling"\cite{VoltDB}. This is the process of using a single-threaded pipeline 
+scheduling."\cite{VoltDB} This is the process of using a single-threaded pipeline 
 that performs the task it was scheduled. This limits the need for locking during
 transactions by intelligently scheduling the transactions so that locks are not
 necessary.
 \par\vspace{\baselineskip}
-OpenMemDB aims to take a different approach, one that is fully wait free. The goal is 
+OpenMemDB aims to take a different approach, one that is fully wait-free. The goal is 
 to use powerful wait free data structures that will allow for a massively parallel 
 DBMS that can scale with the addition of processors and memory. It is our assumption 
 that the achievement of a fully weight free DBMS will achieve the performance gains 
