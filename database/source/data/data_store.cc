@@ -156,6 +156,115 @@ DataResult DataStore::getData(Predicate* predicates,
     // TODO: This function doesn't really make sense to have...
 }
 
+//TODO: Clean up some testing code, printing code, optimize wherever possible, and come up with
+//appropriate naming for error code (possibly ManipResult), maybe some bounds checking beforehand
+//for these loops, error checking too
+//checks if the row data matches with the table schema
+bool DataStore::schemaChecker(SchemaTablePair *table_pair, Record *row)
+{
+    //table and schema
+    DataTable *table = table_pair->table.get();
+    TableSchema *schema = table_pair->schema;
+
+    //number of columns, number of inputs from row, number of constraints in each column
+    int64_t col_len = schema->columns.size();
+    int64_t row_len = row->size(0);
+    int64_t num_Constraints = 0;
+    SQLConstraint constraint;
+    //printf("col_len: %d\nrow_len: %d\n", col_len, row_len);
+
+    //TESTING MUST DELETE: Hardcode schema constraint to test
+    for(int64_t itr = 0; itr < col_len; itr++)
+    {
+	//hardcode constraint
+	SQLConstraintType state = SQLConstraintType::SQL_UNIQUE;
+	SQLConstraint constraint;
+	constraint.type = state;
+
+	//add constraints to the schema
+	schema->columns.at(itr).constraint.push_back(constraint);
+    }
+
+    //copies a value from record, checks the schema column constraint at that index and
+    //checks if the value is coherent with the column constraint
+    //-1 because of the record counter stored there
+    for(int64_t i = 0; i < row_len-1; i++)
+    {
+	int64_t data;
+
+	//retrieve the value from row
+	row->at(i, data);
+
+	//printf("Row data: %d\t", data);
+	
+	num_Constraints = schema->columns.at(i).constraint.size();
+	//printf("numofCons: %d\n", num_Constraints);
+	
+	for(int64_t j = 0; j < num_Constraints; j++)
+	{
+	    constraint = schema->columns.at(i).constraint.at(j);
+	    switch(constraint.type)
+	    {
+		//not_null means a value other than it's default... which record does not have as of
+		//yet so maybe set default value in record to be a special value?
+		case SQLConstraintType::SQL_NOT_NULL:
+		{
+		    //printf("Constraint type: NOT_NULL\n");
+		    break;
+		}
+		
+		case SQLConstraintType::SQL_PRIMARY_KEY :
+		{
+		    int counter = 0;
+		    //check if PRIMARY KEY is the only constraint in schema
+		    //then it will follow into same behavior as unique
+		    for(int64_t m = 0; m < col_len; m++)
+		    {
+			//this will recheck all columns from beginning, reconsider this...
+			if(schema->columns.at(m).constraint.at(j).type ==
+			    SQLConstraintType::SQL_PRIMARY_KEY)
+			    counter++;
+			if(counter > 1)
+			{
+			    return false;
+			    //printf("error two primary keys \n");
+			    //break;
+			}
+		    }
+
+		    //continues on to unique behavior
+		}
+
+		case SQLConstraintType::SQL_UNIQUE:
+		{
+		    int64_t size = table->records.size(0);
+		    Record *table_row;
+		    int64_t table_data;
+		    //printf("size : %d\n", size);
+		    
+		    //check through table and compare if data is unique at index i
+		    for(int64_t k = 0; k < size; k++)
+		    {
+			//grab table row, then grab data from row at i
+			table->records.at(k, row);
+			row->at(i, table_data);
+			if(table_data == data)
+			{
+			    //printf("Not unique! %d %d \n", table_data, data);
+			    return false;
+			}
+		    }
+		    break;
+		}
+	    }
+	}
+    }
+
+    //if none of the constraints return false then all row data has been verified with the column
+    //constraints, we return success
+    return true;
+}
+
 /**
  *	\brief Inserts a record into the given data table, if it exists.
  */
@@ -197,6 +306,7 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
 
     // TODO: Handle table constraints
     size_t ret = table_pair->table->records.push_back_w_ra(new_record);
+    schemaChecker(table_pair, new_record);
     printf("Pushback returned %lu\n", ret);
     printf("Record address %p\n", new_record);
 

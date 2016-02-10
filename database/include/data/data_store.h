@@ -39,6 +39,7 @@
 #include "sql/predicate.h"
 #include "sql/statements/data_definition.h"
 #include "sql/statements/data_manipulation.h"
+#include "sql/common.h"
 
 // Some typedefs(C++11-style) so that we don't have all that meaningless
 // namespace and template junk pop up everywhere.
@@ -231,7 +232,7 @@ private:
 
 	MultiTableRecordCopies searchTables(NestedPredicate* pred);
 
-    void schemaChecker(TableSchema schema, std::vector<SQLColumn> column);
+    bool schemaChecker(SchemaTablePair *table_pair, Record *record);
 
     TableMap table_name_mapping;
 };
