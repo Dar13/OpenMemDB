@@ -20,6 +20,8 @@
 #include <util/types.h>
 #include <workmanager/types.h>
 
+#define THREAD_SLEEP_MS 100
+
 /**
  *  @brief Abstraction of a worker thread.
  *

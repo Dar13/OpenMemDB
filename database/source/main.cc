@@ -41,6 +41,8 @@ int main(int argc, char** argv)
 
   int32_t status = 0;
 
+  printf("%u\n", sizeof(Job));
+
   status = work_manager.Initialize();
   if(status != WorkManager::E_NONE)
   {

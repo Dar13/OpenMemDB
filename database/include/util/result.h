@@ -27,17 +27,32 @@ enum class ResultStatus : uint32_t
     FAILURE_OUT_MEMORY,
 };
 
-// TODO: Refactor so that this paradigm is used throughout
-template <typename T>
-struct Result
+enum class ResultType : uint8_t
 {
-    Result(ResultStatus s, T res) : status(s), result(res) {}
+    QUERY = 0,
+    COMMAND,
+    OTHER,
+};
+
+struct ResultBase
+{
+    ResultBase(ResultStatus s, ResultType t = ResultType::OTHER) : status(s), type(t) {}
+
+    ResultType type;
     ResultStatus status;
+};
+
+template <typename T>
+struct Result : public ResultBase
+{
+    Result(ResultStatus s, T res) : ResultBase(s), result(res) {}
+
     T result;
 };
 
 // Common result types
 using UintResult = Result<uint32_t>;
 using Uint64Result = Result<uint64_t>;
+using IntResult = Result<int32_t>;
 
 #endif

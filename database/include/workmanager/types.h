@@ -31,12 +31,16 @@
 
 // Project includes
 #include <util/types.h>
+#include <util/result.h>
+
+// Tervel includes
+#include <tervel/containers/wf/linked_list_queue/queue.h>
 
 // TODO: Make this into a true result type for SQL Query or Database command
 typedef struct
 {
     uint32_t job_number;    //!< The job number that's associated to this result
-    uint64_t result;        // TODO: Make this into a real result
+    ResultBase* result;
 } JobResult;
 
 //! Typedef of a function pointer that returns a @refer Result and takes an integer.
@@ -46,18 +50,47 @@ typedef JobResult (*JobFunctor)(int);
 typedef std::packaged_task<JobResult(int)> Job;
 
 /**
+ *  \brief TODO
+ */
+struct ThreadNotifier
+{
+    ThreadNotifier()
+        : used(false), stop(false)
+    {}
+
+    //! Whether the mutex is already assigned to a worker thread
+    bool used;
+
+    //! The variable the signifies an interruption of the thread
+    std::atomic<bool> stop;
+
+    //! The mutex to be assigned to a thread
+    std::mutex mutex;
+
+    //! The condition variable to be used in conjunction with the mutex
+    std::condition_variable cond_var;
+};
+
+/**
  *  @brief Additional data that allows for inter-thread communication.
  *
  *  @note TODO:The mutex and queue could probably be replaced with a Tervel data structure.
  */
 struct WorkThreadData
 {
-    WorkThreadData()
-        : stop(false)
+    WorkThreadData(ThreadNotifier* notifier)
+        : stop(notifier->stop), cond_var(notifier->cond_var), mutex(notifier->mutex)
+    {}
+
+    WorkThreadData(const WorkThreadData& data)
+        : stop(data.stop), cond_var(data.cond_var), mutex(data.mutex)
     {}
 
     //! Thread ID
-    uint32_t id;
+    uint16_t id;
+
+    //! If set, this thread should return immediately
+    std::atomic<bool>& stop;
     
     //! Thread object
     std::thread thread;
@@ -66,13 +99,10 @@ struct WorkThreadData
     std::queue<Job> jobs;
 
     //! Condition variable, allows for waking up from sleep
-    std::condition_variable cond_var;
+    std::condition_variable& cond_var;
 
     //! Mutex
-    std::mutex mutex;
-
-    //! If set, this thread should return immediately
-    bool stop;
+    std::mutex& mutex;
 };
 
 #endif

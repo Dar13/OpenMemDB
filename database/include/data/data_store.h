@@ -173,6 +173,34 @@ enum class ManipStatus : uint32_t
     ERR_PARTIAL_CONTENTION,
 };
 
+template<>
+struct Result<ManipStatus> : public ResultBase
+{
+    Result(ResultStatus s, ManipStatus res) : ResultBase(s, ResultType::COMMAND), result(res) {}
+
+    ManipStatus result;
+};
+
+template<>
+struct Result<RecordData> : public ResultBase
+{
+    Result(ResultStatus s, Record res) :
+        ResultBase(s, ResultType::QUERY), result(res)
+    {}
+
+    RecordData result;
+};
+
+template<>
+struct Result<MultiRecordResult> : public ResultBase
+{
+    Result(ResultStatus s, MultiRecordData res) :
+        ResultBase(s, ResultType::QUERY), result(res)
+    {}
+
+    MultiRecordData result;
+};
+
 // Some common Result types for this module
 using DataResult = Result<TervelData>;
 using RecordResult = Result<RecordData>;

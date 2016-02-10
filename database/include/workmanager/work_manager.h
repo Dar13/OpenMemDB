@@ -62,6 +62,10 @@ public:
 
     int32_t Run();
 
+    //! This constant also determines the maximum number of threads
+    //! in the system.
+    static const uint32_t MAX_NUM_MUTEXES = 64;
+
 private:
 
     uint32_t GetAvailableThread();
@@ -71,8 +75,11 @@ private:
     //! Tervel object to give to the worker threads
     tervel::Tervel* m_tervel;
 
-    // TODO: Figure out scalable replacement
-    std::array<WorkThreadData, 8> m_thread_data;
+    //! Number of threads that are supposed to be running
+    uint32_t m_num_threads;
+
+    //! Worker thread data storage
+    std::vector<WorkThreadData> m_thread_data;
 
     //! Holds the futures for currently running jobs
     std::vector<std::future<JobResult>> m_thread_results;
@@ -82,6 +89,9 @@ private:
 
     //! The list of current connections
     std::vector<omdb::Connection> m_connections;
+
+    //! Mutex pool
+    ThreadNotifier m_thread_notifiers[MAX_NUM_MUTEXES];
 
     //! The mapping of job to connection
     std::map<uint32_t, omdb::Connection> m_job_to_connection;

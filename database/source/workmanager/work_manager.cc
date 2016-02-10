@@ -26,8 +26,11 @@
 #include <workmanager/work_manager.h>
 #include <workmanager/work_thread.h>
 
+/**
+ *  \brief Constructor that initializes internal variables properly.
+ */
 WorkManager::WorkManager(uint32_t num_threads, tervel::Tervel* tervel)
-    : m_tervel(tervel)
+    : m_tervel(tervel), m_num_threads(num_threads)
 {
 }
 
@@ -39,16 +42,27 @@ int32_t WorkManager::Initialize()
 {
     std::cout << "Initializing WorkManager\n";
 
-    // Set up the thread data
-    uint32_t thread_id = 0;
-    for(auto& thread_data : m_thread_data)
+    // Setup the thread data
+    for(uint32_t thread_id = 0; thread_id < m_num_threads; thread_id++)
     {
-        thread_data.id = thread_id;
-        thread_id++;
+        auto found_idx = std::find_if(std::begin(m_thread_notifiers),
+                std::end(m_thread_notifiers),
+                [] (const ThreadNotifier& m) -> bool {
+                    return m.used;
+                });
 
-        thread_data.stop = false;
+        if(found_idx == std::end(m_thread_notifiers))
+        {
+            printf("ERROR: Requested number of threads outstripts number of "
+                    "available mutexes!\n");
+            return E_OTHER_ERR;
+        }
 
-        thread_data.thread = std::thread(WorkThread::Run, &thread_data);
+        found_idx->used = true;
+        WorkThreadData data(found_idx);
+
+        m_thread_data.push_back(data);
+        m_thread_data.back().thread = std::thread(WorkThread::Run, &m_thread_data.back());
     }
 
     // Create a socket and listen to it.

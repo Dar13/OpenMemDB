@@ -28,29 +28,20 @@
  */
 void WorkThread::Run(WorkThreadData* data)
 {
-    // TODO: Remove the need for a mutex
+    // Condition variables require a mutex
     std::unique_lock<std::mutex> thread_lock(data->mutex, std::defer_lock);
 
     while(true)
     {
         thread_lock.lock();
+        data->cond_var.wait_for(thread_lock, 
+                std::chrono::milliseconds(THREAD_SLEEP_MS));
+        thread_lock.unlock();
 
-        data->cond_var.wait(thread_lock, [data] ()
-                {
-                    if(data->stop || !data->jobs.empty())
-                    {
-                        return true;
-                    }
-
-                    return false;
-                });
-
-        if(data->stop) { return; }
+        if(data->stop.load()) { return; }
 
         Job do_job = std::move(data->jobs.front());
         data->jobs.pop();
-
-        thread_lock.unlock();
 
         do_job(1);
     }
@@ -71,7 +62,9 @@ Job WorkThread::GenerateJob(int job_num, std::string command)
 
                 printf("Command: %s\n", command.c_str());
 
-                res.result = test;
+                // Execute command/query and generate a suitable result.
+
+                res.result = new Uint64Result(ResultStatus::SUCCESS, 1);
 
                 return res;
             });
