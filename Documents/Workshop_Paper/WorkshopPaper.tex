@@ -73,7 +73,7 @@ that current database engines can spend more than 30\% of time in
 synchronization-related operations (e.g.locking and latching), even when only a 
 single client thread is running."\cite{soares2015database}
 \par\vspace{\baselineskip}
-OpenMemDB solves this problem by implementing a data-store using only wait-free data
+OpenMemDB attempts to solve this problem by implementing a data-store using only wait-free data
 structures. This leads to performance that scales with increasing threads. OpenMemDB also
 resides completely in-memory and therefore avoids all of the slow downs associated with
 going to disk.
@@ -106,6 +106,59 @@ DBMS that can scale with the addition of processors and memory. It is our assump
 that the achievement of a fully weight free DBMS will achieve the performance gains 
 that have been lacking in the DBMS world while eliminating the complexity of 
 distributed systems, all while retaining full ACID compliance.
+\newpage
+
+\section{Technical Approach}
+Our database is built upon wait-free data structures found in Tervel, a collection of
+lock-free and wait-free data structures created by Dr. Damian Dechev et al\cite{web:tervel}. We use
+the common definition of wait-freedom as found in Herlihy's definitive text\cite{herlihy:waitfree}, which
+also provides us with the proof that the composition of linearizable algorithms or data structures
+is also linearizable. From the beginning we knew that in order to create a
+composition of linearizable parts and thus be able to prove linearizability, which is a core component of
+wait-freedom, communication between the various threads must be minimized and only
+done through the wait-free data structures and algorithms available to us. From there
+we can then prove that all running threads are guaranteed to make progress in some finite time
+and then prove wait-freedom from that foundation.
+\par\vspace{\baselineskip}
+The architecture of our database is fairly straightforward, with three main modules that 
+communicate with each other: the Work Manager, SQL Engine, and Data Store. The communication
+between modules is facilitated by a template function that each worker thread, in isolation, uses.
+Each module has a distinct responsibility and mechanism of fulfilling that responsibility with as 
+little communication between threads as possible. The Work Manager is responsible for distributing
+incoming queries and commands among the worker threads as well as sending the final results of those
+queries or commands back to the client that sent them. The SQL Engine is responsible for parsing the
+given query or commmand string into an internal representation that can be executed on the Data Store.
+The Data Store is where all the database's data is stored and thus is where the wait-free data
+structures are mainly used. Those wait-free data structures are important to guarantee that all
+the worker threads can safely and efficiently execute their assigned tasks and then communicate
+those results to the Work Manager.
+\par\vspace{\baselineskip}
+Each worker thread is a long-lived thread spawned by the database upon startup and has various
+thread-local pieces of memory given to it that are used by the various modules. Each instance of
+this memory is guaranteed to be only be accessible by the assigned thread by the C++11 standard\cite{std:c++11}.
+Most of this memory is used by the parser engine within the SQL Engine module and when the 
+thread enters that module, there is zero shared state between it and another thread. When the thread
+leaves the SQL Engine and proceeds to execute the parsed statement, it calls the appropriate
+method within the Data Store module. This begins the portion of the database where the data 
+structures and algorithms are heavily relied upon to achieve linearizability and wait-freedom.
+We specifically use a wait-free hash-map to relate table names to the tables themselves which are nested
+wait-free vectors. Access to these data structures is minimized to reduce code complexity and 
+possible contention between threads over the data contained in the structures.
+\par\vspace{\baselineskip}
+Specifically, the Data Store methods used by the worker threads make local copies of the data contained
+in the core data structures as much as possible so as to take advantage of the standard library's
+well-defined and optimized containers as well as concretely define the situations where 
+multiple writers attempt to write to the same element in the shared data structures. In the few situations
+this can occur, namely in the event of multiple concurrent SQL UPDATE or DELETE statements, we only perform
+the operation if the targeted record hasn't been changed. This is done using Tervel's compare-and-swap 
+operation on a particular element in the vector. Failing to perform these operations due to the 
+selected record(s) changing between the time of selection and the time to perform the operation
+is deemed to be a failure due to contention between threads executing concurrent and overlapping statements
+and is communicated to the client as such.
+
+\section{Experimental Results}
+
+\section{Conclusions}
 
 \newpage
 \bibliography{WorkshopPaper}
