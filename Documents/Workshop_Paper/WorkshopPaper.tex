@@ -147,14 +147,37 @@ possible contention between threads over the data contained in the structures.
 \par\vspace{\baselineskip}
 Specifically, the Data Store methods used by the worker threads make local copies of the data contained
 in the core data structures as much as possible so as to take advantage of the standard library's
-well-defined and optimized containers as well as concretely define the situations where 
+well-defined and optimized containers. This also allows us to concretely define the situations where 
 multiple writers attempt to write to the same element in the shared data structures. In the few situations
 this can occur, namely in the event of multiple concurrent SQL UPDATE or DELETE statements, we only perform
 the operation if the targeted record hasn't been changed. This is done using Tervel's compare-and-swap 
 operation on a particular element in the vector. Failing to perform these operations due to the 
 selected record(s) changing between the time of selection and the time to perform the operation
-is deemed to be a failure due to contention between threads executing concurrent and overlapping statements
+is deemed a soft failure due to contention between threads executing concurrent and overlapping statements
 and is communicated to the client as such.
+\par\vspace{\baselineskip}
+Our handling of read-only operations is similar, but not formally proven to be a proper implementation, 
+to the relativistic programming approach detailed in Howard and Walpole's paper on relativistic 
+red-black trees, where each reader of the data structures only works within its own temporal 
+frame of the data structure\cite{rbtree}. We implement this by copying to local unshared 
+memory and then manipulating the data, effectively capturing a snapshot of the data that 
+we then use to generate the final output given to the client. This manipulation of the 
+data is bounded and cannot infinitely loop or block as long as Tervel's algorithms provide 
+wait-free access to the shared data structures.
+\newpage
+There are particular scenarios when the effects of concurrent SQL statements must be reordered
+in order to maintain a valid sequential history, particularly when SELECT or UPDATE operations
+are interleaved with DELETE or DROP TABLE operations and the operations operate on the same 
+records or tables in the database. An example concurrent history of this interleaving is shown below:
+\par\vspace{\baselineskip}
+\includegraphics{concurrent_history_1}
+\par\vspace{\baselineskip}
+In order to properly linearize this history, we need to reorder the effects of the DROP operation
+to take place after the SELECT. Using smart pointer features in the language chosen for this project
+(C++11), we can both postpone the deletion of the table data while completing the DROP operation.
+The smart pointer guarantees the memory will be deleted when all references to it are released, and
+as the base reference (stored in the relation of table name to table) is removed by the DROP operation,
+the operation's effects are effectively reordered to take place after the SELECT operation.
 
 \section{Experimental Results}
 
