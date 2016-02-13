@@ -12,6 +12,8 @@
 \usepackage{titling}
 \usepackage{mathtools}
 \usepackage{helvet}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
 
 \setlength{\parindent}{0cm}
 
@@ -28,13 +30,18 @@
   /Keywords ()
 }
 
+\let\oldReturn\Return
+\renewcommand{\Return}{\State\oldReturn}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codered}{rgb}{0.6,0,0}
+\definecolor{codegrey}{gray}{0.9}
+
+\newcommand{\inlinecode}[1]{\colorbox{codegrey}{\lstinline[language=C++]{#1}}}
+
 \begin{document}
 \pagenumbering{gobble}
 \maketitle
-\newpage
-
-\pagenumbering{roman}
-\tableofcontents
 \newpage
 
 \pagenumbering{arabic}
@@ -142,7 +149,9 @@ leaves the SQL Engine and proceeds to execute the parsed statement, it calls the
 method within the Data Store module. This begins the portion of the database where the data 
 structures and algorithms are heavily relied upon to achieve linearizability and wait-freedom.
 We specifically use a wait-free hash-map to relate table names to the tables themselves which are nested
-wait-free vectors. Access to these data structures is minimized to reduce code complexity and 
+wait-free vectors. The composition of the Tervel vectors to create the table structure is such that the outer
+vector acts as a container of references to records within the table while each of the referenced vectors
+contain the stored data. Access to these data structures is minimized to reduce code complexity and 
 possible contention between threads over the data contained in the structures.
 \par\vspace{\baselineskip}
 Specifically, the Data Store methods used by the worker threads make local copies of the data contained
@@ -156,32 +165,98 @@ selected record(s) changing between the time of selection and the time to perfor
 is deemed a soft failure due to contention between threads executing concurrent and overlapping statements
 and is communicated to the client as such.
 \par\vspace{\baselineskip}
-Our handling of read-only operations is similar, but not formally proven to be a proper implementation, 
-to the relativistic programming approach detailed in Howard and Walpole's paper on relativistic 
-red-black trees, where each reader of the data structures only works within its own temporal 
-frame of the data structure\cite{rbtree}. We implement this by copying to local unshared 
-memory and then manipulating the data, effectively capturing a snapshot of the data that 
-we then use to generate the final output given to the client. This manipulation of the 
-data is bounded and cannot infinitely loop or block as long as Tervel's algorithms provide 
-wait-free access to the shared data structures.
-\newpage
+Inserting records into a table within the Data Store requires pre-processed data be passed
+into the insertRecord method of the Data Store object. The general proecedure of inserting
+into a table is shown in Figure \ref{insert_record}. This method first retrieves the table 
+that we want to insert into and ensures the data provided adheres to the schema defined 
+at the table's creation. Assuming that check is successful, a Tervel vector is then 
+constructed using the given data while preserving the order of the data. Once the vector 
+is setup we then push the final vector into the table.
+
+\begin{figure}
+ \begin{algorithmic}
+ \Function{InsertRecord}{TableName, Data}
+ \State{T = \Call{GetTable}{TableName}}
+ \If{$\Call{SchemaCheck}{$T, D$}\neq True$}
+  \Return{$False$}
+ \EndIf
+ \State{R is a Tervel vector}
+ \ForAll{D in Data}
+  \State\Call{PushBack}{R,D}
+ \EndFor
+ \State\Call{PushBack}{T,R}
+ \Return{$True$}
+ \EndFunction
+ \end{algorithmic}
+ \caption{How a record is inserted into a table in OpenMemDB}
+ \label{insert_record}
+\end{figure}
+
+\par\vspace{\baselineskip}
+Our handling of read-only operations is similar to the relativistic programming approach detailed 
+in Howard and Walpole's paper on relativistic red-black trees, where each reader of the 
+data structures only works within its own temporal frame of the data structure\cite{rbtree}. 
+This is done by copying to local unshared memory and then manipulating the data, 
+effectively capturing a snapshot of the data that we then use to generate the final 
+output given to the client. This manipulation of the data is bounded and cannot 
+infinitely loop or block as long as Tervel's algorithms provide wait-free access 
+to the shared data structures. An example of this style of data manipulation is shown in 
+Figure \ref{read_op}. That function searches the given table for records that match
+the predicate supplied and then returns a copy of those records. A predicate is defined
+as a binary tree where each leaf node is some sort of comparison operation on a column
+within a record. For example, the statement \inlinecode{SELECT A.* FROM A WHERE A.x = 1 AND A.y = 2}
+would have a predicate with three nodes where the two leaves are the comparisons
+\inlinecode{A.x = 1} and \inlinecode{A.y = 2}. The \inlinecode{EvaluatePredicate} call
+walks that tree and creates a final set of records that satisfies all of the
+leaf nodes. Those copied records are then returned to the caller which will then
+pass them back to the client that initially sent the request.
+
+\begin{figure}[h]
+ \begin{algorithmic}
+ \Function{GetRecords}{TableName, Predicate}
+ \State{$T\gets \Call{GetTable}{TableName}$}
+ \State{$Result\gets empty\ vector$}
+ \If{Predicate is null}
+  \ForAll{records $R$ in $T$}
+  \State{\Call{PushBack}{Result, R}}
+  \EndFor
+ \Else
+  \State{$Result\gets \Call{EvaluatePredicate}{T, Predicate}$}
+ \EndIf
+ \Return{$Result$}
+ \EndFunction
+ \end{algorithmic}
+ \caption{An example of a read operation done on the tables stored in the Data Store}
+ \label{read_op}
+\end{figure}
+
+\par\vspace{\baselineskip}
 There are particular scenarios when the effects of concurrent SQL statements must be reordered
 in order to maintain a valid sequential history, particularly when SELECT or UPDATE operations
 are interleaved with DELETE or DROP TABLE operations and the operations operate on the same 
-records or tables in the database. An example concurrent history of this interleaving is shown below:
+records or tables in the database. An example concurrent history of this interleaving is shown in 
+Figure \ref{concurrent_history}.
+
+\begin{figure}[h]
+  \includegraphics{concurrent_history_1}
+  \caption{A possible concurrent history that OpenMemDB must be able to linearize}
+  \label{concurrent_history}
+\end{figure}
+
 \par\vspace{\baselineskip}
-\includegraphics{concurrent_history_1}
-\par\vspace{\baselineskip}
-In order to properly linearize this history, we need to reorder the effects of the DROP operation
-to take place after the SELECT. Using smart pointer features in the language chosen for this project
-(C++11), we can both postpone the deletion of the table data while completing the DROP operation.
-The smart pointer guarantees the memory will be deleted when all references to it are released, and
-as the base reference (stored in the relation of table name to table) is removed by the DROP operation,
-the operation's effects are effectively reordered to take place after the SELECT operation.
+In order to properly linearize the history in Figure \ref{concurrent_history}, we need to reorder 
+the effects of the DROP operation to take place after the SELECT. Using smart pointer features 
+in the language chosen for this project (C++11), we can both postpone the deletion of the 
+table data while completing the DROP operation. The smart pointer guarantees the memory will 
+be deleted when all references to it are released, and as the base reference (stored in the 
+relation of table name to table) is removed by the DROP operation, the operation's effects 
+are effectively reordered to take place after the SELECT operation.
 
 \section{Experimental Results}
+PENDING
 
 \section{Conclusions}
+PENDING
 
 \newpage
 \bibliography{WorkshopPaper}
