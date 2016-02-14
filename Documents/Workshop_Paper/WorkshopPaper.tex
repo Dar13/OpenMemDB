@@ -50,7 +50,7 @@
 While hard drives are getting faster due to the introduction of NAND flash-based drives,
 they are still relatively slow when compared to main memory. Meanwhile main memory (commonly 
 referred to as Random Access Memory or RAM) is following a long running 
-pattern where it has precipitiously dropped in price from costing thousands of dollars for a few 
+pattern where it has precipitously dropped in price from costing thousands of dollars for a few 
 megabytes to about \$40 for 8 gigabytes \cite{jcmit}. With this trend, we can take 
 advantage and design extremely fast databases. While there are many applications for 
 which current database solutions are fast enough (website logins for example), these 
@@ -62,12 +62,10 @@ memory module technology. Making it possible for a data analysis algorithm to ma
 full use of the database server's processing power to extract and manipulate data
 would make that analysis quicker and efficient in terms of hardware use.
 \par\vspace{\baselineskip}
-A real-world example of this need for fast and high throughput databases is demonstrated by Zynga, 
-the developers of Words with Friends and Farmville, faced a problem where their 
-database was not able to supply their data analysis algorithm problem. With so 
-many users, their database solution was not fast enough to provide real time analytics. 
-There were just too many transactions going on at once. They 
-remedied this by switching to MemSQL: a closed-source in-memory database. With this 
+An example of the need for a fast and high throughput databases is a problem that was experienced by Zynga 
+(the developers of Words with Friends and Farmville). They had so many users that their database solution was
+not able to provide enough throughput to supply their real-time analysis algorithms adequately. Switching to an
+in-memory database, MemSQL, finally provided them with the speed and throughput they required. With this 
 solution, Zynga can ``make decisions based on billions of data points in real-time to 
 provide better in-game personalization and overall customer satisfaction''. \cite{MemSQL} 
 
@@ -92,7 +90,7 @@ There have been some attempts to increase the performance of database management
 systems in recent years. Some solutions will sacrifice
 some data consistency in order to achieve better performance. Still others
 remain fully ACID compliant and attempt to parallelize individual steps in the 
-DBMS or solely use multiple threads when executing query plans. Then there are those
+DBMS or solely use multiple threads when executing query plans. There are also those
 that attempt to implement some level of lock freedom into their DBMS.
 \par\vspace{\baselineskip}
 \subsection{MemSQL and VoltDB}
@@ -135,13 +133,13 @@ Each module has a distinct responsibility and mechanism of fulfilling that respo
 little communication between threads as possible. The Work Manager is responsible for distributing
 incoming queries and commands among the worker threads as well as sending the final results of those
 queries or commands back to the client that sent them. The SQL Engine is responsible for parsing the
-given query or commmand string into an internal representation that can be executed on the Data Store.
+given query or command string into an internal representation that can be executed on the Data Store.
 The Data Store is where all the database's data is stored and thus is where the wait-free data
 structures are mainly used. Those wait-free data structures are important to guarantee that all
 the worker threads can safely and efficiently execute their assigned tasks and then communicate
 those results to the Work Manager.
 \par\vspace{\baselineskip}
-Each worker thread is a long-lived thread spawned by the database upon startup and has various
+Each worker thread is a long-lived thread spawned by the database upon start-up and has various
 thread-local pieces of memory given to it that are used by the various modules. Each instance of
 this memory is guaranteed to be only be accessible by the assigned thread by the C++11 standard\cite{std:c++11}.
 Most of this memory is used by the parser engine within the SQL Engine module and when the 
@@ -166,8 +164,8 @@ selected record(s) changing between the time of selection and the time to perfor
 is deemed a soft failure due to contention between threads executing concurrent and overlapping statements
 and is communicated to the client as such.
 \par\vspace{\baselineskip}
-Inserting records into a table within the Data Store requires pre-processed data be passed
-into the insertRecord method of the Data Store object. The general proecedure of inserting
+Inserting records into a table within the Data Store requires pre-processed data to be passed
+into the insertRecord method of the Data Store object. The general procedure of inserting
 into a table is shown in Figure \ref{insert_record}. This method first retrieves the table 
 that we want to insert into and ensures the data provided adheres to the schema defined 
 at the table's creation. Assuming that check is successful, a Tervel vector is then 
