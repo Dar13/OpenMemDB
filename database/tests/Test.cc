@@ -4,14 +4,12 @@
 
 #include "Test.h"
 #include "Randomizer.h"
+#include "Modes.h"
 #include "SQLGenerator.h"
 #include <sql/omdb_parser.h>
 
-using namespace std;
-
-
 int testMode = -1;
-vector<string> statements;
+vector<string> mainStatements;
 
 Test::Test(){}
 
@@ -37,7 +35,7 @@ Test& Test::test()
             
             printf("Start CREATE test: \n");
             
-            //cout << statements[0] << endl;  
+            //cout << mainStatements[0] << endl;  
             
             break;
     }
@@ -56,11 +54,11 @@ Test& Test::generateCases(int complexity, int amount)
         case MODE_CREATE:
             printf("Generating CREATE test cases \n");
             
-            statements = sqlGenerator.generateCreateCases(complexity, amount);
+            mainStatements = sqlGenerator.generateCreateCases(complexity, amount);
 
-            for(auto i = statements.begin(); i  != statements.end(); i++)
+            for(auto i = mainStatements.begin(); i  != mainStatements.end(); i++)
             {
-                cout << *i << endl;
+                std::cout << *i << std::endl;
             }
             
             break;
@@ -72,5 +70,5 @@ Test& Test::generateCases(int complexity, int amount)
 void Test::clean()
 {
     testMode = -1;
-    statements.clear();
+    mainStatements.clear();
 }

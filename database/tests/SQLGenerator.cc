@@ -34,8 +34,7 @@ string SQLGenerator::generateCreateStatement(int complexity)
     std::string base = "CREATE TABLE ";
     std::string ret = base;
 
-    // Randomize name
-    // Randomize length 
+    // Randomize name and length 
     int nameLength = Randomizer::generateInt(9) + 1;
     std::string name = Randomizer::generateString(nameLength);
 
@@ -50,7 +49,6 @@ string SQLGenerator::generateCreateStatement(int complexity)
 
     if(columnAmountRandomization == 1)
     {
-    	printf("Complexity bit 1 turned on (column randomization)");
         int colAmount = Randomizer::generateInt(4) + 2;
 
         // Randomize all the columns except the last one
@@ -97,7 +95,7 @@ string SQLGenerator::generateCreateStatement(int complexity)
 vector<string> SQLGenerator::generateSelectCases(int complexity, int amount)
 {
 
-    vector<string> statements;
+    std::vector<string> statements;
     return statements;
 }
 

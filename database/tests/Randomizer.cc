@@ -3,12 +3,9 @@
 #include <string>
 #include <random>
 
-using namespace std;
-
-
 // Generate a random string with max length len
 // TODO: replace with random dictionary words
-string Randomizer::generateString(const int length)
+std::string Randomizer::generateString(const int length)
 {
     char str[length];
     static const char alphanum[] =
