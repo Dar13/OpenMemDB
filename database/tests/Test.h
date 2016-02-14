@@ -4,15 +4,12 @@
 #include <string>
 #include <vector>
 
-
-using namespace std;
-
-enum TestType 
-{
-    MODE_UNSET = -1,
-    MODE_CREATE = 0,
-    MODE_SELECT
-};
+// enum TestType 
+// {
+//     MODE_UNSET = -1,
+//     MODE_CREATE = 0,
+//     MODE_SELECT
+// };
 
 class Test 
 {
@@ -24,8 +21,6 @@ class Test
     Test& generateCases(int complexity, int amount);
    
    private:
-
-
     void clean();
 
 };
