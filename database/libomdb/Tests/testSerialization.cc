@@ -70,14 +70,13 @@ bool testResultPacketSerialization() {
   // Create result packet
   ResultPacket resultPacket;
   resultPacket.status = ResultStatus::OK;
-  resultPacket.resultSize = 32;
+  resultPacket.resultSize = 64;
   resultPacket.rowLen = 4;
   resultPacket.terminator = THE_TERMINATOR;
-  // Put data in the packer
+  // Put data in the packet
   uint64_t* resultPacketData = new uint64_t[4];
-  for (int i = 0; i < resultPacket.resultSize/sizeof(uint64_t); ++i) {
-    resultPacketData[i] = (uint64_t)i;
-    std::cout << resultPacketData[i] << std::endl;
+  for (int i = 0; i < resultPacket.resultSize/8; ++i) { // 2 rows
+    resultPacketData[i] = (uint64_t)i;  
   }
   resultPacket.data = resultPacketData;
   // Serialize the result packet
