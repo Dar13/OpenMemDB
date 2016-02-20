@@ -77,6 +77,7 @@ bool testResultPacketSerialization() {
   uint64_t* resultPacketData = new uint64_t[8];
   for (uint64_t i = 0; i < resultPacket.resultSize/8; ++i) { // 2 rows
     resultPacketData[i] = i;
+    std::cout << "Inserted " << i << " into data" << std::endl;
   }
   resultPacket.data = resultPacketData;
   // Serialize the result packet

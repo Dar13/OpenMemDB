@@ -169,6 +169,7 @@ ResultPacket DeserializeResultPacket(char* serializedPacket){
   // Place the first 8 bytes into packet.
   memcpy(&packet, serializedPacket, 8);
   packet.data = new uint64_t[packet.resultSize/sizeof(uint64_t)];
+  memset(packet.data, 0, sizeof(uint64_t) * (packet.resultSize/sizeof(uint64_t)));
   memcpy(packet.data, &serializedPacket[8], packet.resultSize);
   packet.terminator = serializedPacket[8 + packet.resultSize];
   return packet;
