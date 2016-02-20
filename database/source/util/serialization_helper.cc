@@ -139,7 +139,7 @@ CommandPacket DeserializeCommandPacket(char* serializedPacket){
   memcpy(type, &serializedPacket[0], sizeof(CommandType));
   memcpy(commandPacket.message, &serializedPacket[1], DB_NAME_LEN);
   commandPacket.commandType = mapStringToCommandType(type);
-  delete(type);
+  delete[] type;
   return commandPacket;
 }
 
@@ -150,7 +150,7 @@ ConnectionPacket DeserializeConnectionPacket(const char* serializedPacket){
   memcpy(type, &serializedPacket[0], sizeof(uint8_t));
   memcpy(connectionPacket.name, &serializedPacket[1], DB_NAME_LEN);
   connectionPacket.type = mapStringToPacketType(type);
-  delete(type);
+  delete[] type;
   //connectionPacket.name[DB_NAME_LEN - 1] = 0; // I think neil said not necessary
   return connectionPacket;
 }

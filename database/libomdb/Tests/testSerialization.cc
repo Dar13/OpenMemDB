@@ -61,7 +61,7 @@ bool testConnectionPacketSerialization() {
 
   assert(strcmp(deserializedConnectionPacket.name, "db_name") == 0);
 
-  delete serializedConnectionPacket;
+  delete[] serializedConnectionPacket;
 
   return true;
 }
@@ -74,9 +74,9 @@ bool testResultPacketSerialization() {
   resultPacket.rowLen = 4;
   resultPacket.terminator = THE_TERMINATOR;
   // Put data in the packet
-  uint64_t* resultPacketData = new uint64_t[4];
-  for (int i = 0; i < resultPacket.resultSize/8; ++i) { // 2 rows
-    resultPacketData[i] = (uint64_t)i;  
+  uint64_t* resultPacketData = new uint64_t[8];
+  for (uint64_t i = 0; i < resultPacket.resultSize/8; ++i) { // 2 rows
+    resultPacketData[i] = i;
   }
   resultPacket.data = resultPacketData;
   // Serialize the result packet
@@ -133,7 +133,7 @@ bool testResultMetaDataPacketSerialization() {
     std::cout << "Column type:" << col.type << std::endl;
   }
 
-  delete serializedPacket;
+  delete[] serializedPacket;
 
   return true;
 }
