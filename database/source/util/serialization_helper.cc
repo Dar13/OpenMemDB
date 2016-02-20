@@ -166,11 +166,10 @@ ResultMetaDataPacket DeserializeResultMetaDataPacket(char* serializedPacket){
 ResultPacket DeserializeResultPacket(char* serializedPacket){
   printf("Entered deserialize result packet");
   ResultPacket packet;
-  packet.data = new uint64_t;
   // Place the first 8 bytes into packet.
   memcpy(&packet, serializedPacket, 8);
-  uint64_t resultSize = (uint64_t) serializedPacket[4];
-  memcpy(packet.data, &serializedPacket[8], resultSize);
-  packet.terminator = serializedPacket[8 + resultSize];
+  packet.data = new uint64_t[packet.resultSize/sizeof(uint64_t)];
+  memcpy(packet.data, &serializedPacket[8], packet.resultSize);
+  packet.terminator = serializedPacket[8 + packet.resultSize];
   return packet;
 }
