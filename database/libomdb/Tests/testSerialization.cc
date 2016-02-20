@@ -88,7 +88,7 @@ bool testResultPacketSerialization() {
   // Assert some values
   std::cout << "Result Status: " << (int)deserializedResultPacket.status << std::endl;
   assert(deserializedResultPacket.status == ResultStatus::OK);
-  assert(deserializedResultPacket.resultSize == 32);
+  assert(deserializedResultPacket.resultSize == 64);
   assert(deserializedResultPacket.rowLen == 4);
   assert(deserializedResultPacket.terminator == THE_TERMINATOR);
 
