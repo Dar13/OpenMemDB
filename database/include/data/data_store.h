@@ -174,12 +174,25 @@ enum class ManipStatus : uint32_t
     ERR_PARTIAL_CONTENTION,
 };
 
+enum class ConstraintStatus : uint32_t
+{
+    SUCCESS = 0,
+    ERR_CONSTRAINT,
+    ERR_SCHEMA,
+    ERR_ROW_DATA,
+    ERR_NULL,
+    ERR_NOT_UNIQUE,
+    ERR_NOT_PKEY,
+    ERR_ROW_LEN,
+};
+
 // Some common Result types for this module
 using DataResult = Result<TervelData>;
 using RecordResult = Result<RecordData>;
 using MultiRecordResult = Result<MultiRecordData>;
 using ManipResult = Result<ManipStatus>;
 using SchemaResult = Result<TableSchema>;
+using ConstraintResult = Result<ConstraintStatus>;
 
 /**
  *  @brief The interface into the data that is shared between all worker threads.
@@ -232,7 +245,7 @@ private:
 
 	MultiTableRecordCopies searchTables(NestedPredicate* pred);
 
-    bool schemaChecker(SchemaTablePair *table_pair, Record *record);
+    ConstraintResult schemaChecker(SchemaTablePair *table_pair, Record *record);
 
     TableMap table_name_mapping;
 };
