@@ -20,13 +20,15 @@ THE SOFTWARE.
 */
 
 #include <cstring>
+#include <cstdio>
+#include <iostream>
 
 #include "../../include/util/libomdb.h"
 
 /*****************************************************************
  * Helper functions
  *****************************************************************/
-void deserializeResultColumnsAndTerminator(ResultMetaDataPacket* packet,
+/*void deserializeResultColumnsAndTerminator(ResultMetaDataPacket* packet,
                                            const char* serializedPacket,
                                            uint index) {
   uint32_t col = 0;
@@ -46,15 +48,15 @@ void deserializeResultColumnsAndTerminator(ResultMetaDataPacket* packet,
 
   //packet->columns = columns;
   memcpy(packet->columns, columns, sizeof(columns));
-}
+}*/
 
 
 // Need to map to enums from strings.
 CommandType mapStringToCommandType(char* type) {
-  if (strcmp(type, "SQL_STATEMENT") == 0) {
-    return CommandType::SQL_STATEMENT;
-  } else if (strcmp(type, "DB_COMMAND") == 0) {
-    return CommandType::DB_COMMAND;
+  CommandType commandType = static_cast<CommandType>(type[0]);
+  //CommandType commandType = static_cast<CommandType>(std::stoi(typeString));
+  if (commandType == CommandType::DB_COMMAND || commandType == CommandType::SQL_STATEMENT) {
+    return commandType;
   }
 
   return CommandType::INVALID_COMMAND;
@@ -104,14 +106,26 @@ char* SerializeConnectionPacket(ConnectionPacket packet){
   return serializedConnectionPacket;
 }
 
-
 char* SerializeResultMetaDataPacket(ResultMetaDataPacket packet){
+  char* buffer = new (std::nothrow) char[sizeof(ResultMetaDataPacket)];
+  if(buffer == nullptr) {
+    printf("ERROR: Failed to allocate memory for packet buffer!\n");
+    return nullptr;
+  }
 
+  memcpy(buffer, &packet, sizeof(ResultMetaDataPacket));
+  return buffer;
 }
 
 
 char* SerializeResultPacket(ResultPacket packet){
-
+  size_t size = 8 + packet.resultSize + 1;
+  char* buffer = new (std::nothrow) char[size];
+  memset(buffer, 0, size);
+  memcpy(buffer, &packet, sizeof(char) * 8);
+  memcpy(buffer + 8, packet.data, packet.resultSize);
+  buffer[size - 1] = THE_TERMINATOR;
+  return buffer;
 }
 
 /*****************************************************************
@@ -125,7 +139,7 @@ CommandPacket DeserializeCommandPacket(char* serializedPacket){
   memcpy(type, &serializedPacket[0], sizeof(CommandType));
   memcpy(commandPacket.message, &serializedPacket[1], DB_NAME_LEN);
   commandPacket.commandType = mapStringToCommandType(type);
-  delete(type);
+  delete[] type;
   return commandPacket;
 }
 
@@ -136,50 +150,26 @@ ConnectionPacket DeserializeConnectionPacket(const char* serializedPacket){
   memcpy(type, &serializedPacket[0], sizeof(uint8_t));
   memcpy(connectionPacket.name, &serializedPacket[1], DB_NAME_LEN);
   connectionPacket.type = mapStringToPacketType(type);
-  delete(type);
+  delete[] type;
   //connectionPacket.name[DB_NAME_LEN - 1] = 0; // I think neil said not necessary
   return connectionPacket;
 }
 
 
-ResultMetaDataPacket DeserializeResultMetaDataPacket(const char* serializedPacket){
+ResultMetaDataPacket DeserializeResultMetaDataPacket(char* serializedPacket){
   ResultMetaDataPacket metaDataPacket;
-  char* type;
-  char* status;
-  uint32_t* numColumns = new uint32_t;
-  memcpy(type, &serializedPacket[0], sizeof(uint8_t));
-  memcpy(status, &serializedPacket[1], sizeof(uint8_t));
-  memcpy(numColumns, &serializedPacket[2], sizeof(uint32_t));
-  metaDataPacket.type = mapStringToPacketType(type);
-  metaDataPacket.status = mapStringToResultStatus(status);
-  metaDataPacket.numColumns = *numColumns;
-  delete(type);
-  delete(status);
-  delete(numColumns);
-  deserializeResultColumnsAndTerminator(&metaDataPacket, serializedPacket, 6);
+  memcpy(&metaDataPacket, serializedPacket, sizeof(ResultMetaDataPacket));
   return metaDataPacket;
 }
 
 
-ResultPacket DeserializeResultPacket(const char* serializedPacket){
-  ResultPacket resultPacket;
-  char* status;
-  uint32_t* resultSize = new uint32_t;
-  uint8_t* rowLen = new uint8_t;
-  memcpy(status, &serializedPacket[0], sizeof(uint8_t));
-  memcpy(resultSize, &serializedPacket[1], sizeof(uint32_t));
-  memcpy(rowLen, &serializedPacket[5], sizeof(uint8_t));
-  // Need to loop until terminator hit, memcpy 8 bytes at a time
-  uint64_t* resultData = new uint64_t;
-  memcpy(resultData, &serializedPacket[6], *resultSize);
-  // memcpy terminator some how??
-  resultPacket.status = mapStringToResultStatus(status);
-  resultPacket.resultSize = *resultSize;
-  resultPacket.rowLen = *rowLen;
-  resultPacket.data = resultData;
-  delete(status);
-  delete(resultSize);
-  delete(rowLen);
-  delete(resultData);
-  return resultPacket;
+ResultPacket DeserializeResultPacket(char* serializedPacket){
+  ResultPacket packet;
+  // Place the first 8 bytes into packet.
+  memcpy(&packet, serializedPacket, 8);
+  packet.data = new uint64_t[packet.resultSize/sizeof(uint64_t)];
+  memset(packet.data, 0, sizeof(uint64_t) * (packet.resultSize/sizeof(uint64_t)));
+  memcpy(packet.data, &serializedPacket[8], packet.resultSize);
+  packet.terminator = serializedPacket[8 + packet.resultSize];
+  return packet;
 }
