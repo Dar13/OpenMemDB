@@ -16,7 +16,7 @@ bool testResultPacketSerialization();
 bool testResultMetaDataPacketSerialization();
 
 
-int main (int argc, char** argv) {
+int main () {
 
   bool commandPassed = testCommandPacketSerialization();
   bool connectionPassed = testConnectionPacketSerialization();
@@ -33,7 +33,6 @@ bool testCommandPacketSerialization() {
   CommandPacket commandPacket;
   memcpy(commandPacket.message, "command message", sizeof("command message"));
   commandPacket.commandType = CommandType::DB_COMMAND;
-  std::cout << "Name of db: " << commandPacket.message << std::endl;
   char* serializedCommandPacket = SerializeCommandPacket(commandPacket);
   CommandPacket deserializedCommandPacket =
       DeserializeCommandPacket(serializedCommandPacket);
@@ -50,9 +49,7 @@ bool testConnectionPacketSerialization() {
   ConnectionPacket connectionPacket;
   strcpy(connectionPacket.name, "db_name");
   connectionPacket.type = PacketType::COMMAND; // Because there is not CONNECTION type
-  std::cout << "Name of db: " << connectionPacket.name << std::endl;
   char* serializedConnectionPacket = SerializeConnectionPacket(connectionPacket);
-  std::cout << serializedConnectionPacket << std::endl;
 
   ConnectionPacket deserializedConnectionPacket =
       DeserializeConnectionPacket(serializedConnectionPacket);
@@ -77,7 +74,6 @@ bool testResultPacketSerialization() {
   uint64_t* resultPacketData = new uint64_t[8];
   for (uint64_t i = 0; i < resultPacket.resultSize/8; ++i) { // 2 rows
     resultPacketData[i] = i;
-    std::cout << "Inserted " << i << " into data" << std::endl;
   }
   resultPacket.data = resultPacketData;
   // Serialize the result packet
@@ -87,17 +83,12 @@ bool testResultPacketSerialization() {
   ResultPacket deserializedResultPacket = DeserializeResultPacket(serializedResultPacket);
 
   // Assert some values
-  std::cout << "Result Status: " << (int)deserializedResultPacket.status << std::endl;
   assert(deserializedResultPacket.status == ResultStatus::OK);
   assert(deserializedResultPacket.resultSize == 64);
   assert(deserializedResultPacket.rowLen == 4);
   assert(deserializedResultPacket.terminator == THE_TERMINATOR);
 
   // Print some of the result data
-  int numData = deserializedResultPacket.resultSize / sizeof(uint64_t);
-  for (int i = 0; i < numData; ++i) {
-    std::cout << deserializedResultPacket.data[i] << std::endl;
-  }
   return true;
 }
 
@@ -121,19 +112,12 @@ bool testResultMetaDataPacketSerialization() {
 
   // Serialize packet
   char* serializedPacket = SerializeResultMetaDataPacket(resultMetaDataPacket);
-  std::cout << serializedPacket << std::endl;
 
   // Deserialize packet
   ResultMetaDataPacket deserializedPacket = DeserializeResultMetaDataPacket(serializedPacket);
-  std::cout << TAG << "Num columns: "<< deserializedPacket.numColumns << std::endl;
 
   assert(deserializedPacket.type == PacketType::RESULT_METADATA);
   assert(deserializedPacket.numColumns == 5);
-  for (ResultColumn col: deserializedPacket.columns) {
-    std::cout << "Column name:" << col.name << std::endl;
-    std::cout << "Column type:" << col.type << std::endl;
-  }
-
   delete[] serializedPacket;
 
   return true;

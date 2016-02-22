@@ -28,7 +28,7 @@ THE SOFTWARE.
 /*****************************************************************
  * Helper functions
  *****************************************************************/
-void deserializeResultColumnsAndTerminator(ResultMetaDataPacket* packet,
+/*void deserializeResultColumnsAndTerminator(ResultMetaDataPacket* packet,
                                            const char* serializedPacket,
                                            uint index) {
   uint32_t col = 0;
@@ -48,7 +48,7 @@ void deserializeResultColumnsAndTerminator(ResultMetaDataPacket* packet,
 
   //packet->columns = columns;
   memcpy(packet->columns, columns, sizeof(columns));
-}
+}*/
 
 
 // Need to map to enums from strings.
@@ -123,7 +123,7 @@ char* SerializeResultPacket(ResultPacket packet){
   char* buffer = new (std::nothrow) char[size];
   memset(buffer, 0, size);
   memcpy(buffer, &packet, sizeof(char) * 8);
-  memcpy(buffer + 9, &packet.data, packet.resultSize);
+  memcpy(buffer + 8, packet.data, packet.resultSize);
   buffer[size - 1] = THE_TERMINATOR;
   return buffer;
 }
@@ -164,7 +164,6 @@ ResultMetaDataPacket DeserializeResultMetaDataPacket(char* serializedPacket){
 
 
 ResultPacket DeserializeResultPacket(char* serializedPacket){
-  printf("Entered deserialize result packet");
   ResultPacket packet;
   // Place the first 8 bytes into packet.
   memcpy(&packet, serializedPacket, 8);
