@@ -57,6 +57,8 @@ void WorkThread::Run(WorkThreadData* data)
         {
             uintptr_t job_ptr = reinterpret_cast<uintptr_t>(queue_getter.value());
             // Mask off the bottom 4 bits, as Tervel modified them
+            // Malloc/new on Linux guarantees that the address will be a
+            // multiple of 16
             job_ptr = job_ptr & (~0xF);
             job = reinterpret_cast<Job*>(job_ptr);
         }
