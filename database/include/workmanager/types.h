@@ -91,8 +91,8 @@ struct WorkThreadData
     {}
 
     WorkThreadData(WorkThreadData&& data)
-        : stop(data.stop), cond_var(data.cond_var), mutex(data.mutex), 
-        thread(std::move(thread)), tervel(data.tervel)
+        : tervel(data.tervel), stop(data.stop), thread(std::move(thread)), cond_var(data.cond_var), 
+        mutex(data.mutex)
     {}
 
     //! Thread ID

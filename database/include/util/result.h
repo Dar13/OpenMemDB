@@ -20,7 +20,7 @@
 #ifndef OMDB_RESULT_H
 #define OMDB_RESULT_H
 
-enum class ResultStatus : uint32_t
+enum class ResultStatus : uint16_t
 {
     SUCCESS = 0,
     FAILURE,
@@ -37,6 +37,7 @@ enum class ResultType : uint8_t
 struct ResultBase
 {
     ResultBase(ResultStatus s, ResultType t = ResultType::OTHER) : type(t), status(s) {}
+    virtual ~ResultBase() {}
 
     ResultType type;
     ResultStatus status;

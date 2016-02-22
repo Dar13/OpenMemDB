@@ -5,7 +5,11 @@
 #ifndef OPENMEMDB_LIBOMDB_H
 #define OPENMEMDB_LIBOMDB_H
 
+// C++ stdlib include
 #include <string>
+
+// Project include
+#include <util/result.h>
 
 #define MESSAGE_SIZE 300
 
@@ -13,6 +17,8 @@ const uint8_t THE_TERMINATOR = 0xFF;
 const uint32_t DB_NAME_LEN = 50;
 const uint32_t COL_NAME_LEN = 25;
 const uint32_t MAX_NUM_COLUMNS = 20;
+//TODO: Verify with Mike on maximum packet size
+const uint32_t MAX_PACKET_SIZE = 512;
 
 /**
  * Enum used to describe the type of packet being sent
@@ -27,20 +33,16 @@ enum class CommandType: uint8_t {
 enum class PacketType: uint8_t {
   NONE = 0,
   COMMAND,
+  CONNECTION,
   RESULT_METADATA,
   RESULT_DATA,
   INVALID_PACKET
 };
 
-
-enum class ResultStatus: uint16_t {
-  OK = 0,
-  ERROR,
-  ERROR_SYNTAX
-};
-
-
 struct CommandPacket {
+    CommandPacket() : type(PacketType::COMMAND) {}
+
+    PacketType type;
   CommandType commandType;  // The type of command requested to be executed: SQL_STATEMENT or DB_COMMAND
   char message[MESSAGE_SIZE];
   uint8_t terminator;
@@ -48,6 +50,8 @@ struct CommandPacket {
 
 
 struct ConnectionPacket {
+    ConnectionPacket() : type(PacketType::CONNECTION) {}
+
   PacketType type;
   /** The name of the database */
   char name[DB_NAME_LEN]; // The name of the database connected to.

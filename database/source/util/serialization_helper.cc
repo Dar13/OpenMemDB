@@ -76,16 +76,6 @@ PacketType mapStringToPacketType(char* type) {
   return PacketType::INVALID_PACKET;
 }
 
-ResultStatus mapStringToResultStatus(char* status) {
-  if (strcmp(status, "OK")) {
-    return ResultStatus::OK;
-  } else if (strcmp(status, "ERROR_SYNTAX")) {
-    return ResultStatus::ERROR_SYNTAX;
-  }
-
-  return ResultStatus::ERROR ;
-}
-
 /*****************************************************************
  * Serialization functions
  *****************************************************************/

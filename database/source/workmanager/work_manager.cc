@@ -23,6 +23,7 @@
 #include <algorithm>
 
 // Project includes
+#include <util/libomdb.h>
 #include <workmanager/work_manager.h>
 #include <workmanager/work_thread.h>
 
@@ -154,6 +155,16 @@ int32_t WorkManager::Run()
             printf("Creating new connection!\n");
             omdb::Connection conn(conn_socket_fd, conn_addr);
             m_connections.push_back(conn);
+
+            // Send ConnectionPacket with some database metadata
+            ConnectionPacket conn_packet;
+            memset(conn_packet.name, 0, DB_NAME_LEN);
+            memcpy(conn_packet.name, "OpenMemDB Database", 18);
+
+            // TODO: This may infinitely loop
+            while(conn.send(reinterpret_cast<char*>(&conn_packet), 
+                        sizeof(ConnectionPacket)).status_code == omdb::D_SEND_PART)
+            {}
         }
 
         m_connections.erase( std::remove_if( m_connections.begin(),
@@ -181,14 +192,19 @@ int32_t WorkManager::Run()
                 continue;
             }
 
-            printf("Job %d has result %lu\n", res.job_number, res.result);
+            printf("Job %d has result of type %u\n", res.job_number, res.result->type);
 
+            // TODO: Generate ResultMetaData packet
+            // TODO: Generate Result packet
+
+            /*
             status = conn.send((char*)&res.result, sizeof(uint64_t));
             while(status.status_code == omdb::D_RECV_PART)
             {
                 printf("Attempting to send entirety of response\n");
                 status = conn.send((char*)res.result, sizeof(uint64_t));
             }
+            */
 
             if(status.status_code != omdb::D_SEND_FULL &&
                status.status_code != omdb::SUCCESS)
@@ -200,6 +216,9 @@ int32_t WorkManager::Run()
             }
 
             printf("Job number %d is done!\n", res.job_number);
+            
+            // Clean up result
+            delete res.result;
         }
         results.clear();
     }
@@ -227,8 +246,7 @@ uint32_t WorkManager::GetAvailableThread()
  */
 bool WorkManager::ReceiveCommand(omdb::Connection& conn)
 {
-    // TODO: Make magic number into a const
-    char buffer[256];
+    char buffer[MAX_PACKET_SIZE];
     
     // We're making this unsigned so the overflow behavior is predictable
     // If we ever get more than 3 billion concurrent requests, we'll be in trouble though...
@@ -237,8 +255,7 @@ bool WorkManager::ReceiveCommand(omdb::Connection& conn)
     omdb::NetworkStatus status;
 
     // Is there anything in the queue?
-    // TODO: Make magic number into a const
-    status = conn.recv(buffer, 256);
+    status = conn.recv(buffer, MAX_PACKET_SIZE);
 
     // Generate a job and queue it into a worker thread if the full 
     // message was received
@@ -252,13 +269,18 @@ bool WorkManager::ReceiveCommand(omdb::Connection& conn)
         // Create the worker thread's task
         Job j = WorkThread::GenerateJob(job_number, buffer);
         Job* job_ptr = new (std::nothrow) Job(std::move(j));
-        // TODO: Error handling
+        if(job_ptr == nullptr)
+        {
+            // Out of memory, crash?
+            // std::terminate();
+            printf("Out of memory! Unable to allocate job!\n");
+            return true;
+        }
 
         m_thread_results.push_back(job_ptr->get_future());
         m_job_to_connection[job_number] = conn;
 
         // Push the job to the thread
-        // TODO: Replace the lock and queue push with a Tervel FIFO
         WorkThreadData& thread_data = m_thread_data[GetAvailableThread()];
 
         while(!thread_data.job_queue.enqueue(job_ptr)) {}
