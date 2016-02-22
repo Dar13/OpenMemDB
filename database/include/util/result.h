@@ -36,7 +36,7 @@ enum class ResultType : uint8_t
 
 struct ResultBase
 {
-    ResultBase(ResultStatus s, ResultType t = ResultType::OTHER) : status(s), type(t) {}
+    ResultBase(ResultStatus s, ResultType t = ResultType::OTHER) : type(t), status(s) {}
 
     ResultType type;
     ResultStatus status;

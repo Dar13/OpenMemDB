@@ -25,6 +25,7 @@
 #include <thread>
 #include <mutex>
 #include <string>
+#include <atomic>
 #include <queue>
 #include <future>
 #include <condition_variable>
@@ -34,13 +35,14 @@
 #include <util/result.h>
 
 // Tervel includes
+#include <tervel/util/tervel.h>
 #include <tervel/containers/wf/linked_list_queue/queue.h>
 
 // TODO: Make this into a true result type for SQL Query or Database command
 typedef struct
 {
     uint32_t job_number;    //!< The job number that's associated to this result
-    ResultBase* result;
+    ResultBase* result;     //!< Pointer to result
 } JobResult;
 
 //! Typedef of a function pointer that returns a @refer Result and takes an integer.
@@ -48,6 +50,10 @@ typedef JobResult (*JobFunctor)(int);
 
 //! Convenient typedef for the job concept.
 typedef std::packaged_task<JobResult(int)> Job;
+
+//! Convenient typedef for the Tervel queue class
+template<typename T>
+using TervelQueue = tervel::containers::wf::Queue<T>;
 
 /**
  *  \brief TODO
@@ -62,7 +68,7 @@ struct ThreadNotifier
     bool used;
 
     //! The variable the signifies an interruption of the thread
-    std::atomic<bool> stop;
+    std::atomic_bool stop;
 
     //! The mutex to be assigned to a thread
     std::mutex mutex;
@@ -73,36 +79,42 @@ struct ThreadNotifier
 
 /**
  *  @brief Additional data that allows for inter-thread communication.
- *
- *  @note TODO:The mutex and queue could probably be replaced with a Tervel data structure.
  */
 struct WorkThreadData
 {
-    WorkThreadData(ThreadNotifier* notifier)
-        : stop(notifier->stop), cond_var(notifier->cond_var), mutex(notifier->mutex)
+    WorkThreadData()
+        : stop(nullptr), cond_var(nullptr), mutex(nullptr)
     {}
 
-    WorkThreadData(const WorkThreadData& data)
-        : stop(data.stop), cond_var(data.cond_var), mutex(data.mutex)
+    WorkThreadData(ThreadNotifier* notifier)
+        : stop(&(notifier->stop)), cond_var(&notifier->cond_var), mutex(&notifier->mutex)
+    {}
+
+    WorkThreadData(WorkThreadData&& data)
+        : stop(data.stop), cond_var(data.cond_var), mutex(data.mutex), 
+        thread(std::move(thread)), tervel(data.tervel)
     {}
 
     //! Thread ID
     uint16_t id;
 
+    //! Pointer to the tervel object
+    tervel::Tervel* tervel;
+
     //! If set, this thread should return immediately
-    std::atomic<bool>& stop;
+    std::atomic_bool* stop;
     
     //! Thread object
     std::thread thread;
 
     //! Queue of jobs
-    std::queue<Job> jobs;
+    TervelQueue<Job*> job_queue;
 
     //! Condition variable, allows for waking up from sleep
-    std::condition_variable& cond_var;
+    std::condition_variable* cond_var;
 
     //! Mutex
-    std::mutex& mutex;
+    std::mutex* mutex;
 };
 
 #endif

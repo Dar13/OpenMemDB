@@ -30,8 +30,9 @@
  *  \brief Constructor that initializes internal variables properly.
  */
 WorkManager::WorkManager(uint32_t num_threads, tervel::Tervel* tervel)
-    : m_tervel(tervel), m_num_threads(num_threads)
+    : m_tervel(tervel), m_num_threads(num_threads), m_thread_data(num_threads)
 {
+    m_context = new tervel::ThreadContext(m_tervel);
 }
 
 /**
@@ -48,20 +49,21 @@ int32_t WorkManager::Initialize()
         auto found_idx = std::find_if(std::begin(m_thread_notifiers),
                 std::end(m_thread_notifiers),
                 [] (const ThreadNotifier& m) -> bool {
-                    return m.used;
+                    return !m.used;
                 });
 
         if(found_idx == std::end(m_thread_notifiers))
         {
-            printf("ERROR: Requested number of threads outstripts number of "
+            printf("ERROR: Requested number of threads outstrips number of "
                     "available mutexes!\n");
             return E_OTHER_ERR;
         }
 
         found_idx->used = true;
         WorkThreadData data(found_idx);
+        data.tervel = m_tervel;
 
-        m_thread_data.push_back(data);
+        m_thread_data.push_back(std::move(data));
         m_thread_data.back().thread = std::thread(WorkThread::Run, &m_thread_data.back());
     }
 
@@ -249,18 +251,20 @@ bool WorkManager::ReceiveCommand(omdb::Connection& conn)
 
         // Create the worker thread's task
         Job j = WorkThread::GenerateJob(job_number, buffer);
-        m_thread_results.push_back(j.get_future());
+        Job* job_ptr = new (std::nothrow) Job(std::move(j));
+        // TODO: Error handling
+
+        m_thread_results.push_back(job_ptr->get_future());
         m_job_to_connection[job_number] = conn;
 
         // Push the job to the thread
         // TODO: Replace the lock and queue push with a Tervel FIFO
         WorkThreadData& thread_data = m_thread_data[GetAvailableThread()];
 
-        std::unique_lock<std::mutex> lock(thread_data.mutex);
-        thread_data.jobs.push(std::move(j));
+        while(!thread_data.job_queue.enqueue(job_ptr)) {}
 
         // Notify the thread to wake-up
-        thread_data.cond_var.notify_one();
+        thread_data.cond_var->notify_one();
 
         status.status_code = omdb::SUCCESS;
         return false;

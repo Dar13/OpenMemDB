@@ -160,7 +160,6 @@ using TableMap = tervel::containers::wf::HashMap<std::string,
                                                  SchemaTablePair*, 
                                                  TableHashFunctor<std::string, SchemaTablePair*>>;
 
-
 enum class ManipStatus : uint32_t
 {
     SUCCESS = 0,
@@ -173,6 +172,13 @@ enum class ManipStatus : uint32_t
     ERR_PARTIAL_CONTENTION,
 };
 
+// Some common Result types for this module
+using DataResult = Result<TervelData>;
+using RecordResult = Result<RecordData>;
+using MultiRecordResult = Result<MultiRecordData>;
+using ManipResult = Result<ManipStatus>;
+using SchemaResult = Result<TableSchema>;
+
 template<>
 struct Result<ManipStatus> : public ResultBase
 {
@@ -184,7 +190,7 @@ struct Result<ManipStatus> : public ResultBase
 template<>
 struct Result<RecordData> : public ResultBase
 {
-    Result(ResultStatus s, Record res) :
+    Result(ResultStatus s, const RecordData& res) :
         ResultBase(s, ResultType::QUERY), result(res)
     {}
 
@@ -200,13 +206,6 @@ struct Result<MultiRecordResult> : public ResultBase
 
     MultiRecordData result;
 };
-
-// Some common Result types for this module
-using DataResult = Result<TervelData>;
-using RecordResult = Result<RecordData>;
-using MultiRecordResult = Result<MultiRecordData>;
-using ManipResult = Result<ManipStatus>;
-using SchemaResult = Result<TableSchema>;
 
 /**
  *  @brief The interface into the data that is shared between all worker threads.

@@ -20,6 +20,9 @@
 #include <workmanager/types.h>
 #include <workmanager/work_thread.h>
 
+// Tervel include
+#include <tervel/util/tervel.h>
+
 /**
  * @brief This is the framework in which the thread's jobs are executed in.
  *
@@ -28,23 +31,48 @@
  */
 void WorkThread::Run(WorkThreadData* data)
 {
-    // Condition variables require a mutex
-    std::unique_lock<std::mutex> thread_lock(data->mutex, std::defer_lock);
+    // If this throws, then we're dead in the water anyways. Let it crash
+    tervel::ThreadContext* thread_context = new tervel::ThreadContext(data->tervel);
+
+    // Condition variables require an unique_lock
+    std::unique_lock<std::mutex> thread_lock(*data->mutex, std::defer_lock);
 
     while(true)
     {
         thread_lock.lock();
-        data->cond_var.wait_for(thread_lock, 
-                std::chrono::milliseconds(THREAD_SLEEP_MS));
+
+        // TODO: try/catch block needed?
+        while(!data->cond_var->wait_for(thread_lock, std::chrono::milliseconds(15),
+                [&data] () -> bool
+                {
+                    return (data->stop->load() || !data->job_queue.empty());
+                })) {}
         thread_lock.unlock();
 
-        if(data->stop.load()) { return; }
+        if(data->stop->load()) { break; }
 
-        Job do_job = std::move(data->jobs.front());
-        data->jobs.pop();
+        Job* job = nullptr;
+        TervelQueue<Job*>::Accessor queue_getter;
+        if(data->job_queue.dequeue(queue_getter))
+        {
+            uintptr_t job_ptr = reinterpret_cast<uintptr_t>(queue_getter.value());
+            // Mask off the bottom 4 bits, as Tervel modified them
+            job_ptr = job_ptr & (~0xF);
+            job = reinterpret_cast<Job*>(job_ptr);
+        }
+        else
+        {
+            continue;
+        }
 
-        do_job(1);
+        if(job != nullptr)
+        {
+            job->operator()(1);
+            delete job;
+        }
     }
+
+    delete thread_context;
 }
 
 /**

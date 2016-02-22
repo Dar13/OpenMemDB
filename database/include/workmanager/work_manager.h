@@ -44,6 +44,10 @@ class WorkManager
 {
 public:
     WorkManager(uint32_t num_threads, tervel::Tervel* tervel);
+    ~WorkManager()
+    {
+        delete m_context;
+    }
 
     // NM: TODO:Not sure about these error codes...
     /**
@@ -74,6 +78,9 @@ private:
 
     //! Tervel object to give to the worker threads
     tervel::Tervel* m_tervel;
+
+    //! Tervel thread context so the work manager can initialize Tervel objects
+    tervel::ThreadContext* m_context;
 
     //! Number of threads that are supposed to be running
     uint32_t m_num_threads;

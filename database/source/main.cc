@@ -36,12 +36,10 @@ int main(int argc, char** argv)
     printf("\t- %s\n", argv[i]);
   }
 
-  tervel::Tervel* tervel_main = new tervel::Tervel(8);
+  tervel::Tervel* tervel_main = new tervel::Tervel(9);
   WorkManager work_manager(8, tervel_main);
 
   int32_t status = 0;
-
-  printf("%u\n", sizeof(Job));
 
   status = work_manager.Initialize();
   if(status != WorkManager::E_NONE)
