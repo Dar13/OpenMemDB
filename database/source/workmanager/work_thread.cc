@@ -26,6 +26,9 @@
 // Tervel include
 #include <tervel/util/tervel.h>
 
+// Stdlib include
+#include <cstring>
+
 /**
  * @brief This is the framework in which the thread's jobs are executed in.
  *
