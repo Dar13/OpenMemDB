@@ -4,7 +4,7 @@ LDFLAGS=-pthread
 
 EXEC_NAME=test_serialization
 
-OBJECTS= ../../source/util/serialization_helper.o \
+OBJECTS= ../../../source/util/serialization_helper.o \
                     testSerialization.o
 
 all: $(EXEC_NAME)
