@@ -21,7 +21,7 @@ const uint32_t MAX_NUM_COLUMNS = 20;
 const uint32_t MAX_PACKET_SIZE = 512;
 
 /**
- * Enum used to describe the type of packet being sent
+ * Enum used to describe the type of statement being sent
  */
 enum class CommandType: uint8_t {
   SQL_STATEMENT = 0x01,
@@ -29,7 +29,9 @@ enum class CommandType: uint8_t {
   INVALID_COMMAND
 };
 
-
+/**
+ * Enum used to describe the type of packet being sent
+ */
 enum class PacketType: uint8_t {
   NONE = 0,
   COMMAND,

@@ -149,10 +149,66 @@ ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
         // Query
         case SQLStatement::SELECT:
             {
+                SelectQuery* query = reinterpret_cast<SelectQuery*>(statement);
                 MultiRecordResult statement_result = ExecuteQuery(statement, store);
+                if(statement_result.status != ResultStatus::SUCCESS)
+                {
+                    // TODO: Error handling
+                    assert(false);
+                }
+
                 // Extract type and data from the query result, and the column
                 // names from the query statement itself
-                // TODO: Implement this
+                QueryData query_data;
+                if(statement_result.result.size() == 0)
+                {
+                    query_data.metadata.clear();
+                    query_data.data.clear();
+                    return new (std::nothrow) QueryResult(ResultStatus::SUCCESS, query_data);
+                }
+
+                // Grab first record to get metadata
+                RecordData& record = statement_result.result.front();
+                size_t record_size = record.size();
+
+                // Iterate over the record and grab the necessary metadata
+                for(uint32_t itr = 0; itr < record_size; itr++)
+                {
+                    ResultColumn column;
+                    TervelData& data = record[itr];
+                    column.type = static_cast<uint16_t>(data.data.type);
+
+                    std::string& col_name = query->output_columns[itr];
+                    if(col_name.length() < sizeof(column.name))
+                    {
+                        // Assumes chars are 1 byte
+                        memcpy(column.name, col_name.c_str(), col_name.length());
+                    }
+                    else
+                    {
+                        // Invalid length output column
+                        // Probably should be caught before this
+                        // Truncate?
+                        // TODO: Handle this
+                        assert(false);
+                    }
+
+                    query_data.metadata.push_back(column);
+                }
+
+                // TODO: Enforce this being a move rather than a copy
+                query_data.data = statement_result.result;
+
+                QueryResult* query_result = new (std::nothrow) QueryResult(ResultStatus::SUCCESS,
+                                                                            query_data);
+                if(query_result == nullptr)
+                {
+                    // What do?
+                    assert(false);
+                    return nullptr;
+                }
+                
+                return query_result;
             }
             break;
         // Invalid or unknown statement, don't attempt to execute

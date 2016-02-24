@@ -33,6 +33,7 @@
 // Project includes
 #include <util/types.h>
 #include <util/result.h>
+#include <util/libomdb.h>
 #include <sql/common.h>
 
 // Tervel includes
@@ -93,12 +94,13 @@ struct WorkThreadData
     {}
 
     WorkThreadData(ThreadNotifier* notifier)
-        : stop(&(notifier->stop)), cond_var(&notifier->cond_var), mutex(&notifier->mutex)
+        : stop(&(notifier->stop)), cond_var(&notifier->cond_var), 
+        mutex(&notifier->mutex)
     {}
 
     WorkThreadData(WorkThreadData&& data)
-        : tervel(data.tervel), stop(data.stop), thread(std::move(thread)), cond_var(data.cond_var), 
-        mutex(data.mutex)
+        : tervel(data.tervel), stop(data.stop), thread(std::move(thread)), 
+        cond_var(data.cond_var), mutex(data.mutex)
     {}
 
     //! Thread ID
@@ -125,8 +127,18 @@ struct WorkThreadData
 
 struct QueryData
 {
-    std::vector<SQLColumn> metadata;
+    std::vector<ResultColumn> metadata;
     std::vector<std::vector<TervelData>> data;
+};
+
+typedef Result<QueryData> QueryResult;
+
+template<>
+struct Result<QueryData> : public ResultBase
+{
+    Result(ResultStatus s, QueryData res) : ResultBase(s, ResultType::QUERY), result(res) {}
+
+    QueryData result;
 };
 
 #endif
