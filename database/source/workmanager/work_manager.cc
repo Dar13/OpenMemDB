@@ -267,7 +267,7 @@ bool WorkManager::ReceiveCommand(omdb::Connection& conn)
         printf("Creating job number %d\n", job_number);
 
         // Create the worker thread's task
-        Job j = WorkThread::GenerateJob(job_number, buffer);
+        Job j = WorkThread::GenerateJob(job_number, buffer, this->data_store);
         Job* job_ptr = new (std::nothrow) Job(std::move(j));
         if(job_ptr == nullptr)
         {

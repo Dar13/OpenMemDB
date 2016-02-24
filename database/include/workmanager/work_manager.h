@@ -37,6 +37,8 @@
 #include <workmanager/types.h>
 #include <util/network/connection.h>
 
+class DataStore;
+
 /**
  *  @brief Class that handles the main thread and load balancing.
  */
@@ -102,6 +104,9 @@ private:
 
     //! The mapping of job to connection
     std::map<uint32_t, omdb::Connection> m_job_to_connection;
+
+    //! The active data store object
+    DataStore* data_store;
 };
 
 #endif

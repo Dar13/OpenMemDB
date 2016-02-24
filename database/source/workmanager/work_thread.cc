@@ -17,6 +17,9 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+// Project includes
+#include <data/data_store.h>
+#include <sql/omdb_parser.h>
 #include <workmanager/types.h>
 #include <workmanager/work_thread.h>
 
@@ -69,7 +72,8 @@ void WorkThread::Run(WorkThreadData* data)
 
         if(job != nullptr)
         {
-            job->operator()(1);
+            // Execute the job
+            job->operator()();
             delete job;
         }
     }
@@ -83,21 +87,119 @@ void WorkThread::Run(WorkThreadData* data)
  *  @note This currently uses a lambda that binds the passed in string, we can
  *        instead use a wrapper or normal function.
  */
-Job WorkThread::GenerateJob(int job_num, std::string command)
+Job WorkThread::GenerateJob(int job_num, std::string command, DataStore* store)
 {
-    Job job([job_num, command] (int test) -> JobResult
+    Job job([job_num, command, store] (void) -> JobResult
             {
-                JobResult res;
-                res.job_number = job_num;
+                JobResult res(job_num);
+
+                if(store == nullptr)
+                {
+                    // TODO: Error handling
+                }
 
                 printf("Command: %s\n", command.c_str());
 
-                // Execute command/query and generate a suitable result.
+                // Parse the command
+                auto parse_result = parse(command, store);
 
-                res.result = new Uint64Result(ResultStatus::SUCCESS, 1);
+                // Check if the parse succeeded and the statement is non-null
+                // (trust, but verify)
+                if(parse_result.status == ResultStatus::SUCCESS &&
+                    parse_result.result != nullptr)
+                {
+                    res.result = ExecuteStatement(parse_result.result, store);
+                }
+                else
+                {
+                    // Propagate error back to work manager
+                    // TODO: Error handling
+                }
 
                 return res;
             });
 
     return job;
+}
+
+ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* store)
+{
+    ResultBase* result = nullptr;
+    switch(statement->type)
+    {
+        // Commands
+        case SQLStatement::CREATE_TABLE:
+        case SQLStatement::DROP_TABLE:
+        case SQLStatement::UPDATE:
+        case SQLStatement::INSERT_INTO:
+        case SQLStatement::DELETE:
+            {
+                ManipResult statement_result = ExecuteCommand(statement, store);
+                // TODO: Make this a move constructor for performance
+                result = new (std::nothrow) ManipResult(statement_result);
+                if(result == nullptr)
+                {
+                    // Uhh, what now?
+                    // Crash for now
+                    std::terminate();
+                    return nullptr;
+                }
+            }
+            break;
+        // Query
+        case SQLStatement::SELECT:
+            {
+                MultiRecordResult statement_result = ExecuteQuery(statement, store);
+                // Extract type and data from the query result, and the column
+                // names from the query statement itself
+                // TODO: Implement this
+            }
+            break;
+        // Invalid or unknown statement, don't attempt to execute
+        default:
+            // TODO: Error handling
+            break;
+    }
+
+    return result;
+}
+
+ManipResult WorkThread::ExecuteCommand(ParsedStatement* statement, DataStore* store)
+{
+    switch(statement->type)
+    {
+        case SQLStatement::CREATE_TABLE:
+            return store->createTable(*reinterpret_cast<CreateTableCommand*>(statement));
+            break;
+        case SQLStatement::DROP_TABLE:
+            return store->deleteTable(reinterpret_cast<DropTableCommand*>(statement)->table_name);
+            break;
+        case SQLStatement::UPDATE:
+            break;
+        case SQLStatement::INSERT_INTO:
+            break;
+        case SQLStatement::DELETE:
+            break;
+        default:
+            // Should never be hit
+            std::terminate();
+            break;
+    }
+
+    // Shouldn't be hit at all, but will when the command isn't implemented
+    return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR);
+}
+
+MultiRecordResult WorkThread::ExecuteQuery(ParsedStatement* statement, DataStore* store)
+{
+    // Only one type of query, no need for a switch
+    // Verify the type of statement is correct though
+    if(statement->type != SQLStatement::SELECT)
+    {
+        return MultiRecordResult(ResultStatus::FAILURE, MultiRecordData());
+    }
+
+    SelectQuery* query = reinterpret_cast<SelectQuery*>(statement);
+
+    return store->getRecords(query->predicate, query->tables.front());
 }

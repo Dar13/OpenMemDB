@@ -33,23 +33,29 @@
 // Project includes
 #include <util/types.h>
 #include <util/result.h>
+#include <sql/common.h>
 
 // Tervel includes
 #include <tervel/util/tervel.h>
 #include <tervel/containers/wf/linked_list_queue/queue.h>
 
-// TODO: Make this into a true result type for SQL Query or Database command
-typedef struct
+// TODO: Document this
+struct JobResult
 {
+    JobResult() : job_number(0), result(nullptr) {}
+    JobResult(uint32_t num, ResultBase* result = nullptr)
+        : job_number(num), result(result)
+    {}
+
     uint32_t job_number;    //!< The job number that's associated to this result
     ResultBase* result;     //!< Pointer to result
-} JobResult;
+};
 
-//! Typedef of a function pointer that returns a @refer Result and takes an integer.
-typedef JobResult (*JobFunctor)(int);
+//! Typedef of a function pointer that returns a @refer Result and takes a pointer
+typedef JobResult (*JobFunctor)(void);
 
 //! Convenient typedef for the job concept.
-typedef std::packaged_task<JobResult(int)> Job;
+typedef std::packaged_task<JobResult(void)> Job;
 
 //! Convenient typedef for the Tervel queue class
 template<typename T>
@@ -115,6 +121,12 @@ struct WorkThreadData
 
     //! Mutex
     std::mutex* mutex;
+};
+
+struct QueryData
+{
+    std::vector<SQLColumn> metadata;
+    std::vector<std::vector<TervelData>> data;
 };
 
 #endif
