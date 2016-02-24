@@ -42,8 +42,6 @@ enum class PacketType: uint8_t {
 };
 
 struct CommandPacket {
-    CommandPacket() : type(PacketType::COMMAND) {}
-
     PacketType type;
   CommandType commandType;  // The type of command requested to be executed: SQL_STATEMENT or DB_COMMAND
   char message[MESSAGE_SIZE];
@@ -52,8 +50,6 @@ struct CommandPacket {
 
 
 struct ConnectionPacket {
-    ConnectionPacket() : type(PacketType::CONNECTION) {}
-
   PacketType type;
   /** The name of the database */
   char name[DB_NAME_LEN]; // The name of the database connected to.
@@ -76,11 +72,12 @@ struct ResultMetaDataPacket {
 
 
 struct ResultPacket {
-  ResultStatus status;  //16 bits
-  uint16_t rowLen;       // Length of the row in columns, number of columns in the row
-  uint32_t resultSize;  // Size in bytes that he data array will be
-  uint64_t* data;
-  uint8_t terminator;
+    PacketType type;
+    ResultStatus status;  //16 bits
+    uint16_t rowLen;       // Length of the row in columns, number of columns in the row
+    uint32_t resultSize;  // Size in bytes that he data array will be
+    uint64_t* data;
+    uint8_t terminator;
 } __attribute__((packed));
 
 

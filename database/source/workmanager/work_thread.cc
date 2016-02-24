@@ -144,6 +144,8 @@ ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
                     std::terminate();
                     return nullptr;
                 }
+
+                return result;
             }
             break;
         // Query
@@ -164,6 +166,7 @@ ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
                 {
                     query_data.metadata.clear();
                     query_data.data.clear();
+                    // TODO: Error handling?
                     return new (std::nothrow) QueryResult(ResultStatus::SUCCESS, query_data);
                 }
 
@@ -214,6 +217,8 @@ ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
         // Invalid or unknown statement, don't attempt to execute
         default:
             // TODO: Error handling
+            // Shouldn't happen, assert
+            assert(false);
             break;
     }
 

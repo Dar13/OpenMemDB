@@ -167,6 +167,8 @@ int32_t WorkManager::Run()
             {}
         }
 
+        // Remove closed connections while checking if any have commands that need to 
+        // be handled.
         m_connections.erase( std::remove_if( m_connections.begin(),
                                              m_connections.end(),
                                              receive_command),
@@ -179,6 +181,7 @@ int32_t WorkManager::Run()
                                                check_future_result),
                                 m_thread_results.end());
 
+        // Process the current backlog of results and send them back to the client
         for(JobResult res : results)
         {
             omdb::Connection conn;
@@ -188,12 +191,18 @@ int32_t WorkManager::Run()
             }
             else
             {
-                printf("Warning! JobResult exists without a valid connection\n");
+                printf("Warning! JobResult exists without a valid connection, ignoring\n");
                 continue;
             }
 
             printf("Job %d has result of type %u\n", res.job_number, res.result->type);
 
+            if(!SendResult(conn, res.result))
+            {
+                printf("Unable to send job!\n");
+            }
+
+            // TODO: How to handle Command results?
             // TODO: Generate ResultMetaData packet
             // TODO: Generate Result packet
 
@@ -204,7 +213,6 @@ int32_t WorkManager::Run()
                 printf("Attempting to send entirety of response\n");
                 status = conn.send((char*)res.result, sizeof(uint64_t));
             }
-            */
 
             if(status.status_code != omdb::D_SEND_FULL &&
                status.status_code != omdb::SUCCESS)
@@ -214,6 +222,7 @@ int32_t WorkManager::Run()
                                                    strerror(status.secondary_code));
                 return E_NET_ERR;
             }
+            */
 
             printf("Job number %d is done!\n", res.job_number);
             
@@ -266,6 +275,8 @@ bool WorkManager::ReceiveCommand(omdb::Connection& conn)
         // TODO: Remove this, for debugging purposes only
         printf("Creating job number %d\n", job_number);
 
+        // TODO: Properly parse buffer
+
         // Create the worker thread's task
         Job j = WorkThread::GenerateJob(job_number, buffer, this->data_store);
         Job* job_ptr = new (std::nothrow) Job(std::move(j));
@@ -306,6 +317,83 @@ bool WorkManager::ReceiveCommand(omdb::Connection& conn)
                                            strerror(status.secondary_code));
 
         return true;
+    }
+
+    return false;
+}
+
+bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
+{
+    // Convert the result into a packet and then serialize into a buffer
+
+    switch(result->type)
+    {
+        case ResultType::QUERY:
+            // Query results turn into two packets: ResultMetaData and ResultData
+            {
+                ResultMetaDataPacket metadata_packet = {};
+                ResultPacket result_packet = {};
+
+                QueryResult* query = reinterpret_cast<QueryResult*>(result);
+
+                // First, set up the metadata packet
+                metadata_packet.type = PacketType::RESULT_METADATA;
+                metadata_packet.status = query->status;
+
+                // Only finish writing the packet if the result is successful
+                if(query->status == ResultStatus::SUCCESS)
+                {
+                    metadata_packet.numColumns = query->result.metadata.size();
+                    for(uint32_t itr = 0; itr < metadata_packet.numColumns; itr++)
+                    {
+                        metadata_packet.columns[itr].type = query->result.metadata[itr].type;
+                        strcpy(metadata_packet.columns[itr].name,
+                                query->result.metadata[itr].name);
+                    }
+                }
+                metadata_packet.terminator = THE_TERMINATOR;
+
+                // Then, the actual data packet
+                result_packet.type = PacketType::RESULT_DATA;
+                result_packet.status = metadata_packet.status;
+
+                if(metadata_packet.status == ResultStatus::SUCCESS)
+                {
+                    result_packet.rowLen = metadata_packet.numColumns;
+
+                    size_t result_size = result_packet.rowLen * query->result.data.size();
+                    result_size *= sizeof(uint64_t);
+
+                    result_packet.resultSize = result_size;
+
+                    // TODO: Implement packet splitting to stay within packet maximums
+
+                    uint64_t* result_data = new uint64_t[result_size/sizeof(uint64_t)];
+                    uint32_t result_idx = 0;
+                    for(auto record : query->result.data)
+                    {
+                        for(auto data : record)
+                        {
+                            // TODO: Mask off bottom 3 bits?
+                            result_data[result_idx] = data.value;
+                            result_idx++;
+                        }
+                    }
+                    result_packet.data = result_data;
+                    result_packet.terminator = THE_TERMINATOR;
+                }
+
+                // Now actually send the packets
+                // TODO: Implement this
+                assert(false);
+            }
+            break;
+        case ResultType::COMMAND:
+            break;
+        default:
+            // Shouldn't be reached
+            printf("Unknown result reached %s\n", __FUNCTION__);
+            break;
     }
 
     return false;

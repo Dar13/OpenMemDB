@@ -78,6 +78,8 @@ private:
 
     bool ReceiveCommand(omdb::Connection& conn);
 
+    bool SendResult(omdb::Connection& conn, ResultBase* result);
+
     //! Tervel object to give to the worker threads
     tervel::Tervel* m_tervel;
 
