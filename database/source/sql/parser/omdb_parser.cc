@@ -17,9 +17,11 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <cstdlib>
+// C++ stdlib includes
+#include <cstdlib>  // Used for lemon
 #include <map>
 
+// Project includes
 #include "util/stdlib.h"
 
 #include "sql/omdb_parser.h"
@@ -359,10 +361,15 @@ void setupTokenMappings()
   // TODO: Update this as necessary
   keywords["CREATE"] = TK_CREATE;
   keywords["DROP"] = TK_DROP;
+  keywords["SELECT"] = TK_SELECT;
+  keywords["UPDATE"] = TK_UPDATE;
+  keywords["INSERT"] = TK_INSERT;
+  keywords["INTO"] = TK_INTO;
+  keywords["DELETE"] = TK_DELETE;
+
   keywords["TABLE"] = TK_TABLE;
   keywords["AS"] = TK_AS;
   keywords["WHERE"] = TK_WHERE;
-  keywords["SELECT"] = TK_SELECT;
   keywords["FROM"] = TK_FROM;
   keywords["ALL"] = TK_ALL;
   keywords["DISTINCT"] = TK_DISTINCT;
@@ -374,6 +381,5 @@ void setupTokenMappings()
   keywords["AND"] = TK_AND;
   keywords["OR"] = TK_OR;
   keywords["VALUES"] = TK_VALUES;
-  keywords["INSERT"] = TK_INSERT;
-  keywords["INTO"] = TK_INTO;
+  keywords["SET"] = TK_SET;
 }

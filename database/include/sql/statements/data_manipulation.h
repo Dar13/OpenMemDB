@@ -31,6 +31,8 @@
 #include "sql/common.h"
 #include "sql/statements/common.h"
 
+// TODO: Document these structures
+
 struct SelectQuery : public ParsedStatement
 {
     SelectQuery() : ParsedStatement(SQLStatement::SELECT), predicate(nullptr) {}
@@ -65,6 +67,22 @@ struct InsertCommand : public ParsedStatement
     std::string table;
 };
 
-// TODO: UPDATE & DELETE statements
+struct UpdateCommand : public ParsedStatement
+{
+    UpdateCommand() : ParsedStatement(SQLStatement::UPDATE) {}
+
+    std::string table;
+    std::vector<ColumnUpdate> columns;
+    Predicate* predicate;
+};
+
+struct DeleteCommand : public ParsedStatement
+{
+    DeleteCommand() : ParsedStatement(SQLStatement::DELETE) {}
+
+    std::string table;
+    Predicate* predicate;
+};
+
 
 #endif

@@ -83,6 +83,10 @@ void builderStartInsertCommand(StatementBuilder* builder);
 void builderAddDataItem(StatementBuilder* builder, Token data);
 void builderFinishInsertcommand(StatementBuilder* builder);
 
+// Update command functions
+void builderAddUpdateExpr(StatementBuilder* builder, Token operation,
+        Token left, Token right);
+
 // Somewhat generic helper functions
 void builderAddColumn(StatementBuilder* builder, 
                       Token column_name, 

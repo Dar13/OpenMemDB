@@ -39,6 +39,7 @@
 #include "sql/predicate.h"
 #include "sql/statements/data_definition.h"
 #include "sql/statements/data_manipulation.h"
+#include "sql/common.h"
 
 // Some typedefs(C++11-style) so that we don't have all that meaningless
 // namespace and template junk pop up everywhere.
@@ -170,6 +171,19 @@ enum class ManipStatus : uint32_t
     ERR_CONTENTION,
     ERR_PARTIAL,
     ERR_PARTIAL_CONTENTION,
+    ERR_FAILED_CONSTRAINT,
+};
+
+enum class ConstraintStatus : uint32_t
+{
+    SUCCESS = 0,
+    ERR_CONSTRAINT,
+    ERR_SCHEMA,
+    ERR_ROW_DATA,
+    ERR_NULL,
+    ERR_NOT_UNIQUE,
+    ERR_NOT_PKEY,
+    ERR_ROW_LEN,
 };
 
 // Some common Result types for this module
@@ -178,6 +192,7 @@ using RecordResult = Result<RecordData>;
 using MultiRecordResult = Result<MultiRecordData>;
 using ManipResult = Result<ManipStatus>;
 using SchemaResult = Result<TableSchema>;
+using ConstraintResult = Result<ConstraintStatus>;
 
 template<>
 struct Result<ManipStatus> : public ResultBase
@@ -258,7 +273,7 @@ private:
 
 	MultiTableRecordCopies searchTables(NestedPredicate* pred);
 
-    void schemaChecker(TableSchema schema, std::vector<SQLColumn> column);
+    ConstraintResult schemaChecker(SchemaTablePair *table_pair, Record *record);
 
     TableMap table_name_mapping;
 };
