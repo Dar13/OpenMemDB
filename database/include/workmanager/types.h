@@ -40,7 +40,9 @@
 #include <tervel/util/tervel.h>
 #include <tervel/containers/wf/linked_list_queue/queue.h>
 
-// TODO: Document this
+/**
+ *  \brief Struct that relates a job number to its result
+ */
 struct JobResult
 {
     JobResult() : job_number(0), result(nullptr) {}
@@ -63,7 +65,9 @@ template<typename T>
 using TervelQueue = tervel::containers::wf::Queue<T>;
 
 /**
- *  \brief TODO
+ *  \brief A struct that holds some important objects needed to notify threads
+ *  about various status changes they need to undergo, as directed by the 
+ *  workmanager.
  */
 struct ThreadNotifier
 {
@@ -125,14 +129,23 @@ struct WorkThreadData
     std::mutex* mutex;
 };
 
+/**
+ *  \brief Struct that holds the necessary data for composing the packets
+ *  given back to the client that requested the query be run.
+ */
 struct QueryData
 {
+    //! Vector that holds the column information needed for a ResultMetadataPacket
     std::vector<ResultColumn> metadata;
+
+    //! Vector of vectors of the data to be put into the ResultPacket
     std::vector<std::vector<TervelData>> data;
 };
 
+//! Convenience typedef for the result
 typedef Result<QueryData> QueryResult;
 
+//! Specialization of the template result to make sure its constructor is correct
 template<>
 struct Result<QueryData> : public ResultBase
 {

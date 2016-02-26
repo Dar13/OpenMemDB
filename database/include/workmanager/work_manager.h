@@ -51,7 +51,6 @@ public:
         delete m_context;
     }
 
-    // NM: TODO:Not sure about these error codes...
     /**
      *  @brief An enumeration of all error codes that can be returned when
      *         running any member function.

@@ -8,8 +8,9 @@
 // C++ stdlib include
 #include <string>
 
-// Project include
+// Project includes
 #include <util/result.h>
+#include <data/data_store.h>
 
 #define MESSAGE_SIZE 300
 
@@ -52,7 +53,7 @@ struct CommandPacket {
 struct CommandResultPacket {
     PacketType type;
     ResultStatus status;
-    ResultStatus secondaryStatus;
+    ManipStatus secondaryStatus;
     uint32_t rowsAffected;
     uint8_t terminator;
 } __attribute__((packed));

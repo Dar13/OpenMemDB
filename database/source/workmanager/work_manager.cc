@@ -393,7 +393,7 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
                 CommandResultPacket packet = {};
                 packet.type = PacketType::COMMAND_RESULT;
 
-                ManipStatus* manip_result = reinterpret_cast<ManipStatus*>(result);
+                ManipResult* manip_result = reinterpret_cast<ManipResult*>(result);
                 packet.status = manip_result->status;
                 // TODO: Rework ManipStatus to hold rows affected data
                 packet.secondaryStatus = manip_result->result;
@@ -406,7 +406,7 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
             break;
         default:
             // Shouldn't be reached
-            printf("Unknown result reached %s\n", __FUNCTION__);
+            printf("%s: Unknown result returned from query executor!\n", __FUNCTION__);
             break;
     }
 

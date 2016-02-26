@@ -122,6 +122,10 @@ Job WorkThread::GenerateJob(int job_num, std::string command, DataStore* store)
     return job;
 }
 
+/**
+ *  \brief Executes the given statement on the data store object, returning a 
+ *  result.
+ */
 ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* store)
 {
     ResultBase* result = nullptr;
@@ -225,6 +229,10 @@ ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
     return result;
 }
 
+/**
+ *  \brief Executes a command statement on the data store object given and returns a
+ *  relevant result.
+ */
 ManipResult WorkThread::ExecuteCommand(ParsedStatement* statement, DataStore* store)
 {
     switch(statement->type)
@@ -251,6 +259,10 @@ ManipResult WorkThread::ExecuteCommand(ParsedStatement* statement, DataStore* st
     return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR);
 }
 
+/**
+ *  \brief Executes a query statement (i.e. SELECT) on the data store object given
+ *  and returns a relevant result
+ */
 MultiRecordResult WorkThread::ExecuteQuery(ParsedStatement* statement, DataStore* store)
 {
     // Only one type of query, no need for a switch

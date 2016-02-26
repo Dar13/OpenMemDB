@@ -25,9 +25,6 @@
 
 /**
  *  @brief Abstraction of a worker thread.
- *
- *  @note In its current implementation, the class is never actually instantiated.
- *  TODO: Replace with nested namespace?
  */
 class WorkThread
 {
