@@ -172,6 +172,7 @@ enum class ManipStatus : uint32_t
     ERR_CONTENTION,
     ERR_PARTIAL,
     ERR_PARTIAL_CONTENTION,
+    ERR_FAILED_CONSTRAINT,
 };
 
 enum class ConstraintStatus : uint32_t
