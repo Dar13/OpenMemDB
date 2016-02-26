@@ -374,7 +374,7 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
                     {
                         for(auto data : record)
                         {
-                            // TODO: Mask off bottom 3 bits?
+                            data.data.tervel_status = 0;
                             result_data[result_idx] = data.value;
                             result_idx++;
                         }
@@ -389,6 +389,20 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
             }
             break;
         case ResultType::COMMAND:
+            {
+                CommandResultPacket packet = {};
+                packet.type = PacketType::COMMAND_RESULT;
+
+                ManipStatus* manip_result = reinterpret_cast<ManipStatus*>(result);
+                packet.status = manip_result->status;
+                // TODO: Rework ManipStatus to hold rows affected data
+                packet.secondaryStatus = manip_result->result;
+                packet.rowsAffected = 0;
+
+                packet.terminator = THE_TERMINATOR;
+
+                // TODO: Send the packet
+            }
             break;
         default:
             // Shouldn't be reached

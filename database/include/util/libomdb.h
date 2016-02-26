@@ -35,6 +35,7 @@ enum class CommandType: uint8_t {
 enum class PacketType: uint8_t {
   NONE = 0,
   COMMAND,
+  COMMAND_RESULT,
   CONNECTION,
   RESULT_METADATA,
   RESULT_DATA,
@@ -46,20 +47,27 @@ struct CommandPacket {
   CommandType commandType;  // The type of command requested to be executed: SQL_STATEMENT or DB_COMMAND
   char message[MESSAGE_SIZE];
   uint8_t terminator;
-};
+}__attribute__((packed));
 
+struct CommandResultPacket {
+    PacketType type;
+    ResultStatus status;
+    ResultStatus secondaryStatus;
+    uint32_t rowsAffected;
+    uint8_t terminator;
+} __attribute__((packed));
 
 struct ConnectionPacket {
   PacketType type;
   /** The name of the database */
   char name[DB_NAME_LEN]; // The name of the database connected to.
-};
+}__attribute__((packed));
 
 
 struct ResultColumn {
   char name[COL_NAME_LEN];  // The column name
   uint16_t type;            // The SQL type of the column
-};
+}__attribute__((packed));
 
 
 struct ResultMetaDataPacket {
@@ -68,7 +76,7 @@ struct ResultMetaDataPacket {
   uint32_t numColumns;
   ResultColumn columns[MAX_NUM_COLUMNS];  // Array containing name of each column and SQL type associated with it
   uint8_t terminator;
-};
+}__attribute__((packed));
 
 
 struct ResultPacket {
