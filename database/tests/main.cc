@@ -2,6 +2,7 @@
 #include "Test.h"
 #include "DataStoreTest.h"
 #include "Modes.h"
+#include "TestResult.h"
 
 
 int main()
@@ -18,9 +19,12 @@ int main()
 
     DataStoreTest dataStoreTest;
 
-    dataStoreTest.with(MODE_CREATE)
-    				.generateCases(0b0010)
-    				.test();
+    TestResult result = dataStoreTest.with(MODE_CREATE)
+    				                 .generateCases(0b1000)
+    				                 .test();
+
+    printf("Duration: %lu\n", result.duration);
+    printf("Thread Count: %d\n", result.threadCount);
 
 	return 1;
 }

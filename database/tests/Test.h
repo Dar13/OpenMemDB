@@ -4,12 +4,6 @@
 #include <string>
 #include <vector>
 
-// enum TestType 
-// {
-//     MODE_UNSET = -1,
-//     MODE_CREATE = 0,
-//     MODE_SELECT
-// };
 
 class Test 
 {
@@ -19,9 +13,16 @@ class Test
     Test& with(int testMode);
     Test& test(); // return TestResult
     Test& generateCases(int complexity, int amount);
+    bool isRandomized;
+	int mode, complexity, threadCount;
+	std::vector<std::string> statements; 
+     
    
    private:
     void clean();
+
+   protected:
+
 
 };
 

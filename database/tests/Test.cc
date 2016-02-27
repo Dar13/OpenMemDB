@@ -8,23 +8,22 @@
 #include "SQLGenerator.h"
 #include <sql/omdb_parser.h>
 
-int testMode = -1;
-vector<string> mainStatements;
+
 
 Test::Test(){}
 
 Test& Test::with(int mode)
 {
-    testMode = mode;
+    this->mode = mode;
     
     return *this;
 }
 
 Test& Test::test()
 {
-    printf("Test mode: %d\n", testMode);
+    printf("Test mode: %d\n", mode);
     
-    switch(testMode)
+    switch(mode)
     {
             
         case MODE_UNSET:
@@ -35,7 +34,7 @@ Test& Test::test()
             
             printf("Start CREATE test: \n");
             
-            //cout << mainStatements[0] << endl;  
+            //cout << statements[0] << endl;  
             
             break;
     }
@@ -49,18 +48,15 @@ Test& Test::generateCases(int complexity, int amount)
 
     SQLGenerator sqlGenerator;
 
-    switch(testMode)
+    switch(mode)
     {
         case MODE_CREATE:
             printf("Generating CREATE test cases \n");
             
-            mainStatements = sqlGenerator.generateCreateCases(complexity, amount);
+            statements = sqlGenerator.generateCreateCases(complexity, amount);
+            printf("%d\n", statements.size());
 
-            for(auto i = mainStatements.begin(); i  != mainStatements.end(); i++)
-            {
-                std::cout << *i << std::endl;
-            }
-            
+
             break;
                    
     }
@@ -69,6 +65,6 @@ Test& Test::generateCases(int complexity, int amount)
 
 void Test::clean()
 {
-    testMode = -1;
-    mainStatements.clear();
+    mode = -1;
+    statements.clear();
 }

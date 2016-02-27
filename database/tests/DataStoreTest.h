@@ -3,22 +3,27 @@
 
 #include <vector>
 #include <string>
-
-static int testMode, complexity;
+#include "TestResult.h"
 
 class DataStoreTest
 {
 
+
 	public:
 		DataStoreTest();
-		int createTest(int complexity);
 		DataStoreTest& with(int mode);
-		DataStoreTest& test();
+		TestResult test();
 		DataStoreTest& generateCases(int complexity);
 
+
 	private:
+		int complexity, mode, threadCount;
+		bool isRandomized = false;
+		// void createTest();
 		void parseComplexity(int complexity);
+		static void createTest(std::vector<std::string> statements);
 		std::vector<std::string> generateCases();
+		std::vector<std::string> statements;
 
 
 };

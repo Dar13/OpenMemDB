@@ -10,41 +10,20 @@
 #include <vector>
 #include <stdio.h>
 #include <string>
-
-/*
-
-        Complexity bitmask:
-
-        bit     purpose
-
-        0       Enables random statement creation, useful for correctness testing
-        1       Uses 2 threads for testing
-        2       Uses 4 threads for testing
-        3       Uses 8 threads for testing
-*/
-
-bool isRandomized;
-int threadCount;
-std::vector<std::string> statements;
-
+#include <thread>
+#include <chrono>
 
 DataStoreTest::DataStoreTest(){}
 
 // Will return TestResult (or DataStoreTestResult), int for placeholder
-int DataStoreTest::createTest(int complexity)
+void DataStoreTest::createTest(std::vector<std::string> statements)
 {
 
     tervel::Tervel* tervel_test = new tervel::Tervel(8);
     tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);
 
-    SQLGenerator sqlGenerator;
     DataStore data;
 
-    if(isRandomized){
-        printf("test\n");
-    }
-
-    printf("%d\n",threadCount);
     setupTokenMappings();
 
     int successCount = 0;
@@ -70,11 +49,86 @@ int DataStoreTest::createTest(int complexity)
         }
     }
 
-    printf("%d\n", successCount);
-	return 1;
+    printf("Success count: %d\n", successCount);
 
 }
 
+DataStoreTest& DataStoreTest::with(int mode)
+{
+    this->mode = mode;
+    return *this;
+}
+
+DataStoreTest& DataStoreTest::generateCases(int testComplexity)
+{
+    complexity = testComplexity;
+    parseComplexity(complexity);
+
+    printf("%d\n", threadCount);
+
+    switch(mode)
+    {
+        case MODE_CREATE:
+
+            for(int i = 0; i < 7; i++)
+            {
+                std::string create_table = "CREATE TABLE TestT"+ std::to_string(i) +" (A STRING, B INTEGER);";
+                statements.push_back(create_table);
+            }
+
+            break;
+    }
+
+    return *this;
+}
+
+TestResult DataStoreTest::test()
+{
+
+    switch(mode)
+    {
+        case MODE_CREATE:
+
+            std::vector<std::thread> v;
+            
+            for (int i = 0; i < threadCount; ++i)
+            {
+                std::thread t1(&DataStoreTest::createTest, statements);
+                v.push_back(std::move(t1));
+            }
+
+            auto time_start = std::chrono::high_resolution_clock::now();
+
+            for (int i = 0; i < threadCount; ++i)
+            {
+                v.at(i).join();
+            }
+
+            auto time_end = std::chrono::high_resolution_clock::now();
+            
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+
+            TestResult testResult(duration.count(), threadCount);
+
+            return testResult;
+
+    }
+
+    TestResult res(0ul, threadCount);
+    return res;
+}
+
+
+/*
+        Complexity bitmask:
+
+        bit     purpose
+
+        0       Enables random statement creation, useful for correctness testing
+        1       Uses 2 threads for testing
+        2       Uses 4 threads for testing
+        3       Uses 8 threads for testing
+*/
 void DataStoreTest::parseComplexity(int complexity)
 {
     isRandomized = complexity & 0b0001;
@@ -95,46 +149,4 @@ void DataStoreTest::parseComplexity(int complexity)
     {
         threadCount = 1;
     }
-}
-
-DataStoreTest& DataStoreTest::with(int mode)
-{
-    testMode = mode;
-    return *this;
-}
-
-DataStoreTest& DataStoreTest::generateCases(int testComplexity)
-{
-    complexity = testComplexity;
-    parseComplexity(complexity);
-
-
-    switch(testMode)
-    {
-        case MODE_CREATE:
-
-
-            for(int i = 0; i < 10; i++)
-            {
-                std::string create_table = "CREATE TABLE TestTable (A STRING, B INTEGER);";
-                statements.push_back(create_table);
-            }
-
-            break;
-
-    }
-    return *this;
-}
-
-DataStoreTest& DataStoreTest::test()
-{
-
-    switch(testMode)
-    {
-        case MODE_CREATE:
-            createTest(complexity);
-    }
-
-
-    return *this;
 }

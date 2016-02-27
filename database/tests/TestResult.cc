@@ -1,4 +1,8 @@
 #include "TestResult.h"
 
 
-TestResult::TestResult(){}
+TestResult::TestResult(unsigned long duration, int threadCount)
+{
+	this->duration = duration;
+	this->threadCount = threadCount;
+}
