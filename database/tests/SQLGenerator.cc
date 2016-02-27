@@ -95,8 +95,8 @@ string SQLGenerator::generateCreateStatement(int complexity)
 vector<string> SQLGenerator::generateSelectCases(int complexity, int amount)
 {
 
-    std::vector<string> statements;
-    return statements;
+    std::vector<string> selectStatements;
+    return selectStatements;
 }
 
 string SQLGenerator::generateSelectStatement(int complexity)

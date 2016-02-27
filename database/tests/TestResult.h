@@ -3,14 +3,10 @@
 
 class TestResult
 {
-
-	int threadCount, executionTime;
-
 	public:
-		TestResult();
-
-		int getExecutionTime();
-		int getThreadCount();
+		TestResult(unsigned long duration, int threadCount);
+		int threadCount;
+		unsigned long duration;
 
 	private:
 
