@@ -39,6 +39,11 @@ enum class ResultStatus: uint16_t {
   ERROR_SYNTAX
 };
 
+/** Represents result of database command */
+struct CommandResult {
+    bool isSuccess;
+    int numAffected;
+};
 
 struct CommandPacket {
   CommandType commandType;  // The type of command requested to be executed: SQL_STATEMENT or DB_COMMAND

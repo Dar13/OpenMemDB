@@ -8,7 +8,7 @@
 
 #include "../../include/util/serialization_helper.h"
 #include "../../include/util/libomdb.h"
-#include "../result.h"
+#include "result.h"
 
 bool testCommandPacketSerialization();
 bool testConnectionPacketSerialization();

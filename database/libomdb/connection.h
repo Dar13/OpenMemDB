@@ -27,7 +27,7 @@ THE SOFTWARE.
 
 // Project includes.
 #include "result.h"
-#include "../include/util/libomdb.h"
+#include "libomdb.h"
 #include "serialization_helper.h"
 
 namespace libomdb{
@@ -105,7 +105,7 @@ namespace libomdb{
      * @param command The comand to execute
      * @return a CommandResult struct with result information.
      */
-    libomdb::CommandResult executeCommand(std::string command);
+    CommandResult executeCommand(std::string command);
 
 
     /**
