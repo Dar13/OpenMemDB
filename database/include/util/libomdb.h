@@ -43,6 +43,19 @@ enum class PacketType: uint8_t {
   INVALID_PACKET
 };
 
+
+enum class ResultStatus: uint16_t {
+  OK = 0,
+  ERROR,
+  ERROR_SYNTAX
+};
+
+/** Represents result of database command */
+struct CommandResult {
+    bool isSuccess;
+    int numAffected;
+};
+
 struct CommandPacket {
     PacketType type;
   CommandType commandType;  // The type of command requested to be executed: SQL_STATEMENT or DB_COMMAND
