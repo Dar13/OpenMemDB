@@ -1,11 +1,14 @@
 CC=g++
 
-CFLAGS=-std=c++11 -I../../../ -I../../../include/util -I../../ -g -Wall -Wextra
+INC_DIR := -I../../ \
+	   -I../../../ \
+	   -I../../../include \
+
+CFLAGS=-std=c++11 $(INC_DIR) -g -Wall -Wextra
 LDFLAGS=-pthread
 
 EXEC_NAME=test_libomdb
-# What goes under here? Every .cc file that needs to be compiled, but with a .o suffix
-# The “\” does a new-line, don’t worry about it: Alright
+
 OBJECTS= ../../../source/util/serialization_helper.o \
                     ../../connection.o \
                     ../../result.o \

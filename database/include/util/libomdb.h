@@ -10,7 +10,6 @@
 
 // Project includes
 #include <util/result.h>
-#include <data/data_store.h>
 
 #define MESSAGE_SIZE 300
 
@@ -41,13 +40,6 @@ enum class PacketType: uint8_t {
   RESULT_METADATA,
   RESULT_DATA,
   INVALID_PACKET
-};
-
-
-enum class ResultStatus: uint16_t {
-  OK = 0,
-  ERROR,
-  ERROR_SYNTAX
 };
 
 /** Represents result of database command */

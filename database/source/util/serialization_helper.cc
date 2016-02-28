@@ -23,7 +23,7 @@ THE SOFTWARE.
 #include <cstdio>
 #include <iostream>
 
-#include "../../include/util/libomdb.h"
+#include "include/util/libomdb.h"
 
 /*****************************************************************
  * Helper functions

@@ -27,6 +27,18 @@ enum class ResultStatus : uint16_t
     FAILURE_OUT_MEMORY,
 };
 
+enum class ManipStatus : uint32_t
+{
+    SUCCESS = 0,
+    ERR,
+    ERR_NO_MEMORY,
+    ERR_TABLE_NOT_EXIST,
+    ERR_TABLE_CMD_INVALID,
+    ERR_CONTENTION,
+    ERR_PARTIAL,
+    ERR_PARTIAL_CONTENTION,
+};
+
 enum class ResultType : uint8_t
 {
     QUERY = 0,
