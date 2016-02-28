@@ -5,6 +5,7 @@ case $1 in
 		echo "Performing Create Test"
 		./tests
 		python graph_test.py
+		xdg-open test_graph.png
 
 		;;
 	"dtt")
