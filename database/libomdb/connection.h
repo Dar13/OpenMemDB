@@ -26,8 +26,8 @@ THE SOFTWARE.
 #include <string>
 
 // Project includes.
-#include "result.h"
 #include "libomdb.h"
+#include "result.h"
 #include "serialization_helper.h"
 
 namespace libomdb{
