@@ -175,16 +175,21 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair *table_pair, Record *i
     //TESTING MUST DELETE: Hardcode schema constraint to test
     for(int64_t itr = 0; itr < col_len; itr++)
     {
+        //just to init constraint.value bits to all 0
+        TervelData temp = {.value = 0};
+
         //hardcode constraint
         SQLConstraintType state = SQLConstraintType::SQL_DEFAULT;
         constraint.type = state;
+		constraint.value = temp;
+		constraint.value.data.tervel_status = 0;
         constraint.value.value = 10;
 
         //add constraints to the schema
         schema->columns.at(itr).constraint.push_back(constraint);
     }
 
-    if(row_len-1 != col_len)
+    if(row_len != col_len)
     {
         //mismatching columns not enough data
         return ConstraintResult(ResultStatus::SUCCESS, ConstraintStatus::ERR_ROW_LEN);
@@ -193,11 +198,10 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair *table_pair, Record *i
     //copies a value from record, checks the schema column constraint at that index and
     //checks if the value is coherent with the column constraint
     //row-1 because of the record counter stored there
-    for(int64_t i = 0; i < row_len-1; i++)
+    for(int64_t i = 0; i < row_len; i++)
     {
         TervelData data = {.value = 0};
-        data.value = row.at(i).value;
-        data.data.tervel_status = 0; //TODO: probably not needed
+        data = row.at(i);
         num_Constraints = schema->columns.at(i).constraint.size();
 
         for(int64_t j = 0; j < num_Constraints; j++)
@@ -230,20 +234,20 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair *table_pair, Record *i
                         while(!table_row->at(i, table_data)) {}
 
                         //increment the table data by 1 and overwrite the data.value to reflect this
-                        data.value = table_data + 1;
+                        while(!insert_row->cas(i, table_data, table_data+1)) {}
                         break;
                     }
                 case SQLConstraintType::SQL_DEFAULT:
                     {
-                        /*
-                        if(data.value != constraint.value.value)
+                        if(data.data.null == 1)
                         {
-                            return ConstraintResult(ResultStatus::FAILURE, ConstraintStatus::ERR_DEFAULT);
+                            int64_t random;
+                            printf("No value found changing value...\n");
+                            while(!insert_row->insertAt(i, constraint.value.value)) {}
+                            while(!insert_row->at(i, random)) {}
+                            printf("Value inserted %d\n", random);
+                            //return ConstraintResult(ResultStatus::FAILURE, ConstraintStatus::ERR_DEFAULT);
                         }
-                        */
-
-                        //overwrites row value to be default value
-                        data.value = constraint.value.value;
                         break;
                     }
 /*
@@ -341,9 +345,10 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
     counter_data.data.value = counter;
     new_record->push_back_w_ra(counter_data.value);
 
-    // TODO: Handle table constraints
+    // TODO: This should be done eariler 
     if(schemaChecker(table_pair, new_record).status == ResultStatus::SUCCESS)
     {
+        printf("Constraint test passed\n");
         size_t ret = table_pair->table->records.push_back_w_ra(new_record);
         printf("Pushback returned %lu\n", ret);
         printf("Record address %p\n", new_record);
