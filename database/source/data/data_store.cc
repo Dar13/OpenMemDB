@@ -156,19 +156,16 @@ DataResult DataStore::getData(Predicate* predicates,
     // TODO: This function doesn't really make sense to have...
 }
 
-//TODO: Clean up some testing code, maybe some bounds checking beforehand
-//for these loops, error checking too checks if the row data matches with the table schema
-ConstraintResult DataStore::schemaChecker(SchemaTablePair *table_pair, Record *insert_row)
+//Checks if the inserted row is valid for those constraints
+ConstraintResult DataStore::schemaChecker(SchemaTablePair *table_pair, RecordData *row)
 {
-    //table, schema and copy of row being inserted
+    //table, schema
     std::shared_ptr<DataTable> table = table_pair->table;
     TableSchema *schema = table_pair->schema;
-    RecordCopy copy_row = copyRecord(insert_row); //may need record copy
-    RecordData row = copy_row.data;
 
     //number of columns, number of inputs from row, number of constraints in each column
     int64_t col_len = schema->columns.size();
-    int64_t row_len = row.size();
+    int64_t row_len = row->size();
     int64_t num_Constraints = 0;
     SQLConstraint constraint;
 
@@ -178,12 +175,23 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair *table_pair, Record *i
         //just to init constraint.value bits to all 0
         TervelData temp = {.value = 0};
 
-        //hardcode constraint
+        /*
+        //DEFAULT hardcode constraint
         SQLConstraintType state = SQLConstraintType::SQL_DEFAULT;
         constraint.type = state;
 		constraint.value = temp;
+
 		constraint.value.data.tervel_status = 0;
-        constraint.value.value = 10;
+        constraint.value.data.value = 10;
+        constraint.value.data.null = 1;
+        */
+
+        
+        //AUTO INCREMENT hardcode constraint
+        SQLConstraintType state = SQLConstraintType::SQL_AUTO_INCREMENT;
+        constraint.type = state;
+        constraint.value = temp;
+        
 
         //add constraints to the schema
         schema->columns.at(itr).constraint.push_back(constraint);
@@ -192,16 +200,14 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair *table_pair, Record *i
     if(row_len != col_len)
     {
         //mismatching columns not enough data
-        return ConstraintResult(ResultStatus::SUCCESS, ConstraintStatus::ERR_ROW_LEN);
+        return ConstraintResult(ResultStatus::FAILURE, ConstraintStatus::ERR_ROW_LEN);
     }
 
-    //copies a value from record, checks the schema column constraint at that index and
-    //checks if the value is coherent with the column constraint
-    //row-1 because of the record counter stored there
+    //finds the column constraints and check each column in row to see if any apply
     for(int64_t i = 0; i < row_len; i++)
     {
-        TervelData data = {.value = 0};
-        data = row.at(i);
+        TervelData row_data = {.value = 0};
+        row_data = row->at(i);
         num_Constraints = schema->columns.at(i).constraint.size();
 
         for(int64_t j = 0; j < num_Constraints; j++)
@@ -209,96 +215,44 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair *table_pair, Record *i
             constraint = schema->columns.at(i).constraint.at(j);
             switch(constraint.type)
             {
+                //do nothing
                 case SQLConstraintType::SQL_NO_CONSTRAINT:
                     {
                         break;
                     }
-
+                //data cannot be null
                 case SQLConstraintType::SQL_NOT_NULL:
                     {
-                        if(data.data.null == 1)
+                        if(row_data.data.null == 1)
                         {
                             return ConstraintResult(ResultStatus::FAILURE, ConstraintStatus::ERR_NULL);
                         }
 
                         break;
                     }
-
+                //increment unique counter that represents number of records inserted into table
                 case SQLConstraintType::SQL_AUTO_INCREMENT:
                     {
-                        //grab last value from end of table
-                        int64_t table_data;
-                        Record *table_row;
-                        int64_t table_size = table.get()->records.size(0);
-                        while(!table->records.at(table_size, table_row)) {}
-                        while(!table_row->at(i, table_data)) {}
+                        TervelData insert = {.value = 0};
+                        insert.data.value = table->record_counter.load()+1;
+                        insert.data.tervel_status = 0;
 
-                        //increment the table data by 1 and overwrite the data.value to reflect this
-                        while(!insert_row->cas(i, table_data, table_data+1)) {}
+                        row->erase(row->begin()+i);
+                        printf("AUTO INCREMENT value:%d being inserted @%d\n", insert.data.value, i);
+                        row->insert(row->begin()+i, insert);
                         break;
                     }
                 case SQLConstraintType::SQL_DEFAULT:
                     {
-                        if(data.data.null == 1)
+                        //int64_t temp;
+                        if(row_data.data.null == 1)
                         {
-                            int64_t random;
-                            printf("No value found changing value...\n");
-                            while(!insert_row->insertAt(i, constraint.value.value)) {}
-                            while(!insert_row->at(i, random)) {}
-                            printf("Value inserted %d\n", random);
-                            //return ConstraintResult(ResultStatus::FAILURE, ConstraintStatus::ERR_DEFAULT);
+                            row->erase(row->begin()+i);
+                            printf("DEFAULT value:%d being inserted @%d\n", constraint.value.data.value, i);
+                            row->insert(row->begin()+i, constraint.value);
                         }
                         break;
                     }
-/*
- * TODO: Not thread safe because of long table scans
-                case SQLConstraintType::SQL_PRIMARY_KEY:
-                    {
-                        int counter = 0; //TODO: Should be a flag
-
-                        //check if PRIMARY KEY is the only constraint in schema
-                        //then it will follow into same behavior as unique
-                        for(int64_t m = 0; m < col_len; m++)
-                        {
-                            if(schema->columns.at(m).constraint.at(j).type == SQLConstraintType::SQL_PRIMARY_KEY)
-                                counter++;
-                            if(counter > 1)
-                            {
-                                return ConstraintResult(ResultStatus::FAILURE, ConstraintStatus::ERR_NOT_PKEY);
-                                //printf("error two primary keys \n");
-                                //break;
-                            }
-                        }
-
-                        //continues on to unique behavior
-                    }
-
-
-                    //TODO: A snapshot of the table may be necessary since data can be inserted by other
-                    //threads while this unique check is performing a table scan...
-                    //TODO: Or create a master-slave thread where threads insert into db without a table scan
-                    //and this master will clean up any mistakes... having each thread check constraints on a
-                    //snapshot ... does not make much sense
-                case SQLConstraintType::SQL_UNIQUE:
-                    {
-                        //tables should be record here? tables can change while insert is being evaluated
-                        int64_t size = table->records.size(0);
-                        Record *table_row;
-                        int64_t table_data;
-
-                        //perform a table scan and check if any column data matches the row data
-                        for(int64_t k = 0; k < size; k++)
-                        {
-                            while(!table->records.at(k, table_row)) {}
-                            while(!table_row->at(i, table_data))
-                                if(table_data == data.value)
-                                {
-                                    return ConstraintResult(ResultStatus::FAILURE, ConstraintStatus::ERR_NOT_UNIQUE);
-                                }
-                        }
-                        break;
-                    }
-*/
             }
         }
     }
@@ -317,6 +271,22 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
     {
         return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_TABLE_NOT_EXIST);
     }
+
+    printf("Before\n");
+    for(auto i : record)
+    {
+        printf("Data:%d\n", i.data.value);
+    }
+
+    if(schemaChecker(table_pair, &record).status != ResultStatus::SUCCESS)
+        return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_FAILED_CONSTRAINT);
+
+    printf("After\n");
+    for(auto i : record)
+    {
+        printf("Data:%d\n", i.data.value);
+    }
+
 
     // Insert into the table
     Record* new_record = new (std::nothrow) Record(record.size());
@@ -344,19 +314,6 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
 
     counter_data.data.value = counter;
     new_record->push_back_w_ra(counter_data.value);
-
-    // TODO: This should be done eariler 
-    if(schemaChecker(table_pair, new_record).status == ResultStatus::SUCCESS)
-    {
-        printf("Constraint test passed\n");
-        size_t ret = table_pair->table->records.push_back_w_ra(new_record);
-        printf("Pushback returned %lu\n", ret);
-        printf("Record address %p\n", new_record);
-    }
-    else
-    {
-        return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_FAILED_CONSTRAINT);
-    }
 
     return ManipResult(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
 }

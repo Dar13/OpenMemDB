@@ -58,7 +58,7 @@ int main(int argc, char** argv)
 	
     TervelData t_d = { .value = 0 };
     t_d.data.type = INTEGER;
-    //t_d.data.value = 1;
+    t_d.data.value = 1;
 	t_d.data.null = 1;
     printf("Inserting value: %ld\n", t_d.data.value);
     printf("Inserting congregate value: %ld\n", t_d.value);

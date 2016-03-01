@@ -246,7 +246,7 @@ private:
 
 	MultiTableRecordCopies searchTables(NestedPredicate* pred);
 
-    ConstraintResult schemaChecker(SchemaTablePair *table_pair, Record *record);
+    ConstraintResult schemaChecker(SchemaTablePair *table_pair, RecordData *record);
 
     TableMap table_name_mapping;
 };
