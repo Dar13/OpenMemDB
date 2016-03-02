@@ -24,6 +24,8 @@
 #include <sql/omdb_parser.h>
 #include <data/data_store.h>
 
+void createRow(std::vector<int64_t> value, RecordData &data);
+
 /**
  *  @brief The entry point of the application.
  */
@@ -31,10 +33,12 @@ int main(int argc, char** argv)
 {
     tervel::Tervel* tervel_test = new tervel::Tervel(8);
     tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);
+
     DataStore data;
 
     setupTokenMappings();
 
+    //create table
     std::string create_table = "CREATE TABLE TestTable (A INTEGER, B INTEGER);";
 
     ParseResult parse_result = parse(create_table, &data);
@@ -53,26 +57,29 @@ int main(int argc, char** argv)
         }
     }
 
+	//TODO: TESTING SCHEMA HARDCODE IS DEFAULT AUTO_INCREMENT
+	std::vector<int64_t> input = {0, 0};
+    std::vector<int64_t> input2 = {0, 0};
+	std::vector<int64_t> input3 = {-1, 0};
+
+	//first row
     RecordData test_data;
+    createRow(input, test_data);
 
+    //second row
+    RecordData test_data2;
+    createRow(input2, test_data2);
+
+	//third row
+    RecordData test_data3;
+    createRow(input3, test_data3);
 	
-    TervelData t_d = { .value = 0 };
-    t_d.data.type = INTEGER;
-    t_d.data.value = 1;
-	t_d.data.null = 1;
-    printf("Inserting value: %ld\n", t_d.data.value);
-    printf("Inserting congregate value: %ld\n", t_d.value);
-    test_data.push_back(t_d);
-
-    TervelData t_dd = { .value = 0 };
-    t_dd.data.type = INTEGER;
-    t_dd.data.value = 2;
-    printf("Inserting value: %ld\n", t_dd.data.value);
-    printf("Inserting congregate value: %ld\n", t_dd.value);
-    test_data.push_back(t_dd);
-
+    //inserting row 1 and row 2
     auto insert_err = data.insertRecord("TestTable", test_data);
-    if(insert_err.status != ResultStatus::SUCCESS)
+    auto insert_err2 = data.insertRecord("TestTable", test_data2);
+	auto insert_err3 = data.insertRecord("TestTable", test_data3);
+    if(insert_err.status != ResultStatus::SUCCESS || insert_err2.status != ResultStatus::SUCCESS
+		|| insert_err3.status != ResultStatus::SUCCESS)
     {
         printf("Failed to insert record\n");
     }
@@ -133,69 +140,70 @@ int main(int argc, char** argv)
 
     return 1;
 
-  // TODO: Handle passed in parameters
-  printf("Arguments passed in:\n");
-  for(int i = 0; i < argc; i++)
-  {
-    printf("\t- %s\n", argv[i]);
-  }
-
-  tervel::Tervel* tervel_main = new tervel::Tervel(8);
-  WorkManager work_manager(8, tervel_main);
-
-  int32_t status = 0;
-
-  status = work_manager.Initialize();
-  if(status != WorkManager::E_NONE)
-  {
-    printf("Work manager failed to initialize!\n");
-    printf("Error code = %d\n", status);
-    return 1;
-  }
-
-  status = work_manager.Run();
-  if(status != WorkManager::E_NONE)
-  {
-    printf("Work manager failed to run!\n");
-    printf("Error code = %d\n", status);
-    return 1;
-  }
-
-  printf("Shutting down program...\n");
-
-  return 0;
     /*
-	// TODO: Handle passed in parameters
-	printf("Arguments passed in:\n");
-	for(int i = 0; i < argc; i++)
-	{
-		printf("\t- %s\n", argv[i]);
-	}
+    // TODO: Handle passed in parameters
+    printf("Arguments passed in:\n");
+    for(int i = 0; i < argc; i++)
+    {
+        printf("\t- %s\n", argv[i]);
+    }
 
-	tervel::Tervel* tervel_main = new tervel::Tervel(8);
-	WorkManager work_manager(8, tervel_main);
+    tervel::Tervel* tervel_main = new tervel::Tervel(8);
+    WorkManager work_manager(8, tervel_main);
 
-	int32_t status = 0;
+    int32_t status = 0;
 
-	status = work_manager.Initialize();
-	if(status != WorkManager::E_NONE)
-	{
-		printf("Work manager failed to initialize!\n");
-		printf("Error code = %d\n", status);
-		return 1;
-	}
+    status = work_manager.Initialize();
+    if(status != WorkManager::E_NONE)
+    {
+        printf("Work manager failed to initialize!\n");
+        printf("Error code = %d\n", status);
+        return 1;
+    }
 
-	status = work_manager.Run();
-	if(status != WorkManager::E_NONE)
-	{
-		printf("Work manager failed to run!\n");
-		printf("Error code = %d\n", status);
-		return 1;
-	}
+    status = work_manager.Run();
+    if(status != WorkManager::E_NONE)
+    {
+        printf("Work manager failed to run!\n");
+        printf("Error code = %d\n", status);
+        return 1;
+    }
 
-	printf("Shutting down program...\n");
+    printf("Shutting down program...\n");
 
-	return 0;
+    return 0;
+
     */
 }
 
+//JUST FOR TESTING! DELETE AFTERWARDS
+void createRow(std::vector<int64_t> value, RecordData& data)
+{
+    //RecordData data;
+
+	for(auto itr: value)
+	{
+		TervelData t_d = { .value = 0 };
+    	
+        //null is represented as -1
+        if(itr == -1)
+        {
+			t_d.data.type = INTEGER;
+            t_d.data.value = itr;
+			t_d.data.null = 1;
+            printf("Inserting value: %ld\n", t_d.data.value);
+            printf("Inserting congregate value: %ld\n", t_d.value);
+            data.push_back(t_d);
+        }
+        else
+        {
+            t_d.data.type = INTEGER;
+    	    t_d.data.value = itr;
+    	    printf("Inserting value: %ld\n", t_d.data.value);
+    	    printf("Inserting congregate value: %ld\n", t_d.value);
+    	    data.push_back(t_d);
+	    }
+    }
+
+	//return data;
+}

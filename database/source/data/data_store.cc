@@ -169,33 +169,30 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair *table_pair, RecordDat
     int64_t num_Constraints = 0;
     SQLConstraint constraint;
 
-    //TESTING MUST DELETE: Hardcode schema constraint to test
-    for(int64_t itr = 0; itr < col_len; itr++)
-    {
-        //just to init constraint.value bits to all 0
-        TervelData temp = {.value = 0};
+    //just to init constraint.value bits to all 0
+    TervelData temp = {.value = 0};
 
-        /*
-        //DEFAULT hardcode constraint
-        SQLConstraintType state = SQLConstraintType::SQL_DEFAULT;
-        constraint.type = state;
-		constraint.value = temp;
+    //DEFAULT hardcode constraint
+    SQLConstraintType state = SQLConstraintType::SQL_DEFAULT;
+    constraint.type = state;
 
-		constraint.value.data.tervel_status = 0;
-        constraint.value.data.value = 10;
-        constraint.value.data.null = 1;
-        */
+	//init default value
+	constraint.value = temp;
+	constraint.value.data.type = INTEGER;
+	constraint.value.data.tervel_status = 0;
+    constraint.value.data.value = 10;        
 
-        
-        //AUTO INCREMENT hardcode constraint
-        SQLConstraintType state = SQLConstraintType::SQL_AUTO_INCREMENT;
-        constraint.type = state;
-        constraint.value = temp;
+    //pushes default constraint for first column
+    schema->columns.at(0).constraint.push_back(constraint);
+
+    //AUTO INCREMENT hardcode constraint
+    SQLConstraintType state2 = SQLConstraintType::SQL_AUTO_INCREMENT;
+    constraint.type = state2;
+    //constraint.value = temp;
         
 
-        //add constraints to the schema
-        schema->columns.at(itr).constraint.push_back(constraint);
-    }
+    //pushes auto incre constraint for second column
+    schema->columns.at(1).constraint.push_back(constraint);
 
     if(row_len != col_len)
     {
@@ -234,6 +231,7 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair *table_pair, RecordDat
                 case SQLConstraintType::SQL_AUTO_INCREMENT:
                     {
                         TervelData insert = {.value = 0};
+                        insert.data.type = INTEGER;
                         insert.data.value = table->record_counter.load()+1;
                         insert.data.tervel_status = 0;
 
@@ -244,7 +242,6 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair *table_pair, RecordDat
                     }
                 case SQLConstraintType::SQL_DEFAULT:
                     {
-                        //int64_t temp;
                         if(row_data.data.null == 1)
                         {
                             row->erase(row->begin()+i);
@@ -272,6 +269,7 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
         return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_TABLE_NOT_EXIST);
     }
 
+    
     printf("Before\n");
     for(auto i : record)
     {
@@ -286,7 +284,6 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
     {
         printf("Data:%d\n", i.data.value);
     }
-
 
     // Insert into the table
     Record* new_record = new (std::nothrow) Record(record.size());
@@ -311,9 +308,13 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
     // Push the record counter on the back of the record
     TervelData counter_data = {.value = 0};
     uint64_t counter = table_pair->table->record_counter.fetch_add(1);
-
+    
     counter_data.data.value = counter;
     new_record->push_back_w_ra(counter_data.value);
+
+    size_t ret = table_pair->table->records.push_back_w_ra(new_record);
+    printf("Pushback returned %lu\n", ret);
+    printf("Record address %p\n", new_record);
 
     return ManipResult(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
 }
