@@ -142,8 +142,13 @@ struct DataTable
  */
 struct SchemaTablePair
 {
+    SchemaTablePair() : table(nullptr), schema(nullptr) {}
     SchemaTablePair(DataTable* t, TableSchema* s)
         : table(t), schema(s)
+    {}
+
+    SchemaTablePair(const SchemaTablePair& pair)
+        : table(pair.table), schema(pair.schema)
     {}
 
     //! The data that adheres to the schema
@@ -255,9 +260,9 @@ public:
                                  std::string table_name);
 
 private:
-    SchemaTablePair* getTablePair(std::string table_name);
+    bool getTablePair(std::string table_name, SchemaTablePair& pair);
 
-	RecordCopy copyRecord(RecordVector& table, int64_t row_idx);
+    RecordCopy copyRecord(RecordVector& table, int64_t row_idx);
     RecordCopy copyRecord(Record* record);
 
     MultiRecordCopies searchTable(std::shared_ptr<DataTable>& table, ValuePredicate* value_pred);
@@ -266,9 +271,9 @@ private:
                                 ColumnPredicate* col_pred);
                                 */
 
-	MultiTableRecordCopies searchTables(NestedPredicate* pred);
+    MultiTableRecordCopies searchTables(NestedPredicate* pred);
 
-    ConstraintResult schemaChecker(SchemaTablePair *table_pair, RecordData *record);
+    ConstraintResult schemaChecker(SchemaTablePair& table_pair, RecordData *record);
 
     TableMap table_name_mapping;
 };
