@@ -19,6 +19,8 @@ DataStoreTest::DataStoreTest(){}
 void DataStoreTest::createTest(std::vector<std::string> statements)
 {
 
+
+    // Set up tervel and parser
     tervel::Tervel* tervel_test = new tervel::Tervel(8);
     tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);
 
@@ -28,6 +30,7 @@ void DataStoreTest::createTest(std::vector<std::string> statements)
 
     int successCount = 0;
 
+    // Execute create table commands from statements vector (defined in h file)
     for(auto i = statements.begin(); i  != statements.end(); i++)
     {    
         ParseResult parse_result = parse(*i, &data);
@@ -53,12 +56,32 @@ void DataStoreTest::createTest(std::vector<std::string> statements)
 
 }
 
+void DataStoreTest::dropTest(std::vector<std::string> statements)
+{
+
+    DataStore data;
+
+    for(auto i = statements.begin(); i != statements.end(); i++)
+    {
+        data.deleteTable("TestT1");
+    }
+}
+
+void DataStoreTest::insertTest(std::vector<std::string> statements)
+{
+
+}
+
+// First method that should be called when making a test, passes in just the type of test. 
+// Later on we will have the ability to set your own sql strings, this will also be passed in here
 DataStoreTest& DataStoreTest::with(int mode)
 {
     this->mode = mode;
     return *this;
 }
 
+// Depending on the complexity, it will make test cases with little variance (no randomization)
+// or high variance (for correctness testing)
 DataStoreTest& DataStoreTest::generateCases(int testComplexity)
 {
     complexity = testComplexity;
@@ -77,11 +100,19 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
             }
 
             break;
+
+        case MODE_DROP:
+            break;
+        case MODE_INSERT:
+            break;
     }
 
     return *this;
 }
 
+
+// Last function that should be called when making a test, it will actually execute the test
+// on the desired amount of threads based on the complexity.
 TestResult DataStoreTest::test()
 {
 
@@ -114,6 +145,7 @@ TestResult DataStoreTest::test()
 
     }
 
+    // Placeholder, should build a testresult object
     TestResult res(0ul, threadCount);
     return res;
 }

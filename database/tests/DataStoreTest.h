@@ -17,13 +17,16 @@ class DataStoreTest
 
 
 	private:
+		
 		int complexity, mode, threadCount;
 		bool isRandomized = false;
-		// void createTest();
+		std::vector<std::string> statements;
+
 		void parseComplexity(int complexity);
 		static void createTest(std::vector<std::string> statements);
+		static void dropTest(std::vector<std::string> statements);
+		static void insertTest(std::vector<std::string> statements);
 		std::vector<std::string> generateCases();
-		std::vector<std::string> statements;
 
 
 };

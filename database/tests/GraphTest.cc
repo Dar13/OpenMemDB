@@ -51,6 +51,18 @@ GraphTest::GraphTest()
     createOutputFile(timeVals);
 }
 
+// ombdt is a plaintext file that contains test data (used by the python script to generate the graphs)
+// Current format:
+
+/*
+*   TestName
+*   test case count
+*   Thread1 time
+*   Thread2 time
+*   Thread3 time
+*   Thread 4 time
+*   ... etc
+*/
 void GraphTest::createOutputFile(std::vector<int> timeVals)
 {
     std::ofstream outputFile;
