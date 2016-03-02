@@ -61,12 +61,11 @@ memory module technology. Making it possible for a data analysis algorithm to ma
 full use of the database server's processing power to extract and manipulate data
 would make that analysis quicker and more efficient in terms of hardware use.
 \par\vspace{\baselineskip}
-An example of the need for fast and high throughput databases is a problem that was experienced by Zynga 
+An example of the need for fast databases is a problem that was experienced by Zynga 
 (the developers of Words with Friends and Farmville). They had so many users that their database solution was
 not able to provide enough throughput to supply their real-time analysis algorithms adequately. Switching to an
-in-memory database, MemSQL, finally provided them with the speed and throughput they required. With this 
-solution, Zynga can ``make decisions based on billions of data points in real-time to 
-provide better in-game personalization and overall customer satisfaction''\cite{MemSQL}.
+in-memory database, MemSQL finally provided them with the speed they required. With this 
+solution, Zynga can process billions of data points in real-time. This allows them to personalize a user's game as they are playing it, increasing customer satisfaction \cite{MemSQL}.
 
 \subsection{Motivation}
 Over the last 30 years the there has been tremendous advancements in computing
@@ -100,9 +99,8 @@ that attempt to implement some level of lock-freedom into their DBMS.
 MemSQL\footnote{MemSQL can be configured as a Columnstore that stores data on disk.}
 and VoltDB are both fully in-memory DBMS as is OpenMemDB. This is where the
 similarities end as far as OpenMemDB is concerned. MemSQL and VoltDB on the other 
-hand both use distributed systems to achieve performance gains. MemSQL differs from 
-VoltDB in a few ways, the most important being its use of lock-free data structures
-for storing data and its storing of pre-compiled commonly used queries\cite{MemSQL}.
+hand both use distributed systems to achieve performance gains and they both differ from OpenMemDB in a few ways. MemSQL uses lock-free data structures
+to store data and stores pre-compiled commonly used queries\cite{MemSQL}.
 VoltDB tries to make its performance gains by what they call Concurreny through
 scheduling\cite{VoltDB}. This is the process of using a single-threaded pipeline 
 that performs the task it was scheduled. This limits the need for locking during
@@ -136,8 +134,8 @@ incoming queries and commands among the worker threads as well as sending the re
 client that sent them. The SQL Engine is responsible for parsing the
 given query or command string into an internal representation that can be executed on the Data Store.
 The Data Store is where all the database's data is stored and thus is where the wait-free data
-structures are mainly used. Those wait-free data structures are important to guarantee that all
-the worker threads can safely and efficiently execute their assigned tasks and then communicate
+structures are mainly used. These wait-free data structures are important to guarantee that all
+the worker threads can safely and efficiently execute their assigned tasks. Wait-freedom guarantees that all threads system wide finish in a finite amount of steps. Then, the threads communicate
 those results to the Work Manager.
 \par\vspace{\baselineskip}
 Each worker thread is a long-lived thread spawned by the database upon start-up and has various
@@ -145,8 +143,7 @@ thread-local statically-allocated pieces of memory given to it.
 Most of this memory is used by the parser engine within the SQL Engine module. When the 
 thread enters that module, there is zero shared state between it and another thread. When the thread
 leaves the SQL Engine and proceeds to execute the parsed statement, it calls the appropriate
-method within the Data Store module. This begins the portion of the database where the data 
-structures and algorithms are heavily relied upon to achieve linearizability and wait-freedom.
+method within the Data Store module. In this module the data structures and algorithms' wait-freedom and linearizability guarantees provide a fast and efficient way to create, modify, and access data.
 We specifically use a wait-free hash map to relate table names to the tables themselves which are nested
 wait-free vectors. The composition of the Tervel vectors to create the table structure is such that the outer
 vector acts as a container of references to records within the table while each of the referenced vectors
