@@ -177,12 +177,7 @@ enum class ManipStatus : uint32_t
 enum class ConstraintStatus : uint32_t
 {
     SUCCESS = 0,
-    ERR_CONSTRAINT,
-    ERR_SCHEMA,
-    ERR_ROW_DATA,
     ERR_NULL,
-    ERR_NOT_UNIQUE,
-    ERR_NOT_PKEY,
     ERR_ROW_LEN,
 };
 
@@ -273,7 +268,7 @@ private:
 
 	MultiTableRecordCopies searchTables(NestedPredicate* pred);
 
-    ConstraintResult schemaChecker(SchemaTablePair *table_pair, Record *record);
+    ConstraintResult schemaChecker(SchemaTablePair *table_pair, RecordData *record);
 
     TableMap table_name_mapping;
 };
