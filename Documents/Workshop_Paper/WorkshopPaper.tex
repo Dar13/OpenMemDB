@@ -62,10 +62,12 @@ full use of the database server's processing power to extract and manipulate dat
 would make that analysis quicker and more efficient in terms of hardware use.
 \par\vspace{\baselineskip}
 An example of the need for fast databases is a problem that was experienced by Zynga 
-(the developers of Words with Friends and Farmville). They had so many users that their database solution was
-not able to provide enough throughput to supply their real-time analysis algorithms adequately. Switching to an
-in-memory database, MemSQL finally provided them with the speed they required. With this 
-solution, Zynga can process billions of data points in real-time. This allows them to personalize a user's game as they are playing it, increasing customer satisfaction \cite{MemSQL}.
+(the developers of Words with Friends and Farmville). They had so many users that their 
+database solution was not able to provide enough throughput to supply their real-time 
+analysis algorithms adequately. Switching to an in-memory database, MemSQL finally 
+provided them with the speed they required. With this solution, Zynga can process 
+billions of data points in real-time. This allows them to personalize a user's game 
+as they are playing it, increasing customer satisfaction.
 
 \subsection{Motivation}
 Over the last 30 years the there has been tremendous advancements in computing
@@ -258,7 +260,11 @@ in the language chosen for this project, we can both postpone the deletion of th
 table data while completing the DROP operation. The smart pointer guarantees the memory will 
 be deleted when all references to it are released, and as the base reference (stored in the 
 relation of table name to table) is removed by the DROP operation, the operation's effects 
-are effectively reordered to take place after the SELECT operation.
+are effectively reordered to take place after the SELECT operation. This is similar to Tervel's 
+hazard pointer functionality, but is simpler and only protects a single member in the object stored
+in the hash map rather than the entire object. Furthermore, the smart pointer simply triggers a 
+more fine-grained deletion of the table which then uses full Tervel protections to ensure memory
+safety.
 
 \section{Experimental Results}
 PENDING
