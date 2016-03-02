@@ -169,31 +169,6 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair *table_pair, RecordDat
     int64_t num_Constraints = 0;
     SQLConstraint constraint;
 
-    //just to init constraint.value bits to all 0
-    TervelData temp = {.value = 0};
-
-    //DEFAULT hardcode constraint
-    SQLConstraintType state = SQLConstraintType::SQL_DEFAULT;
-    constraint.type = state;
-
-	//init default value
-	constraint.value = temp;
-	constraint.value.data.type = INTEGER;
-	constraint.value.data.tervel_status = 0;
-    constraint.value.data.value = 10;        
-
-    //pushes default constraint for first column
-    schema->columns.at(0).constraint.push_back(constraint);
-
-    //AUTO INCREMENT hardcode constraint
-    SQLConstraintType state2 = SQLConstraintType::SQL_AUTO_INCREMENT;
-    constraint.type = state2;
-    //constraint.value = temp;
-        
-
-    //pushes auto incre constraint for second column
-    schema->columns.at(1).constraint.push_back(constraint);
-
     if(row_len != col_len)
     {
         //mismatching columns not enough data
@@ -235,18 +210,14 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair *table_pair, RecordDat
                         insert.data.value = table->record_counter.load()+1;
                         insert.data.tervel_status = 0;
 
-                        row->erase(row->begin()+i);
-                        printf("AUTO INCREMENT value:%d being inserted @%d\n", insert.data.value, i);
-                        row->insert(row->begin()+i, insert);
+                        row->at(i) = insert;
                         break;
                     }
                 case SQLConstraintType::SQL_DEFAULT:
                     {
                         if(row_data.data.null == 1)
                         {
-                            row->erase(row->begin()+i);
-                            printf("DEFAULT value:%d being inserted @%d\n", constraint.value.data.value, i);
-                            row->insert(row->begin()+i, constraint.value);
+                            row->at(i) = constraint.value;
                         }
                         break;
                     }
@@ -269,21 +240,8 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
         return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_TABLE_NOT_EXIST);
     }
 
-    
-    printf("Before\n");
-    for(auto i : record)
-    {
-        printf("Data:%d\n", i.data.value);
-    }
-
     if(schemaChecker(table_pair, &record).status != ResultStatus::SUCCESS)
         return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_FAILED_CONSTRAINT);
-
-    printf("After\n");
-    for(auto i : record)
-    {
-        printf("Data:%d\n", i.data.value);
-    }
 
     // Insert into the table
     Record* new_record = new (std::nothrow) Record(record.size());
