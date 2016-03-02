@@ -10,7 +10,7 @@
 \usepackage{bigfoot}
 \usepackage[square,sort,comma,numbers]{natbib}
 \usepackage{titling}
-\usepackage{mathtools}
+%\usepackage{mathtools}
 \usepackage{helvet}
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
@@ -70,13 +70,12 @@ provide better in-game personalization and overall customer satisfaction''\cite{
 
 \subsection{Motivation}
 Over the last 30 years the there has been tremendous advancements in computing
-hardware. ``Processors are thousands of times faster and memory is thousands of
-times times larger''\cite{stonebraker2007end}. Most technologies have advanced 
+hardware. Processor speeds have increased significantly and memory is cheaper than ever
+\cite{stonebraker2007end}. Most technologies have advanced 
 along with hardware, however database management systems have struggled to improve
-at a similar rate. This is mostly due to concurrency issues. "Existing studies show
-that current database engines can spend more than 30\% of time in 
-synchronization-related operations (e.g. locking and latching), even when only a 
-single client thread is running''\cite{soares2015database}.
+at a similar rate. This is mostly due to concurrency issues. Databases spend more than 30\% 
+of execution time in synchronization-related operations, even when only running a single
+client thread\cite{soares2015database}.
 \par\vspace{\baselineskip}
 Our approach, OpenMemDB attempts to solve this problem by implementing a data-store 
 using only wait-free data structures. The goal is to use powerful wait-free data 
@@ -104,11 +103,16 @@ similarities end as far as OpenMemDB is concerned. MemSQL and VoltDB on the othe
 hand both use distributed systems to achieve performance gains. MemSQL differs from 
 VoltDB in a few ways, the most important being its use of lock-free data structures
 for storing data and its storing of pre-compiled commonly used queries\cite{MemSQL}.
-VoltDB tries to make its performance gains by what they call "Concurreny through
-scheduling."\cite{VoltDB} This is the process of using a single-threaded pipeline 
+VoltDB tries to make its performance gains by what they call Concurreny through
+scheduling\cite{VoltDB}. This is the process of using a single-threaded pipeline 
 that performs the task it was scheduled. This limits the need for locking during
 transactions by intelligently scheduling the transactions so that locks are not
-necessary.
+necessary. This approach eliminates the time spent obtaining and updating a lock
+but limits parallelization. There can not be true concurrent access on shared data. If 
+there are a number of operations that need to be executed on the same table in a database; 
+these operations will be scheduled sequentially. The only parallelism that occurs is during
+operations on unrelated data. Our approach allows for concurrent operations to take place
+no matter what data is being accessed.
 \newpage
 
 \section{Technical Approach}
