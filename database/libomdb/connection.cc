@@ -32,6 +32,7 @@ THE SOFTWARE.
 #include <cstring>
 
 #include "connection.h"
+#include "libomdb.h"
 
 #define MAXDATASIZE 100
 

@@ -32,6 +32,8 @@ THE SOFTWARE.
 #include <sys/wait.h>
 #include <signal.h>
 
+#include "libomdb.h"
+
 
 /*
  * temp_server.cc
@@ -42,6 +44,44 @@ THE SOFTWARE.
 #define PORT "3490"  // the port users will be connecting to
 
 #define BACKLOG 10     // how many pending connections queue will hold
+
+/********
+ * Stock ResultPacket and ResultMetaDataPacket to be sent back in tests
+ * These will need to be serialized before being sent back to client
+ */
+ResultPacket getStockResultPacket() {
+    uint8_t rows = 10, columns = 10;
+    uint64_t* data = new uint64_t[(rows*columns)];
+    for (uint64_t i = 0; i < rows*columns; ++i) {
+        data[i] = i;
+    }
+    ResultPacket resultPacket;
+    resultPacket.type = PacketType::RESULT_DATA;
+    resultPacket.status = ResultStatus::OK;
+    resultPacket.rowLen = rows;
+    resultPacket.resultSize = (rows * columns * sizeof(uint64_t));
+    resultPacket.data = data;
+    resultPacket.terminator = THE_TERMINATOR;
+    return resultPacket;
+}
+
+ResultMetaDataPacket getStockResultMetaDataPacket() {
+    ResultColumn columns[10];
+    for (int i = 0; i < 10; ++i) {
+        ResultColumn col;
+        std::string num(i);
+        col.name = "Name "+num;
+        col.type = 1; // TODO: Change to Neils types
+        columns[i] = col;
+    }
+    ResultMetaDataPacket resultMetaDataPacket;
+    resultMetaDataPacket.type = PacketType::RESULT_METADATA;
+    resultMetaDataPacket.status = ResultStatus::OK;
+    resultMetaDataPacket.numColumns = 10;
+    resultMetaDataPacket.columns = mdColumns;
+    resultMetaDataPacket.terminator = THE_TERMINATOR;
+    return resultMetaDataPacket;
+}
 
 void sigchld_handler(int s)
 {
@@ -158,12 +198,27 @@ int main(void)
                     exit(1);
                 }
                 receivedBuffer[bytesReceived] = '\0';
+                std::string messageToReturn;
+                std::string mdToReturn;
+                // Check if message is select or command
+                if (receivedBuffer[0] == 'S') {
+                    messageToReturn = SerializeResultPacket(getStockResultPacket());
+                    mdToReturn = SerializeResultMetaDataPacket(getStockResultMetaDataPacket());
+                } else {
+                    // TODO: Setup command packet here
+                }
                 printf("Server received message %s\n", receivedBuffer);
                 if (receivedBuffer[0] == '1') {
                     break;
                 }
-                int bytesSent = send(new_fd, "Received message, I can hear you!", 34, 0);
+                int bytesSent = send(new_fd, messageToReturn.c_str(), messageToReturn.size(), 0);
                 if (bytesSent == -1) {
+                    perror("send");
+                    exit(1);
+                }
+
+                int bytesSent2 = send(new_fd, mdToReturn.c_str(), mdToReturn.size(), 0);
+                if (bytesSent2 == -1) {
                     perror("send");
                     exit(1);
                 }
