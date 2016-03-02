@@ -135,15 +135,18 @@ client that sent them. The SQL Engine is responsible for parsing the
 given query or command string into an internal representation that can be executed on the Data Store.
 The Data Store is where all the database's data is stored and thus is where the wait-free data
 structures are mainly used. These wait-free data structures are important to guarantee that all
-the worker threads can safely and efficiently execute their assigned tasks. Wait-freedom guarantees that all threads system wide finish in a finite amount of steps. Then, the threads communicate
-those results to the Work Manager.
+the worker threads can safely and efficiently execute their assigned tasks. The guarantees of a 
+wait-free data structure are such that multiple threads can work on the same data without 
+running into concurrency conflicts within the data structures or infinitely running. Once 
+the threads calculate their results, they send those results to the Work Manager.
 \par\vspace{\baselineskip}
 Each worker thread is a long-lived thread spawned by the database upon start-up and has various
 thread-local statically-allocated pieces of memory given to it.
 Most of this memory is used by the parser engine within the SQL Engine module. When the 
 thread enters that module, there is zero shared state between it and another thread. When the thread
 leaves the SQL Engine and proceeds to execute the parsed statement, it calls the appropriate
-method within the Data Store module. In this module the data structures and algorithms' wait-freedom and linearizability guarantees provide a fast and efficient way to create, modify, and access data.
+method within the Data Store module. In this module the data structures and algorithms' wait-freedom and 
+linearizability guarantees provide a fast and efficient way to create, modify, and access data.
 We specifically use a wait-free hash map to relate table names to the tables themselves which are nested
 wait-free vectors. The composition of the Tervel vectors to create the table structure is such that the outer
 vector acts as a container of references to records within the table while each of the referenced vectors
@@ -155,19 +158,27 @@ in the core data structures as much as possible so as to take advantage of the s
 well-defined and optimized containers. This also allows us to concretely define the situations where 
 multiple writers attempt to write to the same element in the shared data structures. In the few situations
 this can occur, namely in the event of multiple concurrent SQL UPDATE or DELETE statements, we only perform
-the operation if the targeted record has not been changed. This is done using Tervel's compare-and-swap 
-operation on a particular element in the vector. Failing to perform these operations due to the 
-selected records changing between the time of selection and the time to perform the operation
-is deemed a soft failure due to contention between threads executing concurrent and overlapping statements
-and is communicated to the client as such.
+the operation if the targeted record reference in the table vector has not been changed. This is done using 
+Tervel's compare-and-swap operation on a particular element in the vector. A compare-and-swap operation a 
+swap operation that only occurs when a comparison with a provided expected value succeeds. Failing to 
+perform this swap due to the selected record reference changing between the time of selection and the 
+time to perform the operation is deemed a soft failure due to contention between threads executing 
+concurrent and overlapping statements and is communicated to the client as such.
+\par\vspace{\baselineskip}
+Handling two concurrent update operations that occur at the same time as a long-lived read operation
+is an edge case that OpenMemDB handles using Tervel's hazard pointer. A hazard pointer is a wait-free 
+smart pointer that will only allow freeing of the pointer if there are no references to the pointer within
+the Tervel data structures. Extending the hazard pointer lets us replace a record within a table as described 
+above while maintaining the validity of the reference used by the read operation until that read operation
+concludes and the replaced record is released.
 \par\vspace{\baselineskip}
 Inserting records into a table within the Data Store requires pre-processed data to be passed
-into the \inlinecode{insertRecord} method of the Data Store object. The general procedure of inserting
+into the \inlinecode{InsertRecord} method of the Data Store object. The general procedure of inserting
 into a table is shown in Figure \ref{insert_record}. This method first retrieves the table 
 that we want to insert into and ensures the data provided adheres to the schema defined 
 at the table's creation. Assuming that check is successful, a Tervel vector is then 
 constructed using the given data while preserving the order of the data. Once the vector 
-is setup we then push the final vector into the table.
+is setup we then push the reference to the Tervel vector into the table.
 
 \begin{figure}
  \begin{algorithmic}
@@ -194,7 +205,7 @@ in Howard and Walpole's paper on relativistic red-black trees, where each reader
 data structures only works within its own temporal frame of the data structure\cite{rbtree}. 
 This is done by copying to local unshared memory and then manipulating the data, 
 effectively capturing a snapshot of the data that we then use to generate the final 
-output given to the client. This manipulation of the data is bounded and cannot 
+output given to the client. The acquisition of the data is bounded and cannot 
 infinitely loop or block because Tervel's algorithms provide wait-free access 
 to the shared data structures. An example of this style of data manipulation is shown in 
 Figure \ref{read_op}. That function searches the given table for records that match
