@@ -33,6 +33,7 @@
 
 // Project includes
 #include "hash_functor.h"
+#include "accessor.h"
 #include "util/types.h"
 #include "util/result.h"
 #include "sql/types/common.h"
@@ -43,6 +44,9 @@
 
 // Some typedefs(C++11-style) so that we don't have all that meaningless
 // namespace and template junk pop up everywhere.
+
+template<typename T>
+using TervelVector = tervel::containers::wf::vector::Vector<T>;
 
 // Table data definitions
 using Record = tervel::containers::wf::vector::Vector<int64_t>;
@@ -231,6 +235,8 @@ public:
     DataStore()
         : table_name_mapping(64)
     {}
+
+    TervelVector<ValuePointer<Record>*> test;
 
     ManipResult createTable(CreateTableCommand table_info);
 
