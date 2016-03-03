@@ -12,11 +12,11 @@ with open("test_data.omdbt", "r") as f:
 
 test_name = test_data[0]
 test_case_count = test_data[1]
-thread_time = [int(test_data[2]), int(test_data[3]), int(test_data[4]), int(test_data[5])]
+thread_time = [int(test_data[2]), int(test_data[3]), int(test_data[4]), int(test_data[5]), int(test_data[6]), int(test_data[7]), int(test_data[8])]
 
 # create and show plot
-xticks = ['1','2','4','8']
-x = [1, 2, 3, 4]
+xticks = ['1','2','4','8','16','32','48']
+x = [1, 2, 3, 4, 5, 6, 7]
 
 style.use('ggplot')
 plt.plot(x, thread_time, linewidth=3)

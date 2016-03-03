@@ -32,21 +32,48 @@ GraphTest::GraphTest()
 
     timeVals.push_back(result.duration);
 
-    DataStoreTest dataStoreTest3;
+    // DataStoreTest dataStoreTest3;
 
-    result = dataStoreTest3.with(MODE_CREATE)
-                          .generateCases(0b0100)
-                          .test();
+    // result = dataStoreTest3.with(MODE_CREATE)
+    //                       .generateCases(0b0100)
+    //                       .test();
 
-    timeVals.push_back(result.duration);
+    // timeVals.push_back(result.duration);
 
-    DataStoreTest dataStoreTest4;
+    // DataStoreTest dataStoreTest4;
 
-    result = dataStoreTest4.with(MODE_CREATE)
-                          .generateCases(0b1000)
-                          .test();
+    // result = dataStoreTest4.with(MODE_CREATE)
+    //                       .generateCases(0b1000)
+    //                       .test();
 
-    timeVals.push_back(result.duration);
+    // timeVals.push_back(result.duration);
+
+    // DataStoreTest dataStoreTest5;
+
+    // result = dataStoreTest.with(MODE_CREATE)
+    //                                  .generateCases(0b0000)
+    //                                  .setThreadCount(16)
+    //                                  .test();
+
+    // timeVals.push_back(result.duration);
+
+    // DataStoreTest dataStoreTest6;
+
+    // result = dataStoreTest.with(MODE_CREATE)
+    //                                 .generateCases(0b0000)
+    //                                 .setThreadCount(32)
+    //                                 .test();
+
+    // timeVals.push_back(result.duration);
+
+    // DataStoreTest dataStoreTest7;
+
+    // result = dataStoreTest.with(MODE_CREATE)
+    //                                 .generateCases(0b0000)
+    //                                 .setThreadCount(48)
+    //                                 .test();
+                               
+    // timeVals.push_back(result.duration);
 
     createOutputFile(timeVals);
 }

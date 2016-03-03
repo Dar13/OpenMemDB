@@ -12,33 +12,34 @@
 #include <string>
 #include <thread>
 #include <chrono>
+#include <atomic>
 
-DataStoreTest::DataStoreTest(){}
+
+DataStoreTest::DataStoreTest()
+{
+}
 
 // Will return TestResult (or DataStoreTestResult), int for placeholder
-void DataStoreTest::createTest(std::vector<std::string> statements)
+void DataStoreTest::createTest(std::vector<std::string> statements, DataStore *data)
 {
-
-
-    // Set up tervel and parser
-    tervel::Tervel* tervel_test = new tervel::Tervel(8);
-    tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);
-
-    DataStore data;
+    int successCount = 0;
 
     setupTokenMappings();
 
-    int successCount = 0;
+    tervel::Tervel* tervel_test = tervel_test = new tervel::Tervel(8);
+    tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);
 
     // Execute create table commands from statements vector (defined in h file)
-    for(auto i = statements.begin(); i  != statements.end(); i++)
-    {    
-        ParseResult parse_result = parse(*i, &data);
+
+    for(int i = 0; i < 3; i++)
+    {
+
+        ParseResult parse_result = parse(statements.at(i), data);
 
         if(parse_result.status == ResultStatus::SUCCESS)
         {
             CreateTableCommand* create_table = reinterpret_cast<CreateTableCommand*>(parse_result.result);
-            auto err = data.createTable(*create_table);
+            auto err = data->createTable(*create_table);
             if(err.status == ResultStatus::SUCCESS)
             {
                 printf("Table created\n");
@@ -51,9 +52,6 @@ void DataStoreTest::createTest(std::vector<std::string> statements)
             }
         }
     }
-
-    printf("Success count: %d\n", successCount);
-
 }
 
 void DataStoreTest::dropTest(std::vector<std::string> statements)
@@ -87,13 +85,13 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
     complexity = testComplexity;
     parseComplexity(complexity);
 
-    printf("%d\n", threadCount);
+    printf("Thread count: %d\n", threadCount);
 
     switch(mode)
     {
         case MODE_CREATE:
 
-            for(int i = 0; i < 7; i++)
+            for(int i = 0; i < 3; i++)
             {
                 std::string create_table = "CREATE TABLE TestT"+ std::to_string(i) +" (A STRING, B INTEGER);";
                 statements.push_back(create_table);
@@ -110,21 +108,20 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
     return *this;
 }
 
-
 // Last function that should be called when making a test, it will actually execute the test
 // on the desired amount of threads based on the complexity.
 TestResult DataStoreTest::test()
-{
-
+{    
     switch(mode)
     {
         case MODE_CREATE:
 
             std::vector<std::thread> v;
-            
+            DataStore data;
+
             for (int i = 0; i < threadCount; ++i)
             {
-                std::thread t1(&DataStoreTest::createTest, statements);
+                std::thread t1(createTest, statements, &data);
                 v.push_back(std::move(t1));
             }
 
@@ -138,16 +135,19 @@ TestResult DataStoreTest::test()
             auto time_end = std::chrono::high_resolution_clock::now();
             
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
-
             TestResult testResult(duration.count(), threadCount);
-
             return testResult;
-
     }
 
-    // Placeholder, should build a testresult object
     TestResult res(0ul, threadCount);
     return res;
+
+    
+}
+
+std::vector<std::string> DataStoreTest::calculateArrayCut()
+{
+
 }
 
 
@@ -181,4 +181,10 @@ void DataStoreTest::parseComplexity(int complexity)
     {
         threadCount = 1;
     }
+}
+
+DataStoreTest& DataStoreTest::setThreadCount(int count)
+{
+    threadCount = count;
+    return *this;
 }
