@@ -33,6 +33,9 @@
 \let\oldReturn\Return
 \renewcommand{\Return}{\State\oldReturn}
 
+\newcommand{\CC}{C\nolinebreak\hspace{-.05em}\raisebox{.4ex}{\tiny\bf +}\nolinebreak\hspace{-.10em}\raisebox{.4ex}{\tiny\bf +}}
+
+
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codered}{rgb}{0.6,0,0}
 \definecolor{codegrey}{gray}{0.9}
@@ -86,7 +89,7 @@ fully wait-free DBMS will achieve the performance gains
 that have been lacking in the DBMS world while eliminating the complexity of 
 distributed systems, all while retaining necessary ACID properties. OpenMemDB also
 resides completely in-memory and therefore avoids all of the slow downs associated with
-going to disk. OpenMemDB was written in C++11 and uses the modern constructs defined
+going to disk. OpenMemDB was written in \CC 11 and uses the modern constructs defined
 by that standard extensively.
 \par\vspace{\baselineskip}
 
@@ -117,7 +120,7 @@ no matter what data is being accessed.
 
 \section{Technical Approach}
 Our database is built upon wait-free data structures found in Tervel, a collection of
-lock-free and wait-free data structures created by Dr. Damian Dechev et al\cite{web:tervel}. We use
+lock-free and wait-free data structures created by Steven Feldman, Pierre LaBorde, and Damian Dechev\cite{tervel:hazard_pointer}\cite{tervel:hash_map}\cite{tervel:vector}. We use
 the common definition of wait-freedom as found in Herlihy's definitive text\cite{herlihy:waitfree}, which
 states that the composition of linearizable algorithms or data structures
 is also linearizable. From the beginning, we knew that we had to compose 
