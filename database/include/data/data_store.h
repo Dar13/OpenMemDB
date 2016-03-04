@@ -78,6 +78,15 @@ struct RecordCopy
     RecordData data;
 };
 
+struct RecordReference
+{
+    RecordReference() : id(0), ptr(nullptr) {}
+    RecordReference(uint64_t i, Record* p) : id(i), ptr(p) {}
+
+    uint64_t id;
+    Record* ptr;
+};
+
 // TODO: Is there a more efficient way?
 using MultiRecordData = std::vector<RecordData>;
 
@@ -94,6 +103,13 @@ using MultiRecordCopies = std::vector<RecordCopy>;
  *  \detail THIS IS FOR INTERNAL USE ONLY
  */
 using MultiTableRecordCopies = std::map<std::string, MultiRecordCopies>;
+
+/**
+ *  \brief A vector that holds record ID and references instead of full records
+ *
+ *  \detail THIS IS FOR INTERNAL USE ONLY
+ */
+using RecordReferences = std::vector<RecordReference>;
 
 /**
  * \brief The schema that a table must adhere to.
@@ -246,21 +262,15 @@ public:
 
     SchemaResult getTableSchema(std::string table_name);
 
-    DataResult updateData(Predicate* predicates,
-                          std::string table_name,
-                          uint32_t column_idx,
-                          TervelData value);
-
-    DataResult getData(Predicate* predicates,
-                       std::string table_name,
-                       uint32_t column_idx);
-
     ManipResult insertRecord(std::string table_name,
                              RecordData record);
 
-    ManipResult updateRecord(Predicate* predicates, 
+    ManipResult updateRecords(Predicate* predicates, 
                              std::string table_name,
                              RecordData record);
+
+    ManipResult deleteRecords(Predicate* predicates,
+                              std::string table_name);
 
     MultiRecordResult getRecords(Predicate* predicates,
                                  std::string table_name);
@@ -278,6 +288,10 @@ private:
                                 */
 
 	MultiTableRecordCopies searchTables(NestedPredicate* pred);
+
+    RecordReferences searchTableForRefs(std::shared_ptr<DataTable>& table, 
+            ValuePredicate* value_pred);
+    RecordReferences searchTablesForRefs(NestedPredicate* pred);
 
     ConstraintResult schemaChecker(SchemaTablePair *table_pair, Record *record);
 

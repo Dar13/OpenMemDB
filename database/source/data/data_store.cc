@@ -143,19 +143,6 @@ UintResult DataStore::getColumnIndex(std::string table_name, std::string column_
     return UintResult(ResultStatus::FAILURE, 0);
 }
 
-DataResult DataStore::updateData(Predicate* predicates,
-        std::string table_name, uint32_t column_idx,
-        TervelData value)
-{
-    // TODO: This function doesn't really make sense to have...
-}
-
-DataResult DataStore::getData(Predicate* predicates,
-        std::string table_name, uint32_t column_idx)
-{
-    // TODO: This function doesn't really make sense to have...
-}
-
 //TODO: Clean up some testing code, maybe some bounds checking beforehand
 //for these loops, error checking too checks if the row data matches with the table schema
 ConstraintResult DataStore::schemaChecker(SchemaTablePair *table_pair, Record *insert_row)
@@ -359,10 +346,37 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
 /**
  *	\brief Update the appropriate record(s) with the given \refer RecordData object
  */
-ManipResult DataStore::updateRecord(Predicate* predicates,
+ManipResult DataStore::updateRecords(Predicate* predicates,
         std::string table_name,
         RecordData record)
 {
+}
+
+/**
+ *  \brief Delete the appropriate records that satisfy the given predicate
+ */
+ManipResult DataStore::deleteRecords(Predicate* predicates, std::string table_name)
+{
+    if(predicates == nullptr)
+    {
+        // TODO: Allow a full delete?
+    }
+    else
+    {
+        RecordReferences record_refs;
+        switch(predicates->type)
+        {
+            case PredicateType::NESTED:
+                record_refs = searchTablesForRefs(predicates);
+                break;
+            case PredicateType::VALUE:
+                break;
+            default:
+                // How the hell did you get here?
+                // std::terminate()?
+                break;
+        }
+    }
 }
 
 /**
@@ -719,6 +733,175 @@ MultiTableRecordCopies DataStore::searchTables(NestedPredicate* pred)
             result[l_itr.first] = join;
         }
     }
+
+    return result;
+}
+
+/**
+ *	\brief Searches the given table for records that satisfies the given predicate 
+ *	and records their ID
+ */
+RecordReferences DataStore::searchTableForRefs(std::shared_ptr<DataTable>& table,
+        ValuePredicate* value_pred)
+{
+    RecordReferences data;
+    if(table == nullptr || value_pred == nullptr)
+    {
+        return RecordReferences();
+    }
+
+    // This assumes table maps to the table name in the value predicate
+    int64_t table_len = table->records.size(0);
+    if(table_len == 0)
+    {
+        return RecordReferences();
+    }
+
+    for(int64_t idx = 0; idx < table_len; idx++)
+    {
+        Record* row = nullptr;
+
+        while(!table->records.at(idx, row)) {}
+
+        // TODO: Consider making this a more focused grab of data
+        RecordCopy record = copyRecord(row);
+
+        if(record.data.size() <= value_pred->column.column_idx)
+        {
+            // TODO: Propagate error up? This should be caught earlier
+            return RecordReferences();
+        }
+
+        ExpressionValue row_value(record.data.at(value_pred->column.column_idx));
+
+        if(evaluateOperation(value_pred->op, 
+                    value_pred->expected_value,
+                    row_value).IsTrue())
+        {
+            printf("Record matches predicate!\n");
+            data.push_back(RecordReference(record.id, row));
+        }
+    }
+
+    return data;
+}
+
+RecordReferences DataStore::searchTablesForRefs(NestedPredicate* pred)
+{
+    auto result = RecordReferences();
+    auto left_result = RecordReferences();
+    auto right_result = RecordReferences();
+
+    // This assumes the nested predicate given has two children
+    Predicate* left = pred->left_child; 
+    switch(left->type)
+    {
+        case PredicateType::NESTED:
+            {
+                auto nest_pred = reinterpret_cast<NestedPredicate*>(left);
+                left_result = searchTablesForRefs(nest_pred);
+            }
+            break;
+        case PredicateType::COLUMN:
+            {
+                /*
+                   ColumnPredicate* col_pred = reinterpret_cast<ColumnPredicate*>(left);
+                   auto column_result = searchTable(col_pred->left_column.table,
+                   col_pred->right_column.table, col_pred);
+                   */
+                printf("Column to column predicates are not supported!\n");
+                return RecordReferences();
+            }
+            break;
+        case PredicateType::VALUE:
+            {
+                ValuePredicate* val_pred = reinterpret_cast<ValuePredicate*>(left);
+                auto table_pair = getTablePair(val_pred->column.table);
+                left_result = searchTableForRefs(table_pair->table, val_pred);
+            }
+            break;
+    }
+
+    Predicate* right = pred->right_child;
+    switch(right->type)
+    {
+        case PredicateType::NESTED:
+            {
+                auto nest_pred = reinterpret_cast<NestedPredicate*>(right);
+                right_result = searchTablesForRefs(nest_pred);
+            }
+            break;
+        case PredicateType::COLUMN:
+            {
+                /*
+                   ColumnPredicate* col_pred = reinterpret_cast<ColumnPredicate*>(right);
+                   auto column_result = searchTable(col_pred->left_column.table,
+                   col_pred->right_column.table, col_pred);
+                   */
+                printf("Column to column predicates are not supported!\n");
+                return RecordReferences();
+            }
+            break;
+        case PredicateType::VALUE:
+            {
+                ValuePredicate* val_pred = reinterpret_cast<ValuePredicate*>(right);
+                auto table_pair = getTablePair(val_pred->column.table);
+                right_result = searchTableForRefs(table_pair->table, val_pred);
+            }
+            break;
+    }
+
+    // Join the two results based on the nested predicate operation
+
+    // This compares two records and orders them based on their ID
+    auto comp_copy = [] (RecordReference a, RecordReference b) -> bool {
+        return a.id < b.id;
+    };
+
+    size_t l_size = left_result.size();
+    size_t r_size = right_result.size();
+
+    size_t num_join_records = 0;
+    switch(pred->op) 
+    { 
+        case ExpressionOperation::AND:
+            num_join_records = (l_size > r_size) ? l_size : r_size;
+            break;
+        case ExpressionOperation::OR:
+        default:
+            num_join_records = l_size + r_size;
+            break;
+    }
+
+    auto join = RecordReferences(num_join_records);
+
+    // The ranges have to be sorted
+    std::sort(left_result.begin(), left_result.end(), comp_copy);
+    std::sort(right_result.begin(), right_result.end(), comp_copy);
+
+    RecordReferences::iterator join_end_itr;
+
+    // Perform the appropriate set operation
+    switch(pred->op)
+    {
+        case ExpressionOperation::AND:
+            join_end_itr = std::set_intersection(left_result.begin(), left_result.end(),
+                    right_result.begin(), right_result.end(),
+                    join.begin(), comp_copy);
+            break;
+        case ExpressionOperation::OR:
+            join_end_itr = std::set_union(left_result.begin(), left_result.end(),
+                    right_result.begin(), right_result.end(),
+                    join.begin(), comp_copy);
+            break;
+        default:
+            printf("Invalid operation used to join sets!\n");
+            break;
+    }
+
+    // Resize the vector to chop off unused elements
+    join.resize(join_end_itr - join.begin());
+    result = join;
 
     return result;
 }
