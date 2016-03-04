@@ -84,7 +84,14 @@ struct ResultMetaDataPacket {
   uint8_t terminator;
 }__attribute__((packed));
 
-
+/**
+ * Used to return results in both queries and commands
+ * for query see comments beside field
+ * for command
+ *  resultSize // number of rows affected
+ *  status // status
+ *  rowLen // errorCode
+ */
 struct ResultPacket {
     PacketType type;
     ResultStatus status;  //16 bits

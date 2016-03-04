@@ -83,6 +83,21 @@ ResultMetaDataPacket getStockResultMetaDataPacket() {
     return resultMetaDataPacket;
 }
 
+ResultPacket getStockComResult() {
+    /*for command
+    *  resultSize // number of rows affected
+    *  status // status
+    *  rowLen // errorCode
+    */
+    ResultPacket packet;
+    packet.resultSize = 10; // 10 rows affected
+    packet.status = ResultStatus::OK;
+    packet.rowLen = 1; // ManipStatus is a uint32_t, don't know how this would work
+    packet.data = nullptr;
+    packet.terminator = THE_TERMINATOR;
+    return packet;
+}
+
 void sigchld_handler(int s)
 {
     // waitpid() might overwrite errno, so we save and restore it:
@@ -206,6 +221,11 @@ int main(void)
                     mdToReturn = SerializeResultMetaDataPacket(getStockResultMetaDataPacket());
                 } else {
                     // TODO: Setup command packet here
+                    // Command results should be returned in
+                    // ResultPacket with different values set
+                    // see libomdb.h for specifics
+                    messageToReturn = SerializeResultPacket(getStockComRes());
+                    mdToReturn = SerializeResultMetaData(getStockResultMetaDataPacket());
                 }
                 printf("Server received message %s\n", receivedBuffer);
                 if (receivedBuffer[0] == '1') {
