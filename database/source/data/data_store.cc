@@ -289,6 +289,40 @@ ManipResult DataStore::updateRecords(Predicate* predicates,
         std::string table_name,
         RecordData record)
 {
+    if(predicates == nullptr)
+    {
+        // TODO: Allow a full update?
+    }
+    else
+    {
+        RecordReferences record_refs;
+        switch(predicates->type)
+        {
+            case PredicateType::NESTED:
+                record_refs = searchTablesForRefs(reinterpret_cast<NestedPredicate*>(predicates));
+                break;
+            case PredicateType::VALUE:
+            {
+                SchemaTablePair pair;
+                if(!getTablePair(table_name, pair))
+                {
+                    return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_TABLE_NOT_EXIST);
+                }
+
+                record_refs = searchTableForRefs(pair.table, reinterpret_cast<ValuePredicate*>(predicates));
+            }
+                break;
+            default:
+                // How the hell did you get here?
+                // std::terminate()?
+                break;
+        }
+
+        // TODO: Perform the delete using the record references and IDs gathered and the template record
+    }
+
+    // General error, this should never be reached
+    return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR);
 }
 
 /**
@@ -309,13 +343,27 @@ ManipResult DataStore::deleteRecords(Predicate* predicates, std::string table_na
                 record_refs = searchTablesForRefs(reinterpret_cast<NestedPredicate*>(predicates));
                 break;
             case PredicateType::VALUE:
+            {
+                SchemaTablePair pair;
+                if(!getTablePair(table_name, pair))
+                {
+                    return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_TABLE_NOT_EXIST);
+                }
+
+                record_refs = searchTableForRefs(pair.table, reinterpret_cast<ValuePredicate*>(predicates));
+            }
                 break;
             default:
                 // How the hell did you get here?
                 // std::terminate()?
                 break;
         }
+
+        // TODO: Perform the delete using the record references and IDs gathered
     }
+
+    // General error, this should never be reached
+    return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR);
 }
 
 /**
