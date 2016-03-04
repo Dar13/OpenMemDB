@@ -31,7 +31,7 @@ class DataStoreTest
 		static void dropTest(std::vector<std::string> statements, DataStore *data);
 		static void insertTest(std::vector<std::string> statements);
 		std::vector<std::string> generateCases();
-		std::vector<std::string> calculateArrayCut();
+		std::vector<std::string> calculateArrayCut(int threadCount, int threadNumber);
 
 };
 

@@ -13,7 +13,9 @@
 #include <thread>
 #include <chrono>
 #include <atomic>
+#include <tuple>
 
+typedef std::tuple<int,int,int> i2tuple;
 
 DataStoreTest::DataStoreTest()
 {
@@ -54,14 +56,12 @@ void DataStoreTest::createTest(std::vector<std::string> statements, DataStore *d
     }
 }
 
-void DataStoreTest::dropTest(std::vector<std::string> statements)
+void DataStoreTest::dropTest(std::vector<std::string> statements, DataStore *data)
 {
-
-    DataStore data;
 
     for(auto i = statements.begin(); i != statements.end(); i++)
     {
-        data.deleteTable("TestT1");
+        data->deleteTable("TestT1");
     }
 }
 
@@ -139,15 +139,18 @@ TestResult DataStoreTest::test()
             return testResult;
     }
 
+    // Placeholder
     TestResult res(0ul, threadCount);
     return res;
 
     
 }
 
-std::vector<std::string> DataStoreTest::calculateArrayCut()
+std::vector<std::string> DataStoreTest::calculateArrayCut(int threadCount, int threadNumber)
 {
-
+    int size = statements.size();
+    int cutPerThread = size / threadCount;
+    int start;
 }
 
 
