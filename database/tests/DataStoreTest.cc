@@ -15,8 +15,6 @@
 #include <atomic>
 #include <tuple>
 
-typedef std::tuple<int,int,int> i2tuple;
-
 DataStoreTest::DataStoreTest()
 {
 }
@@ -33,10 +31,10 @@ void DataStoreTest::createTest(std::vector<std::string> statements, DataStore *d
 
     // Execute create table commands from statements vector (defined in h file)
 
-    for(int i = 0; i < 3; i++)
+    for(auto i = statements.begin(); i  != statements.end(); i++)
     {
 
-        ParseResult parse_result = parse(statements.at(i), data);
+        ParseResult parse_result = parse(*i, data);
 
         if(parse_result.status == ResultStatus::SUCCESS)
         {
@@ -91,7 +89,7 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
     {
         case MODE_CREATE:
 
-            for(int i = 0; i < 3; i++)
+            for(int i = 0; i < 48; i++)
             {
                 std::string create_table = "CREATE TABLE TestT"+ std::to_string(i) +" (A STRING, B INTEGER);";
                 statements.push_back(create_table);
@@ -121,7 +119,14 @@ TestResult DataStoreTest::test()
 
             for (int i = 0; i < threadCount; ++i)
             {
-                std::thread t1(createTest, statements, &data);
+                i2tuple tuple = calculateArrayCut(threadCount, i);
+
+                std::cout << std::get<0>(tuple) << " ";
+                std::cout << std::get<1>(tuple) << "\n";
+
+                std::vector<std::string> cut(&statements[std::get<0>(tuple)], &statements[std::get<1>(tuple)]);
+
+                std::thread t1(createTest, cut, &data);
                 v.push_back(std::move(t1));
             }
 
@@ -146,11 +151,16 @@ TestResult DataStoreTest::test()
     
 }
 
-std::vector<std::string> DataStoreTest::calculateArrayCut(int threadCount, int threadNumber)
+i2tuple DataStoreTest::calculateArrayCut(int threadCount, int threadNumber)
 {
     int size = statements.size();
     int cutPerThread = size / threadCount;
-    int start;
+
+    int start = cutPerThread*threadNumber;
+
+    int end = start + cutPerThread;
+
+    return i2tuple(start, end);
 }
 
 

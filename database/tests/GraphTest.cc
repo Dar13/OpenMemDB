@@ -18,19 +18,19 @@ GraphTest::GraphTest()
     std::vector<int> timeVals;
     DataStoreTest dataStoreTest;
 
-    TestResult result = dataStoreTest.with(MODE_CREATE)
-    				                 .generateCases(0b0000)
-    				                 .test();
+    // TestResult result = dataStoreTest.with(MODE_CREATE)
+    // 				                 .generateCases(0b0000)
+    // 				                 .test();
 
-    timeVals.push_back(result.duration);
+    // timeVals.push_back(result.duration);
 
-    DataStoreTest dataStoreTest2;
+    // DataStoreTest dataStoreTest2;
 
-    result = dataStoreTest2.with(MODE_CREATE)
-                          .generateCases(0b0010)
-                          .test();
+    // result = dataStoreTest2.with(MODE_CREATE)
+    //                       .generateCases(0b0010)
+    //                       .test();
 
-    timeVals.push_back(result.duration);
+    // timeVals.push_back(result.duration);
 
     // DataStoreTest dataStoreTest3;
 
@@ -68,12 +68,12 @@ GraphTest::GraphTest()
 
     // DataStoreTest dataStoreTest7;
 
-    // result = dataStoreTest.with(MODE_CREATE)
-    //                                 .generateCases(0b0000)
-    //                                 .setThreadCount(48)
-    //                                 .test();
+    TestResult result = dataStoreTest.with(MODE_CREATE)
+                                    .generateCases(0b0000)
+                                    .setThreadCount(48)
+                                    .test();
                                
-    // timeVals.push_back(result.duration);
+    timeVals.push_back(result.duration);
 
     createOutputFile(timeVals);
 }
@@ -101,4 +101,6 @@ void GraphTest::createOutputFile(std::vector<int> timeVals)
     {
         outputFile << std::to_string(testTime) + "\n";
     }
+
+    outputFile << "end \n";
 }
