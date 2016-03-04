@@ -70,9 +70,22 @@ ManipResult DataStore::createTable(CreateTableCommand table_info)
  */
 ManipResult DataStore::deleteTable(std::string table_name)
 {
-    //find table in table_mapping
-    SchemaTablePair* table_pair = getTablePair(table_name);
-    if(table_pair == nullptr)
+    // Find table in table_mapping
+    SchemaTablePair* pair_ptr = nullptr;
+    {
+        // We need this extra scope to make sure the accessor destructs
+        TableMap::ValueAccessor hash_accessor;
+        if(table_name_mapping.at(table_name, hash_accessor))
+        {
+            if(hash_accessor.valid())
+            {
+                // TODO: Is this safe? I think so, but ...
+                pair_ptr = (*hash_accessor.value());
+            }
+        }
+    }
+
+    if(pair_ptr == nullptr)
     {
         return ManipResult(ResultStatus::FAILURE,
                 ManipStatus::ERR_TABLE_NOT_EXIST);
@@ -86,17 +99,19 @@ ManipResult DataStore::deleteTable(std::string table_name)
                 ManipStatus::ERR_TABLE_NOT_EXIST);
     }
 
-    TableSchema *schema = table_pair->schema;
+    TableSchema *schema = pair_ptr->schema;
 
     // Delete the schema
     delete schema;
 
     // Delete the pair
-    delete table_pair;
+    delete pair_ptr;
 
     // We're going to rely on the shared_ptr within SchemaTablePair
     // to delete the data table. The row-by-row delete will be done within the
-    // DataTable destructor.
+    // DataTable destructor. Any call to getTablePair adds an owner to the shared
+    // pointer, which increases its ref-count. Deleting this pair allows for the 
+    // ref-count to hit zero, which triggers a delete.
 
     return ManipResult(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
 }
@@ -106,14 +121,14 @@ ManipResult DataStore::deleteTable(std::string table_name)
  */
 SchemaResult DataStore::getTableSchema(std::string table_name)
 {
-    SchemaTablePair* pair = getTablePair(table_name);
-    if(pair == nullptr)
+    SchemaTablePair pair;
+    if(!getTablePair(table_name, pair))
     {
         return SchemaResult(ResultStatus::FAILURE, TableSchema());
     }
     else
     {
-        TableSchema schema = *pair->schema;
+        TableSchema schema = *pair.schema;
         return SchemaResult(ResultStatus::SUCCESS, schema);
     }
 }
@@ -123,14 +138,14 @@ SchemaResult DataStore::getTableSchema(std::string table_name)
  */
 UintResult DataStore::getColumnIndex(std::string table_name, std::string column_name)
 {
-    SchemaTablePair* table_pair = getTablePair(table_name);
-    if(table_pair)
+    SchemaTablePair table_pair;
+    if(getTablePair(table_name, table_pair))
     {
         // This should be safe, we're only reading from the object
-        size_t num_columns = table_pair->schema->columns.size();
+        size_t num_columns = table_pair.schema->columns.size();
         for(uint32_t itr = 0; itr < num_columns; itr++)
         {
-            if(table_pair->schema->columns[itr].name == column_name)
+            if(table_pair.schema->columns[itr].name == column_name)
             {
                 return UintResult(ResultStatus::SUCCESS, itr);
             }
@@ -143,48 +158,31 @@ UintResult DataStore::getColumnIndex(std::string table_name, std::string column_
     return UintResult(ResultStatus::FAILURE, 0);
 }
 
-//TODO: Clean up some testing code, maybe some bounds checking beforehand
-//for these loops, error checking too checks if the row data matches with the table schema
-ConstraintResult DataStore::schemaChecker(SchemaTablePair *table_pair, Record *insert_row)
+
+//Checks if the inserted row is valid for those constraints
+ConstraintResult DataStore::schemaChecker(SchemaTablePair& table_pair, RecordData *row)
 {
-    //table, schema and copy of row being inserted
-    std::shared_ptr<DataTable> table = table_pair->table;
-    TableSchema *schema = table_pair->schema;
-    RecordCopy copy_row = copyRecord(insert_row); //may need record copy
-    RecordData row = copy_row.data;
+    //table, schema
+    std::shared_ptr<DataTable> table = table_pair.table;
+    TableSchema *schema = table_pair.schema;
 
     //number of columns, number of inputs from row, number of constraints in each column
     int64_t col_len = schema->columns.size();
-    int64_t row_len = row.size();
+    int64_t row_len = row->size();
     int64_t num_Constraints = 0;
     SQLConstraint constraint;
 
-    //TESTING MUST DELETE: Hardcode schema constraint to test
-    for(int64_t itr = 0; itr < col_len; itr++)
-    {
-        //hardcode constraint
-        SQLConstraintType state = SQLConstraintType::SQL_DEFAULT;
-        constraint.type = state;
-        constraint.value.value = 10;
-
-        //add constraints to the schema
-        schema->columns.at(itr).constraint.push_back(constraint);
-    }
-
-    if(row_len-1 != col_len)
+    if(row_len != col_len)
     {
         //mismatching columns not enough data
-        return ConstraintResult(ResultStatus::SUCCESS, ConstraintStatus::ERR_ROW_LEN);
+        return ConstraintResult(ResultStatus::FAILURE, ConstraintStatus::ERR_ROW_LEN);
     }
 
-    //copies a value from record, checks the schema column constraint at that index and
-    //checks if the value is coherent with the column constraint
-    //row-1 because of the record counter stored there
-    for(int64_t i = 0; i < row_len-1; i++)
+    //finds the column constraints and check each column in row to see if any apply
+    for(int64_t i = 0; i < row_len; i++)
     {
-        TervelData data = {.value = 0};
-        data.value = row.at(i).value;
-        data.data.tervel_status = 0; //TODO: probably not needed
+        TervelData row_data = {.value = 0};
+        row_data = row->at(i);
         num_Constraints = schema->columns.at(i).constraint.size();
 
         for(int64_t j = 0; j < num_Constraints; j++)
@@ -192,96 +190,40 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair *table_pair, Record *i
             constraint = schema->columns.at(i).constraint.at(j);
             switch(constraint.type)
             {
+                //do nothing
                 case SQLConstraintType::SQL_NO_CONSTRAINT:
                     {
                         break;
                     }
-
+                //data cannot be null
                 case SQLConstraintType::SQL_NOT_NULL:
                     {
-                        if(data.data.null == 1)
+                        if(row_data.data.null == 1)
                         {
                             return ConstraintResult(ResultStatus::FAILURE, ConstraintStatus::ERR_NULL);
                         }
 
                         break;
                     }
-
+                //increment unique counter that represents number of records inserted into table
                 case SQLConstraintType::SQL_AUTO_INCREMENT:
                     {
-                        //grab last value from end of table
-                        int64_t table_data;
-                        Record *table_row;
-                        int64_t table_size = table.get()->records.size(0);
-                        while(!table->records.at(table_size, table_row)) {}
-                        while(!table_row->at(i, table_data)) {}
+                        TervelData insert = {.value = 0};
+                        insert.data.type = INTEGER;
+                        insert.data.value = table->record_counter.load()+1;
+                        insert.data.tervel_status = 0;
 
-                        //increment the table data by 1 and overwrite the data.value to reflect this
-                        data.value = table_data + 1;
+                        row->at(i) = insert;
                         break;
                     }
                 case SQLConstraintType::SQL_DEFAULT:
                     {
-                        /*
-                        if(data.value != constraint.value.value)
+                        if(row_data.data.null == 1)
                         {
-                            return ConstraintResult(ResultStatus::FAILURE, ConstraintStatus::ERR_DEFAULT);
-                        }
-                        */
-
-                        //overwrites row value to be default value
-                        data.value = constraint.value.value;
-                        break;
-                    }
-/*
- * TODO: Not thread safe because of long table scans
-                case SQLConstraintType::SQL_PRIMARY_KEY:
-                    {
-                        int counter = 0; //TODO: Should be a flag
-
-                        //check if PRIMARY KEY is the only constraint in schema
-                        //then it will follow into same behavior as unique
-                        for(int64_t m = 0; m < col_len; m++)
-                        {
-                            if(schema->columns.at(m).constraint.at(j).type == SQLConstraintType::SQL_PRIMARY_KEY)
-                                counter++;
-                            if(counter > 1)
-                            {
-                                return ConstraintResult(ResultStatus::FAILURE, ConstraintStatus::ERR_NOT_PKEY);
-                                //printf("error two primary keys \n");
-                                //break;
-                            }
-                        }
-
-                        //continues on to unique behavior
-                    }
-
-
-                    //TODO: A snapshot of the table may be necessary since data can be inserted by other
-                    //threads while this unique check is performing a table scan...
-                    //TODO: Or create a master-slave thread where threads insert into db without a table scan
-                    //and this master will clean up any mistakes... having each thread check constraints on a
-                    //snapshot ... does not make much sense
-                case SQLConstraintType::SQL_UNIQUE:
-                    {
-                        //tables should be record here? tables can change while insert is being evaluated
-                        int64_t size = table->records.size(0);
-                        Record *table_row;
-                        int64_t table_data;
-
-                        //perform a table scan and check if any column data matches the row data
-                        for(int64_t k = 0; k < size; k++)
-                        {
-                            while(!table->records.at(k, table_row)) {}
-                            while(!table_row->at(i, table_data))
-                                if(table_data == data.value)
-                                {
-                                    return ConstraintResult(ResultStatus::FAILURE, ConstraintStatus::ERR_NOT_UNIQUE);
-                                }
+                            row->at(i) = constraint.value;
                         }
                         break;
                     }
-*/
             }
         }
     }
@@ -295,10 +237,15 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair *table_pair, Record *i
 ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
 {
     // Get the table
-    SchemaTablePair* table_pair = getTablePair(table_name);
-    if(table_pair == nullptr)
+    SchemaTablePair table_pair;
+    if(!getTablePair(table_name, table_pair))
     {
         return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_TABLE_NOT_EXIST);
+    }
+
+    if(schemaChecker(table_pair, &record).status != ResultStatus::SUCCESS)
+    {
+        return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_FAILED_CONSTRAINT);
     }
 
     // Insert into the table
@@ -323,22 +270,14 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
 
     // Push the record counter on the back of the record
     TervelData counter_data = {.value = 0};
-    uint64_t counter = table_pair->table->record_counter.fetch_add(1);
-
+    uint64_t counter = table_pair.table->record_counter.fetch_add(1);
+    
     counter_data.data.value = counter;
     new_record->push_back_w_ra(counter_data.value);
 
-    // TODO: Handle table constraints
-    if(schemaChecker(table_pair, new_record).status == ResultStatus::SUCCESS)
-    {
-        size_t ret = table_pair->table->records.push_back_w_ra(new_record);
-        printf("Pushback returned %lu\n", ret);
-        printf("Record address %p\n", new_record);
-    }
-    else
-    {
-        return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_FAILED_CONSTRAINT);
-    }
+    size_t ret = table_pair.table->records.push_back_w_ra(new_record);
+    printf("Pushback returned %lu\n", ret);
+    printf("Record address %p\n", new_record);
 
     return ManipResult(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
 }
@@ -367,7 +306,7 @@ ManipResult DataStore::deleteRecords(Predicate* predicates, std::string table_na
         switch(predicates->type)
         {
             case PredicateType::NESTED:
-                record_refs = searchTablesForRefs(predicates);
+                record_refs = searchTablesForRefs(reinterpret_cast<NestedPredicate*>(predicates));
                 break;
             case PredicateType::VALUE:
                 break;
@@ -386,13 +325,13 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
         std::string table_name)
 {
     // Get the table pair
-    SchemaTablePair* table_pair = getTablePair(table_name);
-    if(table_pair == nullptr)
+    SchemaTablePair table_pair;
+    if(!getTablePair(table_name, table_pair))
     {
         return MultiRecordResult(ResultStatus::FAILURE, MultiRecordData());
     }
 
-    auto table = table_pair->table;
+    auto table = table_pair.table;
     RecordVector& records = table->records;
 
     // Evaluate predicates and return all rows that satisfy the predicates'
@@ -460,7 +399,7 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
                     }
                     else
                     {
-                        MultiRecordCopies copies = searchTable(table_pair->table,
+                        MultiRecordCopies copies = searchTable(table_pair.table,
                                 val_pred);
 
                         // Have to convert back into a multi record data
@@ -487,7 +426,7 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
 /**
  *  \brief Gets the \refer SchemaTablePair object associated to the table name given
  */
-SchemaTablePair* DataStore::getTablePair(std::string table_name)
+bool DataStore::getTablePair(std::string table_name, SchemaTablePair& pair)
 {
     TableMap::ValueAccessor hash_accessor;
     if(table_name_mapping.at(table_name, hash_accessor))
@@ -495,12 +434,12 @@ SchemaTablePair* DataStore::getTablePair(std::string table_name)
         if(hash_accessor.valid())
         {
             // TODO: Is this safe? I think so, but ...
-            SchemaTablePair* pair = (*hash_accessor.value());
-            return pair;
+            pair = *(*hash_accessor.value());
+            return true;
         }
     }
 
-    return nullptr;
+    return false;
 }
 
 /**
@@ -634,8 +573,10 @@ MultiTableRecordCopies DataStore::searchTables(NestedPredicate* pred)
         case PredicateType::VALUE:
             {
                 ValuePredicate* val_pred = reinterpret_cast<ValuePredicate*>(left);
-                auto table_pair = getTablePair(val_pred->column.table);
-                auto value_result = searchTable(table_pair->table, val_pred);
+                SchemaTablePair table_pair;
+                // Assume this succeeds
+                getTablePair(val_pred->column.table, table_pair);
+                auto value_result = searchTable(table_pair.table, val_pred);
                 left_result[val_pred->column.table] = value_result;
             }
             break;
@@ -664,8 +605,10 @@ MultiTableRecordCopies DataStore::searchTables(NestedPredicate* pred)
         case PredicateType::VALUE:
             {
                 ValuePredicate* val_pred = reinterpret_cast<ValuePredicate*>(right);
-                auto table_pair = getTablePair(val_pred->column.table);
-                auto value_result = searchTable(table_pair->table, val_pred);
+                SchemaTablePair table_pair;
+                // Assume this succeeds
+                getTablePair(val_pred->column.table, table_pair);
+                auto value_result = searchTable(table_pair.table, val_pred);
                 right_result[val_pred->column.table] = value_result;
             }
             break;
@@ -816,8 +759,9 @@ RecordReferences DataStore::searchTablesForRefs(NestedPredicate* pred)
         case PredicateType::VALUE:
             {
                 ValuePredicate* val_pred = reinterpret_cast<ValuePredicate*>(left);
-                auto table_pair = getTablePair(val_pred->column.table);
-                left_result = searchTableForRefs(table_pair->table, val_pred);
+                SchemaTablePair table_pair;
+                getTablePair(val_pred->column.table, table_pair);
+                left_result = searchTableForRefs(table_pair.table, val_pred);
             }
             break;
     }
@@ -845,8 +789,10 @@ RecordReferences DataStore::searchTablesForRefs(NestedPredicate* pred)
         case PredicateType::VALUE:
             {
                 ValuePredicate* val_pred = reinterpret_cast<ValuePredicate*>(right);
-                auto table_pair = getTablePair(val_pred->column.table);
-                right_result = searchTableForRefs(table_pair->table, val_pred);
+                SchemaTablePair table_pair;
+
+                getTablePair(val_pred->column.table, table_pair);
+                right_result = searchTableForRefs(table_pair.table, val_pred);
             }
             break;
     }

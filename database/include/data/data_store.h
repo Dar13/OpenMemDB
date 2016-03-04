@@ -162,8 +162,13 @@ struct DataTable
  */
 struct SchemaTablePair
 {
+    SchemaTablePair() : table(nullptr), schema(nullptr) {}
     SchemaTablePair(DataTable* t, TableSchema* s)
         : table(t), schema(s)
+    {}
+
+    SchemaTablePair(const SchemaTablePair& pair)
+        : table(pair.table), schema(pair.schema)
     {}
 
     //! The data that adheres to the schema
@@ -197,12 +202,7 @@ enum class ManipStatus : uint32_t
 enum class ConstraintStatus : uint32_t
 {
     SUCCESS = 0,
-    ERR_CONSTRAINT,
-    ERR_SCHEMA,
-    ERR_ROW_DATA,
     ERR_NULL,
-    ERR_NOT_UNIQUE,
-    ERR_NOT_PKEY,
     ERR_ROW_LEN,
 };
 
@@ -276,9 +276,9 @@ public:
                                  std::string table_name);
 
 private:
-    SchemaTablePair* getTablePair(std::string table_name);
+    bool getTablePair(std::string table_name, SchemaTablePair& pair);
 
-	RecordCopy copyRecord(RecordVector& table, int64_t row_idx);
+    RecordCopy copyRecord(RecordVector& table, int64_t row_idx);
     RecordCopy copyRecord(Record* record);
 
     MultiRecordCopies searchTable(std::shared_ptr<DataTable>& table, ValuePredicate* value_pred);
@@ -287,13 +287,13 @@ private:
                                 ColumnPredicate* col_pred);
                                 */
 
-	MultiTableRecordCopies searchTables(NestedPredicate* pred);
+    MultiTableRecordCopies searchTables(NestedPredicate* pred);
 
     RecordReferences searchTableForRefs(std::shared_ptr<DataTable>& table, 
             ValuePredicate* value_pred);
     RecordReferences searchTablesForRefs(NestedPredicate* pred);
 
-    ConstraintResult schemaChecker(SchemaTablePair *table_pair, Record *record);
+    ConstraintResult schemaChecker(SchemaTablePair& table_pair, RecordData *record);
 
     TableMap table_name_mapping;
 };
