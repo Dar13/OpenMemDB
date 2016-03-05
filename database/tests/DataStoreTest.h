@@ -25,14 +25,23 @@ class DataStoreTest
 
 	private:
 		
+        struct thread_data
+        {
+            //tervel test, thread context, datastore must be shared by all threads
+            tervel::Tervel* tervel_test;
+            //tervel::ThreadContext* main_context;
+            DataStore *data;
+        }share;
+        
+
 		int complexity, mode, threadCount;
 		bool isRandomized = false;
 		std::vector<std::string> statements;
         std::vector<std::string> table_name;
 
 		void parseComplexity(int complexity);
-		static void createTest(std::vector<std::string> statements, DataStore *data);
-        static void dropTest(std::vector<std::string> table_name, DataStore *data);
+		static void createTest(std::vector<std::string> statements, void *t_data);
+        static void dropTest(std::vector<std::string> table_name, void *t_data);
         static void createTables(std::vector<std::string> statements, std::vector<std::string> table_name, DataStore *data);
         static void dropTables(std::vector<std::string> table_name, DataStore *data);
 		static void insertTest(std::vector<std::string> statements);

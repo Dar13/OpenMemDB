@@ -20,17 +20,20 @@ DataStoreTest::DataStoreTest()
 }
 
 // Will return TestResult (or DataStoreTestResult), int for placeholder
-void DataStoreTest::createTest(std::vector<std::string> statements, DataStore *data)
+void DataStoreTest::createTest(std::vector<std::string> statements, void *t_data)
 {
+    struct thread_data *grab;
+    grab = (struct thread_data *) t_data;
     int successCount = 0;
 
     setupTokenMappings();
 
-    tervel::Tervel* tervel_test = tervel_test = new tervel::Tervel(8);
+    tervel::Tervel* tervel_test = grab->tervel_test;
+    //tervel::Tervel* tervel_test = new tervel::Tervel(8);
     tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);
+    DataStore *data = grab->data;
 
     // Execute create table commands from statements vector (defined in h file)
-
     for(auto i = statements.begin(); i  != statements.end(); i++)
     {
 
@@ -54,8 +57,14 @@ void DataStoreTest::createTest(std::vector<std::string> statements, DataStore *d
     }
 }
 
-void DataStoreTest::dropTest(std::vector<std::string> table_name, DataStore *data)
+void DataStoreTest::dropTest(std::vector<std::string> table_name, void *t_data)
 {
+    struct thread_data *grab;
+    grab = (struct thread_data *) t_data;
+    tervel::Tervel* tervel_test = grab->tervel_test;
+    tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);
+    DataStore *data = grab->data;
+
     for(auto i = table_name.begin(); i != table_name.end(); i++)
     {
         auto err = data->deleteTable(*i);
@@ -65,7 +74,8 @@ void DataStoreTest::dropTest(std::vector<std::string> table_name, DataStore *dat
         }
         else
         {
-            printf("Unable to delete table");
+            std::cout << *i << std::endl;
+            printf("Unable to delete table\n");
         }
     }
 }
@@ -131,7 +141,12 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
 // on the desired amount of threads based on the complexity.
 TestResult DataStoreTest::test()
 {    
+    //thread shared data initalize here
     DataStore data;
+    share.tervel_test = new tervel::Tervel(8);
+    
+    share.data = &data;
+
     switch(mode)
     {
         case MODE_CREATE:
@@ -147,7 +162,7 @@ TestResult DataStoreTest::test()
 
                 std::vector<std::string> cut(&statements[std::get<0>(tuple)], &statements[std::get<1>(tuple)]);
 
-                std::thread t1(createTest, cut, &data);
+                std::thread t1(createTest, cut, (void *) &share);
                 v.push_back(std::move(t1));
             }
 
@@ -162,14 +177,13 @@ TestResult DataStoreTest::test()
             
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
             TestResult testResult(duration.count(), threadCount);
-            return testResult;   
+            return testResult;
         }
         
         case MODE_DROP:
         {
-
+            
             std::vector<std::thread> v;
-            std::vector<std::thread> v_t;
             for(int i = 0; i < threadCount; ++i)
             {
                 i2tuple tuple = calculateArrayCut(threadCount, i); 
@@ -179,49 +193,21 @@ TestResult DataStoreTest::test()
 
                 std::vector<std::string> cut(&statements[std::get<0>(tuple)], &statements[std::get<1>(tuple)]);                
 
-                std::thread t(createTables, cut, table_name, &data);
+                std::thread t(createTest, cut, (void *) &share);
                 v.push_back(std::move(t));
             }
-
-            auto time_start = std::chrono::high_resolution_clock::now();            
 
             for (int i = 0; i < threadCount; ++i)
             {
                 v.at(i).join();
             }
-            auto time_end = std::chrono::high_resolution_clock::now();
-            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
-
-            TestResult testResult(duration.count(), threadCount);
-            return testResult;
-
-            /*
-             * No way to access data after thread joins, it results in a seg fault
-            //spawn create table threads
-            std::vector<std::thread> v;
+            
             std::vector<std::thread> v_t;
-            for(int i = 0; i < threadCount; ++i)
-            {
-                i2tuple tuple = calculateArrayCut(threadCount, i); 
-
-                std::cout << std::get<0>(tuple) << " ";
-                std::cout << std::get<1>(tuple) << "\n";
-
-                std::vector<std::string> cut(&statements[std::get<0>(tuple)], &statements[std::get<1>(tuple)]);                
-
-                std::thread t(createTest, cut, &data);
-                v.push_back(std::move(t));
-            }
-
-            for (int i = 0; i < threadCount; ++i)
-            {
-                v.at(i).join();
-            }
 
             //drop table
             for(int i = 0; i < threadCount; ++i)
             {
-                std::thread t(dropTest, table_name, &data);
+                std::thread t(dropTest, table_name, (void *) &share);
                 v_t.push_back(std::move(t));
             }
 
@@ -233,10 +219,11 @@ TestResult DataStoreTest::test()
             }
             auto time_end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+            
 
             TestResult testResult(duration.count(), threadCount);
             return testResult;
-            */
+            
         }
     }
 
@@ -296,12 +283,11 @@ DataStoreTest& DataStoreTest::setThreadCount(int count)
     return *this;
 }
 
-
-void DataStoreTest::createTables(std::vector<std::string> statements, std::vector<std::string> tablename, DataStore *data)
+/*
+void DataStoreTest::createTables(std::vector<std::string> statements, std::vector<std::string> tablename, void *thread_data)
 {
     setupTokenMappings();
-    tervel::Tervel* tervel_test = tervel_test = new tervel::Tervel(8);
-    tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);
+    
     // Execute create table commands from statements vector (defined in h file)
     for(auto i = statements.begin(); i  != statements.end(); i++)
     {
@@ -326,6 +312,8 @@ void DataStoreTest::createTables(std::vector<std::string> statements, std::vecto
                 printf("Unable to delete table\n");
         }
     }
+
+
  
     //Data cannot be accessed at this point
     //for(auto i = table_name.begin(); i != table_name.end(); i++)
@@ -345,3 +333,4 @@ void DataStoreTest::createTables(std::vector<std::string> statements, std::vecto
     
     //dropTables(table_name, data);
 }
+*/
