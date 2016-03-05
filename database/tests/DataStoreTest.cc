@@ -56,48 +56,19 @@ void DataStoreTest::createTest(std::vector<std::string> statements, DataStore *d
 
 void DataStoreTest::dropTest(std::vector<std::string> table_name, DataStore *data)
 {
-    //for(auto i = table_name.begin(); i != table_name.end(); i++)
-    //{
-        printf("Deleting table ...\n");
-        auto err = data->deleteTable("TestT0");
-
+    for(auto i = table_name.begin(); i != table_name.end(); i++)
+    {
+        auto err = data->deleteTable(*i);
         if(err.status == ResultStatus::SUCCESS)
         {
-            std::cout << "Table TestT0 deleted" << std::endl;
+            std::cout << "Table " << *i << " deleted" << std::endl;
         }
         else
         {
             printf("Unable to delete table");
         }
-        // if(data->deleteTable("TestT1").status == ResultStatus::SUCCESS)
-        // {
-        //     std::cout << "Table TestT1 deleted" << std::endl;
-        // }
-        // else
-        // {
-        //     printf("Unable to delete table");
-        // }
-
-        printf("Done deleting\n");
-        /*
-        if(data->deleteTable(*i).status == ResultStatus::SUCCESS)
-        {
-            std::cout << "Table " << *i << "deleted" << std::endl;
-        }
-        else
-        {
-            printf("Unable to delete table");
-        }*/
-    //}
+    }
 }
-
-/*
-void DataStoreTest::dropTest(std::vector<std::string> statements, std::vector<std::string> table_name, DataStore *data)
-{
-    createTable(statements, data);
-    dropTable(table_name, data);
-}
-*/
 
 void DataStoreTest::insertTest(std::vector<std::string> statements)
 {
@@ -191,58 +162,81 @@ TestResult DataStoreTest::test()
             
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
             TestResult testResult(duration.count(), threadCount);
-            return testResult;
+            return testResult;   
         }
         
         case MODE_DROP:
         {
 
-            createTables(statements, &data);
+            std::vector<std::thread> v;
+            std::vector<std::thread> v_t;
+            for(int i = 0; i < threadCount; ++i)
+            {
+                i2tuple tuple = calculateArrayCut(threadCount, i); 
 
-            std::thread t(dropTables, table_name, &data);
+                std::cout << std::get<0>(tuple) << " ";
+                std::cout << std::get<1>(tuple) << "\n";
 
+                std::vector<std::string> cut(&statements[std::get<0>(tuple)], &statements[std::get<1>(tuple)]);                
+
+                std::thread t(createTables, cut, table_name, &data);
+                v.push_back(std::move(t));
+            }
+
+            auto time_start = std::chrono::high_resolution_clock::now();            
+
+            for (int i = 0; i < threadCount; ++i)
+            {
+                v.at(i).join();
+            }
+            auto time_end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+
+            TestResult testResult(duration.count(), threadCount);
+            return testResult;
+
+            /*
+             * No way to access data after thread joins, it results in a seg fault
             //spawn create table threads
-            // std::vector<std::thread> v;
-            // std::vector<std::thread> v_t;
-            // for(int i = 0; i < threadCount; ++i)
-            // {
-            //     i2tuple tuple = calculateArrayCut(threadCount, i); 
+            std::vector<std::thread> v;
+            std::vector<std::thread> v_t;
+            for(int i = 0; i < threadCount; ++i)
+            {
+                i2tuple tuple = calculateArrayCut(threadCount, i); 
 
-            //     std::cout << std::get<0>(tuple) << " ";
-            //     std::cout << std::get<1>(tuple) << "\n";
+                std::cout << std::get<0>(tuple) << " ";
+                std::cout << std::get<1>(tuple) << "\n";
 
-            //     std::vector<std::string> cut(&statements[std::get<0>(tuple)], &statements[std::get<1>(tuple)]);                
+                std::vector<std::string> cut(&statements[std::get<0>(tuple)], &statements[std::get<1>(tuple)]);                
 
-            //     std::thread t(createTest, cut, &data);
-            //     v.push_back(std::move(t));
-            // }
+                std::thread t(createTest, cut, &data);
+                v.push_back(std::move(t));
+            }
 
-            // //auto time_start = std::chrono::high_resolution_clock::now();
+            for (int i = 0; i < threadCount; ++i)
+            {
+                v.at(i).join();
+            }
 
-            // for (int i = 0; i < threadCount; ++i)
-            // {
+            //drop table
+            for(int i = 0; i < threadCount; ++i)
+            {
+                std::thread t(dropTest, table_name, &data);
+                v_t.push_back(std::move(t));
+            }
 
-            //     v.at(i).join();
+            auto time_start = std::chrono::high_resolution_clock::now();
 
-            // }
-            
-            // auto err = data.deleteTable("");
+            for(int i = 0; i < threadCount; ++i)
+            {
+                v_t.at(i).join();
+            }
+            auto time_end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
 
-
-            //auto time_end = std::chrono::high_resolution_clock::now();
-
-            //auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
-
-            // for(int i = 0; i < table_name.size(); i++)
-            // {
-            //     std::cout << table_name.at(i) << std::endl;
-            // }
-
-
-
-            // TestResult testResult(duration.count(), threadCount);
-            // return testResult;
-            break;
+            TestResult testResult(duration.count(), threadCount);
+            return testResult;
+            */
         }
     }
 
@@ -302,7 +296,8 @@ DataStoreTest& DataStoreTest::setThreadCount(int count)
     return *this;
 }
 
-void DataStoreTest::createTables(std::vector<std::string> statements, DataStore *data)
+
+void DataStoreTest::createTables(std::vector<std::string> statements, std::vector<std::string> tablename, DataStore *data)
 {
     setupTokenMappings();
     tervel::Tervel* tervel_test = tervel_test = new tervel::Tervel(8);
@@ -323,23 +318,30 @@ void DataStoreTest::createTables(std::vector<std::string> statements, DataStore 
             {
                 printf("Unable to create table!\n");
             }
+
+            err = data->deleteTable(create_table->table_name);
+            if(err.status == ResultStatus::SUCCESS)
+                printf("Table deleted\n");
+            else
+                printf("Unable to delete table\n");
         }
     }
-}
+ 
+    //Data cannot be accessed at this point
+    //for(auto i = table_name.begin(); i != table_name.end(); i++)
+    //{
+    //    std::cout << *i << std::endl;
+    //    auto err = data->deleteTable(*i);
 
-void DataStoreTest::dropTables(std::vector<std::string> table_name, DataStore *data)
-{
-    for(auto i = table_name.begin(); i != table_name.end(); i++)
-    {
-        auto err = data->deleteTable(*i);
-
-        if(err.status == ResultStatus::SUCCESS)
-        {
-            printf("Success!\n");
-        }
-        else
-        {
-            printf("Failure\n");
-        }
-    }
+    //    if(err.status == ResultStatus::SUCCESS)
+    //    {
+    //        std::cout << "Table " << *i << " deleted\n" << std::endl;
+    //    }
+    //    else
+    //    {
+    //        printf("Unable to delete table!\n");
+    //    } 
+    //} 
+    
+    //dropTables(table_name, data);
 }

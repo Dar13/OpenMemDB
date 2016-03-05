@@ -33,8 +33,7 @@ class DataStoreTest
 		void parseComplexity(int complexity);
 		static void createTest(std::vector<std::string> statements, DataStore *data);
         static void dropTest(std::vector<std::string> table_name, DataStore *data);
-        //void dropTest(std::vector<std::string> statements, std::vector<std::string> table_name, DataStore *data);
-        static void createTables(std::vector<std::string> statements, DataStore *data);
+        static void createTables(std::vector<std::string> statements, std::vector<std::string> table_name, DataStore *data);
         static void dropTables(std::vector<std::string> table_name, DataStore *data);
 		static void insertTest(std::vector<std::string> statements);
 		std::vector<std::string> generateCases();
