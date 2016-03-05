@@ -68,9 +68,9 @@ GraphTest::GraphTest()
 
     // DataStoreTest dataStoreTest7;
 
-    TestResult result = dataStoreTest.with(MODE_CREATE)
+    TestResult result = dataStoreTest.with(MODE_DROP)
                                     .generateCases(0b0000)
-                                    .setThreadCount(48)
+                                    .setThreadCount(2)
                                     .test();
                                
     timeVals.push_back(result.duration);

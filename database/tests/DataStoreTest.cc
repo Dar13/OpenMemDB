@@ -54,14 +54,48 @@ void DataStoreTest::createTest(std::vector<std::string> statements, DataStore *d
     }
 }
 
-void DataStoreTest::dropTest(std::vector<std::string> statements, DataStore *data)
+void DataStoreTest::dropTest(std::vector<std::string> table_name, DataStore *data)
 {
+    //for(auto i = table_name.begin(); i != table_name.end(); i++)
+    //{
+        printf("Deleting table ...\n");
+        if(data->deleteTable("TestT0").status == ResultStatus::SUCCESS)
+        {
+            std::cout << "Table TestT0 deleted" << std::endl;
+        }
+        else
+        {
+            printf("Unable to delete table");
+        }
+        if(data->deleteTable("TestT1").status == ResultStatus::SUCCESS)
+        {
+            std::cout << "Table TestT1 deleted" << std::endl;
+        }
+        else
+        {
+            printf("Unable to delete table");
+        }
 
-    for(auto i = statements.begin(); i != statements.end(); i++)
-    {
-        data->deleteTable("TestT1");
-    }
+        printf("Done deleting\n");
+        /*
+        if(data->deleteTable(*i).status == ResultStatus::SUCCESS)
+        {
+            std::cout << "Table " << *i << "deleted" << std::endl;
+        }
+        else
+        {
+            printf("Unable to delete table");
+        }*/
+    //}
 }
+
+/*
+void DataStoreTest::dropTest(std::vector<std::string> statements, std::vector<std::string> table_name, DataStore *data)
+{
+    createTable(statements, data);
+    dropTable(table_name, data);
+}
+*/
 
 void DataStoreTest::insertTest(std::vector<std::string> statements)
 {
@@ -88,17 +122,31 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
     switch(mode)
     {
         case MODE_CREATE:
-
-            for(int i = 0; i < 48; i++)
+        {
+            for(int i = 0; i < 2; i++)
             {
                 std::string create_table = "CREATE TABLE TestT"+ std::to_string(i) +" (A STRING, B INTEGER);";
                 statements.push_back(create_table);
             }
 
-            break;
+        }break;
 
         case MODE_DROP:
-            break;
+        {
+            for(int i = 0; i < 2; i++)
+            {
+                std::string create_table = "CREATE TABLE TestT"+ std::to_string(i) +" (A STRING, B INTEGER);";
+                statements.push_back(create_table);
+            }         
+   
+            for(int i = 0; i < 2; i++)
+            {
+                std::string drop_table = "TestT"+ std::to_string(i);
+                table_name.push_back(drop_table);
+            }
+
+        }break;
+        
         case MODE_INSERT:
             break;
     }
@@ -110,12 +158,12 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
 // on the desired amount of threads based on the complexity.
 TestResult DataStoreTest::test()
 {    
+    DataStore data;
     switch(mode)
     {
         case MODE_CREATE:
-
+        {
             std::vector<std::thread> v;
-            DataStore data;
 
             for (int i = 0; i < threadCount; ++i)
             {
@@ -142,13 +190,69 @@ TestResult DataStoreTest::test()
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
             TestResult testResult(duration.count(), threadCount);
             return testResult;
-    }
+        }break;
+        
+        case MODE_DROP:
+        {
+            //spawn create table threads
+            std::vector<std::thread> v;
+            std::vector<std::thread> v_t;
+            for(int i = 0; i < threadCount; ++i)
+            {
+                i2tuple tuple = calculateArrayCut(threadCount, i); 
 
+                std::cout << std::get<0>(tuple) << " ";
+                std::cout << std::get<1>(tuple) << "\n";
+
+                std::vector<std::string> cut(&statements[std::get<0>(tuple)], &statements[std::get<1>(tuple)]);                
+
+                std::thread t(createTest, cut, &data);
+                v.push_back(std::move(t));
+            }
+
+            //auto time_start = std::chrono::high_resolution_clock::now();
+
+            for (int i = 0; i < threadCount; ++i)
+            {
+
+                v.at(i).join();
+            }
+            
+            //auto time_end = std::chrono::high_resolution_clock::now();
+
+            //auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+
+            for(int i = 0; i < table_name.size(); i++)
+            {
+                std::cout << table_name.at(i) << std::endl;
+            }
+
+            //spawn drop table threads
+            for(int j = 0; j < threadCount; ++j)
+            {
+                std::thread t1(dropTest, table_name, &data);
+                v_t.push_back(std::move(t1));
+            }
+
+            auto time_start = std::chrono::high_resolution_clock::now();
+
+            for (int i = 0; i < threadCount; ++i)
+            {
+
+                v_t.at(i).join();
+            }
+
+            auto time_end = std::chrono::high_resolution_clock::now();
+
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+
+            TestResult testResult(duration.count(), threadCount);
+            return testResult;
+        }break;
+    }
     // Placeholder
     TestResult res(0ul, threadCount);
     return res;
-
-    
 }
 
 i2tuple DataStoreTest::calculateArrayCut(int threadCount, int threadNumber)
