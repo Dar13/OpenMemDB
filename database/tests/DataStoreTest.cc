@@ -15,6 +15,7 @@
 #include <atomic>
 #include <tuple>
 
+
 DataStoreTest::DataStoreTest()
 {
 }
@@ -130,6 +131,8 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
 {
     complexity = testComplexity;
     parseComplexity(complexity);
+    share.tervel_test = new tervel::Tervel(threadCount);
+
 
     printf("Thread count: %d\n", threadCount);
 
@@ -192,7 +195,6 @@ TestResult DataStoreTest::test()
         case MODE_CREATE:
         {
             std::vector<std::thread> v;
-            share.tervel_test = new tervel::Tervel(threadCount);
 
             for (int i = 0; i < threadCount; ++i)
             {
@@ -218,7 +220,6 @@ TestResult DataStoreTest::test()
         {
             std::vector<std::thread> v;
             std::vector<std::thread> v_t;
-            share.tervel_test = new tervel::Tervel(2*threadCount);
 
             //create table
             for (int i = 0; i < threadCount; ++i)
@@ -264,7 +265,6 @@ TestResult DataStoreTest::test()
         {
             std::vector<std::thread> v;
             std::vector<std::thread> v_t;
-            share.tervel_test = new tervel::Tervel(2*threadCount);
 
             //create table
             for (int i = 0; i < threadCount; ++i)

@@ -68,7 +68,7 @@ GraphTest::GraphTest()
 
     // DataStoreTest dataStoreTest7;
 
-    TestResult result = dataStoreTest.with(MODE_DROP)
+    TestResult result = dataStoreTest.with(MODE_CREATE)
                                     .generateCases(0b0000)
                                     .test();
                                

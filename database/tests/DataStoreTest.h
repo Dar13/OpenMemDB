@@ -29,6 +29,7 @@ class DataStoreTest
         {
             //tervel test and datastore must be shared by all threads
             tervel::Tervel* tervel_test;
+
             //tervel::ThreadContext* main_context;
             DataStore *data;
         }share;
