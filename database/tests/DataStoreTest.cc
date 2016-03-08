@@ -131,7 +131,7 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
 {
     complexity = testComplexity;
     parseComplexity(complexity);
-    share.tervel_test = new tervel::Tervel(threadCount);
+    //share.tervel_test = new tervel::Tervel(2*threadCount);
 
 
     printf("Thread count: %d\n", threadCount);
@@ -150,14 +150,24 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
 
         case MODE_DROP:
         {
+
             for(int i = 0; i < threadCount; i++)
             {
-                i2tuple tuple = calculateArrayCut(threadCount, i);
+                std::string create_table = "CREATE TABLE TestT"+ std::to_string(i) +" (A STRING, B INTEGER);";
+                statements.push_back(create_table);
+            }
 
-                std::cout << std::get<0>(tuple) << " ";
-                std::cout << std::get<1>(tuple) << "\n";
+
+            for(int i = 0; i < threadCount; i++)
+            {
+                std::string drop = "TestT"+std::to_string(i);
+                table_name.push_back(drop);
+                //i2tuple tuple = calculateArrayCut(threadCount, i);
+
+                //std::cout << std::get<0>(tuple) << " ";
+                //std::cout << std::get<1>(tuple) << "\n";
             
-                std::vector<std::string> cut(&statements[std::get<0>(tuple)], &statements[std::get<1>(tuple)]);
+                //std::vector<std::string> cut(&statements[std::get<0>(tuple)], &statements[std::get<1>(tuple)]);
                 //table_name = *cut;
             }
             break;
@@ -189,6 +199,7 @@ TestResult DataStoreTest::test()
     //thread shared data initalize here
     DataStore data;
     share.data = &data;
+    share.tervel_test = new tervel::Tervel(threadCount);
 
     switch(mode)
     {
@@ -236,12 +247,12 @@ TestResult DataStoreTest::test()
             //drop table
             for (int i = 0; i < threadCount; ++i)
             {
-                i2tuple tuple = calculateArrayCut(threadCount, i); 
+                //i2tuple tuple = calculateArrayCut(threadCount, i); 
 
-                std::cout << std::get<0>(tuple) << " ";
-                std::cout << std::get<1>(tuple) << "\n";
+                //std::cout << std::get<0>(tuple) << " ";
+                //std::cout << std::get<1>(tuple) << "\n";
 
-                std::vector<std::string> table_name(&statements[std::get<0>(tuple)], &statements[std::get<1>(tuple)]);
+                //std::vector<std::string> table_name(&statements[std::get<0>(tuple)], &statements[std::get<1>(tuple)]);
                 
                 std::thread t(dropTest, table_name, (void *) &share);
                 v_t.push_back(std::move(t));
@@ -342,7 +353,7 @@ void DataStoreTest::parseComplexity(int complexity)
     }
     else
     {
-        threadCount = 64;
+        threadCount = 2;
     }
 }
 
