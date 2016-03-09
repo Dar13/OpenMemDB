@@ -54,11 +54,11 @@ While hard drives are getting faster due to the introduction of NAND flash-based
 they are still relatively slow when compared to main memory. Meanwhile main memory is 
 following a long running pattern where it has precipitously dropped in price from costing 
 thousands of dollars for a few megabytes to about \$40 for 8 gigabytes \cite{jcmit}. 
-With this trend, we can take advantage and design fast databases. While there are many 
-applications for which current database solutions are fast enough (website logins for 
+With this trend, we can take advantage and design fast databases that reside entirely in main memory. While there are many 
+applications that current database solutions are fast enough for (website logins for 
 example), these solutions leave something to be desired for massively concurrent 
-systems with high throughput requirements such as real-time analytics on large 
-datasets. While the largest of these datasets are still too large for main memory, 
+systems with high throughput requirements or for embedded systems that have maximum latency 
+requirements. While the largest of these datasets are still too large for main memory, 
 some datasets are finally able to fit into main memory in modern systems due to the 
 cheapness and advancement of memory module technology. Making it possible for a data 
 analysis algorithm to make full use of the database server's processing power to extract 
@@ -73,7 +73,7 @@ billions of data points in real-time. This allows them to personalize a user's g
 as they are playing it, increasing customer satisfaction.
 
 \subsection{Motivation}
-Over the last 30 years the there has been tremendous advancements in computing
+Over the last 30 years there has been tremendous advances in computing
 hardware. Processor speeds have increased significantly and memory is cheaper than ever
 \cite{stonebraker2007end}. Most technologies have advanced 
 along with hardware, however database management systems have struggled to improve
@@ -88,7 +88,7 @@ and memory. It is our assumption that the achievement of a fully wait-free DBMS 
 achieve the performance gains that have been lacking in the DBMS field while eliminating 
 the complexity of multi-threaded systems, all while retaining necessary ACID properties. 
 The requirements of being wait-free dictate that OpenMemDB is an in-memory database and 
-thus avoids all of the slow downs associated with going to disk. OpenMemDB is written 
+thus avoids all of the slow downs associated with going to hard disk. OpenMemDB is written 
 in \CC 11 and uses the modern constructs defined by that standard extensively.
 \par\vspace{\baselineskip}
 
@@ -103,7 +103,8 @@ that attempt to implement some level of lock-freedom into their DBMS.
 MemSQL\footnote{MemSQL can be configured as a Columnstore that stores data on disk.}
 and VoltDB are both fully in-memory DBMS as is OpenMemDB. This is where the
 similarities end as far as OpenMemDB is concerned. MemSQL and VoltDB on the other 
-hand both use distributed systems to achieve performance gains and they both differ from OpenMemDB in a few ways. MemSQL uses lock-free data structures
+hand both use distributed systems to achieve performance gains and they both differ from 
+OpenMemDB in a few ways. MemSQL uses lock-free data structures
 to store data and stores pre-compiled commonly used queries\cite{MemSQL}.
 VoltDB tries to make its performance gains by what they call Concurreny through
 scheduling\cite{VoltDB}. This is the process of using a single-threaded pipeline 
@@ -119,8 +120,8 @@ no matter what data is being accessed.
 
 \section{Technical Approach}
 Our database is built upon wait-free data structures found in Tervel, a collection of
-lock-free and wait-free data structures created by Steven Feldman, Pierre LaBorde, and Damian Dechev\cite{tervel:hazard_pointer}\cite{tervel:hash_map}\cite{tervel:vector}. We use
-the common definition of wait-freedom as found in Herlihy's definitive text, which
+lock-free and wait-free data structures created by Steven Feldman, Pierre LaBorde, and Damian Dechev\cite{tervel:hazard_pointer}\cite{tervel:hash_map}\cite{tervel:vector}. 
+We use the common definition of wait-freedom as found in Herlihy's definitive text, which
 states that all threads must make progress within a finite amount of time\cite{herlihy:waitfree}.
 We also use the statement that a composition of linearizable algorithms or data structures
 is also linearizable. From the beginning, we knew that we had to compose 
@@ -141,8 +142,9 @@ The Data Store is where all the database's data is stored and thus is where the 
 structures are primarily used. These wait-free data structures are used so that all
 the worker threads can safely and efficiently execute their assigned tasks. The guarantees of a 
 wait-free data structure are such that multiple threads can work on the same data without 
-running into concurrency conflicts within the data structures or infinitely running. Once 
-the threads calculate their results, they send those results to the Work Manager.
+running into concurrency conflicts within the data structures or waiting on another thread to 
+finish for an indeterminate amount of time. Once the threads calculate their results, they 
+send those results to the Work Manager.
 \par\vspace{\baselineskip}
 Each worker thread is a long-lived thread spawned by the database upon start-up 
 and has various thread-local statically-allocated pieces of memory given to it.
@@ -153,7 +155,7 @@ module. In this module the data structures and algorithms' wait-freedom and line
 guarantees provide a fast and efficient way to create, modify, and access the stored data.  
 We specifically use a wait-free hash map to relate table names to the tables themselves 
 which are nested wait-free vectors. The composition of the Tervel vectors to create 
-the table structure is such that the outer vector acts as a container of references 
+the table structure is that the outer vector acts as a container of references 
 to records within the table while each of the referenced vectors contain the stored 
 data. Access to these data structures is minimized to reduce code complexity and 
 possible contention between threads over the data contained in the structures.
