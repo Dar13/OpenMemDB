@@ -32,7 +32,7 @@ THE SOFTWARE.
 #include <sys/wait.h>
 #include <signal.h>
 
-#include "libomdb.h"
+#include "../../../include/util/libomdb.h"
 
 
 /*
@@ -216,11 +216,10 @@ int main(void)
                 std::string messageToReturn;
                 std::string mdToReturn;
                 // Check if message is select or command
-                if (receivedBuffer[0] == 'S') {
+                if (receivedBuffer[0] == 'S' || receivedBuffer[0] == 's') {
                     messageToReturn = SerializeResultPacket(getStockResultPacket());
                     mdToReturn = SerializeResultMetaDataPacket(getStockResultMetaDataPacket());
                 } else {
-                    // TODO: Setup command packet here
                     // Command results should be returned in
                     // ResultPacket with different values set
                     // see libomdb.h for specifics
@@ -250,5 +249,5 @@ int main(void)
 
     }
 
-    return 0;
+    return 0; // Unreachable, but that's fine I guess.
 }

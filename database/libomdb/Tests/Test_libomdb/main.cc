@@ -2,11 +2,13 @@
 // Created by mike on 2/22/16.
 //
 
-#include "omdb_lib.h"
+#include "../../omdb_lib.h"
+#include "../../../include/util/libomdb.h"
 
 /**
  * This test assumes that there is a table calles users
  * This table "exists" in the temp_server
+ * The temp_server must be running before this test can be run
  */
 int main ()
 {
