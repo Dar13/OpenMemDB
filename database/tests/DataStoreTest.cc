@@ -199,7 +199,7 @@ TestResult DataStoreTest::test()
     //thread shared data initalize here
     DataStore data;
     share.data = &data;
-    share.tervel_test = new tervel::Tervel(threadCount);
+    share.tervel_test = new tervel::Tervel(threadCount*2);
 
     switch(mode)
     {
