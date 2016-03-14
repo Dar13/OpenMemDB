@@ -37,6 +37,8 @@
 #include <workmanager/types.h>
 #include <util/network/connection.h>
 
+class DataStore;
+
 /**
  *  @brief Class that handles the main thread and load balancing.
  */
@@ -44,8 +46,11 @@ class WorkManager
 {
 public:
     WorkManager(uint32_t num_threads, tervel::Tervel* tervel);
+    ~WorkManager()
+    {
+        delete m_context;
+    }
 
-    // NM: TODO:Not sure about these error codes...
     /**
      *  @brief An enumeration of all error codes that can be returned when
      *         running any member function.
@@ -62,17 +67,29 @@ public:
 
     int32_t Run();
 
+    //! This constant also determines the maximum number of threads
+    //! in the system.
+    static const uint32_t MAX_NUM_MUTEXES = 64;
+
 private:
 
     uint32_t GetAvailableThread();
 
     bool ReceiveCommand(omdb::Connection& conn);
 
+    bool SendResult(omdb::Connection& conn, ResultBase* result);
+
     //! Tervel object to give to the worker threads
     tervel::Tervel* m_tervel;
 
-    // TODO: Figure out scalable replacement
-    std::array<WorkThreadData, 8> m_thread_data;
+    //! Tervel thread context so the work manager can initialize Tervel objects
+    tervel::ThreadContext* m_context;
+
+    //! Number of threads that are supposed to be running
+    uint32_t m_num_threads;
+
+    //! Worker thread data storage
+    std::vector<WorkThreadData> m_thread_data;
 
     //! Holds the futures for currently running jobs
     std::vector<std::future<JobResult>> m_thread_results;
@@ -83,8 +100,14 @@ private:
     //! The list of current connections
     std::vector<omdb::Connection> m_connections;
 
+    //! Mutex pool
+    ThreadNotifier m_thread_notifiers[MAX_NUM_MUTEXES];
+
     //! The mapping of job to connection
     std::map<uint32_t, omdb::Connection> m_job_to_connection;
+
+    //! The active data store object
+    DataStore* data_store;
 };
 
 #endif

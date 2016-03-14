@@ -77,6 +77,28 @@ void builderStartInsertCommand(StatementBuilder* builder)
     printf("Builder started for INSERT INTO statement\n");
 }
 
+void builderStartUpdateCommand(StatementBuilder* builder)
+{
+    UpdateCommand* cmd = new (std::nothrow) UpdateCommand();
+
+    builder->started = true;
+    builder->statement = cmd;
+    builder->valid = true;
+
+    printf("Builder started for UPDATE statement\n");
+}
+
+void builderStartDeleteCommand(StatementBuilder* builder)
+{
+    DeleteCommand* cmd = new (std::nothrow) DeleteCommand();
+
+    builder->started = true;
+    builder->statement = cmd;
+    builder->valid = true;
+
+    printf("Builder started for DELETE statement\n");
+}
+
 // SELECT helper functions ////////////////////////////////////////////////////
 void builderAddSelectAllColumns(StatementBuilder* builder, Token table)
 {
@@ -164,6 +186,49 @@ void builderFinishInsertCommand(StatementBuilder* builder)
 {
 }
 
+// Delete command helper functions ////////////////////////////////////////////
+
+void builderAddUpdateExpr(StatementBuilder* builder, Token operation,
+        Token left, Token right)
+{
+    if(!builder->started)
+    {
+        return;
+    }
+
+    if(!operation->is_operation || 
+        operation->operation != static_cast<uint16_t>(ExpressionOperation::EQUALS))
+    {
+        printf("Invalid expression for UPDATE statements!\n");
+        return;
+    }
+
+    UpdateCommand* update = reinterpret_cast<UpdateCommand*>(builder->statement);
+    ColumnUpdate update_info;
+    auto column_idx_result = builder->data_store->getColumnIndex(update->table, left->text);
+    if(column_idx_result.status == ResultStatus::SUCCESS)
+    {
+        update_info.column_idx = column_idx_result.result;
+    }
+    else
+    {
+        // Column doesn't exist
+        // TODO: Error handling
+    }
+
+    if(right->is_value)
+    {
+        update_info.new_data = right->value;
+    }
+    else
+    {
+        // Not a value
+        // TODO: Error handling
+    }
+
+    update->columns.push_back(update_info);
+}
+
 // Generic-ish helper functions ///////////////////////////////////////////////
 
 void builderAddColumn(StatementBuilder* builder, Token column_name,
@@ -217,6 +282,18 @@ void builderAddTableName(StatementBuilder* builder, Token table_name)
             {
                 InsertCommand* insert = reinterpret_cast<InsertCommand*>(builder->statement);
                 insert->table = table_name->text;
+            }
+            break;
+        case SQLStatement::UPDATE:
+            {
+                UpdateCommand* update = reinterpret_cast<UpdateCommand*>(builder->statement);
+                update->table = table_name->text;
+            }
+            break;
+        case SQLStatement::DELETE:
+            {
+                DeleteCommand* del = reinterpret_cast<DeleteCommand*>(builder->statement);
+                del->table = table_name->text;
             }
             break;
         default:

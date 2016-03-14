@@ -33,15 +33,20 @@
 
 // Project includes
 #include "hash_functor.h"
+#include "accessor.h"
 #include "util/types.h"
 #include "util/result.h"
 #include "sql/types/common.h"
 #include "sql/predicate.h"
 #include "sql/statements/data_definition.h"
 #include "sql/statements/data_manipulation.h"
+#include "sql/common.h"
 
 // Some typedefs(C++11-style) so that we don't have all that meaningless
 // namespace and template junk pop up everywhere.
+
+template<typename T>
+using TervelVector = tervel::containers::wf::vector::Vector<T>;
 
 // Table data definitions
 using Record = tervel::containers::wf::vector::Vector<int64_t>;
@@ -73,6 +78,15 @@ struct RecordCopy
     RecordData data;
 };
 
+struct RecordReference
+{
+    RecordReference() : id(0), ptr(nullptr) {}
+    RecordReference(uint64_t i, Record* p) : id(i), ptr(p) {}
+
+    uint64_t id;
+    Record* ptr;
+};
+
 // TODO: Is there a more efficient way?
 using MultiRecordData = std::vector<RecordData>;
 
@@ -89,6 +103,13 @@ using MultiRecordCopies = std::vector<RecordCopy>;
  *  \detail THIS IS FOR INTERNAL USE ONLY
  */
 using MultiTableRecordCopies = std::map<std::string, MultiRecordCopies>;
+
+/**
+ *  \brief A vector that holds record ID and references instead of full records
+ *
+ *  \detail THIS IS FOR INTERNAL USE ONLY
+ */
+using RecordReferences = std::vector<RecordReference>;
 
 /**
  * \brief The schema that a table must adhere to.
@@ -141,8 +162,13 @@ struct DataTable
  */
 struct SchemaTablePair
 {
+    SchemaTablePair() : table(nullptr), schema(nullptr) {}
     SchemaTablePair(DataTable* t, TableSchema* s)
         : table(t), schema(s)
+    {}
+
+    SchemaTablePair(const SchemaTablePair& pair)
+        : table(pair.table), schema(pair.schema)
     {}
 
     //! The data that adheres to the schema
@@ -160,7 +186,6 @@ using TableMap = tervel::containers::wf::HashMap<std::string,
                                                  SchemaTablePair*, 
                                                  TableHashFunctor<std::string, SchemaTablePair*>>;
 
-
 enum class ManipStatus : uint32_t
 {
     SUCCESS = 0,
@@ -171,6 +196,14 @@ enum class ManipStatus : uint32_t
     ERR_CONTENTION,
     ERR_PARTIAL,
     ERR_PARTIAL_CONTENTION,
+    ERR_FAILED_CONSTRAINT,
+};
+
+enum class ConstraintStatus : uint32_t
+{
+    SUCCESS = 0,
+    ERR_NULL,
+    ERR_ROW_LEN,
 };
 
 // Some common Result types for this module
@@ -179,6 +212,35 @@ using RecordResult = Result<RecordData>;
 using MultiRecordResult = Result<MultiRecordData>;
 using ManipResult = Result<ManipStatus>;
 using SchemaResult = Result<TableSchema>;
+using ConstraintResult = Result<ConstraintStatus>;
+
+template<>
+struct Result<ManipStatus> : public ResultBase
+{
+    Result(ResultStatus s, ManipStatus res) : ResultBase(s, ResultType::COMMAND), result(res) {}
+
+    ManipStatus result;
+};
+
+template<>
+struct Result<RecordData> : public ResultBase
+{
+    Result(ResultStatus s, const RecordData& res) :
+        ResultBase(s, ResultType::QUERY), result(res)
+    {}
+
+    RecordData result;
+};
+
+template<>
+struct Result<MultiRecordResult> : public ResultBase
+{
+    Result(ResultStatus s, MultiRecordData res) :
+        ResultBase(s, ResultType::QUERY), result(res)
+    {}
+
+    MultiRecordData result;
+};
 
 /**
  *  @brief The interface into the data that is shared between all worker threads.
@@ -190,6 +252,8 @@ public:
         : table_name_mapping(64)
     {}
 
+    TervelVector<ValuePointer<Record>*> test;
+
     ManipResult createTable(CreateTableCommand table_info);
 
     ManipResult deleteTable(std::string table_name);
@@ -198,29 +262,23 @@ public:
 
     SchemaResult getTableSchema(std::string table_name);
 
-    DataResult updateData(Predicate* predicates,
-                          std::string table_name,
-                          uint32_t column_idx,
-                          TervelData value);
-
-    DataResult getData(Predicate* predicates,
-                       std::string table_name,
-                       uint32_t column_idx);
-
     ManipResult insertRecord(std::string table_name,
                              RecordData record);
 
-    ManipResult updateRecord(Predicate* predicates, 
+    ManipResult updateRecords(Predicate* predicates, 
                              std::string table_name,
                              RecordData record);
+
+    ManipResult deleteRecords(Predicate* predicates,
+                              std::string table_name);
 
     MultiRecordResult getRecords(Predicate* predicates,
                                  std::string table_name);
 
 private:
-    SchemaTablePair* getTablePair(std::string table_name);
+    bool getTablePair(std::string table_name, SchemaTablePair& pair);
 
-	RecordCopy copyRecord(RecordVector& table, int64_t row_idx);
+    RecordCopy copyRecord(RecordVector& table, int64_t row_idx);
     RecordCopy copyRecord(Record* record);
 
     MultiRecordCopies searchTable(std::shared_ptr<DataTable>& table, ValuePredicate* value_pred);
@@ -229,9 +287,13 @@ private:
                                 ColumnPredicate* col_pred);
                                 */
 
-	MultiTableRecordCopies searchTables(NestedPredicate* pred);
+    MultiTableRecordCopies searchTables(NestedPredicate* pred);
 
-    void schemaChecker(TableSchema schema, std::vector<SQLColumn> column);
+    RecordReferences searchTableForRefs(std::shared_ptr<DataTable>& table, 
+            ValuePredicate* value_pred);
+    RecordReferences searchTablesForRefs(NestedPredicate* pred);
+
+    ConstraintResult schemaChecker(SchemaTablePair& table_pair, RecordData *record);
 
     TableMap table_name_mapping;
 };

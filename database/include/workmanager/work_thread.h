@@ -17,20 +17,24 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <data/data_store.h>
 #include <util/types.h>
 #include <workmanager/types.h>
 
+#define THREAD_SLEEP_MS 100
+
 /**
  *  @brief Abstraction of a worker thread.
- *
- *  @note In its current implementation, the class is never actually instantiated.
- *  TODO: Replace with nested namespace?
  */
 class WorkThread
 {
 public:
     static void Run(WorkThreadData* data);
 
-    static Job GenerateJob(int job_num, std::string command);
+    static ResultBase* ExecuteStatement(ParsedStatement* statement, DataStore* store);
+    static ManipResult ExecuteCommand(ParsedStatement* statement, DataStore* store);
+    static MultiRecordResult ExecuteQuery(ParsedStatement* statement, DataStore* store);
+
+    static Job GenerateJob(int job_num, std::string command, DataStore* store);
 private:
 };

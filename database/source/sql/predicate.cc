@@ -231,15 +231,19 @@ void setupStatement(ParsedStatement* statement, Expression* expr, DataStore* dat
             }
             break;
         case SQLStatement::UPDATE:
-            // TODO
-            break;
-        case SQLStatement::INSERT_INTO:
-            // TODO
+            {
+                UpdateCommand* update = reinterpret_cast<UpdateCommand*>(statement);
+                update->predicate = makePredicateFromExpression(expr, data_store);
+            }
             break;
         case SQLStatement::DELETE:
-            // TODO
+            {
+                DeleteCommand* del = reinterpret_cast<DeleteCommand*>(statement);
+                del->predicate = makePredicateFromExpression(expr, data_store);
+            }
             break;
         default:
+            // Should never reach this
             break;
     }
 }

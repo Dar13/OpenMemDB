@@ -35,7 +35,7 @@ ManipResult DataStore::createTable(CreateTableCommand table_info)
     if(table_info.columns.size() <= 0)
     {
         return ManipResult(ResultStatus::FAILURE,
-                           ManipStatus::ERR_TABLE_CMD_INVALID);
+                ManipStatus::ERR_TABLE_CMD_INVALID);
     }
 
     TableSchema* schema = new (std::nothrow) TableSchema;
@@ -70,9 +70,22 @@ ManipResult DataStore::createTable(CreateTableCommand table_info)
  */
 ManipResult DataStore::deleteTable(std::string table_name)
 {
-    //find table in table_mapping
-    SchemaTablePair* table_pair = getTablePair(table_name);
-    if(table_pair == nullptr)
+    // Find table in table_mapping
+    SchemaTablePair* pair_ptr = nullptr;
+    {
+        // We need this extra scope to make sure the accessor destructs
+        TableMap::ValueAccessor hash_accessor;
+        if(table_name_mapping.at(table_name, hash_accessor))
+        {
+            if(hash_accessor.valid())
+            {
+                // TODO: Is this safe? I think so, but ...
+                pair_ptr = (*hash_accessor.value());
+            }
+        }
+    }
+
+    if(pair_ptr == nullptr)
     {
         return ManipResult(ResultStatus::FAILURE,
                 ManipStatus::ERR_TABLE_NOT_EXIST);
@@ -86,18 +99,20 @@ ManipResult DataStore::deleteTable(std::string table_name)
                 ManipStatus::ERR_TABLE_NOT_EXIST);
     }
 
-    TableSchema *schema = table_pair->schema;
+    TableSchema *schema = pair_ptr->schema;
 
     // Delete the schema
     delete schema;
 
     // Delete the pair
-    delete table_pair;
+    delete pair_ptr;
 
     // We're going to rely on the shared_ptr within SchemaTablePair
     // to delete the data table. The row-by-row delete will be done within the
-    // DataTable destructor.
-    
+    // DataTable destructor. Any call to getTablePair adds an owner to the shared
+    // pointer, which increases its ref-count. Deleting this pair allows for the 
+    // ref-count to hit zero, which triggers a delete.
+
     return ManipResult(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
 }
 
@@ -106,14 +121,14 @@ ManipResult DataStore::deleteTable(std::string table_name)
  */
 SchemaResult DataStore::getTableSchema(std::string table_name)
 {
-    SchemaTablePair* pair = getTablePair(table_name);
-    if(pair == nullptr)
+    SchemaTablePair pair;
+    if(!getTablePair(table_name, pair))
     {
         return SchemaResult(ResultStatus::FAILURE, TableSchema());
     }
     else
     {
-        TableSchema schema = *pair->schema;
+        TableSchema schema = *pair.schema;
         return SchemaResult(ResultStatus::SUCCESS, schema);
     }
 }
@@ -123,37 +138,97 @@ SchemaResult DataStore::getTableSchema(std::string table_name)
  */
 UintResult DataStore::getColumnIndex(std::string table_name, std::string column_name)
 {
-    SchemaTablePair* table_pair = getTablePair(table_name);
-    if(table_pair)
+    SchemaTablePair table_pair;
+    if(getTablePair(table_name, table_pair))
     {
         // This should be safe, we're only reading from the object
-        size_t num_columns = table_pair->schema->columns.size();
+        size_t num_columns = table_pair.schema->columns.size();
         for(uint32_t itr = 0; itr < num_columns; itr++)
         {
-            if(table_pair->schema->columns[itr].name == column_name)
+            if(table_pair.schema->columns[itr].name == column_name)
             {
                 return UintResult(ResultStatus::SUCCESS, itr);
             }
         }
 
-		return UintResult(ResultStatus::FAILURE, 0);
+        return UintResult(ResultStatus::FAILURE, 0);
     }
 
     // Table name doesn't exist in the table name map
     return UintResult(ResultStatus::FAILURE, 0);
 }
 
-DataResult DataStore::updateData(Predicate* predicates,
-                      std::string table_name, uint32_t column_idx,
-                      TervelData value)
-{
-    // TODO: This function doesn't really make sense to have...
-}
 
-DataResult DataStore::getData(Predicate* predicates,
-                   std::string table_name, uint32_t column_idx)
+//Checks if the inserted row is valid for those constraints
+ConstraintResult DataStore::schemaChecker(SchemaTablePair& table_pair, RecordData *row)
 {
-    // TODO: This function doesn't really make sense to have...
+    //table, schema
+    std::shared_ptr<DataTable> table = table_pair.table;
+    TableSchema *schema = table_pair.schema;
+
+    //number of columns, number of inputs from row, number of constraints in each column
+    int64_t col_len = schema->columns.size();
+    int64_t row_len = row->size();
+    int64_t num_Constraints = 0;
+    SQLConstraint constraint;
+
+    if(row_len != col_len)
+    {
+        //mismatching columns not enough data
+        return ConstraintResult(ResultStatus::FAILURE, ConstraintStatus::ERR_ROW_LEN);
+    }
+
+    //finds the column constraints and check each column in row to see if any apply
+    for(int64_t i = 0; i < row_len; i++)
+    {
+        TervelData row_data = {.value = 0};
+        row_data = row->at(i);
+        num_Constraints = schema->columns.at(i).constraint.size();
+
+        for(int64_t j = 0; j < num_Constraints; j++)
+        {
+            constraint = schema->columns.at(i).constraint.at(j);
+            switch(constraint.type)
+            {
+                //do nothing
+                case SQLConstraintType::SQL_NO_CONSTRAINT:
+                    {
+                        break;
+                    }
+                //data cannot be null
+                case SQLConstraintType::SQL_NOT_NULL:
+                    {
+                        if(row_data.data.null == 1)
+                        {
+                            return ConstraintResult(ResultStatus::FAILURE, ConstraintStatus::ERR_NULL);
+                        }
+
+                        break;
+                    }
+                //increment unique counter that represents number of records inserted into table
+                case SQLConstraintType::SQL_AUTO_INCREMENT:
+                    {
+                        TervelData insert = {.value = 0};
+                        insert.data.type = INTEGER;
+                        insert.data.value = table->record_counter.load()+1;
+                        insert.data.tervel_status = 0;
+
+                        row->at(i) = insert;
+                        break;
+                    }
+                case SQLConstraintType::SQL_DEFAULT:
+                    {
+                        if(row_data.data.null == 1)
+                        {
+                            row->at(i) = constraint.value;
+                        }
+                        break;
+                    }
+            }
+        }
+    }
+
+    return ConstraintResult(ResultStatus::SUCCESS, ConstraintStatus::SUCCESS);
 }
 
 /**
@@ -162,10 +237,15 @@ DataResult DataStore::getData(Predicate* predicates,
 ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
 {
     // Get the table
-    SchemaTablePair* table_pair = getTablePair(table_name);
-    if(table_pair == nullptr)
+    SchemaTablePair table_pair;
+    if(!getTablePair(table_name, table_pair))
     {
         return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_TABLE_NOT_EXIST);
+    }
+
+    if(schemaChecker(table_pair, &record).status != ResultStatus::SUCCESS)
+    {
+        return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_FAILED_CONSTRAINT);
     }
 
     // Insert into the table
@@ -190,13 +270,12 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
 
     // Push the record counter on the back of the record
     TervelData counter_data = {.value = 0};
-    uint64_t counter = table_pair->table->record_counter.fetch_add(1);
-
+    uint64_t counter = table_pair.table->record_counter.fetch_add(1);
+    
     counter_data.data.value = counter;
     new_record->push_back_w_ra(counter_data.value);
 
-    // TODO: Handle table constraints
-    size_t ret = table_pair->table->records.push_back_w_ra(new_record);
+    size_t ret = table_pair.table->records.push_back_w_ra(new_record);
     printf("Pushback returned %lu\n", ret);
     printf("Record address %p\n", new_record);
 
@@ -206,26 +285,101 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
 /**
  *	\brief Update the appropriate record(s) with the given \refer RecordData object
  */
-ManipResult DataStore::updateRecord(Predicate* predicates,
-                         std::string table_name,
-                         RecordData record)
+ManipResult DataStore::updateRecords(Predicate* predicates,
+        std::string table_name,
+        RecordData record)
 {
+    if(predicates == nullptr)
+    {
+        // TODO: Allow a full update?
+    }
+    else
+    {
+        RecordReferences record_refs;
+        switch(predicates->type)
+        {
+            case PredicateType::NESTED:
+                record_refs = searchTablesForRefs(reinterpret_cast<NestedPredicate*>(predicates));
+                break;
+            case PredicateType::VALUE:
+            {
+                SchemaTablePair pair;
+                if(!getTablePair(table_name, pair))
+                {
+                    return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_TABLE_NOT_EXIST);
+                }
+
+                record_refs = searchTableForRefs(pair.table, reinterpret_cast<ValuePredicate*>(predicates));
+            }
+                break;
+            default:
+                // How the hell did you get here?
+                // std::terminate()?
+                break;
+        }
+
+        // TODO: Perform the delete using the record references and IDs gathered and the template record
+    }
+
+    // General error, this should never be reached
+    return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR);
+}
+
+/**
+ *  \brief Delete the appropriate records that satisfy the given predicate
+ */
+ManipResult DataStore::deleteRecords(Predicate* predicates, std::string table_name)
+{
+    if(predicates == nullptr)
+    {
+        // TODO: Allow a full delete?
+    }
+    else
+    {
+        RecordReferences record_refs;
+        switch(predicates->type)
+        {
+            case PredicateType::NESTED:
+                record_refs = searchTablesForRefs(reinterpret_cast<NestedPredicate*>(predicates));
+                break;
+            case PredicateType::VALUE:
+            {
+                SchemaTablePair pair;
+                if(!getTablePair(table_name, pair))
+                {
+                    return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_TABLE_NOT_EXIST);
+                }
+
+                record_refs = searchTableForRefs(pair.table, reinterpret_cast<ValuePredicate*>(predicates));
+            }
+                break;
+            default:
+                // How the hell did you get here?
+                // std::terminate()?
+                break;
+        }
+
+        // TODO: Perform the delete using the record references and IDs gathered
+    }
+
+    // General error, this should never be reached
+    return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR);
 }
 
 /**
  *	\brief Retrieves the appropriate record(s) based on the predicates given
  */
 MultiRecordResult DataStore::getRecords(Predicate* predicates,
-                                        std::string table_name)
+        std::string table_name)
 {
     // Get the table pair
-    SchemaTablePair* table_pair = getTablePair(table_name);
-    if(table_pair == nullptr)
+    SchemaTablePair table_pair;
+    if(!getTablePair(table_name, table_pair))
     {
-	    return MultiRecordResult(ResultStatus::FAILURE, MultiRecordData());
+        return MultiRecordResult(ResultStatus::FAILURE, MultiRecordData());
     }
 
-    auto table = table_pair->table;
+    auto table = table_pair.table;
     RecordVector& records = table->records;
 
     // Evaluate predicates and return all rows that satisfy the predicates'
@@ -236,29 +390,29 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
     {
         MultiRecordData data;
 
-	    int64_t table_len = records.size(0);
-	    if(table_len == 0)
-	    {
-	        // Finished, table is empty
-		    return MultiRecordResult(ResultStatus::SUCCESS, MultiRecordData());
-	    }
+        int64_t table_len = records.size(0);
+        if(table_len == 0)
+        {
+            // Finished, table is empty
+            return MultiRecordResult(ResultStatus::SUCCESS, MultiRecordData());
+        }
 
-	    for(int64_t i = 0; i < table_len; i++)
-	    {
-	        // Get the current row pointer
-	        Record* row = nullptr;
-	        
-	        // This essentially waits for an access to become available.
-	        // TODO: Is this wait-free?
-	        while(!records.at(i, row)) {}
+        for(int64_t i = 0; i < table_len; i++)
+        {
+            // Get the current row pointer
+            Record* row = nullptr;
 
-                printf("Retrieved record address: %p\n", row);
+            // This essentially waits for an access to become available.
+            // TODO: Is this wait-free?
+            while(!records.at(i, row)) {}
 
-	        RecordCopy record_copy = copyRecord(row);
-	        data.push_back(record_copy.data);
-	    }
+            printf("Retrieved record address: %p\n", row);
 
-	    return MultiRecordResult(ResultStatus::SUCCESS, data);
+            RecordCopy record_copy = copyRecord(row);
+            data.push_back(record_copy.data);
+        }
+
+        return MultiRecordResult(ResultStatus::SUCCESS, data);
     }
     else
     {
@@ -293,8 +447,8 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
                     }
                     else
                     {
-                        MultiRecordCopies copies = searchTable(table_pair->table,
-                                                           val_pred);
+                        MultiRecordCopies copies = searchTable(table_pair.table,
+                                val_pred);
 
                         // Have to convert back into a multi record data
                         MultiRecordData data;
@@ -320,7 +474,7 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
 /**
  *  \brief Gets the \refer SchemaTablePair object associated to the table name given
  */
-SchemaTablePair* DataStore::getTablePair(std::string table_name)
+bool DataStore::getTablePair(std::string table_name, SchemaTablePair& pair)
 {
     TableMap::ValueAccessor hash_accessor;
     if(table_name_mapping.at(table_name, hash_accessor))
@@ -328,19 +482,19 @@ SchemaTablePair* DataStore::getTablePair(std::string table_name)
         if(hash_accessor.valid())
         {
             // TODO: Is this safe? I think so, but ...
-            SchemaTablePair* pair = (*hash_accessor.value());
-            return pair;
+            pair = *(*hash_accessor.value());
+            return true;
         }
     }
 
-    return nullptr;
+    return false;
 }
 
 /**
  *	\brief Searches the given table for records that satisfies the given predicate
  */
 MultiRecordCopies DataStore::searchTable(std::shared_ptr<DataTable>& table,
-                                  ValuePredicate* value_pred)
+        ValuePredicate* value_pred)
 {
     MultiRecordCopies data;
     if(table == nullptr || value_pred == nullptr)
@@ -372,8 +526,8 @@ MultiRecordCopies DataStore::searchTable(std::shared_ptr<DataTable>& table,
         ExpressionValue row_value(record.data.at(value_pred->column.column_idx));
 
         if(evaluateOperation(value_pred->op, 
-                             value_pred->expected_value,
-                             row_value).IsTrue())
+                    value_pred->expected_value,
+                    row_value).IsTrue())
         {
             printf("Record matches predicate!\n");
             data.push_back(record);
@@ -386,57 +540,57 @@ MultiRecordCopies DataStore::searchTable(std::shared_ptr<DataTable>& table,
 /**
  * TODO This only needs to be implemented if we support column-column compares
  */
-/*
-MultiTableRecordData DataStore::searchTable(std::string table_first, std::string table_second,
-        ColumnPredicate* col_pred)
-{
-    auto default_res = MultiTableRecordData();
-    auto result = MultiTableRecordData();
+    /*
+       MultiTableRecordData DataStore::searchTable(std::string table_first, std::string table_second,
+       ColumnPredicate* col_pred)
+       {
+       auto default_res = MultiTableRecordData();
+       auto result = MultiTableRecordData();
 
-    auto f_table_pair = getTablePair(table_first);
-    auto s_table_pair = getTablePair(table_second);
+       auto f_table_pair = getTablePair(table_first);
+       auto s_table_pair = getTablePair(table_second);
 
-    if(f_table_pair == nullptr || s_table_pair == nullptr || col_pred == nullptr)
-    {
-        return default_res;
-    }
+       if(f_table_pair == nullptr || s_table_pair == nullptr || col_pred == nullptr)
+       {
+       return default_res;
+       }
 
-    RecordVector& f_table = f_table_pair->table->records;
-    RecordVector& s_table = s_table_pair->table->records;
+       RecordVector& f_table = f_table_pair->table->records;
+       RecordVector& s_table = s_table_pair->table->records;
 
-    int64_t first_len = f_table.size(0);
-    int64_t second_len = s_table.size(0);
-    if(first_len == 0 || second_len == 0)
-    {
-        return default_res;
-    }
+       int64_t first_len = f_table.size(0);
+       int64_t second_len = s_table.size(0);
+       if(first_len == 0 || second_len == 0)
+       {
+       return default_res;
+       }
 
-    for(int64_t first_idx = 0; first_idx < first_len; first_idx++)
-    {
-        RecordData f_data = copyRecord(f_table, first_idx);
+       for(int64_t first_idx = 0; first_idx < first_len; first_idx++)
+       {
+       RecordData f_data = copyRecord(f_table, first_idx);
 
-        for(int64_t second_idx = 0; second_idx < second_len; second_idx++)
-        {
-            RecordData s_data = copyRecord(s_table, second_idx);
+       for(int64_t second_idx = 0; second_idx < second_len; second_idx++)
+       {
+       RecordData s_data = copyRecord(s_table, second_idx);
 
-            TervelData f_value = f_data[col_pred->left_column.column_idx];
-            TervelData s_value = s_data[col_pred->right_column.column_idx];
-            if(f_value.data.value == s_value.data.value)
-            {
-                result[table_first].push_back(f_data);
-                result[table_second].push_back(s_data);
-            }
-        }
-    }
+       TervelData f_value = f_data[col_pred->left_column.column_idx];
+       TervelData s_value = s_data[col_pred->right_column.column_idx];
+       if(f_value.data.value == s_value.data.value)
+       {
+       result[table_first].push_back(f_data);
+       result[table_second].push_back(s_data);
+       }
+       }
+       }
 
-    return default_res;
-}
-*/
+       return default_res;
+       }
+       */
 
-/**
- *	\brief Searches the system tables for records that satisfy the
- *	given predicate tree.
- */
+        /**
+         *	\brief Searches the system tables for records that satisfy the
+         *	given predicate tree.
+         */
 MultiTableRecordCopies DataStore::searchTables(NestedPredicate* pred)
 {
     auto result = MultiTableRecordCopies();
@@ -449,29 +603,31 @@ MultiTableRecordCopies DataStore::searchTables(NestedPredicate* pred)
     {
         case PredicateType::NESTED:
             {
-	        auto nest_pred = reinterpret_cast<NestedPredicate*>(left);
-	        left_result = searchTables(nest_pred);
-	    }
-	    break;
-	case PredicateType::COLUMN:
+                auto nest_pred = reinterpret_cast<NestedPredicate*>(left);
+                left_result = searchTables(nest_pred);
+            }
+            break;
+        case PredicateType::COLUMN:
             {
                 /*
-		ColumnPredicate* col_pred = reinterpret_cast<ColumnPredicate*>(left);
-		auto column_result = searchTable(col_pred->left_column.table,
-		col_pred->right_column.table, col_pred);
-                */
+                   ColumnPredicate* col_pred = reinterpret_cast<ColumnPredicate*>(left);
+                   auto column_result = searchTable(col_pred->left_column.table,
+                   col_pred->right_column.table, col_pred);
+                   */
                 printf("Column to column predicates are not supported!\n");
-				return MultiTableRecordCopies();
+                return MultiTableRecordCopies();
             }
-	    break;
-	case PredicateType::VALUE:
-	    {
-	        ValuePredicate* val_pred = reinterpret_cast<ValuePredicate*>(left);
-	        auto table_pair = getTablePair(val_pred->column.table);
-	        auto value_result = searchTable(table_pair->table, val_pred);
+            break;
+        case PredicateType::VALUE:
+            {
+                ValuePredicate* val_pred = reinterpret_cast<ValuePredicate*>(left);
+                SchemaTablePair table_pair;
+                // Assume this succeeds
+                getTablePair(val_pred->column.table, table_pair);
+                auto value_result = searchTable(table_pair.table, val_pred);
                 left_result[val_pred->column.table] = value_result;
-	    }
-	    break;
+            }
+            break;
     }
 
     Predicate* right = pred->right_child;
@@ -479,33 +635,35 @@ MultiTableRecordCopies DataStore::searchTables(NestedPredicate* pred)
     {
         case PredicateType::NESTED:
             {
-	        auto nest_pred = reinterpret_cast<NestedPredicate*>(right);
-	        right_result = searchTables(nest_pred);
-	    }
-	        break;
+                auto nest_pred = reinterpret_cast<NestedPredicate*>(right);
+                right_result = searchTables(nest_pred);
+            }
+            break;
         case PredicateType::COLUMN:
-	    {
+            {
                 /*
-	        ColumnPredicate* col_pred = reinterpret_cast<ColumnPredicate*>(right);
-		auto column_result = searchTable(col_pred->left_column.table,
-		col_pred->right_column.table, col_pred);
-                */
+                   ColumnPredicate* col_pred = reinterpret_cast<ColumnPredicate*>(right);
+                   auto column_result = searchTable(col_pred->left_column.table,
+                   col_pred->right_column.table, col_pred);
+                   */
                 printf("Column to column predicates are not supported!\n");
-		return MultiTableRecordCopies();
-	    }
-	    break;
+                return MultiTableRecordCopies();
+            }
+            break;
         case PredicateType::VALUE:
-	     {
-	         ValuePredicate* val_pred = reinterpret_cast<ValuePredicate*>(right);
-	         auto table_pair = getTablePair(val_pred->column.table);
-	         auto value_result = searchTable(table_pair->table, val_pred);
-                 right_result[val_pred->column.table] = value_result;
-             }
-             break;
+            {
+                ValuePredicate* val_pred = reinterpret_cast<ValuePredicate*>(right);
+                SchemaTablePair table_pair;
+                // Assume this succeeds
+                getTablePair(val_pred->column.table, table_pair);
+                auto value_result = searchTable(table_pair.table, val_pred);
+                right_result[val_pred->column.table] = value_result;
+            }
+            break;
     }
 
     // Join the two results based on the nested predicate operation
-    
+
     // This compares two records and orders them based on their ID
     auto comp_copy = [] (RecordCopy a, RecordCopy b) -> bool {
         return a.id < b.id;
@@ -519,7 +677,7 @@ MultiTableRecordCopies DataStore::searchTables(NestedPredicate* pred)
             {
                 continue;
             }
-            
+
             size_t l_size = l_itr.second.size();
             size_t r_size = r_itr.second.size();
 
@@ -533,7 +691,7 @@ MultiTableRecordCopies DataStore::searchTables(NestedPredicate* pred)
                 default:
                     num_join_records = l_size + r_size;
                     break;
-	    }
+            }
 
             auto join = MultiRecordCopies(num_join_records);
 
@@ -571,16 +729,188 @@ MultiTableRecordCopies DataStore::searchTables(NestedPredicate* pred)
 }
 
 /**
+ *	\brief Searches the given table for records that satisfies the given predicate 
+ *	and records their ID
+ */
+RecordReferences DataStore::searchTableForRefs(std::shared_ptr<DataTable>& table,
+        ValuePredicate* value_pred)
+{
+    RecordReferences data;
+    if(table == nullptr || value_pred == nullptr)
+    {
+        return RecordReferences();
+    }
+
+    // This assumes table maps to the table name in the value predicate
+    int64_t table_len = table->records.size(0);
+    if(table_len == 0)
+    {
+        return RecordReferences();
+    }
+
+    for(int64_t idx = 0; idx < table_len; idx++)
+    {
+        Record* row = nullptr;
+
+        while(!table->records.at(idx, row)) {}
+
+        // TODO: Consider making this a more focused grab of data
+        RecordCopy record = copyRecord(row);
+
+        if(record.data.size() <= value_pred->column.column_idx)
+        {
+            // TODO: Propagate error up? This should be caught earlier
+            return RecordReferences();
+        }
+
+        ExpressionValue row_value(record.data.at(value_pred->column.column_idx));
+
+        if(evaluateOperation(value_pred->op, 
+                    value_pred->expected_value,
+                    row_value).IsTrue())
+        {
+            printf("Record matches predicate!\n");
+            data.push_back(RecordReference(record.id, row));
+        }
+    }
+
+    return data;
+}
+
+RecordReferences DataStore::searchTablesForRefs(NestedPredicate* pred)
+{
+    auto result = RecordReferences();
+    auto left_result = RecordReferences();
+    auto right_result = RecordReferences();
+
+    // This assumes the nested predicate given has two children
+    Predicate* left = pred->left_child; 
+    switch(left->type)
+    {
+        case PredicateType::NESTED:
+            {
+                auto nest_pred = reinterpret_cast<NestedPredicate*>(left);
+                left_result = searchTablesForRefs(nest_pred);
+            }
+            break;
+        case PredicateType::COLUMN:
+            {
+                /*
+                   ColumnPredicate* col_pred = reinterpret_cast<ColumnPredicate*>(left);
+                   auto column_result = searchTable(col_pred->left_column.table,
+                   col_pred->right_column.table, col_pred);
+                   */
+                printf("Column to column predicates are not supported!\n");
+                return RecordReferences();
+            }
+            break;
+        case PredicateType::VALUE:
+            {
+                ValuePredicate* val_pred = reinterpret_cast<ValuePredicate*>(left);
+                SchemaTablePair table_pair;
+                getTablePair(val_pred->column.table, table_pair);
+                left_result = searchTableForRefs(table_pair.table, val_pred);
+            }
+            break;
+    }
+
+    Predicate* right = pred->right_child;
+    switch(right->type)
+    {
+        case PredicateType::NESTED:
+            {
+                auto nest_pred = reinterpret_cast<NestedPredicate*>(right);
+                right_result = searchTablesForRefs(nest_pred);
+            }
+            break;
+        case PredicateType::COLUMN:
+            {
+                /*
+                   ColumnPredicate* col_pred = reinterpret_cast<ColumnPredicate*>(right);
+                   auto column_result = searchTable(col_pred->left_column.table,
+                   col_pred->right_column.table, col_pred);
+                   */
+                printf("Column to column predicates are not supported!\n");
+                return RecordReferences();
+            }
+            break;
+        case PredicateType::VALUE:
+            {
+                ValuePredicate* val_pred = reinterpret_cast<ValuePredicate*>(right);
+                SchemaTablePair table_pair;
+
+                getTablePair(val_pred->column.table, table_pair);
+                right_result = searchTableForRefs(table_pair.table, val_pred);
+            }
+            break;
+    }
+
+    // Join the two results based on the nested predicate operation
+
+    // This compares two records and orders them based on their ID
+    auto comp_copy = [] (RecordReference a, RecordReference b) -> bool {
+        return a.id < b.id;
+    };
+
+    size_t l_size = left_result.size();
+    size_t r_size = right_result.size();
+
+    size_t num_join_records = 0;
+    switch(pred->op) 
+    { 
+        case ExpressionOperation::AND:
+            num_join_records = (l_size > r_size) ? l_size : r_size;
+            break;
+        case ExpressionOperation::OR:
+        default:
+            num_join_records = l_size + r_size;
+            break;
+    }
+
+    auto join = RecordReferences(num_join_records);
+
+    // The ranges have to be sorted
+    std::sort(left_result.begin(), left_result.end(), comp_copy);
+    std::sort(right_result.begin(), right_result.end(), comp_copy);
+
+    RecordReferences::iterator join_end_itr;
+
+    // Perform the appropriate set operation
+    switch(pred->op)
+    {
+        case ExpressionOperation::AND:
+            join_end_itr = std::set_intersection(left_result.begin(), left_result.end(),
+                    right_result.begin(), right_result.end(),
+                    join.begin(), comp_copy);
+            break;
+        case ExpressionOperation::OR:
+            join_end_itr = std::set_union(left_result.begin(), left_result.end(),
+                    right_result.begin(), right_result.end(),
+                    join.begin(), comp_copy);
+            break;
+        default:
+            printf("Invalid operation used to join sets!\n");
+            break;
+    }
+
+    // Resize the vector to chop off unused elements
+    join.resize(join_end_itr - join.begin());
+    result = join;
+
+    return result;
+}
+
+/**
  *	\brief Copy a specific row from a given table
  */
 RecordCopy DataStore::copyRecord(RecordVector& table, int64_t row_idx)
 {
-	Record* record = nullptr;
+    Record* record = nullptr;
 
-	// TODO: Handle non-trivial failure case (e.g. row_idx > table->size())
-	while(!table.at(row_idx, record)) {}
+    // TODO: Handle non-trivial failure case (e.g. row_idx > table->size())
+    while(!table.at(row_idx, record)) {}
 
-	return copyRecord(record);
+    return copyRecord(record);
 }
 
 /**
@@ -601,13 +931,13 @@ RecordCopy DataStore::copyRecord(Record* record)
 
         int64_t tervel_data = 0;
 
-	    // Pull the current value of the data from the record
-	    while(!record->at(i, tervel_data)) {}
+        // Pull the current value of the data from the record
+        while(!record->at(i, tervel_data)) {}
 
         data.value = tervel_data;
 
         printf("Retrieved value: %ld\n", tervel_data);
-        
+
         // TODO: This is ugly af, rethink this naming scheme in Data/TervelData
         // Clear out any Tervel status bits so as to make later comparisons trivial
         data.data.tervel_status = 0;

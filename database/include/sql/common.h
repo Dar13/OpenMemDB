@@ -70,6 +70,13 @@ struct SQLColumn
     std::vector<SQLConstraint> constraint;
 };
 
+// TODO: Document this
+struct ColumnUpdate
+{
+    uint32_t column_idx;
+    TervelData new_data;
+};
+
 enum class SQLStatement : uint16_t
 {
   INVALID = 0,

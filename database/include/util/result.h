@@ -20,24 +20,40 @@
 #ifndef OMDB_RESULT_H
 #define OMDB_RESULT_H
 
-enum class ResultStatus : uint32_t
+enum class ResultStatus : uint16_t
 {
     SUCCESS = 0,
     FAILURE,
     FAILURE_OUT_MEMORY,
 };
 
-// TODO: Refactor so that this paradigm is used throughout
-template <typename T>
-struct Result
+enum class ResultType : uint8_t
 {
-    Result(ResultStatus s, T res) : status(s), result(res) {}
+    QUERY = 0,
+    COMMAND,
+    OTHER,
+};
+
+struct ResultBase
+{
+    ResultBase(ResultStatus s, ResultType t = ResultType::OTHER) : type(t), status(s) {}
+    virtual ~ResultBase() {}
+
+    ResultType type;
     ResultStatus status;
+};
+
+template <typename T>
+struct Result : public ResultBase
+{
+    Result(ResultStatus s, T res) : ResultBase(s), result(res) {}
+
     T result;
 };
 
 // Common result types
 using UintResult = Result<uint32_t>;
 using Uint64Result = Result<uint64_t>;
+using IntResult = Result<int32_t>;
 
 #endif

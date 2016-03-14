@@ -24,6 +24,8 @@
 #include <sql/omdb_parser.h>
 #include <data/data_store.h>
 
+void createRow(std::vector<int64_t> value, RecordData &data);
+
 /**
  *  @brief The entry point of the application.
  */
@@ -36,7 +38,7 @@ int main(int argc, char** argv)
     printf("\t- %s\n", argv[i]);
   }
 
-  tervel::Tervel* tervel_main = new tervel::Tervel(8);
+  tervel::Tervel* tervel_main = new tervel::Tervel(9);
   WorkManager work_manager(8, tervel_main);
 
   int32_t status = 0;
@@ -61,3 +63,4 @@ int main(int argc, char** argv)
 
   return 0;
 }
+

@@ -181,6 +181,17 @@ comparison_predicate ::= expr. { }
 
 // UPDATE STATEMENT ///////////////////////////////////////////////////////////
 
+cmd ::= UPDATE update_table SET update_expr_list where_clause.
+
+update_table(A) ::= name(X).
+{
+  A = X;
+  // TODO: update builder functions
+}
+
+update_expr_list ::= update_expr_list COMMA update_expr.
+update_expr ::= column_id(X) EQ(OP) term(Y). { builderAddUpdateExpr(builder, OP, X, Y); }
+
 // INSERT INTO STATEMENT //////////////////////////////////////////////////////
 
 cmd ::= INSERT INTO insert_table VALUES LPAREN insert_values RPAREN.
@@ -203,3 +214,11 @@ insert_term(A) ::= INTEGER|FLOAT|DATE|TIME|NULL(X).
 }
 
 // DELETE STATEMENT ///////////////////////////////////////////////////////////
+
+cmd ::= DELETE FROM delete_table where_clause.
+
+delete_table(A) ::= name(X).
+{
+  A = X;
+  // TODO: Update builder functions
+}

@@ -153,7 +153,7 @@ union TervelData
     } data;
 
     int64_t value;
-};
+} __attribute__((packed));
 
 // If this triggers, something has gone really wrong
 static_assert(8 == sizeof(TervelData), "TervelData must be exactly 64 bits long");
