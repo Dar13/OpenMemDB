@@ -20,9 +20,6 @@
 #ifndef SQL_BUILDER_H
 #define SQL_BUILDER_H
 
-// Boost includes
-#include <boost/variant.hpp>
-
 // C++ standard library includes
 #include <string>
 
@@ -56,6 +53,9 @@ struct StatementBuilder
     //! If true, then the builder's parsed statement is valid SQL
     bool valid;
 
+    //! Vector to temporarily hold a columns' constraints.
+    std::vector<SQLConstraint> temp_constraints;
+
     //! The internal representation of a SQL statement
     ParsedStatement* statement;
 
@@ -69,6 +69,8 @@ struct StatementBuilder
 // Table management functions
 void builderStartCreateTable(StatementBuilder* builder, Token table_name);
 void builderStartDropTable(StatementBuilder* builder, Token table_name);
+void builderAddColumnConstraint(StatementBuilder* builder, SQLConstraintType type,
+        Token value = nullptr);
 
 // Query management function
 void builderStartSelectQuery(StatementBuilder* builder);

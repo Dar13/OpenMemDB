@@ -191,12 +191,12 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair& table_pair, RecordDat
             switch(constraint.type)
             {
                 //do nothing
-                case SQLConstraintType::SQL_NO_CONSTRAINT:
+                case SQLConstraintType::NO_CONSTRAINT:
                     {
                         break;
                     }
                 //data cannot be null
-                case SQLConstraintType::SQL_NOT_NULL:
+                case SQLConstraintType::NOT_NULL:
                     {
                         if(row_data.data.null == 1)
                         {
@@ -206,7 +206,7 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair& table_pair, RecordDat
                         break;
                     }
                 //increment unique counter that represents number of records inserted into table
-                case SQLConstraintType::SQL_AUTO_INCREMENT:
+                case SQLConstraintType::AUTO_INCREMENT:
                     {
                         TervelData insert = {.value = 0};
                         insert.data.type = INTEGER;
@@ -216,7 +216,7 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair& table_pair, RecordDat
                         row->at(i) = insert;
                         break;
                     }
-                case SQLConstraintType::SQL_DEFAULT:
+                case SQLConstraintType::DEFAULT:
                     {
                         if(row_data.data.null == 1)
                         {
