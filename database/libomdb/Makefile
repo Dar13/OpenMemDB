@@ -2,19 +2,17 @@
 CC=g++
 
 INC_DIR := -I../ \
-	   -I../include \
-	   -I../include/util \
 
 # Basic flags that will be shared between debug and release configurations
-CFLAGS=-Wall -Wextra -g $(INC_DIR) -std=c++11 -I../include/util
+CFLAGS=-Wall -Wextra -g $(INC_DIR) -std=c++11
 
 LDFLAGS=-rdynamic -pthread
 
-LIB_NAME := omdb_lib.a
+LIB_NAME := libomdb.a
 
 SOURCES := ./connection.cc \
-	   ./result.cc \
-	   ../source/util/serialization_helper.cc \
+	   ./libomdb_result.cc \
+	   ./serialization_helper.cc \
 	   ./omdb_lib.cc \
 
 OBJECTS = $(SOURCES:.cc=.o)
@@ -22,7 +20,8 @@ OBJECTS = $(SOURCES:.cc=.o)
 all: $(SOURCES) $(LIB_NAME)
 
 $(LIB_NAME): $(OBJECTS)
-	ar rvs omdb_lib.a $(OBJECTS)
+	ar rvs $(LIB_NAME) $(OBJECTS)
+	ranlib $(LIB_NAME)
 
 %.o : %.cc
 	$(CC) $(CFLAGS) -c $< -o $@

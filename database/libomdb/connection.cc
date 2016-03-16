@@ -31,11 +31,12 @@ THE SOFTWARE.
 
 #include <cstring>
 
-#include "connection.h"
-#include "libomdb.h"
+#include "omdb_lib.h"
+#include "serialization_helper.h"
 
 #define MAXDATASIZE 100
 
+using namespace libomdb;
 
 /************************************************************************
  * Temp struct holder for results
@@ -45,7 +46,6 @@ struct ResultHolder {
   char metaDataPacket[MESSAGE_SIZE];
   char resultPacket[MESSAGE_SIZE];
 };
-
 
 
 /*************************************************************************

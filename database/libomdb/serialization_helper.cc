@@ -23,7 +23,7 @@ THE SOFTWARE.
 #include <fstream>
 #include <cstring>
 
-#include "libomdb.h"
+#include "serialization_helper.h"
 
 /*****************************************************************
  * Helper functions

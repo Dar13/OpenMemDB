@@ -2,8 +2,7 @@
 // Created by mike on 2/22/16.
 //
 
-#include "../../omdb_lib.h"
-#include "../../../include/util/libomdb.h"
+#include "omdb_lib.h"
 
 /**
  * This test assumes that there is a table calles users

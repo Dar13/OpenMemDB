@@ -1,23 +1,19 @@
 CC=g++
 
-INC_DIR := -I../ \
-	   -I../../ \
-	   -I../../../ \
-	   -I../../../include \
-	   -I../../../include/util \
+INC_DIR := -I../../
 
 CFLAGS := -std=c++11 $(INC_DIR) -g -Wall -Wextra
-LDFLAGS := -pthread -L../ -lomdb_lib.a
+LDFLAGS := -pthread -L ../../ -lomdb
 
 EXEC_NAME=test_libomdb
 
-OBJECTS := main.o \ 
+OBJECTS := main.o
 
 all: $(EXEC_NAME)
 	@echo -e "Compilation done!"
 
 $(EXEC_NAME): $(OBJECTS)
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $(EXEC_NAME)
+	$(CC) $(OBJECTS) $(LDFLAGS) -o $(EXEC_NAME)
 
 %.o : %.cc
 	@echo -e "Compiling source file"
