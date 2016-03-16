@@ -34,8 +34,6 @@ void builderStartCreateTable(StatementBuilder* builder, Token table_name)
     builder->started = true;
     builder->statement = command;
     builder->valid = true;
-  
-    printf("Builder started for CREATE TABLE statement\n");
 }
 
 void builderStartDropTable(StatementBuilder* builder, Token table_name)
@@ -46,8 +44,22 @@ void builderStartDropTable(StatementBuilder* builder, Token table_name)
     builder->started = true;
     builder->statement = command;
     builder->valid = true;
-  
-    printf("Builder started/done for DROP TABLE statement\n");
+}
+
+void builderAddColumnConstraint(StatementBuilder* builder, SQLConstraintType type,
+        Token value) 
+{
+    assert(builder != nullptr);
+
+    SQLConstraint constraint;
+    constraint.type = type;
+    
+    if(value && value->is_value)
+    {
+        constraint.value = value->value;
+    }
+
+    builder->temp_constraints.push_back(constraint);
 }
 
 void builderStartSelectQuery(StatementBuilder* builder)
@@ -61,8 +73,6 @@ void builderStartSelectQuery(StatementBuilder* builder)
     builder->started = true;
     builder->statement = query;
     builder->valid = true;
-  
-    printf("Builder started for SELECT statement\n");
 }
 
 void builderStartInsertCommand(StatementBuilder* builder)
@@ -73,8 +83,6 @@ void builderStartInsertCommand(StatementBuilder* builder)
     builder->started = true;
     builder->statement = cmd;
     builder->valid = true;
-
-    printf("Builder started for INSERT INTO statement\n");
 }
 
 void builderStartUpdateCommand(StatementBuilder* builder)
@@ -84,8 +92,6 @@ void builderStartUpdateCommand(StatementBuilder* builder)
     builder->started = true;
     builder->statement = cmd;
     builder->valid = true;
-
-    printf("Builder started for UPDATE statement\n");
 }
 
 void builderStartDeleteCommand(StatementBuilder* builder)
@@ -95,8 +101,6 @@ void builderStartDeleteCommand(StatementBuilder* builder)
     builder->started = true;
     builder->statement = cmd;
     builder->valid = true;
-
-    printf("Builder started for DELETE statement\n");
 }
 
 // SELECT helper functions ////////////////////////////////////////////////////
@@ -122,8 +126,6 @@ void builderAddSelectAllColumns(StatementBuilder* builder, Token table)
             // TODO: Error handling?
             break;
     }
-
-    printf("AddSelectAllColumns called for table %s\n", table->text.c_str());
 }
 
 void builderAddQualifiedSelectColumn(StatementBuilder* builder,
@@ -234,11 +236,11 @@ void builderAddUpdateExpr(StatementBuilder* builder, Token operation,
 void builderAddColumn(StatementBuilder* builder, Token column_name,
                       Token column_type, Token column_constraints)
 {
-    printf("Entered builderAddColumn\n");
+    //printf("Entered builderAddColumn\n");
 
     if(!builder->started)
     {
-        // TODO: What do?
+        printf("Builder not started, but attempting to add column?!\n");
     }
 
     switch(builder->statement->type)
@@ -249,8 +251,9 @@ void builderAddColumn(StatementBuilder* builder, Token column_name,
             SQLColumn column;
             column.name = column_name->text;
             column.type = getSQLType(&column_type->text);
-            // TODO: Column constraints
-            (void)column_constraints;
+
+            std::swap(column.constraint, builder->temp_constraints);
+            builder->temp_constraints.clear();
 
             cmd->columns.push_back(column);
         }
@@ -264,8 +267,6 @@ void builderAddColumn(StatementBuilder* builder, Token column_name,
         {}
         break;
     }
-
-    printf("Exit builderAddColumn\n");
 }
 
 void builderAddTableName(StatementBuilder* builder, Token table_name)

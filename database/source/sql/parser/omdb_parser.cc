@@ -87,8 +87,7 @@ ParseResult parse(std::string input, DataStore* data_store)
 
 void token_print(Token token)
 {
-    (void)token;
-    //printf("Token: %s\n", token->text.c_str());
+    printf("Token: %s\n", token->text.c_str());
 }
 
 /**
@@ -372,7 +371,7 @@ void setupTokenMappings()
   keywords["FROM"] = TK_FROM;
   keywords["ALL"] = TK_ALL;
   keywords["DISTINCT"] = TK_DISTINCT;
-  keywords["UNIQUE"] = TK_UNIQUE;
+  //keywords["UNIQUE"] = TK_UNIQUE;
   keywords["AUTO_INCREMENT"] = TK_AUTO_INCREMENT;
   keywords["NOT"] = TK_NOT;
   keywords["NULL"] = TK_NULL;

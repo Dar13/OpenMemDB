@@ -71,7 +71,6 @@ column_list ::= column.
 column(A) ::= column_id(X) type(Y) column_args(Z).
 {
   (void)A;
-
   builderAddColumn(builder, X, Y, Z);
 }
 
@@ -81,8 +80,8 @@ column_id(A) ::= name(X).   {A = X;}
 %token_class ids ID|STRING.
 
 %type name {Token}
-name(A) ::= id(X).      {A = X; token_print(X);}
-name(A) ::= STRING(X).  {A = X; token_print(X);}
+name(A) ::= id(X).      {A = X;}
+name(A) ::= STRING(X).  {A = X;}
 
 %type typetoken {Token}
 type(A) ::= . { A = nullptr; }
@@ -96,13 +95,20 @@ typename(A) ::= ids(X). {A = X;}
 column_args ::= column_args column_constraints.
 column_args ::= .
 
-column_constraints ::= DEFAULT LPAREN expr(X) RPAREN. {(void)X; /*printf("col_const\n");*/}
-column_constraints ::= DEFAULT term(X).               {(void)X; /*printf("col_const\n");*/}
-//column_constraints ::= DEFAULT id(X).               {(void)X; /*printf("col_const\n");*/}
+column_constraints ::= DEFAULT term(X).
+{
+  builderAddColumnConstraint(builder, SQLConstraintType::DEFAULT, X);
+}
 
-column_constraints ::= NOT NULL.        {/*printf("Token: NOT NULL\n");*/}
-column_constraints ::= UNIQUE.          {/*printf("Token: UNIQUE\n");*/}
-column_constraints ::= AUTO_INCREMENT.  {/*printf("Token: AUTO_INCREMENT\n");*/}
+column_constraints ::= NOT NULL. 
+{
+  builderAddColumnConstraint(builder, SQLConstraintType::NOT_NULL);
+}
+
+column_constraints ::= AUTO_INCREMENT.
+{
+  builderAddColumnConstraint(builder, SQLConstraintType::AUTO_INCREMENT);
+}
 
 // Time to define operator precedence
 %left OR.
