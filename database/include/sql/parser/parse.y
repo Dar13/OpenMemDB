@@ -38,12 +38,11 @@
 }
 
 %parse_failure {
-  printf("Parse failed!\n");
   builderClean(builder);
 }
 
 %parse_accept {
-  printf("Parse accepts input!\n");
+  //printf("Parse accepts input!\n");
 }
 
 input ::= cmd_list.
@@ -51,8 +50,8 @@ input ::= cmd_list.
 cmd_list ::= cmd_list end_cmd.
 cmd_list ::= end_cmd.
 
-end_cmd ::= SEMICOLON.  { printf("semicolon found\n");}
-end_cmd ::= explain cmdx SEMICOLON. { printf("command found and semicolon found\n");}
+end_cmd ::= SEMICOLON.
+end_cmd ::= explain cmdx SEMICOLON. 
 
 explain ::= . { }
 
@@ -97,13 +96,13 @@ typename(A) ::= ids(X). {A = X;}
 column_args ::= column_args column_constraints.
 column_args ::= .
 
-column_constraints ::= DEFAULT LPAREN expr(X) RPAREN. {(void)X; printf("col_const\n");}
-column_constraints ::= DEFAULT term(X).               {(void)X; printf("col_const\n");}
-//column_constraints ::= DEFAULT id(X).               {(void)X; printf("col_const\n");}
+column_constraints ::= DEFAULT LPAREN expr(X) RPAREN. {(void)X; /*printf("col_const\n");*/}
+column_constraints ::= DEFAULT term(X).               {(void)X; /*printf("col_const\n");*/}
+//column_constraints ::= DEFAULT id(X).               {(void)X; /*printf("col_const\n");*/}
 
-column_constraints ::= NOT NULL.        {printf("Token: NOT NULL\n");}
-column_constraints ::= UNIQUE.          {printf("Token: UNIQUE\n");}
-column_constraints ::= AUTO_INCREMENT.  {printf("Token: AUTO_INCREMENT\n");}
+column_constraints ::= NOT NULL.        {/*printf("Token: NOT NULL\n");*/}
+column_constraints ::= UNIQUE.          {/*printf("Token: UNIQUE\n");*/}
+column_constraints ::= AUTO_INCREMENT.  {/*printf("Token: AUTO_INCREMENT\n");*/}
 
 // Time to define operator precedence
 %left OR.
@@ -119,14 +118,14 @@ term(A) ::= name(X) DOT column_id(Y). {
     X->table_name = X->text;
     X->column_name = Y->text;
     X->text = X->text + "." + Y->text;
-    printf("Reference: %s.%s\n", X->table_name.c_str(), X->column_name.c_str());
+    //printf("Reference: %s.%s\n", X->table_name.c_str(), X->column_name.c_str());
     X->is_column = true;
     A = X;
 }
-term(A) ::= column_id(X). { A = X; printf("expression term\n"); }
+term(A) ::= column_id(X). { A = X; /*printf("expression term\n");*/ }
 term(A) ::= INTEGER|FLOAT|DATE|TIME(X).
 { 
-  printf("Numeric term handling\n");
+  //printf("Numeric term handling\n");
   A = X;
 }
 
@@ -150,7 +149,7 @@ select_column ::= name(X) DOT name(Y) as_clause(Z). {
 }
 
 as_clause(A) ::= AS name(X).  { A = X; }
-as_clause(A) ::= .            { A = nullptr; printf("Empty AS\n"); }
+as_clause(A) ::= .            { A = nullptr; }
 
 select_table ::= FROM table_references where_clause group_by_clause.
 select_table ::= FROM name(A).  { (void)A; }
@@ -160,17 +159,16 @@ table_references ::= table_reference(X). { (void)X; }
 
 table_reference(A) ::= name(X) as_clause(Y). 
 {
-  printf("Non-empty table reference\n");
   (void)A;
   (void)X; 
   (void)Y; 
   //printf("Table reference: %s as %s\n", X->text->c_str(), Y->text->c_str());
 }
 
-table_reference ::= . { printf("Empty table reference\n"); }
+table_reference ::= .
 
 // TODO: consider other clauses
-where_clause ::= WHERE search_condition. { printf("WHERE clause\n"); }
+where_clause ::= WHERE search_condition.
 
 group_by_clause ::= .
 
@@ -201,7 +199,7 @@ insert_table(A) ::= name(X).
   A = X; 
   builderStartInsertCommand(builder);
   builderAddTableName(builder, A);
-  printf("Starting INSERT INTO statement parse\n");
+  //printf("Starting INSERT INTO statement parse\n");
 }
 
 insert_values ::= insert_values COMMA insert_term.

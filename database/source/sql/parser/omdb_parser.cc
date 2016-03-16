@@ -69,7 +69,6 @@ ParseResult parse(std::string input, DataStore* data_store)
 
     if(builder.statement == nullptr || !builder.valid)
     {
-        printf("Failed to parse statement!\n");
         return ParseResult(ResultStatus::FAILURE, nullptr);
     }
     else
@@ -80,7 +79,6 @@ ParseResult parse(std::string input, DataStore* data_store)
         delete builder.expr;
         builder.expr = nullptr;
 
-        printf("Statement parse was successful!\n");
         return ParseResult(ResultStatus::SUCCESS, builder.statement);
     }
 
@@ -89,7 +87,8 @@ ParseResult parse(std::string input, DataStore* data_store)
 
 void token_print(Token token)
 {
-    printf("Token: %s\n", token->text.c_str());
+    (void)token;
+    //printf("Token: %s\n", token->text.c_str());
 }
 
 /**
