@@ -50,7 +50,7 @@ GraphTest::GraphTest()
 
     // DataStoreTest dataStoreTest5;
 
-    // result = dataStoreTest.with(MODE_CREATE)
+    // result = dataStoreTest5.with(MODE_CREATE)
     //                                  .generateCases(0b0000)
     //                                  .setThreadCount(16)
     //                                  .test();
@@ -59,7 +59,7 @@ GraphTest::GraphTest()
 
     // DataStoreTest dataStoreTest6;
 
-    // result = dataStoreTest.with(MODE_CREATE)
+    // result = dataStoreTest6.with(MODE_CREATE)
     //                                 .generateCases(0b0000)
     //                                 .setThreadCount(32)
     //                                 .test();
@@ -68,8 +68,15 @@ GraphTest::GraphTest()
 
     // DataStoreTest dataStoreTest7;
 
+    // result = dataStoreTest7.with(MODE_CREATE)
+    //                             .generateCases(0b0000)
+    //                             .setThreadCount(64)
+    //                             .test();
+
+    // timeVals.push_back(result.duration);
+
     TestResult result = dataStoreTest.with(MODE_DROP)
-                                    .generateCases(0b0000)
+                                    .generateCases(0b1000)
                                     .test();
                                
     timeVals.push_back(result.duration);
