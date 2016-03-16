@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-std=c++11 -I./ -I../../include/util -g -Wall -Wextra
+CFLAGS=-std=c++11 -I../../ -I../../../include/util -g -Wall -Wextra
 LDFLAGS=-pthread
 
 EXEC_NAME=test_serialization

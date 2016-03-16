@@ -1,0 +1,959 @@
+In file included from /usr/include/c++/5.3.0/iterator:65:0,
+                 from ../../../include/util/stdlib.h:23,
+                 from /usr/include/c++/5.3.0/cstdlib:72,
+                 from /usr/include/c++/5.3.0/ext/string_conversions.h:41,
+                 from /usr/include/c++/5.3.0/bits/basic_string.h:5249,
+                 from /usr/include/c++/5.3.0/string:52,
+                 from /usr/include/c++/5.3.0/bits/locale_classes.h:40,
+                 from /usr/include/c++/5.3.0/bits/ios_base.h:41,
+                 from /usr/include/c++/5.3.0/ios:42,
+                 from /usr/include/c++/5.3.0/ostream:38,
+                 from /usr/include/c++/5.3.0/iostream:39,
+                 from ../../../source/util/serialization_helper.cc:24:
+/usr/include/c++/5.3.0/istream:602:33: error: ‘std::ios_base::seekdir’ has not been declared
+       seekg(off_type, ios_base::seekdir);
+                                 ^
+/usr/include/c++/5.3.0/istream: In instantiation of ‘class std::basic_istream<char>’:
+/usr/include/c++/5.3.0/istream:647:24:   required from here
+/usr/include/c++/5.3.0/istream:58:11: error: invalid use of incomplete type ‘class std::basic_ios<char>’
+     class basic_istream : virtual public basic_ios<_CharT, _Traits>
+           ^
+In file included from /usr/include/c++/5.3.0/ios:38:0,
+                 from /usr/include/c++/5.3.0/ostream:38,
+                 from /usr/include/c++/5.3.0/iostream:39,
+                 from ../../../source/util/serialization_helper.cc:24:
+/usr/include/c++/5.3.0/iosfwd:77:11: note: declaration of ‘class std::basic_ios<char>’
+     class basic_ios;
+           ^
+In file included from /usr/include/c++/5.3.0/iterator:65:0,
+                 from ../../../include/util/stdlib.h:23,
+                 from /usr/include/c++/5.3.0/cstdlib:72,
+                 from /usr/include/c++/5.3.0/ext/string_conversions.h:41,
+                 from /usr/include/c++/5.3.0/bits/basic_string.h:5249,
+                 from /usr/include/c++/5.3.0/string:52,
+                 from /usr/include/c++/5.3.0/bits/locale_classes.h:40,
+                 from /usr/include/c++/5.3.0/bits/ios_base.h:41,
+                 from /usr/include/c++/5.3.0/ios:42,
+                 from /usr/include/c++/5.3.0/ostream:38,
+                 from /usr/include/c++/5.3.0/iostream:39,
+                 from ../../../source/util/serialization_helper.cc:24:
+/usr/include/c++/5.3.0/istream: In instantiation of ‘class std::basic_istream<wchar_t>’:
+/usr/include/c++/5.3.0/istream:663:27:   required from here
+/usr/include/c++/5.3.0/istream:58:11: error: invalid use of incomplete type ‘class std::basic_ios<wchar_t>’
+     class basic_istream : virtual public basic_ios<_CharT, _Traits>
+           ^
+In file included from /usr/include/c++/5.3.0/ios:38:0,
+                 from /usr/include/c++/5.3.0/ostream:38,
+                 from /usr/include/c++/5.3.0/iostream:39,
+                 from ../../../source/util/serialization_helper.cc:24:
+/usr/include/c++/5.3.0/iosfwd:77:11: note: declaration of ‘class std::basic_ios<wchar_t>’
+     class basic_ios;
+           ^
+In file included from /usr/include/c++/5.3.0/istream:934:0,
+                 from /usr/include/c++/5.3.0/iterator:65,
+                 from ../../../include/util/stdlib.h:23,
+                 from /usr/include/c++/5.3.0/cstdlib:72,
+                 from /usr/include/c++/5.3.0/ext/string_conversions.h:41,
+                 from /usr/include/c++/5.3.0/bits/basic_string.h:5249,
+                 from /usr/include/c++/5.3.0/string:52,
+                 from /usr/include/c++/5.3.0/bits/locale_classes.h:40,
+                 from /usr/include/c++/5.3.0/bits/ios_base.h:41,
+                 from /usr/include/c++/5.3.0/ios:42,
+                 from /usr/include/c++/5.3.0/ostream:38,
+                 from /usr/include/c++/5.3.0/iostream:39,
+                 from ../../../source/util/serialization_helper.cc:24:
+/usr/include/c++/5.3.0/bits/istream.tcc: In constructor ‘std::basic_istream<_CharT, _Traits>::sentry::sentry(std::basic_istream<_CharT, _Traits>&, bool)’:
+/usr/include/c++/5.3.0/bits/istream.tcc:49:7: error: incomplete type ‘std::ios_base’ used in nested name specifier
+       ios_base::iostate __err = ios_base::goodbit;
+       ^
+/usr/include/c++/5.3.0/bits/istream.tcc:54:41: error: incomplete type ‘std::ios_base’ used in nested name specifier
+    if (!__noskip && bool(__in.flags() & ios_base::skipws))
+                                         ^
+/usr/include/c++/5.3.0/bits/istream.tcc:62:19: error: incomplete type ‘std::ctype_base’ used in nested name specifier
+        && __ct.is(ctype_base::space, 
+                   ^
+/usr/include/c++/5.3.0/bits/istream.tcc:70:3: error: ‘__err’ was not declared in this scope
+   __err |= ios_base::eofbit;
+   ^
+/usr/include/c++/5.3.0/bits/istream.tcc:70:12: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   __err |= ios_base::eofbit;
+            ^
+/usr/include/c++/5.3.0/bits/istream.tcc:74:26: error: ‘__err’ was not declared in this scope
+       if (__in.good() && __err == ios_base::goodbit)
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:74:35: error: incomplete type ‘std::ios_base’ used in nested name specifier
+       if (__in.good() && __err == ios_base::goodbit)
+                                   ^
+/usr/include/c++/5.3.0/bits/istream.tcc:78:13: error: incomplete type ‘std::ios_base’ used in nested name specifier
+    __err |= ios_base::failbit;
+             ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::basic_istream<_CharT, _Traits>& std::basic_istream<_CharT, _Traits>::_M_extract(_ValueT&)’:
+/usr/include/c++/5.3.0/bits/istream.tcc:92:6: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      ios_base::iostate __err = ios_base::goodbit;
+      ^
+/usr/include/c++/5.3.0/bits/istream.tcc:96:29: error: ‘__err’ was not declared in this scope
+   __ng.get(*this, 0, *this, __err, __v);
+                             ^
+/usr/include/c++/5.3.0/bits/istream.tcc:100:21: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   this->_M_setstate(ios_base::badbit);
+                     ^
+/usr/include/c++/5.3.0/bits/istream.tcc:104:28: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        { this->_M_setstate(ios_base::badbit); }
+                            ^
+/usr/include/c++/5.3.0/bits/istream.tcc:105:10: error: ‘__err’ was not declared in this scope
+      if (__err)
+          ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::basic_istream<_CharT, _Traits>& std::basic_istream<_CharT, _Traits>::operator>>(short int&)’:
+/usr/include/c++/5.3.0/bits/istream.tcc:121:4: error: incomplete type ‘std::ios_base’ used in nested name specifier
+    ios_base::iostate __err = ios_base::goodbit;
+    ^
+/usr/include/c++/5.3.0/bits/istream.tcc:126:34: error: ‘__err’ was not declared in this scope
+        __ng.get(*this, 0, *this, __err, __l);
+                                  ^
+/usr/include/c++/5.3.0/bits/istream.tcc:132:14: error: incomplete type ‘std::ios_base’ used in nested name specifier
+     __err |= ios_base::failbit;
+              ^
+/usr/include/c++/5.3.0/bits/istream.tcc:137:14: error: incomplete type ‘std::ios_base’ used in nested name specifier
+     __err |= ios_base::failbit;
+              ^
+/usr/include/c++/5.3.0/bits/istream.tcc:145:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::badbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:149:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      { this->_M_setstate(ios_base::badbit); }
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:150:8: error: ‘__err’ was not declared in this scope
+    if (__err)
+        ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::basic_istream<_CharT, _Traits>& std::basic_istream<_CharT, _Traits>::operator>>(int&)’:
+/usr/include/c++/5.3.0/bits/istream.tcc:166:4: error: incomplete type ‘std::ios_base’ used in nested name specifier
+    ios_base::iostate __err = ios_base::goodbit;
+    ^
+/usr/include/c++/5.3.0/bits/istream.tcc:171:34: error: ‘__err’ was not declared in this scope
+        __ng.get(*this, 0, *this, __err, __l);
+                                  ^
+/usr/include/c++/5.3.0/bits/istream.tcc:177:14: error: incomplete type ‘std::ios_base’ used in nested name specifier
+     __err |= ios_base::failbit;
+              ^
+/usr/include/c++/5.3.0/bits/istream.tcc:182:14: error: incomplete type ‘std::ios_base’ used in nested name specifier
+     __err |= ios_base::failbit;       
+              ^
+/usr/include/c++/5.3.0/bits/istream.tcc:190:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::badbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:194:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      { this->_M_setstate(ios_base::badbit); }
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:195:8: error: ‘__err’ was not declared in this scope
+    if (__err)
+        ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::basic_istream<_CharT, _Traits>& std::basic_istream<_CharT, _Traits>::operator>>(std::basic_istream<_CharT, _Traits>::__streambuf_type*)’:
+/usr/include/c++/5.3.0/bits/istream.tcc:206:7: error: incomplete type ‘std::ios_base’ used in nested name specifier
+       ios_base::iostate __err = ios_base::goodbit;
+       ^
+/usr/include/c++/5.3.0/bits/istream.tcc:214:3: error: ‘__err’ was not declared in this scope
+   __err |= ios_base::failbit;
+   ^
+/usr/include/c++/5.3.0/bits/istream.tcc:214:12: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   __err |= ios_base::failbit;
+            ^
+/usr/include/c++/5.3.0/bits/istream.tcc:216:3: error: ‘__err’ was not declared in this scope
+   __err |= ios_base::eofbit;
+   ^
+/usr/include/c++/5.3.0/bits/istream.tcc:216:12: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   __err |= ios_base::eofbit;
+            ^
+/usr/include/c++/5.3.0/bits/istream.tcc:220:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::failbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:224:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      { this->_M_setstate(ios_base::failbit); }
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:227:2: error: ‘__err’ was not declared in this scope
+  __err |= ios_base::failbit;
+  ^
+/usr/include/c++/5.3.0/bits/istream.tcc:227:11: error: incomplete type ‘std::ios_base’ used in nested name specifier
+  __err |= ios_base::failbit;
+           ^
+/usr/include/c++/5.3.0/bits/istream.tcc:228:11: error: ‘__err’ was not declared in this scope
+       if (__err)
+           ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::basic_istream<_CharT, _Traits>::int_type std::basic_istream<_CharT, _Traits>::get()’:
+/usr/include/c++/5.3.0/bits/istream.tcc:241:7: error: incomplete type ‘std::ios_base’ used in nested name specifier
+       ios_base::iostate __err = ios_base::goodbit;
+       ^
+/usr/include/c++/5.3.0/bits/istream.tcc:252:3: error: ‘__err’ was not declared in this scope
+   __err |= ios_base::eofbit;
+   ^
+/usr/include/c++/5.3.0/bits/istream.tcc:252:12: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   __err |= ios_base::eofbit;
+            ^
+/usr/include/c++/5.3.0/bits/istream.tcc:256:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::badbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:260:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      { this->_M_setstate(ios_base::badbit); }
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:263:2: error: ‘__err’ was not declared in this scope
+  __err |= ios_base::failbit;
+  ^
+/usr/include/c++/5.3.0/bits/istream.tcc:263:11: error: incomplete type ‘std::ios_base’ used in nested name specifier
+  __err |= ios_base::failbit;
+           ^
+/usr/include/c++/5.3.0/bits/istream.tcc:264:11: error: ‘__err’ was not declared in this scope
+       if (__err)
+           ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::basic_istream<_CharT, _Traits>& std::basic_istream<_CharT, _Traits>::get(std::basic_istream<_CharT, _Traits>::char_type&)’:
+/usr/include/c++/5.3.0/bits/istream.tcc:275:7: error: incomplete type ‘std::ios_base’ used in nested name specifier
+       ios_base::iostate __err = ios_base::goodbit;
+       ^
+/usr/include/c++/5.3.0/bits/istream.tcc:289:3: error: ‘__err’ was not declared in this scope
+   __err |= ios_base::eofbit;
+   ^
+/usr/include/c++/5.3.0/bits/istream.tcc:289:12: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   __err |= ios_base::eofbit;
+            ^
+/usr/include/c++/5.3.0/bits/istream.tcc:293:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::badbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:297:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      { this->_M_setstate(ios_base::badbit); }
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:300:2: error: ‘__err’ was not declared in this scope
+  __err |= ios_base::failbit;
+  ^
+/usr/include/c++/5.3.0/bits/istream.tcc:300:11: error: incomplete type ‘std::ios_base’ used in nested name specifier
+  __err |= ios_base::failbit;
+           ^
+/usr/include/c++/5.3.0/bits/istream.tcc:301:11: error: ‘__err’ was not declared in this scope
+       if (__err)
+           ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::basic_istream<_CharT, _Traits>& std::basic_istream<_CharT, _Traits>::get(std::basic_istream<_CharT, _Traits>::char_type*, std::streamsize, std::basic_istream<_CharT, _Traits>::char_type)’:
+/usr/include/c++/5.3.0/bits/istream.tcc:312:7: error: incomplete type ‘std::ios_base’ used in nested name specifier
+       ios_base::iostate __err = ios_base::goodbit;
+       ^
+/usr/include/c++/5.3.0/bits/istream.tcc:332:3: error: ‘__err’ was not declared in this scope
+   __err |= ios_base::eofbit;
+   ^
+/usr/include/c++/5.3.0/bits/istream.tcc:332:12: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   __err |= ios_base::eofbit;
+            ^
+/usr/include/c++/5.3.0/bits/istream.tcc:336:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::badbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:340:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      { this->_M_setstate(ios_base::badbit); }
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:347:2: error: ‘__err’ was not declared in this scope
+  __err |= ios_base::failbit;
+  ^
+/usr/include/c++/5.3.0/bits/istream.tcc:347:11: error: incomplete type ‘std::ios_base’ used in nested name specifier
+  __err |= ios_base::failbit;
+           ^
+/usr/include/c++/5.3.0/bits/istream.tcc:348:11: error: ‘__err’ was not declared in this scope
+       if (__err)
+           ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::basic_istream<_CharT, _Traits>& std::basic_istream<_CharT, _Traits>::get(std::basic_istream<_CharT, _Traits>::__streambuf_type&, std::basic_istream<_CharT, _Traits>::char_type)’:
+/usr/include/c++/5.3.0/bits/istream.tcc:359:7: error: incomplete type ‘std::ios_base’ used in nested name specifier
+       ios_base::iostate __err = ios_base::goodbit;
+       ^
+/usr/include/c++/5.3.0/bits/istream.tcc:380:3: error: ‘__err’ was not declared in this scope
+   __err |= ios_base::eofbit;
+   ^
+/usr/include/c++/5.3.0/bits/istream.tcc:380:12: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   __err |= ios_base::eofbit;
+            ^
+/usr/include/c++/5.3.0/bits/istream.tcc:384:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::badbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:388:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      { this->_M_setstate(ios_base::badbit); }
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:391:2: error: ‘__err’ was not declared in this scope
+  __err |= ios_base::failbit;
+  ^
+/usr/include/c++/5.3.0/bits/istream.tcc:391:11: error: incomplete type ‘std::ios_base’ used in nested name specifier
+  __err |= ios_base::failbit;
+           ^
+/usr/include/c++/5.3.0/bits/istream.tcc:392:11: error: ‘__err’ was not declared in this scope
+       if (__err)
+           ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::basic_istream<_CharT, _Traits>& std::basic_istream<_CharT, _Traits>::getline(std::basic_istream<_CharT, _Traits>::char_type*, std::streamsize, std::basic_istream<_CharT, _Traits>::char_type)’:
+/usr/include/c++/5.3.0/bits/istream.tcc:403:7: error: incomplete type ‘std::ios_base’ used in nested name specifier
+       ios_base::iostate __err = ios_base::goodbit;
+       ^
+/usr/include/c++/5.3.0/bits/istream.tcc:423:17: error: ‘__err’ was not declared in this scope
+                 __err |= ios_base::eofbit;
+                 ^
+/usr/include/c++/5.3.0/bits/istream.tcc:423:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+                 __err |= ios_base::eofbit;
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:432:21: error: ‘__err’ was not declared in this scope
+                     __err |= ios_base::failbit;
+                     ^
+/usr/include/c++/5.3.0/bits/istream.tcc:432:30: error: incomplete type ‘std::ios_base’ used in nested name specifier
+                     __err |= ios_base::failbit;
+                              ^
+/usr/include/c++/5.3.0/bits/istream.tcc:437:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::badbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:441:33: error: incomplete type ‘std::ios_base’ used in nested name specifier
+             { this->_M_setstate(ios_base::badbit); }
+                                 ^
+/usr/include/c++/5.3.0/bits/istream.tcc:448:9: error: ‘__err’ was not declared in this scope
+         __err |= ios_base::failbit;
+         ^
+/usr/include/c++/5.3.0/bits/istream.tcc:448:18: error: incomplete type ‘std::ios_base’ used in nested name specifier
+         __err |= ios_base::failbit;
+                  ^
+/usr/include/c++/5.3.0/bits/istream.tcc:449:11: error: ‘__err’ was not declared in this scope
+       if (__err)
+           ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::basic_istream<_CharT, _Traits>& std::basic_istream<_CharT, _Traits>::ignore()’:
+/usr/include/c++/5.3.0/bits/istream.tcc:466:4: error: incomplete type ‘std::ios_base’ used in nested name specifier
+    ios_base::iostate __err = ios_base::goodbit;
+    ^
+/usr/include/c++/5.3.0/bits/istream.tcc:473:3: error: ‘__err’ was not declared in this scope
+   __err |= ios_base::eofbit;
+   ^
+/usr/include/c++/5.3.0/bits/istream.tcc:473:12: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   __err |= ios_base::eofbit;
+            ^
+/usr/include/c++/5.3.0/bits/istream.tcc:479:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::badbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:483:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      { this->_M_setstate(ios_base::badbit); }
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:484:8: error: ‘__err’ was not declared in this scope
+    if (__err)
+        ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::basic_istream<_CharT, _Traits>& std::basic_istream<_CharT, _Traits>::ignore(std::streamsize)’:
+/usr/include/c++/5.3.0/bits/istream.tcc:499:11: error: incomplete type ‘std::ios_base’ used in nested name specifier
+           ios_base::iostate __err = ios_base::goodbit;
+           ^
+/usr/include/c++/5.3.0/bits/istream.tcc:537:17: error: ‘__err’ was not declared in this scope
+                 __err |= ios_base::eofbit;
+                 ^
+/usr/include/c++/5.3.0/bits/istream.tcc:537:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+                 __err |= ios_base::eofbit;
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:541:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::badbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:545:33: error: incomplete type ‘std::ios_base’ used in nested name specifier
+             { this->_M_setstate(ios_base::badbit); }
+                                 ^
+/usr/include/c++/5.3.0/bits/istream.tcc:546:15: error: ‘__err’ was not declared in this scope
+           if (__err)
+               ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::basic_istream<_CharT, _Traits>& std::basic_istream<_CharT, _Traits>::ignore(std::streamsize, std::basic_istream<_CharT, _Traits>::int_type)’:
+/usr/include/c++/5.3.0/bits/istream.tcc:561:11: error: incomplete type ‘std::ios_base’ used in nested name specifier
+           ios_base::iostate __err = ios_base::goodbit;
+           ^
+/usr/include/c++/5.3.0/bits/istream.tcc:595:17: error: ‘__err’ was not declared in this scope
+                 __err |= ios_base::eofbit;
+                 ^
+/usr/include/c++/5.3.0/bits/istream.tcc:595:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+                 __err |= ios_base::eofbit;
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:606:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::badbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:610:33: error: incomplete type ‘std::ios_base’ used in nested name specifier
+             { this->_M_setstate(ios_base::badbit); }
+                                 ^
+/usr/include/c++/5.3.0/bits/istream.tcc:611:15: error: ‘__err’ was not declared in this scope
+           if (__err)
+               ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::basic_istream<_CharT, _Traits>::int_type std::basic_istream<_CharT, _Traits>::peek()’:
+/usr/include/c++/5.3.0/bits/istream.tcc:627:4: error: incomplete type ‘std::ios_base’ used in nested name specifier
+    ios_base::iostate __err = ios_base::goodbit;
+    ^
+/usr/include/c++/5.3.0/bits/istream.tcc:632:3: error: ‘__err’ was not declared in this scope
+   __err |= ios_base::eofbit;
+   ^
+/usr/include/c++/5.3.0/bits/istream.tcc:632:12: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   __err |= ios_base::eofbit;
+            ^
+/usr/include/c++/5.3.0/bits/istream.tcc:636:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::badbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:640:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      { this->_M_setstate(ios_base::badbit); }
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:641:8: error: ‘__err’ was not declared in this scope
+    if (__err)
+        ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::basic_istream<_CharT, _Traits>& std::basic_istream<_CharT, _Traits>::read(std::basic_istream<_CharT, _Traits>::char_type*, std::streamsize)’:
+/usr/include/c++/5.3.0/bits/istream.tcc:656:4: error: incomplete type ‘std::ios_base’ used in nested name specifier
+    ios_base::iostate __err = ios_base::goodbit;
+    ^
+/usr/include/c++/5.3.0/bits/istream.tcc:661:3: error: ‘__err’ was not declared in this scope
+   __err |= (ios_base::eofbit | ios_base::failbit);
+   ^
+/usr/include/c++/5.3.0/bits/istream.tcc:661:13: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   __err |= (ios_base::eofbit | ios_base::failbit);
+             ^
+/usr/include/c++/5.3.0/bits/istream.tcc:661:32: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   __err |= (ios_base::eofbit | ios_base::failbit);
+                                ^
+/usr/include/c++/5.3.0/bits/istream.tcc:665:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::badbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:669:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      { this->_M_setstate(ios_base::badbit); }
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:670:8: error: ‘__err’ was not declared in this scope
+    if (__err)
+        ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::streamsize std::basic_istream<_CharT, _Traits>::readsome(std::basic_istream<_CharT, _Traits>::char_type*, std::streamsize)’:
+/usr/include/c++/5.3.0/bits/istream.tcc:685:4: error: incomplete type ‘std::ios_base’ used in nested name specifier
+    ios_base::iostate __err = ios_base::goodbit;
+    ^
+/usr/include/c++/5.3.0/bits/istream.tcc:693:3: error: ‘__err’ was not declared in this scope
+   __err |= ios_base::eofbit;
+   ^
+/usr/include/c++/5.3.0/bits/istream.tcc:693:12: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   __err |= ios_base::eofbit;
+            ^
+/usr/include/c++/5.3.0/bits/istream.tcc:697:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::badbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:701:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      { this->_M_setstate(ios_base::badbit); }
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:702:8: error: ‘__err’ was not declared in this scope
+    if (__err)
+        ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::basic_istream<_CharT, _Traits>& std::basic_istream<_CharT, _Traits>::putback(std::basic_istream<_CharT, _Traits>::char_type)’:
+/usr/include/c++/5.3.0/bits/istream.tcc:717:38: error: incomplete type ‘std::ios_base’ used in nested name specifier
+       this->clear(this->rdstate() & ~ios_base::eofbit);
+                                      ^
+/usr/include/c++/5.3.0/bits/istream.tcc:721:4: error: incomplete type ‘std::ios_base’ used in nested name specifier
+    ios_base::iostate __err = ios_base::goodbit;
+    ^
+/usr/include/c++/5.3.0/bits/istream.tcc:728:3: error: ‘__err’ was not declared in this scope
+   __err |= ios_base::badbit;
+   ^
+/usr/include/c++/5.3.0/bits/istream.tcc:728:12: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   __err |= ios_base::badbit;
+            ^
+/usr/include/c++/5.3.0/bits/istream.tcc:732:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::badbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:736:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      { this->_M_setstate(ios_base::badbit); }
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:737:8: error: ‘__err’ was not declared in this scope
+    if (__err)
+        ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::basic_istream<_CharT, _Traits>& std::basic_istream<_CharT, _Traits>::unget()’:
+/usr/include/c++/5.3.0/bits/istream.tcc:752:38: error: incomplete type ‘std::ios_base’ used in nested name specifier
+       this->clear(this->rdstate() & ~ios_base::eofbit);
+                                      ^
+/usr/include/c++/5.3.0/bits/istream.tcc:756:4: error: incomplete type ‘std::ios_base’ used in nested name specifier
+    ios_base::iostate __err = ios_base::goodbit;
+    ^
+/usr/include/c++/5.3.0/bits/istream.tcc:763:3: error: ‘__err’ was not declared in this scope
+   __err |= ios_base::badbit;
+   ^
+/usr/include/c++/5.3.0/bits/istream.tcc:763:12: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   __err |= ios_base::badbit;
+            ^
+/usr/include/c++/5.3.0/bits/istream.tcc:767:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::badbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:771:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      { this->_M_setstate(ios_base::badbit); }
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:772:8: error: ‘__err’ was not declared in this scope
+    if (__err)
+        ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘int std::basic_istream<_CharT, _Traits>::sync()’:
+/usr/include/c++/5.3.0/bits/istream.tcc:789:4: error: incomplete type ‘std::ios_base’ used in nested name specifier
+    ios_base::iostate __err = ios_base::goodbit;
+    ^
+/usr/include/c++/5.3.0/bits/istream.tcc:796:7: error: ‘__err’ was not declared in this scope
+       __err |= ios_base::badbit;
+       ^
+/usr/include/c++/5.3.0/bits/istream.tcc:796:16: error: incomplete type ‘std::ios_base’ used in nested name specifier
+       __err |= ios_base::badbit;
+                ^
+/usr/include/c++/5.3.0/bits/istream.tcc:803:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::badbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:807:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      { this->_M_setstate(ios_base::badbit); }
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:808:8: error: ‘__err’ was not declared in this scope
+    if (__err)
+        ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::basic_istream<_CharT, _Traits>::pos_type std::basic_istream<_CharT, _Traits>::tellg()’:
+/usr/include/c++/5.3.0/bits/istream.tcc:828:40: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   __ret = this->rdbuf()->pubseekoff(0, ios_base::cur,
+                                        ^
+/usr/include/c++/5.3.0/bits/istream.tcc:829:9: error: incomplete type ‘std::ios_base’ used in nested name specifier
+         ios_base::in);
+         ^
+/usr/include/c++/5.3.0/bits/istream.tcc:833:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::badbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:837:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      { this->_M_setstate(ios_base::badbit); }
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::basic_istream<_CharT, _Traits>& std::basic_istream<_CharT, _Traits>::seekg(std::basic_istream<_CharT, _Traits>::pos_type)’:
+/usr/include/c++/5.3.0/bits/istream.tcc:850:38: error: incomplete type ‘std::ios_base’ used in nested name specifier
+       this->clear(this->rdstate() & ~ios_base::eofbit);
+                                      ^
+/usr/include/c++/5.3.0/bits/istream.tcc:854:4: error: incomplete type ‘std::ios_base’ used in nested name specifier
+    ios_base::iostate __err = ios_base::goodbit;
+    ^
+/usr/include/c++/5.3.0/bits/istream.tcc:861:10: error: incomplete type ‘std::ios_base’ used in nested name specifier
+          ios_base::in);
+          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:865:7: error: ‘__err’ was not declared in this scope
+       __err |= ios_base::failbit;
+       ^
+/usr/include/c++/5.3.0/bits/istream.tcc:865:16: error: incomplete type ‘std::ios_base’ used in nested name specifier
+       __err |= ios_base::failbit;
+                ^
+/usr/include/c++/5.3.0/bits/istream.tcc:870:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::badbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:874:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      { this->_M_setstate(ios_base::badbit); }
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:875:8: error: ‘__err’ was not declared in this scope
+    if (__err)
+        ^
+/usr/include/c++/5.3.0/bits/istream.tcc: At global scope:
+/usr/include/c++/5.3.0/bits/istream.tcc:884:37: error: ‘std::ios_base::seekdir’ has not been declared
+     seekg(off_type __off, ios_base::seekdir __dir)
+                                     ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In member function ‘std::basic_istream<_CharT, _Traits>& std::basic_istream<_CharT, _Traits>::seekg(std::basic_istream<_CharT, _Traits>::off_type, int)’:
+/usr/include/c++/5.3.0/bits/istream.tcc:889:38: error: incomplete type ‘std::ios_base’ used in nested name specifier
+       this->clear(this->rdstate() & ~ios_base::eofbit);
+                                      ^
+/usr/include/c++/5.3.0/bits/istream.tcc:893:4: error: incomplete type ‘std::ios_base’ used in nested name specifier
+    ios_base::iostate __err = ios_base::goodbit;
+    ^
+/usr/include/c++/5.3.0/bits/istream.tcc:900:10: error: incomplete type ‘std::ios_base’ used in nested name specifier
+          ios_base::in);
+          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:904:7: error: ‘__err’ was not declared in this scope
+       __err |= ios_base::failbit;
+       ^
+/usr/include/c++/5.3.0/bits/istream.tcc:904:16: error: incomplete type ‘std::ios_base’ used in nested name specifier
+       __err |= ios_base::failbit;
+                ^
+/usr/include/c++/5.3.0/bits/istream.tcc:909:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        this->_M_setstate(ios_base::badbit);
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:913:26: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      { this->_M_setstate(ios_base::badbit); }
+                          ^
+/usr/include/c++/5.3.0/bits/istream.tcc:914:8: error: ‘__err’ was not declared in this scope
+    if (__err)
+        ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In function ‘std::basic_istream<_CharT, _Traits>& std::operator>>(std::basic_istream<_CharT, _Traits>&, _CharT&)’:
+/usr/include/c++/5.3.0/bits/istream.tcc:931:4: error: incomplete type ‘std::ios_base’ used in nested name specifier
+    ios_base::iostate __err = ios_base::goodbit;
+    ^
+/usr/include/c++/5.3.0/bits/istream.tcc:938:3: error: ‘__err’ was not declared in this scope
+   __err |= (ios_base::eofbit | ios_base::failbit);
+   ^
+/usr/include/c++/5.3.0/bits/istream.tcc:938:13: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   __err |= (ios_base::eofbit | ios_base::failbit);
+             ^
+/usr/include/c++/5.3.0/bits/istream.tcc:938:32: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   __err |= (ios_base::eofbit | ios_base::failbit);
+                                ^
+/usr/include/c++/5.3.0/bits/istream.tcc:942:25: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        __in._M_setstate(ios_base::badbit);
+                         ^
+/usr/include/c++/5.3.0/bits/istream.tcc:946:25: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      { __in._M_setstate(ios_base::badbit); }
+                         ^
+/usr/include/c++/5.3.0/bits/istream.tcc:947:8: error: ‘__err’ was not declared in this scope
+    if (__err)
+        ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In function ‘std::basic_istream<_CharT, _Traits>& std::operator>>(std::basic_istream<_CharT, _Traits>&, _CharT*)’:
+/usr/include/c++/5.3.0/bits/istream.tcc:964:7: error: incomplete type ‘std::ios_base’ used in nested name specifier
+       ios_base::iostate __err = ios_base::goodbit;
+       ^
+/usr/include/c++/5.3.0/bits/istream.tcc:983:20: error: incomplete type ‘std::ctype_base’ used in nested name specifier
+        && !__ct.is(ctype_base::space,
+                    ^
+/usr/include/c++/5.3.0/bits/istream.tcc:991:3: error: ‘__err’ was not declared in this scope
+   __err |= ios_base::eofbit;
+   ^
+/usr/include/c++/5.3.0/bits/istream.tcc:991:12: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   __err |= ios_base::eofbit;
+            ^
+/usr/include/c++/5.3.0/bits/istream.tcc:1000:25: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        __in._M_setstate(ios_base::badbit);
+                         ^
+/usr/include/c++/5.3.0/bits/istream.tcc:1004:25: error: incomplete type ‘std::ios_base’ used in nested name specifier
+      { __in._M_setstate(ios_base::badbit); }
+                         ^
+/usr/include/c++/5.3.0/bits/istream.tcc:1007:2: error: ‘__err’ was not declared in this scope
+  __err |= ios_base::failbit;
+  ^
+/usr/include/c++/5.3.0/bits/istream.tcc:1007:11: error: incomplete type ‘std::ios_base’ used in nested name specifier
+  __err |= ios_base::failbit;
+           ^
+/usr/include/c++/5.3.0/bits/istream.tcc:1008:11: error: ‘__err’ was not declared in this scope
+       if (__err)
+           ^
+/usr/include/c++/5.3.0/bits/istream.tcc: In function ‘std::basic_istream<_CharT, _Traits>& std::ws(std::basic_istream<_CharT, _Traits>&)’:
+/usr/include/c++/5.3.0/bits/istream.tcc:1029:18: error: incomplete type ‘std::ctype_base’ used in nested name specifier
+       && __ct.is(ctype_base::space, _Traits::to_char_type(__c)))
+                  ^
+/usr/include/c++/5.3.0/bits/istream.tcc:1033:17: error: incomplete type ‘std::ios_base’ used in nested name specifier
+   __in.setstate(ios_base::eofbit);
+                 ^
+In file included from /usr/include/c++/5.3.0/iterator:65:0,
+                 from ../../../include/util/stdlib.h:23,
+                 from /usr/include/c++/5.3.0/cstdlib:72,
+                 from /usr/include/c++/5.3.0/ext/string_conversions.h:41,
+                 from /usr/include/c++/5.3.0/bits/basic_string.h:5249,
+                 from /usr/include/c++/5.3.0/string:52,
+                 from /usr/include/c++/5.3.0/bits/locale_classes.h:40,
+                 from /usr/include/c++/5.3.0/bits/ios_base.h:41,
+                 from /usr/include/c++/5.3.0/ios:42,
+                 from /usr/include/c++/5.3.0/ostream:38,
+                 from /usr/include/c++/5.3.0/iostream:39,
+                 from ../../../source/util/serialization_helper.cc:24:
+/usr/include/c++/5.3.0/istream: In instantiation of ‘class std::basic_iostream<char>’:
+/usr/include/c++/5.3.0/bits/istream.tcc:1063:25:   required from here
+/usr/include/c++/5.3.0/istream:824:11: error: invalid use of incomplete type ‘class std::basic_ostream<char>’
+     class basic_iostream
+           ^
+In file included from /usr/include/c++/5.3.0/ios:38:0,
+                 from /usr/include/c++/5.3.0/ostream:38,
+                 from /usr/include/c++/5.3.0/iostream:39,
+                 from ../../../source/util/serialization_helper.cc:24:
+/usr/include/c++/5.3.0/iosfwd:86:11: note: declaration of ‘class std::basic_ostream<char>’
+     class basic_ostream;
+           ^
+In file included from /usr/include/c++/5.3.0/iterator:65:0,
+                 from ../../../include/util/stdlib.h:23,
+                 from /usr/include/c++/5.3.0/cstdlib:72,
+                 from /usr/include/c++/5.3.0/ext/string_conversions.h:41,
+                 from /usr/include/c++/5.3.0/bits/basic_string.h:5249,
+                 from /usr/include/c++/5.3.0/string:52,
+                 from /usr/include/c++/5.3.0/bits/locale_classes.h:40,
+                 from /usr/include/c++/5.3.0/bits/ios_base.h:41,
+                 from /usr/include/c++/5.3.0/ios:42,
+                 from /usr/include/c++/5.3.0/ostream:38,
+                 from /usr/include/c++/5.3.0/iostream:39,
+                 from ../../../source/util/serialization_helper.cc:24:
+/usr/include/c++/5.3.0/istream: In instantiation of ‘class std::basic_iostream<wchar_t>’:
+/usr/include/c++/5.3.0/bits/istream.tcc:1085:25:   required from here
+/usr/include/c++/5.3.0/istream:824:11: error: invalid use of incomplete type ‘class std::basic_ostream<wchar_t>’
+     class basic_iostream
+           ^
+In file included from /usr/include/c++/5.3.0/ios:38:0,
+                 from /usr/include/c++/5.3.0/ostream:38,
+                 from /usr/include/c++/5.3.0/iostream:39,
+                 from ../../../source/util/serialization_helper.cc:24:
+/usr/include/c++/5.3.0/iosfwd:86:11: note: declaration of ‘class std::basic_ostream<wchar_t>’
+     class basic_ostream;
+           ^
+In file included from /usr/include/c++/5.3.0/bits/streambuf_iterator.h:35:0,
+                 from /usr/include/c++/5.3.0/iterator:67,
+                 from ../../../include/util/stdlib.h:23,
+                 from /usr/include/c++/5.3.0/cstdlib:72,
+                 from /usr/include/c++/5.3.0/ext/string_conversions.h:41,
+                 from /usr/include/c++/5.3.0/bits/basic_string.h:5249,
+                 from /usr/include/c++/5.3.0/string:52,
+                 from /usr/include/c++/5.3.0/bits/locale_classes.h:40,
+                 from /usr/include/c++/5.3.0/bits/ios_base.h:41,
+                 from /usr/include/c++/5.3.0/ios:42,
+                 from /usr/include/c++/5.3.0/ostream:38,
+                 from /usr/include/c++/5.3.0/iostream:39,
+                 from ../../../source/util/serialization_helper.cc:24:
+/usr/include/c++/5.3.0/streambuf: At global scope:
+/usr/include/c++/5.3.0/streambuf:192:17: error: field ‘_M_buf_locale’ has incomplete type ‘std::locale’
+       locale    _M_buf_locale;
+                 ^
+In file included from /usr/include/c++/5.3.0/ios:41:0,
+                 from /usr/include/c++/5.3.0/ostream:38,
+                 from /usr/include/c++/5.3.0/iostream:39,
+                 from ../../../source/util/serialization_helper.cc:24:
+/usr/include/c++/5.3.0/bits/localefwd.h:55:9: note: forward declaration of ‘class std::locale’
+   class locale;
+         ^
+In file included from /usr/include/c++/5.3.0/bits/streambuf_iterator.h:35:0,
+                 from /usr/include/c++/5.3.0/iterator:67,
+                 from ../../../include/util/stdlib.h:23,
+                 from /usr/include/c++/5.3.0/cstdlib:72,
+                 from /usr/include/c++/5.3.0/ext/string_conversions.h:41,
+                 from /usr/include/c++/5.3.0/bits/basic_string.h:5249,
+                 from /usr/include/c++/5.3.0/string:52,
+                 from /usr/include/c++/5.3.0/bits/locale_classes.h:40,
+                 from /usr/include/c++/5.3.0/bits/ios_base.h:41,
+                 from /usr/include/c++/5.3.0/ios:42,
+                 from /usr/include/c++/5.3.0/ostream:38,
+                 from /usr/include/c++/5.3.0/iostream:39,
+                 from ../../../source/util/serialization_helper.cc:24:
+/usr/include/c++/5.3.0/streambuf:251:44: error: ‘std::ios_base::seekdir’ has not been declared
+       pubseekoff(off_type __off, ios_base::seekdir __way,
+                                            ^
+/usr/include/c++/5.3.0/streambuf:252:14: error: ‘std::ios_base::openmode’ has not been declared
+    ios_base::openmode __mode = ios_base::in | ios_base::out)
+              ^
+/usr/include/c++/5.3.0/streambuf:264:14: error: ‘std::ios_base::openmode’ has not been declared
+    ios_base::openmode __mode = ios_base::in | ios_base::out)
+              ^
+/usr/include/c++/5.3.0/streambuf:602:35: error: ‘std::ios_base::seekdir’ has not been declared
+       seekoff(off_type, ios_base::seekdir,
+                                   ^
+/usr/include/c++/5.3.0/streambuf:603:18: error: ‘std::ios_base::openmode’ has not been declared
+        ios_base::openmode /*__mode*/ = ios_base::in | ios_base::out)
+                  ^
+/usr/include/c++/5.3.0/streambuf:615:18: error: ‘std::ios_base::openmode’ has not been declared
+        ios_base::openmode /*__mode*/ = ios_base::in | ios_base::out)
+                  ^
+/usr/include/c++/5.3.0/streambuf:252:32: error: incomplete type ‘std::ios_base’ used in nested name specifier
+    ios_base::openmode __mode = ios_base::in | ios_base::out)
+                                ^
+/usr/include/c++/5.3.0/streambuf:252:47: error: incomplete type ‘std::ios_base’ used in nested name specifier
+    ios_base::openmode __mode = ios_base::in | ios_base::out)
+                                               ^
+/usr/include/c++/5.3.0/streambuf:264:32: error: incomplete type ‘std::ios_base’ used in nested name specifier
+    ios_base::openmode __mode = ios_base::in | ios_base::out)
+                                ^
+/usr/include/c++/5.3.0/streambuf:264:47: error: incomplete type ‘std::ios_base’ used in nested name specifier
+    ios_base::openmode __mode = ios_base::in | ios_base::out)
+                                               ^
+/usr/include/c++/5.3.0/streambuf:603:40: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        ios_base::openmode /*__mode*/ = ios_base::in | ios_base::out)
+                                        ^
+/usr/include/c++/5.3.0/streambuf:603:55: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        ios_base::openmode /*__mode*/ = ios_base::in | ios_base::out)
+                                                       ^
+/usr/include/c++/5.3.0/streambuf:615:40: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        ios_base::openmode /*__mode*/ = ios_base::in | ios_base::out)
+                                        ^
+/usr/include/c++/5.3.0/streambuf:615:55: error: incomplete type ‘std::ios_base’ used in nested name specifier
+        ios_base::openmode /*__mode*/ = ios_base::in | ios_base::out)
+                                                       ^
+/usr/include/c++/5.3.0/streambuf: In member function ‘std::locale std::basic_streambuf<_CharT, _Traits>::pubimbue(const std::locale&)’:
+/usr/include/c++/5.3.0/streambuf:210:7: error: return type ‘class std::locale’ is incomplete
+       {
+       ^
+/usr/include/c++/5.3.0/streambuf: In member function ‘std::locale std::basic_streambuf<_CharT, _Traits>::getloc() const’:
+/usr/include/c++/5.3.0/streambuf:227:7: error: return type ‘class std::locale’ is incomplete
+       { return _M_buf_locale; }
+       ^
+In file included from /usr/include/c++/5.3.0/ext/string_conversions.h:41:0,
+                 from /usr/include/c++/5.3.0/bits/basic_string.h:5249,
+                 from /usr/include/c++/5.3.0/string:52,
+                 from /usr/include/c++/5.3.0/bits/locale_classes.h:40,
+                 from /usr/include/c++/5.3.0/bits/ios_base.h:41,
+                 from /usr/include/c++/5.3.0/ios:42,
+                 from /usr/include/c++/5.3.0/ostream:38,
+                 from /usr/include/c++/5.3.0/iostream:39,
+                 from ../../../source/util/serialization_helper.cc:24:
+/usr/include/c++/5.3.0/cstdlib: At global scope:
+/usr/include/c++/5.3.0/cstdlib:118:11: error: ‘::div_t’ has not been declared
+   using ::div_t;
+           ^
+/usr/include/c++/5.3.0/cstdlib:119:11: error: ‘::ldiv_t’ has not been declared
+   using ::ldiv_t;
+           ^
+/usr/include/c++/5.3.0/cstdlib:121:11: error: ‘::abort’ has not been declared
+   using ::abort;
+           ^
+/usr/include/c++/5.3.0/cstdlib:122:11: error: ‘::abs’ has not been declared
+   using ::abs;
+           ^
+/usr/include/c++/5.3.0/cstdlib:123:11: error: ‘::atexit’ has not been declared
+   using ::atexit;
+           ^
+/usr/include/c++/5.3.0/cstdlib:126:11: error: ‘::at_quick_exit’ has not been declared
+   using ::at_quick_exit;
+           ^
+/usr/include/c++/5.3.0/cstdlib:129:11: error: ‘::atof’ has not been declared
+   using ::atof;
+           ^
+/usr/include/c++/5.3.0/cstdlib:130:11: error: ‘::atoi’ has not been declared
+   using ::atoi;
+           ^
+/usr/include/c++/5.3.0/cstdlib:131:11: error: ‘::atol’ has not been declared
+   using ::atol;
+           ^
+/usr/include/c++/5.3.0/cstdlib:132:11: error: ‘::bsearch’ has not been declared
+   using ::bsearch;
+           ^
+/usr/include/c++/5.3.0/cstdlib:133:11: error: ‘::calloc’ has not been declared
+   using ::calloc;
+           ^
+/usr/include/c++/5.3.0/cstdlib:134:11: error: ‘::div’ has not been declared
+   using ::div;
+           ^
+/usr/include/c++/5.3.0/cstdlib:135:11: error: ‘::exit’ has not been declared
+   using ::exit;
+           ^
+/usr/include/c++/5.3.0/cstdlib:136:11: error: ‘::free’ has not been declared
+   using ::free;
+           ^
+/usr/include/c++/5.3.0/cstdlib:137:11: error: ‘::getenv’ has not been declared
+   using ::getenv;
+           ^
+/usr/include/c++/5.3.0/cstdlib:138:11: error: ‘::labs’ has not been declared
+   using ::labs;
+           ^
+/usr/include/c++/5.3.0/cstdlib:139:11: error: ‘::ldiv’ has not been declared
+   using ::ldiv;
+           ^
+/usr/include/c++/5.3.0/cstdlib:140:11: error: ‘::malloc’ has not been declared
+   using ::malloc;
+           ^
+/usr/include/c++/5.3.0/cstdlib:142:11: error: ‘::mblen’ has not been declared
+   using ::mblen;
+           ^
+/usr/include/c++/5.3.0/cstdlib:143:11: error: ‘::mbstowcs’ has not been declared
+   using ::mbstowcs;
+           ^
+/usr/include/c++/5.3.0/cstdlib:144:11: error: ‘::mbtowc’ has not been declared
+   using ::mbtowc;
+           ^
+/usr/include/c++/5.3.0/cstdlib:146:11: error: ‘::qsort’ has not been declared
+   using ::qsort;
+           ^
+/usr/include/c++/5.3.0/cstdlib:149:11: error: ‘::quick_exit’ has not been declared
+   using ::quick_exit;
+           ^
+/usr/include/c++/5.3.0/cstdlib:152:11: error: ‘::rand’ has not been declared
+   using ::rand;
+           ^
+/usr/include/c++/5.3.0/cstdlib:153:11: error: ‘::realloc’ has not been declared
+   using ::realloc;
+           ^
+/usr/include/c++/5.3.0/cstdlib:154:11: error: ‘::srand’ has not been declared
+   using ::srand;
+           ^
+/usr/include/c++/5.3.0/cstdlib:155:11: error: ‘::strtod’ has not been declared
+   using ::strtod;
+           ^
+/usr/include/c++/5.3.0/cstdlib:156:11: error: ‘::strtol’ has not been declared
+   using ::strtol;
+           ^
+/usr/include/c++/5.3.0/cstdlib:157:11: error: ‘::strtoul’ has not been declared
+   using ::strtoul;
+           ^
+/usr/include/c++/5.3.0/cstdlib:158:11: error: ‘::system’ has not been declared
+   using ::system;
+           ^
+/usr/include/c++/5.3.0/cstdlib:160:11: error: ‘::wcstombs’ has not been declared
+   using ::wcstombs;
+           ^
+/usr/include/c++/5.3.0/cstdlib:161:11: error: ‘::wctomb’ has not been declared
+   using ::wctomb;
+           ^
+/usr/include/c++/5.3.0/cstdlib:168:10: error: ‘ldiv_t’ does not name a type
+   inline ldiv_t
+          ^
+/usr/include/c++/5.3.0/cstdlib:214:11: error: ‘::lldiv_t’ has not been declared
+   using ::lldiv_t;
+           ^
+/usr/include/c++/5.3.0/cstdlib:220:11: error: ‘::_Exit’ has not been declared
+   using ::_Exit;
+           ^
+/usr/include/c++/5.3.0/cstdlib:224:11: error: ‘::llabs’ has not been declared
+   using ::llabs;
+           ^
+/usr/include/c++/5.3.0/cstdlib:226:10: error: ‘lldiv_t’ does not name a type
+   inline lldiv_t
+          ^
+/usr/include/c++/5.3.0/cstdlib:230:11: error: ‘::lldiv’ has not been declared
+   using ::lldiv;
+           ^
+/usr/include/c++/5.3.0/cstdlib:241:11: error: ‘::atoll’ has not been declared
+   using ::atoll;
+           ^
+/usr/include/c++/5.3.0/cstdlib:242:11: error: ‘::strtoll’ has not been declared
+   using ::strtoll;
+           ^
+/usr/include/c++/5.3.0/cstdlib:243:11: error: ‘::strtoull’ has not been declared
+   using ::strtoull;
+           ^
+/usr/include/c++/5.3.0/cstdlib:245:11: error: ‘::strtof’ has not been declared
+   using ::strtof;
+           ^
+/usr/include/c++/5.3.0/cstdlib:246:11: error: ‘::strtold’ has not been declared
+   using ::strtold;
+           ^
+/usr/include/c++/5.3.0/cstdlib:254:22: error: ‘__gnu_cxx::lldiv_t’ has not been declared
+   using ::__gnu_cxx::lldiv_t;
+                      ^
+/usr/include/c++/5.3.0/cstdlib:256:22: error: ‘__gnu_cxx::_Exit’ has not been declared
+   using ::__gnu_cxx::_Exit;
+                      ^
+/usr/include/c++/5.3.0/cstdlib:258:22: error: ‘__gnu_cxx::llabs’ has not been declared
+   using ::__gnu_cxx::llabs;
+                      ^
+/usr/include/c++/5.3.0/cstdlib:259:22: error: ‘__gnu_cxx::div’ has not been declared
+   using ::__gnu_cxx::div;
+                      ^
+/usr/include/c++/5.3.0/cstdlib:260:22: error: ‘__gnu_cxx::lldiv’ has not been declared
+   using ::__gnu_cxx::lldiv;
+                      ^
+/usr/include/c++/5.3.0/cstdlib:262:22: error: ‘__gnu_cxx::atoll’ has not been declared
+   using ::__gnu_cxx::atoll;
+                      ^
+/usr/include/c++/5.3.0/cstdlib:263:22: error: ‘__gnu_cxx::strtof’ has not been declared
+   using ::__gnu_cxx::strtof;
+                      ^
+/usr/include/c++/5.3.0/cstdlib:264:22: error: ‘__gnu_cxx::strtoll’ has not been declared
+   using ::__gnu_cxx::strtoll;
+                      ^
+/usr/include/c++/5.3.0/cstdlib:265:22: error: ‘__gnu_cxx::strtoull’ has not been declared
+   using ::__gnu_cxx::strtoull;
+                      ^
+/usr/include/c++/5.3.0/cstdlib:266:22: error: ‘__gnu_cxx::strtold’ has not been declared
+   using ::__gnu_cxx::strtold;
+                      ^
+In file included from /usr/include/c++/5.3.0/string:52:0,
+                 from /usr/include/c++/5.3.0/bits/locale_classes.h:40,
+                 from /usr/include/c++/5.3.0/bits/ios_base.h:41,
+                 from /usr/include/c++/5.3.0/ios:42,
+                 from /usr/include/c++/5.3.0/ostream:38,
+                 from /usr/include/c++/5.3.0/iostream:39,
+                 from ../../../source/util/serialization_helper.cc:24:
+/usr/include/c++/5.3.0/bits/basic_string.h: In function ‘int std::__cxx11::stoi(const string&, std::size_t*, int)’:
+/usr/include/c++/5.3.0/bits/basic_string.h:5259:42: error: ‘strtol’ is not a member of ‘std’
+   { return __gnu_cxx::__stoa<long, int>(&std::strtol, "stoi", __str.c_str(),
+                                          ^
+/usr/include/c++/5.3.0/bits/basic_string.h: In function ‘long int std::__cxx11::stol(const string&, std::size_t*, int)’:
+/usr/include/c++/5.3.0/bits/basic_string.h:5264:31: error: ‘strtol’ is not a member of ‘std’
+   { return __gnu_cxx::__stoa(&std::strtol, "stol", __str.c_str(),
+                               ^
+/usr/include/c++/5.3.0/bits/basic_string.h: In function ‘long unsigned int std::__cxx11::stoul(const string&, std::size_t*, int)’:
+/usr/include/c++/5.3.0/bits/basic_string.h:5269:31: error: ‘strtoul’ is not a member of ‘std’
+   { return __gnu_cxx::__stoa(&std::strtoul, "stoul", __str.c_str(),
+                               ^
+/usr/include/c++/5.3.0/bits/basic_string.h: In function ‘long long int std::__cxx11::stoll(const string&, std::size_t*, int)’:
+/usr/include/c++/5.3.0/bits/basic_string.h:5274:31: error: ‘strtoll’ is not a member of ‘std’
+   { return __gnu_cxx::__stoa(&std::strtoll, "stoll", __str.c_str(),
+                               ^
+/usr/include/c++/5.3.0/bits/basic_string.h: In function ‘long long unsigned int std::__cxx11::stoull(const string&, std::size_t*, int)’:
+/usr/include/c++/5.3.0/bits/basic_string.h:5279:31: error: ‘strtoull’ is not a member of ‘std’
+   { return __gnu_cxx::__stoa(&std::strtoull, "stoull", __str.c_str(),
+                               ^
+/usr/include/c++/5.3.0/bits/basic_string.h: In function ‘float std::__cxx11::stof(const string&, std::size_t*)’:
+/usr/include/c++/5.3.0/bits/basic_string.h:5285:31: error: ‘strtof’ is not a member of ‘std’
+   { return __gnu_cxx::__stoa(&std::strtof, "stof", __str.c_str(), __idx); }
+                               ^
+/usr/include/c++/5.3.0/bits/basic_string.h: In function ‘double std::__cxx11::stod(const string&, std::size_t*)’:
+/usr/include/c++/5.3.0/bits/basic_string.h:5289:31: error: ‘strtod’ is not a member of ‘std’
+   { return __gnu_cxx::__stoa(&std::strtod, "stod", __str.c_str(), __idx); }
+                               ^
+/usr/include/c++/5.3.0/bits/basic_string.h: In function ‘long double std::__cxx11::stold(const string&, std::size_t*)’:
+/usr/include/c++/5.3.0/bits/basic_string.h:5293:31: error: ‘strtold’ is not a member of ‘std’
+   { return __gnu_cxx::__stoa(&std::strtold, "stold", __str.c_str(), __idx); }
+                               ^
+make: *** [../../../source/util/serialization_helper.o] Error 1

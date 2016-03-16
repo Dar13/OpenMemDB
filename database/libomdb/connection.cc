@@ -19,24 +19,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <unistd.h>
 #include <string>
 #include <fstream>
 #include <iostream>
 
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
 
-#include "connection.h"
+#include <cstring>
+
+#include "omdb_lib.h"
+#include "serialization_helper.h"
 
 #define MAXDATASIZE 100
 
+using namespace libomdb;
 
 /************************************************************************
  * Temp struct holder for results
@@ -46,7 +46,6 @@ struct ResultHolder {
   char metaDataPacket[MESSAGE_SIZE];
   char resultPacket[MESSAGE_SIZE];
 };
-
 
 
 /*************************************************************************
@@ -137,7 +136,7 @@ libomdb::CommandResult parseCommandResult(ResultHolder result) {
   //ResultMetaDataPacket metaDataPacket = DeserializeResultMetaDataPacket(result.metaDataPacket);
   ResultPacket packet = DeserializeResultPacket(result.resultPacket);
   libomdb::CommandResult commandResult;
-  commandResult.isSuccess = packet.status == ResultStatus::OK;
+  commandResult.isSuccess = packet.status == ResultStatus::SUCCESS;
   commandResult.numAffected = packet.resultSize; // TODO: Confirm with neil
   return commandResult;
 }

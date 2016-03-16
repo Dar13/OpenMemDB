@@ -10,7 +10,6 @@
 
 // Project includes
 #include <util/result.h>
-#include <data/data_store.h>
 
 #define MESSAGE_SIZE 300
 
@@ -41,6 +40,12 @@ enum class PacketType: uint8_t {
   RESULT_METADATA,
   RESULT_DATA,
   INVALID_PACKET
+};
+
+/** Represents result of database command */
+struct CommandResult {
+    bool isSuccess;
+    int numAffected;
 };
 
 struct CommandPacket {
@@ -79,7 +84,14 @@ struct ResultMetaDataPacket {
   uint8_t terminator;
 }__attribute__((packed));
 
-
+/**
+ * Used to return results in both queries and commands
+ * for query see comments beside field
+ * for command
+ *  resultSize // number of rows affected
+ *  status // status
+ *  rowLen // errorCode
+ */
 struct ResultPacket {
     PacketType type;
     ResultStatus status;  //16 bits

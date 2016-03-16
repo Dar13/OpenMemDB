@@ -186,26 +186,6 @@ using TableMap = tervel::containers::wf::HashMap<std::string,
                                                  SchemaTablePair*, 
                                                  TableHashFunctor<std::string, SchemaTablePair*>>;
 
-enum class ManipStatus : uint32_t
-{
-    SUCCESS = 0,
-    ERR,
-    ERR_NO_MEMORY,
-    ERR_TABLE_NOT_EXIST,
-    ERR_TABLE_CMD_INVALID,
-    ERR_CONTENTION,
-    ERR_PARTIAL,
-    ERR_PARTIAL_CONTENTION,
-    ERR_FAILED_CONSTRAINT,
-};
-
-enum class ConstraintStatus : uint32_t
-{
-    SUCCESS = 0,
-    ERR_NULL,
-    ERR_ROW_LEN,
-};
-
 // Some common Result types for this module
 using DataResult = Result<TervelData>;
 using RecordResult = Result<RecordData>;

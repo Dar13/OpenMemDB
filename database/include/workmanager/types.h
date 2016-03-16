@@ -33,7 +33,7 @@
 // Project includes
 #include <util/types.h>
 #include <util/result.h>
-#include <util/libomdb.h>
+#include <util/packets.h>
 #include <sql/common.h>
 
 // Tervel includes
