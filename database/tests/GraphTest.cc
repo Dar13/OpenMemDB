@@ -76,7 +76,7 @@ GraphTest::GraphTest()
     // timeVals.push_back(result.duration);
 
     TestResult result = dataStoreTest.with(MODE_DROP)
-                                    .generateCases(0b1000)
+                                    .generateCases(0b0000)
                                     .test();
                                
     timeVals.push_back(result.duration);

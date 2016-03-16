@@ -60,19 +60,63 @@ void DataStoreTest::createTest(std::vector<std::string> statements, void *t_data
     delete main_context;
 }
 
+tervel::ThreadContext* DataStoreTest::loadTables(std::vector<std::string> statements, void *t_data)
+{
+    struct thread_data *grab;
+    grab = (struct thread_data *) t_data;
+    int successCount = 0;
+
+    setupTokenMappings();
+
+    tervel::ThreadContext* main_context = new tervel::ThreadContext(grab->tervel_test);
+    DataStore *data = grab->data;
+
+    printf("%p\n", data);
+
+    // Execute create table commands from statements vector (defined in h file)
+    for(auto i = statements.begin(); i  != statements.end(); i++)
+    {
+
+        ParseResult parse_result = parse(*i, data);
+
+        if(parse_result.status == ResultStatus::SUCCESS)
+        {
+            CreateTableCommand* create_table = reinterpret_cast<CreateTableCommand*>(parse_result.result);
+            auto err = data->createTable(*create_table);
+            if(err.status == ResultStatus::SUCCESS)
+            {
+                printf("Table created\n");
+                successCount++;
+
+            }
+            else
+            {
+                printf("Unable to create table!\n");
+            }
+        }
+    }
+
+    return main_context;
+}
+
 void DataStoreTest::dropTest(std::vector<std::string> table_name, void *t_data)
 {
     struct thread_data *grab;
     grab = (struct thread_data *) t_data;
 
+
     tervel::Tervel* tervel_test = grab->tervel_test;
     tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);
+
     DataStore *data = grab->data;
+
+    printf("%p\n", data);
 
     //Drop tables after creating them
     for(auto i = table_name.begin(); i != table_name.end(); i++)
     {
         auto err = data->deleteTable(*i);
+
         if(err.status == ResultStatus::SUCCESS)
         {
             std::cout << "Table " << *i << " deleted" << std::endl;
@@ -80,6 +124,8 @@ void DataStoreTest::dropTest(std::vector<std::string> table_name, void *t_data)
         else
         {
             printf("Unable to delete table\n");
+
+            std::cout << "Table " << *i << " cant be found" << std::endl;
         }
     }
 
@@ -163,6 +209,7 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
                 std::string drop = "TestT"+std::to_string(i);
                 table_name.push_back(drop);
             }
+
             break;
         }
         
@@ -229,23 +276,11 @@ TestResult DataStoreTest::test()
         case MODE_DROP:
         {
 
-            std::vector<std::thread> v;
             std::vector<std::thread> v_t;
 
-            //create table
-            for (int i = 0; i < threadCount; ++i)
-            {
-                i2tuple tuple = calculateArrayCut(threadCount, i);
-                std::vector<std::string> cut(&statements[std::get<0>(tuple)], &statements[std::get<1>(tuple)]);
+            tervel::ThreadContext* old_context = loadTables(statements, (void *) &share);
 
-                std::thread t1(createTest, cut, (void *) &share);
-                v.push_back(std::move(t1));
-            }
-
-            for (int i = 0; i < threadCount; ++i)
-            {
-                v.at(i).join();
-            }
+            // std::this_thread::sleep_for(std::chrono::seconds(5));
 
             //drop table
             for (int i = 0; i < threadCount; ++i)
@@ -267,6 +302,8 @@ TestResult DataStoreTest::test()
 
             auto time_end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+
+            delete old_context;
 
             TestResult testResult(duration.count(), threadCount);
             return testResult;

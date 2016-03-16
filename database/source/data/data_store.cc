@@ -59,7 +59,14 @@ ManipResult DataStore::createTable(CreateTableCommand table_info)
         // TODO: Error handling
     }
 
-    table_name_mapping.insert( table_info.table_name, pair);
+    if(table_name_mapping.insert( table_info.table_name, pair))
+    {
+        printf("Key value pair inserted\n");
+    }
+    else
+    {
+        printf("Insertion failed\n");
+    }
 
     return ManipResult(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
 }
