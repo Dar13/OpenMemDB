@@ -1,30 +1,31 @@
 # Compiler to use
 CC=g++
 
-SRC_DIR=./
-EXEC=test
+INC_DIR := -I../ \
 
 # Basic flags that will be shared between debug and release configurations
-CFLAGS=-Wall -Wextra -g -std=c++11 -I../include/util
+CFLAGS=-Wall -Wextra -g $(INC_DIR) -std=c++11
 
 LDFLAGS=-rdynamic -pthread
 
-FILES=result.cc connection.cc ../source/util/serialization_helper.cc
+LIB_NAME := libomdb.a
 
-SOURCES=$(addprefix $(SRC_DIR), $(FILES))
-OBJECTS=$(SOURCES:.cc=.o)
+SOURCES := ./connection.cc \
+	   ./libomdb_result.cc \
+	   ./serialization_helper.cc \
+	   ./omdb_lib.cc \
 
+OBJECTS = $(SOURCES:.cc=.o)
 
-all: $(SOURCES)
+all: $(SOURCES) $(LIB_NAME)
 
-test: $(SOURCES) ./Tests/Test_libomdb/main.cc $(EXEC)
+$(LIB_NAME): $(OBJECTS)
+	ar rvs $(LIB_NAME) $(OBJECTS)
+	ranlib $(LIB_NAME)
 
-$(EXEC): $(OBJECTS)
-	$(CC) $(LDFLAGS) $(OBJECTS) ./Tests/Test_libomdb/main.o -o $@
-
-.cc.o:
+%.o : %.cc
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(EXEC)
+	rm -f $(LIB_NAME)
 	rm $(OBJECTS)

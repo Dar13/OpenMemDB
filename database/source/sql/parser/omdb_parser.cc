@@ -22,7 +22,7 @@
 #include <map>
 
 // Project includes
-#include "util/stdlib.h"
+#include "util/omdb_stdlib.h"
 
 #include "sql/omdb_parser.h"
 #include "sql/statements/expression.h"

@@ -7,7 +7,9 @@
 #ifndef OPENMEMDB_SERIALIZATION_HELPER_H
 #define OPENMEMDB_SERIALIZATION_HELPER_H
 
-#include "libomdb.h"
+#include "omdb_lib.h"
+
+using namespace libomdb;
 
 /****************************************************************
  * Serialization functions

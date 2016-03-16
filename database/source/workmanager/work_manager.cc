@@ -23,7 +23,6 @@
 #include <algorithm>
 
 // Project includes
-#include <util/libomdb.h>
 #include <workmanager/work_manager.h>
 #include <workmanager/work_thread.h>
 
