@@ -77,8 +77,10 @@ ManipResult DataStore::deleteTable(std::string table_name)
         TableMap::ValueAccessor hash_accessor;
         if(table_name_mapping.at(table_name, hash_accessor))
         {
+            printf("Found key\n");
             if(hash_accessor.valid())
             {
+                printf("Accessor is valid\n");
                 // TODO: Is this safe? I think so, but ...
                 pair_ptr = (*hash_accessor.value());
             }
@@ -87,16 +89,19 @@ ManipResult DataStore::deleteTable(std::string table_name)
 
     if(pair_ptr == nullptr)
     {
+        printf("Table doesn't exist!\n");
         return ManipResult(ResultStatus::FAILURE,
                 ManipStatus::ERR_TABLE_NOT_EXIST);
     }
 
     // Remove the table from the table name map
     // TODO: Have Tervel return a true return code rather than a boolean
-    if(!table_name_mapping.remove(table_name))
+    while(!table_name_mapping.remove(table_name))
     {
+        /*
         return ManipResult(ResultStatus::FAILURE,
                 ManipStatus::ERR_TABLE_NOT_EXIST);
+        */
     }
 
     TableSchema *schema = pair_ptr->schema;
