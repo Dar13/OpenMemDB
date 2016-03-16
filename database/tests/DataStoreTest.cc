@@ -254,7 +254,7 @@ TestResult DataStoreTest::test()
 
                 std::vector<std::string> cut(&table_name[std::get<0>(tuple)], &table_name[std::get<1>(tuple)]);
                 
-                std::thread t(dropTest, cut, (void *) &share);
+                std::thread t(dropTest, table_name, (void *) &share);
                 v_t.push_back(std::move(t));
             }
 
