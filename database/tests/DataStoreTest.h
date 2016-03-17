@@ -40,7 +40,7 @@ class DataStoreTest
 		std::vector<std::string> statements;
         std::vector<int64_t> test_data;
         std::vector<std::string> table_name;
-
+        
 		void parseComplexity(int complexity);
 		static void createTest(std::vector<std::string> statements, void *t_data);
 		static tervel::ThreadContext* loadTables(std::vector<std::string> statements, void *t_data);

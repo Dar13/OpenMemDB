@@ -34,6 +34,8 @@ void DataStoreTest::createTest(std::vector<std::string> statements, void *t_data
     tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);
     DataStore *data = grab->data;
 
+    auto time_start = std::chrono::high_resolution_clock::now();
+
     // Execute create table commands from statements vector (defined in h file)
     for(auto i = statements.begin(); i  != statements.end(); i++)
     {
@@ -56,6 +58,13 @@ void DataStoreTest::createTest(std::vector<std::string> statements, void *t_data
             }
         }
     }
+
+    auto time_end = std::chrono::high_resolution_clock::now();
+
+             
+    thread_local static auto threadTime = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+
+    std::cout << "Time " << threadTime.count() << std::endl;
 
     delete main_context;
 }
@@ -247,6 +256,8 @@ TestResult DataStoreTest::test()
             
             std::vector<std::thread> v;
 
+            // auto time_start = std::chrono::high_resolution_clock::now();
+
             for (int i = 0; i < threadCount; i++)
             {
                 i2tuple tuple = calculateArrayCut(threadCount, i);
@@ -259,17 +270,16 @@ TestResult DataStoreTest::test()
                 v.push_back(std::move(t1));
             }
 
-            auto time_start = std::chrono::high_resolution_clock::now();
 
             for (int i = 0; i < threadCount; ++i)
             {
                 v.at(i).join();
             }
 
-            auto time_end = std::chrono::high_resolution_clock::now();
+            // auto time_end = std::chrono::high_resolution_clock::now();
+            // auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
 
-            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
-            TestResult testResult(duration.count(), threadCount);
+            TestResult testResult(1000, threadCount);
             return testResult;
         }
         
@@ -281,6 +291,8 @@ TestResult DataStoreTest::test()
             tervel::ThreadContext* old_context = loadTables(statements, (void *) &share);
 
             // std::this_thread::sleep_for(std::chrono::seconds(5));
+            
+            auto time_start = std::chrono::high_resolution_clock::now();
 
             //drop table
             for (int i = 0; i < threadCount; ++i)
@@ -289,16 +301,17 @@ TestResult DataStoreTest::test()
 
                 std::vector<std::string> cut(&table_name[std::get<0>(tuple)], &table_name[std::get<1>(tuple)]);
                 
-                std::thread t(dropTest, table_name, (void *) &share);
+                std::thread t(dropTest, cut, (void *) &share);
                 v_t.push_back(std::move(t));
             }
 
-            auto time_start = std::chrono::high_resolution_clock::now();
+
 
             for(int i = 0; i < threadCount; ++i)
             {
                 v_t.at(i).join();
             }
+
 
             auto time_end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
