@@ -22,6 +22,7 @@
 
 // STL includes
 #include <map>
+#include <functional>
 #include <atomic>
 
 // Tervel includes
@@ -52,6 +53,8 @@ using TervelVector = tervel::containers::wf::vector::Vector<T>;
 using Record = tervel::containers::wf::vector::Vector<int64_t>;
 
 using RecordVector = tervel::containers::wf::vector::Vector<Record*>;
+
+using KeyHashFunctor = std::hash<std::string>;
 
 // This is just a copy of a record
 using RecordData = std::vector<TervelData>;
@@ -182,9 +185,9 @@ struct SchemaTablePair
 using MultiTableRecordData = std::map<std::string, MultiRecordData>;
 
 // The mack-daddy, the mapping of table names to tables/schemas.
-using TableMap = tervel::containers::wf::HashMap<std::string, 
+using TableMap = tervel::containers::wf::HashMap<size_t, 
                                                  SchemaTablePair*, 
-                                                 TableHashFunctor<std::string, SchemaTablePair*>>;
+                                                 TableHashFunctor<size_t, SchemaTablePair*>>;
 
 // Some common Result types for this module
 using DataResult = Result<TervelData>;
