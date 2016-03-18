@@ -32,8 +32,8 @@ THE SOFTWARE.
 #include <sys/wait.h>
 #include <signal.h>
 
-#include "../../../include/util/libomdb.h"
-
+#include "../../../include/util/packets.h"
+#include "serialization_helper.h"
 
 /*
  * temp_server.cc
@@ -57,7 +57,7 @@ ResultPacket getStockResultPacket() {
     }
     ResultPacket resultPacket;
     resultPacket.type = PacketType::RESULT_DATA;
-    resultPacket.status = ResultStatus::OK;
+    resultPacket.status = ResultStatus::SUCCESS;
     resultPacket.rowLen = rows;
     resultPacket.resultSize = (rows * columns * sizeof(uint64_t));
     resultPacket.data = data;
@@ -66,19 +66,20 @@ ResultPacket getStockResultPacket() {
 }
 
 ResultMetaDataPacket getStockResultMetaDataPacket() {
-    ResultColumn columns[10];
-    for (int i = 0; i < 10; ++i) {
+    ResultColumn columns[20];
+    for (int i = 0; i < 20; ++i) {
         ResultColumn col;
-        std::string num(i);
-        col.name = "Name "+num;
+        std::string numberString = "Name"+std::to_string(i);
+        strcpy(col.name, numberString.c_str());
         col.type = 1; // TODO: Change to Neils types
         columns[i] = col;
     }
     ResultMetaDataPacket resultMetaDataPacket;
     resultMetaDataPacket.type = PacketType::RESULT_METADATA;
-    resultMetaDataPacket.status = ResultStatus::OK;
+    resultMetaDataPacket.status = ResultStatus::SUCCESS;
     resultMetaDataPacket.numColumns = 10;
-    resultMetaDataPacket.columns = mdColumns;
+    //resultMetaDataPacket.columns = columns;
+    memcpy(resultMetaDataPacket.columns, &columns, sizeof(ResultColumn) * 20);
     resultMetaDataPacket.terminator = THE_TERMINATOR;
     return resultMetaDataPacket;
 }
@@ -91,11 +92,18 @@ ResultPacket getStockComResult() {
     */
     ResultPacket packet;
     packet.resultSize = 10; // 10 rows affected
-    packet.status = ResultStatus::OK;
+    packet.status = ResultStatus::SUCCESS;
     packet.rowLen = 1; // ManipStatus is a uint32_t, don't know how this would work
     packet.data = nullptr;
     packet.terminator = THE_TERMINATOR;
     return packet;
+}
+
+ConnectionPacket getStockConnectionPacket() {
+  ConnectionPacket packet;
+  packet.type = PacketType::CONNECTION;
+  strcpy(packet.name, "Fake DB");
+  return packet;
 }
 
 void sigchld_handler(int s)
@@ -200,7 +208,10 @@ int main(void)
 
         if (!fork()) { // this is the child process
             close(sockfd); // child doesn't need the listener
-            if (send(new_fd, "Hello, world!", 13, 0) == -1) {
+            // TODO: This is where a connection packet needs to be built
+            ConnectionPacket conPacket = getStockConnectionPacket();
+            auto serializedConPacket = SerializeConnectionPacket(conPacket);
+            if (send(new_fd, serializedConPacket, sizeof(serializedConPacket), 0) == -1) {
                 perror("send");
                 exit(1);
             }
@@ -223,8 +234,8 @@ int main(void)
                     // Command results should be returned in
                     // ResultPacket with different values set
                     // see libomdb.h for specifics
-                    messageToReturn = SerializeResultPacket(getStockComRes());
-                    mdToReturn = SerializeResultMetaData(getStockResultMetaDataPacket());
+                    messageToReturn = SerializeResultPacket(getStockComResult());
+                    mdToReturn = SerializeResultMetaDataPacket(getStockResultMetaDataPacket());
                 }
                 printf("Server received message %s\n", receivedBuffer);
                 if (receivedBuffer[0] == '1') {

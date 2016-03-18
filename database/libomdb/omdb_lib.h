@@ -18,7 +18,6 @@ namespace libomdb
   const uint32_t DB_NAME_LEN = 50;
   const uint32_t COL_NAME_LEN = 25;
   const uint32_t MAX_NUM_COLUMNS = 20;
-  //TODO: Verify with Mike on maximum packet size
   const uint32_t MAX_PACKET_SIZE = 512;
 
   enum class ResultStatus : uint16_t
@@ -234,7 +233,7 @@ namespace libomdb
 
     /** Builds new ConnectionMetaData object */
     ConnectionMetaData(std::string dbName, bool isValid);
-    
+
     /** Gets the name of the connected database */
     std::string getDbName();    
 
