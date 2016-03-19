@@ -70,9 +70,10 @@ void *get_in_addr(struct sockaddr *sa)
 CommandPacket buildPacket(CommandType type, std::string command) {
   CommandPacket commandPacket;
   // command needs to be made into char[]
-  strncpy(commandPacket.message, command.c_str(), sizeof(commandPacket.message));
-  commandPacket.message[sizeof(commandPacket.message) -1] = 0;
+  strncpy(commandPacket.message, command.c_str(), command.length());
+  commandPacket.message[command.length()] = '\0';
   commandPacket.commandType = type;
+  commandPacket.type = PacketType::COMMAND;
   commandPacket.terminator = THE_TERMINATOR;
 
   return commandPacket;
@@ -167,13 +168,8 @@ libomdb::Result parseQueryResult(ResultHolder holder) {
  * @param socket The file descriptor of the listening socket
  */
 ResultHolder sendMessage(CommandPacket packet, int socket) {
-  // Need to convert message to c string in order to send it.
-  char message[MESSAGE_SIZE];
-  memcpy(message, &packet, sizeof(packet));
-  std::cout << "Message being sent: " << message <<std::endl;
-  // const char* c_message = message.c_str();
-  std::cout << "Attempting to send message to socket" << socket << std::endl;
-  int bytes_sent = send(socket, message, sizeof message, 0);
+  char *serializedPacket = SerializeCommandPacket(packet);
+  int bytes_sent = send(socket, serializedPacket, sizeof(packet), 0);
   std::cout<< "Bytes sent: " << bytes_sent << std::endl;
   if (bytes_sent == -1) {
     perror("send");
@@ -300,23 +296,6 @@ libomdb::Connection libomdb::Connection::connect(std::string hostname,
   buf[numbytes] = '\0';
 
   printf("client: received '%s'\n",buf);
-  std::string dbConnectString = "k:"+db;
-  const char* dbString = dbConnectString.c_str();
-  // Sending the name of the database to the server.
-  int bytesSent = send(sockfd, dbString, dbConnectString.length(), 0);
-  if (bytesSent == -1) {
-    perror("send");
-    return errorConnection();
-  }
-
-  int bytesReceived = recv(sockfd, buf, MAXDATASIZE -1, 0);
-  if (bytesReceived == -1) {
-    perror("recv");
-    return errorConnection();
-  }
-
-  buf[bytesReceived] = '\0';
-  printf("client received response from server: %s\n", buf);
 
   return libomdb::Connection::buildConnectionObj(sockfd, buf);
 }

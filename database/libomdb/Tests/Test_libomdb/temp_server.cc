@@ -208,7 +208,6 @@ int main(void)
 
         if (!fork()) { // this is the child process
             close(sockfd); // child doesn't need the listener
-            // TODO: This is where a connection packet needs to be built
             ConnectionPacket conPacket = getStockConnectionPacket();
             auto serializedConPacket = SerializeConnectionPacket(conPacket);
             if (send(new_fd, serializedConPacket, sizeof(serializedConPacket), 0) == -1) {
@@ -217,41 +216,50 @@ int main(void)
             }
 
             while(1) {
-                char receivedBuffer[1000];
-                int bytesReceived = recv(new_fd, receivedBuffer, 999, 0);
+                char receivedBuffer[sizeof(CommandPacket)];
+                int bytesReceived = recv(new_fd, receivedBuffer, sizeof(CommandPacket), 0);
                 if (bytesReceived == -1) {
                     perror("recv");
                     exit(1);
                 }
                 receivedBuffer[bytesReceived] = '\0';
-                std::string messageToReturn;
-                std::string mdToReturn;
+                char* messageToReturn;
+                char* mdToReturn;
+                CommandPacket commandPacket = DeserializeCommandPacket(receivedBuffer);
+                printf("Received command packet\nMessage: %s\n", commandPacket.message);
                 // Check if message is select or command
-                if (receivedBuffer[0] == 'S' || receivedBuffer[0] == 's') {
+                if (commandPacket.commandType == CommandType::SQL_STATEMENT) {
                     messageToReturn = SerializeResultPacket(getStockResultPacket());
                     mdToReturn = SerializeResultMetaDataPacket(getStockResultMetaDataPacket());
-                } else {
+                } else if (commandPacket.commandType == CommandType::DB_COMMAND){
                     // Command results should be returned in
                     // ResultPacket with different values set
                     // see libomdb.h for specifics
                     messageToReturn = SerializeResultPacket(getStockComResult());
                     mdToReturn = SerializeResultMetaDataPacket(getStockResultMetaDataPacket());
+                } else {
+                    printf("Command Packet type: %d\n", commandPacket.type);
+                    printf("Command packet command type: %d\n", commandPacket.commandType);
                 }
                 printf("Server received message %s\n", receivedBuffer);
                 if (receivedBuffer[0] == '1') {
                     break;
                 }
-                int bytesSent = send(new_fd, messageToReturn.c_str(), messageToReturn.size(), 0);
+
+                printf("Messages being sent to client:\nMetaData: %s\nResult: %s\n", mdToReturn, messageToReturn);
+
+                int bytesSent2 = send(new_fd, mdToReturn, sizeof(ResultMetaDataPacket), 0);
+                if (bytesSent2 == -1) {
+                    perror("send");
+                    exit(1);
+                }
+
+                int bytesSent = send(new_fd, messageToReturn, sizeof(ResultPacket), 0);
                 if (bytesSent == -1) {
                     perror("send");
                     exit(1);
                 }
 
-                int bytesSent2 = send(new_fd, mdToReturn.c_str(), mdToReturn.size(), 0);
-                if (bytesSent2 == -1) {
-                    perror("send");
-                    exit(1);
-                }
             }
             close(new_fd);
             exit(0);
