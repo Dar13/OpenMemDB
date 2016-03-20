@@ -94,7 +94,7 @@ std::vector<libomdb::ResultRow> parseData(ResultPacket packet) {
   uint32_t numberOfRows = (packet.resultSize / rowSizeInBytes);
   uint64_t* dataPointer = &packet.data[0];
   // data is char* so data[0] is 1 byte
-  // so dataPointer++ moves up only one byte
+  // so dataPointer++ moves up 8 bytes, to the next uint64_t
   for (uint i = 0; i < numberOfRows; ++i) {
     libomdb::ResultRow row;
     for (uint j = 0; j < packet.rowLen; ++i) {
@@ -102,7 +102,7 @@ std::vector<libomdb::ResultRow> parseData(ResultPacket packet) {
       memcpy(col, dataPointer, 8); //Move the next 8 bytes into col
       row.push_back(*col);
       delete(col);
-      dataPointer += 8; // Move pointer up 8 bytes. dataPointer++ moves 1 byte
+      dataPointer++; // Move pointer to next uint64_t
     }
     rows.push_back(row);
   }
