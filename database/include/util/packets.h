@@ -80,6 +80,7 @@ struct ResultMetaDataPacket {
   PacketType type;
   ResultStatus status;
   uint32_t numColumns;
+  uint32_t resultPacketSize; // Size of the ResultPacket that follows this packet
   ResultColumn columns[MAX_NUM_COLUMNS];  // Array containing name of each column and SQL type associated with it
   uint8_t terminator;
 }__attribute__((packed));

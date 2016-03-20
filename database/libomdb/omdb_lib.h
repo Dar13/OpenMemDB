@@ -99,6 +99,7 @@ namespace libomdb
     PacketType type;
     ResultStatus status;
     uint32_t numColumns;
+    uint32_t resultPacketSize; // This is the size of ResultPacket associated with this one
     ResultColumn columns[MAX_NUM_COLUMNS];  // Array containing name of each column and SQL type associated with it
     uint8_t terminator;
   }__attribute__((packed));

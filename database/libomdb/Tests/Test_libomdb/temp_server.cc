@@ -248,12 +248,14 @@ int main(void)
 
                 printf("Messages being sent to client:\nMetaData: %s\nResult: %s\n", mdToReturn, messageToReturn);
 
+                printf("%zu\n", sizeof(ResultMetaDataPacket));
                 int bytesSent2 = send(new_fd, mdToReturn, sizeof(ResultMetaDataPacket), 0);
                 if (bytesSent2 == -1) {
                     perror("send");
                     exit(1);
                 }
 
+                printf("%zu\n", sizeof(ResultPacket));
                 int bytesSent = send(new_fd, messageToReturn, sizeof(ResultPacket), 0);
                 if (bytesSent == -1) {
                     perror("send");
