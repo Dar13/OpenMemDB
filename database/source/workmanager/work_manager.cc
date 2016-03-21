@@ -381,10 +381,35 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
                     result_packet.data = result_data;
                     result_packet.terminator = THE_TERMINATOR;
                 }
+                
+                // TODO: Verify
+                metadata_packet.resultPacketSize = 9 + result_packet.resultSize + 1;
 
-                // Now actually send the packets
-                // TODO: Implement this
-                assert(false);
+                // Serialize the packets
+                // TODO: Convert to static buffers
+                char* metadata_buffer = new char[sizeof(ResultMetaDataPacket)];
+                memcpy(metadata_buffer, &metadata_packet, sizeof(ResultMetaDataPacket));
+
+                char* result_buffer = new char[metadata_packet.resultPacketSize];
+                memcpy(result_buffer, &result_packet, 9);
+                memcpy(result_buffer + 9, result_packet.data, result_packet.resultSize);
+                result_buffer[metadata_packet.resultPacketSize - 1] = THE_TERMINATOR;
+
+                // Now actually send the data
+                auto net_status = conn.send(metadata_buffer, sizeof(ResultMetaDataPacket));
+                if(net_status.status_code != omdb::NetworkStatusCodes::SUCCESS)
+                {
+                    // TODO: Handle error
+                }
+
+                net_status = conn.send(result_buffer, metadata_packet.resultPacketSize);
+                if(net_status.status_code != omdb::NetworkStatusCodes::SUCCESS)
+                {
+                    // TODO: Handle error
+                }
+
+                delete metadata_buffer;
+                delete result_buffer;
             }
             break;
         case ResultType::COMMAND:
