@@ -109,11 +109,11 @@ char* SerializeResultMetaDataPacket(ResultMetaDataPacket packet){
 
 
 char* SerializeResultPacket(ResultPacket packet){
-  size_t size = 8 + packet.resultSize + 1;
+  size_t size = 9 + packet.resultSize + 1;
   char* buffer = new (std::nothrow) char[size];
   memset(buffer, 0, size);
-  memcpy(buffer, &packet, sizeof(char) * 8);
-  memcpy(buffer + 8, packet.data, packet.resultSize);
+  memcpy(buffer, &packet, sizeof(char) * 9);
+  memcpy(buffer + 9, packet.data, packet.resultSize);
   buffer[size - 1] = THE_TERMINATOR;
   return buffer;
 }
@@ -156,10 +156,10 @@ ResultMetaDataPacket DeserializeResultMetaDataPacket(char* serializedPacket){
 ResultPacket DeserializeResultPacket(char* serializedPacket){
   ResultPacket packet;
   // Place the first 8 bytes into packet.
-  memcpy(&packet, serializedPacket, 8);
+  memcpy(&packet, serializedPacket, 9);
   packet.data = new uint64_t[packet.resultSize/sizeof(uint64_t)];
-  memset(packet.data, 0, sizeof(uint64_t) * (packet.resultSize/sizeof(uint64_t)));
-  memcpy(packet.data, &serializedPacket[8], packet.resultSize);
-  packet.terminator = serializedPacket[8 + packet.resultSize];
+  memset(packet.data, 0, (packet.resultSize/sizeof(uint64_t)));
+  memcpy(packet.data, &serializedPacket[9], packet.resultSize);
+  packet.terminator = serializedPacket[9 + packet.resultSize];
   return packet;
 }

@@ -43,8 +43,8 @@ using namespace libomdb;
  ************************************************************************/
 /** Used to hold result before parsing into objects **/
 struct ResultHolder {
-  char metaDataPacket[MESSAGE_SIZE];
-  char resultPacket[MESSAGE_SIZE];
+  char metaDataPacket[sizeof(ResultMetaDataPacket)];
+  char *resultPacket;
 };
 
 
@@ -97,7 +97,7 @@ std::vector<libomdb::ResultRow> parseData(ResultPacket packet) {
   // so dataPointer++ moves up 8 bytes, to the next uint64_t
   for (uint i = 0; i < numberOfRows; ++i) {
     libomdb::ResultRow row;
-    for (uint j = 0; j < packet.rowLen; ++i) {
+    for (uint j = 0; j < packet.rowLen; ++j) {
       int64_t* col = new int64_t;
       memcpy(col, dataPointer, 8); //Move the next 8 bytes into col
       row.push_back(*col);
@@ -195,9 +195,10 @@ ResultHolder sendMessage(CommandPacket packet, int socket) {
     return emptyHolder;
   }
 
-
+  ResultMetaDataPacket resultMetaDataPacket = DeserializeResultMetaDataPacket(holder.metaDataPacket);
+  holder.resultPacket = new char[resultMetaDataPacket.resultPacketSize];
   // Now receive result packet
-  bytes_recieved = recv(socket, holder.resultPacket, sizeof(holder.resultPacket), 0);
+  bytes_recieved = recv(socket, holder.resultPacket, resultMetaDataPacket.resultPacketSize, 0);
   if (bytes_recieved == -1) {
     perror("recv");
     ResultHolder emptyHolder;
@@ -311,6 +312,7 @@ void libomdb::Connection::disconnect() {
 
 libomdb::CommandResult libomdb::Connection::executeCommand(std::string command) {
   CommandPacket packet = buildPacket(CommandType::DB_COMMAND, command);
+  printf("Inside executeCommand: command type: %d\n"+(int)packet.commandType);
   return parseCommandResult(sendMessage(packet, this->m_socket_fd));
 }
 

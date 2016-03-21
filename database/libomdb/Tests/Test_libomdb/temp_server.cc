@@ -31,6 +31,7 @@ THE SOFTWARE.
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <cassert>
 
 #include "../../../include/util/packets.h"
 #include "serialization_helper.h"
@@ -225,11 +226,11 @@ int main(void)
                     perror("recv");
                     exit(1);
                 }
-                receivedBuffer[bytesReceived] = '\0';
+                //receivedBuffer[bytesReceived] = '\0';
                 char* messageToReturn;
                 char* mdToReturn;
                 CommandPacket commandPacket = DeserializeCommandPacket(receivedBuffer);
-                printf("Received command packet\nMessage: %s\n", commandPacket.message);
+                printf("The command type is: %d\n\n", (int)commandPacket.commandType);
                 // Check if message is select or command
                 if (commandPacket.commandType == CommandType::SQL_STATEMENT) {
                     messageToReturn = SerializeResultPacket(getStockResultPacket());
@@ -239,33 +240,34 @@ int main(void)
                     // Command results should be returned in
                     // ResultPacket with different values set
                     // see libomdb.h for specifics
+                    assert(false);
+                    printf("Building and returning command result\n");
                     resultMetaDataPacket = getStockResultMetaDataPacket();
                     messageToReturn = SerializeResultPacket(getStockComResult());
+                    resultMetaDataPacket.resultPacketSize = std::string(messageToReturn).length();
                     mdToReturn = SerializeResultMetaDataPacket(resultMetaDataPacket);
                 } else {
-                    printf("Command Packet type: %d\n", commandPacket.type);
-                    printf("Command packet command type: %d\n", commandPacket.commandType);
+                    printf("Entered forbidden zone >:(\n");
                 }
-                printf("Server received message %s\n", receivedBuffer);
                 if (receivedBuffer[0] == '1') {
                     break;
                 }
 
-                printf("Messages being sent to client:\nMetaData: %s\nResult: %s\n", mdToReturn, messageToReturn);
 
-                printf("%zu\n", sizeof(ResultMetaDataPacket));
                 int bytesSent2 = send(new_fd, mdToReturn, sizeof(ResultMetaDataPacket), 0);
                 if (bytesSent2 == -1) {
                     perror("send");
                     exit(1);
                 }
 
-                printf("%zu\n", sizeof(ResultPacket));
                 int bytesSent = send(new_fd, messageToReturn, resultMetaDataPacket.resultPacketSize, 0);
                 if (bytesSent == -1) {
                     perror("send");
                     exit(1);
                 }
+
+
+                printf("\n--------------------------------------------------------------\n");
 
             }
             close(new_fd);
