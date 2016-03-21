@@ -80,6 +80,8 @@ ResultMetaDataPacket getStockResultMetaDataPacket() {
     resultMetaDataPacket.numColumns = 10;
     //resultMetaDataPacket.columns = columns;
     memcpy(resultMetaDataPacket.columns, &columns, sizeof(ResultColumn) * 20);
+    resultMetaDataPacket.resultPacketSize = ((10 * 10 * sizeof(uint64_t)) + sizeof(PacketType) + sizeof(ResultStatus) +
+                                             sizeof(uint64_t) + sizeof(uint32_t) + sizeof(uint8_t)); // 10 rows 10 columns and then all of the other stuff in the result packet
     resultMetaDataPacket.terminator = THE_TERMINATOR;
     return resultMetaDataPacket;
 }
@@ -216,6 +218,7 @@ int main(void)
             }
 
             while(1) {
+                ResultMetaDataPacket resultMetaDataPacket;
                 char receivedBuffer[sizeof(CommandPacket)];
                 int bytesReceived = recv(new_fd, receivedBuffer, sizeof(CommandPacket), 0);
                 if (bytesReceived == -1) {
@@ -230,13 +233,15 @@ int main(void)
                 // Check if message is select or command
                 if (commandPacket.commandType == CommandType::SQL_STATEMENT) {
                     messageToReturn = SerializeResultPacket(getStockResultPacket());
-                    mdToReturn = SerializeResultMetaDataPacket(getStockResultMetaDataPacket());
+                    resultMetaDataPacket = getStockResultMetaDataPacket();
+                    mdToReturn = SerializeResultMetaDataPacket(resultMetaDataPacket);
                 } else if (commandPacket.commandType == CommandType::DB_COMMAND){
                     // Command results should be returned in
                     // ResultPacket with different values set
                     // see libomdb.h for specifics
+                    resultMetaDataPacket = getStockResultMetaDataPacket();
                     messageToReturn = SerializeResultPacket(getStockComResult());
-                    mdToReturn = SerializeResultMetaDataPacket(getStockResultMetaDataPacket());
+                    mdToReturn = SerializeResultMetaDataPacket(resultMetaDataPacket);
                 } else {
                     printf("Command Packet type: %d\n", commandPacket.type);
                     printf("Command packet command type: %d\n", commandPacket.commandType);
@@ -256,7 +261,7 @@ int main(void)
                 }
 
                 printf("%zu\n", sizeof(ResultPacket));
-                int bytesSent = send(new_fd, messageToReturn, sizeof(ResultPacket), 0);
+                int bytesSent = send(new_fd, messageToReturn, resultMetaDataPacket.resultPacketSize, 0);
                 if (bytesSent == -1) {
                     perror("send");
                     exit(1);

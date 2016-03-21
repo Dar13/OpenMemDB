@@ -195,6 +195,7 @@ ResultHolder sendMessage(CommandPacket packet, int socket) {
     return emptyHolder;
   }
 
+
   // Now receive result packet
   bytes_recieved = recv(socket, holder.resultPacket, sizeof(holder.resultPacket), 0);
   if (bytes_recieved == -1) {
