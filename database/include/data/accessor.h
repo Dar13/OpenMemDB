@@ -19,6 +19,7 @@ class ValuePointer : public tervel::util::memory::hp::Element
 
         ~ValuePointer() {
             counter.store(std::numeric_limits<int64_t>::min());
+            delete value;
         }
 };
 
@@ -34,13 +35,14 @@ class VectorAccessor {
             if(vector.at(index, retrieved_value))
             {
                 // hp_watch
-                if(HazardPointer::watch(HazardPointer::SlotID::SHORTUSE, retrieved_value))
-                {
-                    // TODO: ?
-                }
+                HazardPointer::watch(HazardPointer::SlotID::SHORTUSE, retrieved_value);
 
-                // c != vector->at(x))
-                // TODO: What is c?
+                Value* test_value;
+                if(!vector->at(test_value) || retrieved_value != test_value)
+                {
+                    HazardPointer::unwatch(HazardPointer::SlotID::SHORTUSE, retrieved_value);
+                    return false;
+                }
 
                 uintptr_t clean_ptr = reinterpret_cast<uintptr_t>(retrieved_value) & (~0xF);
                 retrieved_value = reinterpret_cast<Value*>(clean_ptr);
@@ -51,8 +53,12 @@ class VectorAccessor {
                 HazardPointer::unwatch(HazardPointer::SlotID::SHORTUSE, retrieved_value);
 
                 T* check_2 = nullptr;
-                // TODO: Handle a failure here?
-                vector.at(index, check_2);
+                if(vector.at(index, check_2))
+                {
+                    HazardPointer::unwatch(HazardPointer::SlotID::SHORTUSE, retrieved_value);
+                    return false;
+                }
+
                 check_2 = (Value*)(((uintptr_t)check_2) & (~0xF));
                 if(res < 0 || retrieved_value != check_2)
                 {
