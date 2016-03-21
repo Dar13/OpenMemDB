@@ -5,6 +5,8 @@ enum TestType
 {
     MODE_UNSET = -1,
     MODE_CREATE = 0,
+    MODE_DROP = 1,
+    MODE_INSERT = 2,
     MODE_SELECT
 };
 

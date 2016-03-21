@@ -38,13 +38,10 @@ typedef uint64_t SQLBigIntType;
 // TODO: Redo this enum's naming
 enum class SQLConstraintType : uint32_t
 {
-  SQL_NO_CONSTRAINT = 0,
-  SQL_NOT_NULL,
-  SQL_DEFAULT,
-  SQL_UNIQUE,
-  SQL_PRIMARY_KEY,
-  SQL_FOREIGN_KEY,
-  SQL_AUTO_INCREMENT
+  NO_CONSTRAINT = 0,
+  NOT_NULL,
+  DEFAULT,
+  AUTO_INCREMENT
 };
 
 /**

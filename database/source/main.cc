@@ -24,8 +24,6 @@
 #include <sql/omdb_parser.h>
 #include <data/data_store.h>
 
-void createRow(std::vector<int64_t> value, RecordData &data);
-
 /**
  *  @brief The entry point of the application.
  */

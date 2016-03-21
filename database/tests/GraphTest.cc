@@ -18,39 +18,84 @@ GraphTest::GraphTest()
     std::vector<int> timeVals;
     DataStoreTest dataStoreTest;
 
-    TestResult result = dataStoreTest.with(MODE_CREATE)
-    				                 .generateCases(0b0000)
-    				                 .test();
+    // TestResult result = dataStoreTest.with(MODE_CREATE)
+    // 				                 .generateCases(0b0000)
+    // 				                 .test();
 
-    timeVals.push_back(result.duration);
+    // timeVals.push_back(result.duration);
 
-    DataStoreTest dataStoreTest2;
+    // DataStoreTest dataStoreTest2;
 
-    result = dataStoreTest2.with(MODE_CREATE)
-                          .generateCases(0b0010)
-                          .test();
+    // result = dataStoreTest2.with(MODE_CREATE)
+    //                       .generateCases(0b0010)
+    //                       .test();
 
-    timeVals.push_back(result.duration);
+    // timeVals.push_back(result.duration);
 
-    DataStoreTest dataStoreTest3;
+    // DataStoreTest dataStoreTest3;
 
-    result = dataStoreTest3.with(MODE_CREATE)
-                          .generateCases(0b0100)
-                          .test();
+    // result = dataStoreTest3.with(MODE_CREATE)
+    //                       .generateCases(0b0100)
+    //                       .test();
 
-    timeVals.push_back(result.duration);
+    // timeVals.push_back(result.duration);
 
-    DataStoreTest dataStoreTest4;
+    // DataStoreTest dataStoreTest4;
 
-    result = dataStoreTest4.with(MODE_CREATE)
-                          .generateCases(0b1000)
-                          .test();
+    // result = dataStoreTest4.with(MODE_CREATE)
+    //                       .generateCases(0b1000)
+    //                       .test();
 
+    // timeVals.push_back(result.duration);
+
+    // DataStoreTest dataStoreTest5;
+
+    // result = dataStoreTest5.with(MODE_CREATE)
+    //                                  .generateCases(0b0000)
+    //                                  .setThreadCount(16)
+    //                                  .test();
+
+    // timeVals.push_back(result.duration);
+
+    // DataStoreTest dataStoreTest6;
+
+    // result = dataStoreTest6.with(MODE_CREATE)
+    //                                 .generateCases(0b0000)
+    //                                 .setThreadCount(32)
+    //                                 .test();
+
+    // timeVals.push_back(result.duration);
+
+    // DataStoreTest dataStoreTest7;
+
+    // result = dataStoreTest7.with(MODE_CREATE)
+    //                             .generateCases(0b0000)
+    //                             .setThreadCount(64)
+    //                             .test();
+
+    // timeVals.push_back(result.duration);
+
+    TestResult result = dataStoreTest.with(MODE_DROP)
+                                    .generateCases(0b0000)
+                                    .test();
+                               
     timeVals.push_back(result.duration);
 
     createOutputFile(timeVals);
 }
 
+// ombdt is a plaintext file that contains test data (used by the python script to generate the graphs)
+// Current format:
+
+/*
+*   TestName
+*   test case count
+*   Thread1 time
+*   Thread2 time
+*   Thread3 time
+*   Thread 4 time
+*   ... etc
+*/
 void GraphTest::createOutputFile(std::vector<int> timeVals)
 {
     std::ofstream outputFile;
@@ -62,4 +107,6 @@ void GraphTest::createOutputFile(std::vector<int> timeVals)
     {
         outputFile << std::to_string(testTime) + "\n";
     }
+
+    outputFile << "end \n";
 }

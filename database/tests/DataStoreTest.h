@@ -1,9 +1,16 @@
 #ifndef DATASTORETEST_H
 #define DATASTORETEST_H
 
+#include <tervel/util/tervel.h>
+#include <data/data_store.h>
+
 #include <vector>
 #include <string>
+#include <atomic>
+#include <tuple>
 #include "TestResult.h"
+
+typedef std::tuple<int,int> i2tuple;
 
 class DataStoreTest
 {
@@ -12,19 +19,36 @@ class DataStoreTest
 	public:
 		DataStoreTest();
 		DataStoreTest& with(int mode);
-		TestResult test();
 		DataStoreTest& generateCases(int complexity);
-
+		DataStoreTest& setThreadCount(int count);
+		TestResult test();
 
 	private:
+		
+        struct thread_data
+        {
+            //tervel test and datastore must be shared by all threads
+            tervel::Tervel* tervel_test;
+
+            //tervel::ThreadContext* main_context;
+            DataStore *data;
+        }share;
+        
+
 		int complexity, mode, threadCount;
 		bool isRandomized = false;
-		// void createTest();
-		void parseComplexity(int complexity);
-		static void createTest(std::vector<std::string> statements);
-		std::vector<std::string> generateCases();
 		std::vector<std::string> statements;
+        std::vector<int64_t> test_data;
+        std::vector<std::string> table_name;
 
+		void parseComplexity(int complexity);
+		static void createTest(std::vector<std::string> statements, void *t_data);
+		static tervel::ThreadContext* loadTables(std::vector<std::string> statements, void *t_data);
+        static void dropTest(std::vector<std::string> table_name, void *t_data);
+		//static void dropTest(std::vector<std::string> statements, std::vector<std::string> table_name, void *t_data);
+        static void insertTest(std::vector<int64_t> record, void *t_data);
+		std::vector<std::string> generateCases();
+		i2tuple calculateArrayCut(int threadCount, int threadNumber);
 
 };
 

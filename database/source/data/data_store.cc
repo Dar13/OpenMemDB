@@ -38,6 +38,8 @@ ManipResult DataStore::createTable(CreateTableCommand table_info)
                 ManipStatus::ERR_TABLE_CMD_INVALID);
     }
 
+    KeyHashFunctor hash_functor;
+
     TableSchema* schema = new (std::nothrow) TableSchema;
     if(schema == nullptr)
     {
@@ -59,7 +61,16 @@ ManipResult DataStore::createTable(CreateTableCommand table_info)
         // TODO: Error handling
     }
 
-    table_name_mapping.insert( table_info.table_name, pair);
+    size_t key = hash_functor(table_info.table_name);
+
+    if(table_name_mapping.insert( key, pair))
+    {
+        printf("Key value pair inserted\n");
+    }
+    else
+    {
+        printf("Insertion failed\n");
+    }
 
     return ManipResult(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
 }
@@ -70,15 +81,19 @@ ManipResult DataStore::createTable(CreateTableCommand table_info)
  */
 ManipResult DataStore::deleteTable(std::string table_name)
 {
+    KeyHashFunctor hasher;
+    size_t key = hasher(table_name);
     // Find table in table_mapping
     SchemaTablePair* pair_ptr = nullptr;
     {
         // We need this extra scope to make sure the accessor destructs
         TableMap::ValueAccessor hash_accessor;
-        if(table_name_mapping.at(table_name, hash_accessor))
+        if(table_name_mapping.at(key, hash_accessor))
         {
+            printf("Found key\n");
             if(hash_accessor.valid())
             {
+                printf("Accessor is valid\n");
                 // TODO: Is this safe? I think so, but ...
                 pair_ptr = (*hash_accessor.value());
             }
@@ -87,16 +102,19 @@ ManipResult DataStore::deleteTable(std::string table_name)
 
     if(pair_ptr == nullptr)
     {
+        printf("Table doesn't exist!\n");
         return ManipResult(ResultStatus::FAILURE,
                 ManipStatus::ERR_TABLE_NOT_EXIST);
     }
 
     // Remove the table from the table name map
     // TODO: Have Tervel return a true return code rather than a boolean
-    if(!table_name_mapping.remove(table_name))
+    while(!table_name_mapping.remove(key))
     {
+        /*
         return ManipResult(ResultStatus::FAILURE,
                 ManipStatus::ERR_TABLE_NOT_EXIST);
+        */
     }
 
     TableSchema *schema = pair_ptr->schema;
@@ -191,12 +209,12 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair& table_pair, RecordDat
             switch(constraint.type)
             {
                 //do nothing
-                case SQLConstraintType::SQL_NO_CONSTRAINT:
+                case SQLConstraintType::NO_CONSTRAINT:
                     {
                         break;
                     }
                 //data cannot be null
-                case SQLConstraintType::SQL_NOT_NULL:
+                case SQLConstraintType::NOT_NULL:
                     {
                         if(row_data.data.null == 1)
                         {
@@ -206,7 +224,7 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair& table_pair, RecordDat
                         break;
                     }
                 //increment unique counter that represents number of records inserted into table
-                case SQLConstraintType::SQL_AUTO_INCREMENT:
+                case SQLConstraintType::AUTO_INCREMENT:
                     {
                         TervelData insert = {.value = 0};
                         insert.data.type = INTEGER;
@@ -216,7 +234,7 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair& table_pair, RecordDat
                         row->at(i) = insert;
                         break;
                     }
-                case SQLConstraintType::SQL_DEFAULT:
+                case SQLConstraintType::DEFAULT:
                     {
                         if(row_data.data.null == 1)
                         {
@@ -476,8 +494,11 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
  */
 bool DataStore::getTablePair(std::string table_name, SchemaTablePair& pair)
 {
+    std::hash<std::string> hash_functor;
     TableMap::ValueAccessor hash_accessor;
-    if(table_name_mapping.at(table_name, hash_accessor))
+
+    size_t key = hash_functor(table_name);
+    if(table_name_mapping.at(key, hash_accessor))
     {
         if(hash_accessor.valid())
         {
