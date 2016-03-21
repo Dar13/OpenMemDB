@@ -107,6 +107,11 @@ std::vector<libomdb::ResultRow> parseData(ResultPacket packet) {
     rows.push_back(row);
   }
 
+  // Place empty row in ros so that first next call moves to actual data
+  // This is standar op for result sets
+  libomdb::ResultRow initRow;
+  rows.push_back(initRow);
+
   return rows;
 }
 
@@ -123,6 +128,7 @@ std::vector<libomdb::MetaDataColumn> parseMetaData(ResultMetaDataPacket packet) 
     libomdb::MetaDataColumn column;
     column.label = std::string(packet.columns[i].name);
     column.sqlType = packet.columns[i].type;
+    metaDataColumns.push_back(column);
   }
   return metaDataColumns;
 }
