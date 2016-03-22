@@ -23,6 +23,7 @@
 #include <algorithm>
 
 // Project includes
+#include <util/common.h>
 #include <workmanager/work_manager.h>
 #include <workmanager/work_thread.h>
 
@@ -254,7 +255,8 @@ uint32_t WorkManager::GetAvailableThread()
  */
 bool WorkManager::ReceiveCommand(omdb::Connection& conn)
 {
-    char buffer[MAX_PACKET_SIZE];
+    // TODO: Make static to avoid re-allocation?
+    char command_buffer[sizeof(CommandPacket)];
     
     // We're making this unsigned so the overflow behavior is predictable
     // If we ever get more than 3 billion concurrent requests, we'll be in trouble though...
@@ -263,7 +265,7 @@ bool WorkManager::ReceiveCommand(omdb::Connection& conn)
     omdb::NetworkStatus status;
 
     // Is there anything in the queue?
-    status = conn.recv(buffer, MAX_PACKET_SIZE);
+    status = conn.recv(command_buffer, sizeof(CommandPacket));
 
     // Generate a job and queue it into a worker thread if the full 
     // message was received
@@ -274,10 +276,11 @@ bool WorkManager::ReceiveCommand(omdb::Connection& conn)
         // TODO: Remove this, for debugging purposes only
         printf("Creating job number %d\n", job_number);
 
-        // TODO: Properly parse buffer
+        CommandPacket command;
+        memcpy(&command, command_buffer, sizeof(CommandPacket));
 
         // Create the worker thread's task
-        Job j = WorkThread::GenerateJob(job_number, buffer, this->data_store);
+        Job j = WorkThread::GenerateJob(job_number, command.message, this->data_store);
         Job* job_ptr = new (std::nothrow) Job(std::move(j));
         if(job_ptr == nullptr)
         {
@@ -414,18 +417,51 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
             break;
         case ResultType::COMMAND:
             {
-                CommandResultPacket packet = {};
-                packet.type = PacketType::COMMAND_RESULT;
+                ResultMetaDataPacket metadata_packet = {};
+                ResultPacket result_packet = {};
 
-                ManipResult* manip_result = reinterpret_cast<ManipResult*>(result);
-                packet.status = manip_result->status;
-                // TODO: Rework ManipStatus to hold rows affected data
-                packet.secondaryStatus = manip_result->result;
-                packet.rowsAffected = 0;
+                ManipResult* result = reinterpret_cast<ManipResult*>(result);
 
-                packet.terminator = THE_TERMINATOR;
+                metadata_packet.type = PacketType::RESULT_METADATA;
+                metadata_packet.status = result->status;
+                metadata_packet.numColumns = static_cast<uint32_t>(result->result);
 
-                // TODO: Send the packet
+                // Leaving the columns set to 0, they're unused
+
+                // Tiny packet
+                metadata_packet.resultPacketSize = 10;
+
+                metadata_packet.terminator = THE_TERMINATOR;
+
+                // Setup the metadata packet
+                result_packet.type = PacketType::RESULT_DATA;
+                result_packet.status = metadata_packet.status;
+                result_packet.resultSize = result->rows_affected;
+                result_packet.terminator = THE_TERMINATOR;
+                // All other fields should be set to zero
+                
+                char* metadata_buffer = new char[sizeof(ResultMetaDataPacket)];
+                serializeMetaDataPacket(metadata_packet, metadata_buffer);
+
+                char* result_buffer = new char[metadata_packet.resultPacketSize];
+                serializeResultPacket(result_packet, result_buffer);
+
+                // Now actually send the data
+                auto net_status = conn.send(metadata_buffer, sizeof(ResultMetaDataPacket));
+                if(net_status.status_code != omdb::NetworkStatusCodes::SUCCESS)
+                {
+                    // TODO: Handle error
+                }
+
+                net_status = conn.send(result_buffer, metadata_packet.resultPacketSize);
+                if(net_status.status_code != omdb::NetworkStatusCodes::SUCCESS)
+                {
+                    // TODO: Handle error
+                }
+
+                // TODO: Remove when switched to static buffer
+                delete metadata_buffer;
+                delete result_buffer;
             }
             break;
         default:

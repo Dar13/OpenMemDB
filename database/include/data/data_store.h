@@ -203,6 +203,7 @@ struct Result<ManipStatus> : public ResultBase
     Result(ResultStatus s, ManipStatus res) : ResultBase(s, ResultType::COMMAND), result(res) {}
 
     ManipStatus result;
+    uint32_t rows_affected;
 };
 
 template<>
