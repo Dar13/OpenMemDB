@@ -256,7 +256,7 @@ TestResult DataStoreTest::test()
             
             std::vector<std::thread> v;
 
-            // auto time_start = std::chrono::high_resolution_clock::now();
+            auto time_start = std::chrono::high_resolution_clock::now();
 
             for (int i = 0; i < threadCount; i++)
             {
@@ -276,10 +276,10 @@ TestResult DataStoreTest::test()
                 v.at(i).join();
             }
 
-            // auto time_end = std::chrono::high_resolution_clock::now();
-            // auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+            auto time_end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
 
-            TestResult testResult(1000, threadCount);
+            TestResult testResult(duration.count(), threadCount);
             return testResult;
         }
         

@@ -9,20 +9,20 @@
 #include "TestResult.h"
 
 
-GraphTest::GraphTest()
+GraphTest::GraphTest(int mode, int threadCount)
 {
 
     // Creating a new instance because it fails the position < secondary_array_size_ otherwise
     // todo: reset tervel after each test so I dont have to do this
 
-    std::vector<int> timeVals;
-    DataStoreTest dataStoreTest;
+    // std::vector<int> timeVals;
+    // DataStoreTest dataStoreTest;
 
-    TestResult result = dataStoreTest.with(MODE_CREATE)
-    				                 .generateCases(0b0000)
-    				                 .test();
+    // TestResult result = dataStoreTest.with(MODE_CREATE)
+    // 				                 .generateCases(0b0000)
+    // 				                 .test();
 
-    timeVals.push_back(result.duration);
+    // timeVals.push_back(result.duration);
 
     // DataStoreTest dataStoreTest2;
 
@@ -81,7 +81,8 @@ GraphTest::GraphTest()
                                
     // timeVals.push_back(result.duration);
 
-    createOutputFile(timeVals);
+    createPerformanceTest(threadCount);
+
 }
 
 // ombdt is a plaintext file that contains test data (used by the python script to generate the graphs)
@@ -96,17 +97,44 @@ GraphTest::GraphTest()
 *   Thread 4 time
 *   ... etc
 */
-void GraphTest::createOutputFile(std::vector<int> timeVals)
+
+void GraphTest::createOrAppendOutputFile(int time, int threadCount)
 {
     std::ofstream outputFile;
-    outputFile.open("test_data.omdbt");
-    outputFile << "CreateTest\n";
-    outputFile << "5\n";
 
-    for(auto const& testTime : timeVals)
-    {
-        outputFile << std::to_string(testTime) + "\n";
+
+    // first thread, make a new file
+    if(threadCount == 1)
+    {        
+        outputFile.open("test_data.omdbt");
+        if(outputFile.is_open())
+        {
+            outputFile << "CreateTest\n";
+            outputFile << threadCount << "\n";
+            outputFile << time << "\n";
+            outputFile.close();
+        }
     }
+    else // any other thread count means we just append
+    {
+        outputFile.open("test_data.omdbt", std::ios::app);
+        if(outputFile.is_open())
+        {
+            outputFile << time << "\n";
+            outputFile.close();
+        }
+    }
+}
 
-    outputFile << "end \n";
+void GraphTest::createPerformanceTest(int threadCount)
+{
+    DataStoreTest dataStoreTest;
+
+    TestResult result = dataStoreTest.with(MODE_CREATE)
+                                  .generateCases(0b0000)
+                                  .setThreadCount(threadCount)
+                                  .test();
+
+    createOrAppendOutputFile(result.duration, threadCount);
+
 }

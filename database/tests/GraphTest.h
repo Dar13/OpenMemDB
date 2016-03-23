@@ -7,8 +7,10 @@
 class GraphTest
 {
 	public:
-		GraphTest();
-		void createOutputFile(std::vector<int> timeVals);
+		GraphTest(int mode, int threadCount);
+		void createOrAppendOutputFile(int time, int threadCount);
+		void createPerformanceTest(int threadCount);
+		
 	
 };
 
