@@ -18,10 +18,10 @@ void printLine(char symbol) {
     std::cout<<std::endl;
 }
 
-void doConnect(libomdb::Connection* connection, std::string command) {
-    if (command.compare("connect")) {
+libomdb::Connection doConnect(std::string command) {
+    if (command.compare("connect") != 0) {
         std::cout << "Be sure to type connect to connect :-)" << std::endl;
-        return;
+        return libomdb::Connection::errorConnection();
     }
     // Connect to the database with the given instructions
     std::string ip;
@@ -35,13 +35,9 @@ void doConnect(libomdb::Connection* connection, std::string command) {
     std::cout << "What is the database name?" << std::endl;
     std::cin >> database;
 
-    try {
-        *connection = libomdb::Connection::connect(ip, port, database);
-        std::cout << "Successfully connected to " << database << std::endl;
-    } catch (int e) {
-        // I guess you catch ints in c++?
-        std::cout << "Something went wrong\tException number " << e << std::endl;
-    }
+    auto connection = libomdb::Connection::connect(ip, port, database);
+    std::cout << "Successfully connected to " << database << std::endl;
+    return connection;
 }
 
 void doQuery(libomdb::Connection connection, std::string command) {
@@ -77,7 +73,7 @@ void doCommand(libomdb::Connection connection, std::string command) {
 }
 
 int main () {
-    libomdb::Connection *connection = NULL;
+    auto connection = libomdb::Connection::errorConnection();
     // Ask the user to connect to a database
     // What port and ip is the database running on
     std::string command;
@@ -92,17 +88,17 @@ int main () {
         }
         char firstLetter = command.at(0);
         if (firstLetter == 's') {
-            if (connection == NULL) {
+            if (!connection.getMetaData().isValid()) {
                 std::cout << "You must first connect to a database" << std::endl;
             } else {
-                doQuery(*connection, command);
+                doQuery(connection, command);
             }
         } else {
-            if (connection == NULL) {
+            if (!connection.getMetaData().isValid()) {
                 // Try to connect to the database
-                doConnect(connection, command);
+                connection = doConnect(command);
             } else {
-                doCommand(*connection, command);
+                doCommand(connection, command);
             }
         }
 

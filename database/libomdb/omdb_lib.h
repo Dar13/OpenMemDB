@@ -322,7 +322,7 @@ namespace libomdb
      * // Cannot figure out how to not do this in the .h Be my guest to fix. C++ is annoying.
      */
     static Connection errorConnection() {
-      return Connection(0, ConnectionMetaData(NULL, false));
+      return Connection(0, ConnectionMetaData("", false));
     }
 
    private:
