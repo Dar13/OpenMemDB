@@ -62,10 +62,11 @@ int32_t WorkManager::Initialize()
 
         found_idx->used = true;
         WorkThreadData data(found_idx);
+        data.id = thread_id;
         data.tervel = m_tervel;
 
-        m_thread_data.push_back(std::move(data));
-        m_thread_data.back().thread = std::thread(WorkThread::Run, &m_thread_data.back());
+        m_thread_data[thread_id] = data;
+        m_thread_data[thread_id].thread = std::thread(WorkThread::Run, &m_thread_data[thread_id]);
     }
 
     // Create a socket and listen to it.
@@ -202,28 +203,6 @@ int32_t WorkManager::Run()
                 printf("Unable to send job!\n");
             }
 
-            // TODO: How to handle Command results?
-            // TODO: Generate ResultMetaData packet
-            // TODO: Generate Result packet
-
-            /*
-            status = conn.send((char*)&res.result, sizeof(uint64_t));
-            while(status.status_code == omdb::D_RECV_PART)
-            {
-                printf("Attempting to send entirety of response\n");
-                status = conn.send((char*)res.result, sizeof(uint64_t));
-            }
-
-            if(status.status_code != omdb::D_SEND_FULL &&
-               status.status_code != omdb::SUCCESS)
-            {
-                printf("Error sending result to client!\n");
-                printf("Code: %d Secondary: %s\n", status.status_code,
-                                                   strerror(status.secondary_code));
-                return E_NET_ERR;
-            }
-            */
-
             printf("Job number %d is done!\n", res.job_number);
             
             // Clean up result
@@ -295,11 +274,13 @@ bool WorkManager::ReceiveCommand(omdb::Connection& conn)
 
         // Push the job to the thread
         WorkThreadData& thread_data = m_thread_data[GetAvailableThread()];
+        printf("id = %u\n", thread_data.id);
 
         while(!thread_data.job_queue.enqueue(job_ptr)) {}
 
         // Notify the thread to wake-up
-        thread_data.cond_var->notify_one();
+        printf("thread notifier = %p\n", thread_data.notifier);
+        thread_data.notifier->cond_var.notify_one();
 
         status.status_code = omdb::SUCCESS;
         return false;

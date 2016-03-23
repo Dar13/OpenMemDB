@@ -40,22 +40,24 @@ void WorkThread::Run(WorkThreadData* data)
     // If this throws, then we're dead in the water anyways. Let it crash
     tervel::ThreadContext* thread_context = new tervel::ThreadContext(data->tervel);
 
+    ThreadNotifier* notifier = data->notifier;
+
     // Condition variables require an unique_lock
-    std::unique_lock<std::mutex> thread_lock(*data->mutex, std::defer_lock);
+    std::unique_lock<std::mutex> thread_lock(notifier->mutex, std::defer_lock);
 
     while(true)
     {
         thread_lock.lock();
 
         // TODO: try/catch block needed?
-        while(!data->cond_var->wait_for(thread_lock, std::chrono::milliseconds(15),
-                [&data] () -> bool
+        while(!notifier->cond_var.wait_for(thread_lock, std::chrono::milliseconds(15),
+                [&data, notifier] () -> bool
                 {
-                    return (data->stop->load() || !data->job_queue.empty());
+                    return (notifier->stop.load() || !data->job_queue.empty());
                 })) {}
         thread_lock.unlock();
 
-        if(data->stop->load()) { break; }
+        if(notifier->stop.load()) { break; }
 
         Job* job = nullptr;
         TervelQueue<Job*>::Accessor queue_getter;
