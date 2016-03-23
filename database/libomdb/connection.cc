@@ -176,7 +176,6 @@ libomdb::Result parseQueryResult(ResultHolder holder) {
 ResultHolder sendMessage(CommandPacket packet, int socket) {
   char *serializedPacket = SerializeCommandPacket(packet);
   int bytes_sent = send(socket, serializedPacket, sizeof(packet), 0);
-  std::cout<< "Bytes sent: " << bytes_sent << std::endl;
   if (bytes_sent == -1) {
     perror("send");
     ResultHolder emptyHolder;
@@ -194,7 +193,6 @@ ResultHolder sendMessage(CommandPacket packet, int socket) {
   ResultHolder holder;
 
   int bytes_recieved = recv(socket, holder.metaDataPacket, sizeof(holder.metaDataPacket), 0);
-  std::cout << "Bytes relieved: " << bytes_recieved << std::endl;
   if (bytes_recieved == -1) {
     perror("recv");
     ResultHolder emptyHolder;
@@ -293,7 +291,6 @@ libomdb::Connection libomdb::Connection::connect(std::string hostname,
 
   inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr),
                                                           s, sizeof s);
-  printf("client: connecting to %s\n", s);
   freeaddrinfo(servinfo); // all done with this structure
 
   if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
@@ -303,7 +300,6 @@ libomdb::Connection libomdb::Connection::connect(std::string hostname,
 
   buf[numbytes] = '\0';
 
-  printf("client: received '%s'\n",buf);
 
   return libomdb::Connection::buildConnectionObj(sockfd, buf);
 }
@@ -318,7 +314,6 @@ void libomdb::Connection::disconnect() {
 
 libomdb::CommandResult libomdb::Connection::executeCommand(std::string command) {
   CommandPacket packet = buildPacket(CommandType::DB_COMMAND, command);
-  printf("Inside executeCommand: command type: %d\n"+(int)packet.commandType);
   return parseCommandResult(sendMessage(packet, this->m_socket_fd));
 }
 
