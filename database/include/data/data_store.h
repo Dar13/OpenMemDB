@@ -84,10 +84,10 @@ struct RecordCopy
 struct RecordReference
 {
     RecordReference() : id(0), ptr(nullptr) {}
-    RecordReference(uint64_t i, Record* p) : id(i), ptr(p) {}
+    RecordReference(uint64_t i, ValuePointer<Record>* p) : id(i), ptr(p) {}
 
     uint64_t id;
-    Record* ptr;
+    ValuePointer<Record>* ptr;
 };
 
 // TODO: Is there a more efficient way?
@@ -270,6 +270,8 @@ private:
 
     RecordCopy copyRecord(RecordVector& table, int64_t row_idx);
     RecordCopy copyRecord(Record* record);
+
+    Record* updateRecord(const RecordData& old_record, RecordData& new_record);
 
     MultiRecordCopies searchTable(std::shared_ptr<DataTable>& table, ValuePredicate* value_pred);
     /*

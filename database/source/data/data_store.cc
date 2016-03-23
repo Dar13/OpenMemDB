@@ -306,12 +306,21 @@ ManipResult DataStore::updateRecords(Predicate* predicates,
         std::string table_name,
         RecordData record)
 {
+    // Denotes whether there's been some contention in the update
+    bool some_contention = false;
+
     if(predicates == nullptr)
     {
         // TODO: Allow a full update?
     }
     else
     {
+        SchemaTablePair pair;
+        if(!getTablePair(table_name, pair))
+        {
+            return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_TABLE_NOT_EXIST);
+        }
+
         RecordReferences record_refs;
         switch(predicates->type)
         {
@@ -320,12 +329,6 @@ ManipResult DataStore::updateRecords(Predicate* predicates,
                 break;
             case PredicateType::VALUE:
             {
-                SchemaTablePair pair;
-                if(!getTablePair(table_name, pair))
-                {
-                    return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_TABLE_NOT_EXIST);
-                }
-
                 record_refs = searchTableForRefs(pair.table, reinterpret_cast<ValuePredicate*>(predicates));
             }
                 break;
@@ -335,7 +338,68 @@ ManipResult DataStore::updateRecords(Predicate* predicates,
                 break;
         }
 
-        // TODO: Attempt a swap using the swap() method in Tervel
+        if(record_refs.size() == 0)
+        {
+            ManipResult result(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
+            // There just isn't anything to update
+            result.rows_affected = 0;
+            return result;
+        }
+
+        uint64_t num_affected = 0;
+        // Attempt to swap the various references with the calculated record
+        for(auto old_record : record_refs)
+        {
+            int64_t table_len = pair.table->records.size();
+            for(int64_t idx = 0; idx < table_len; idx++)
+            {
+                VectorAccessor<Record> accessor;
+                if(!accessor.init(pair.table->records, idx))
+                {
+                    // Failed to initialize the accessor.
+                    // Not sure what to do here, I think it best would be to 
+                    // continue on and try the rest of the table.
+                    continue;
+                }
+
+                // TODO: Add a ID check?
+                if(old_record.ptr != accessor.value)
+                {
+                    continue;
+                }
+
+                RecordCopy copy = copyRecord(accessor.value->ptr);
+
+                // Perform the update
+                Record* updated_record = updateRecord(copy.data, record); 
+                if(updated_record == nullptr)
+                {
+                    // TODO: Error handling
+                }
+
+                // Now perform the CAS with the new record
+                ValuePointer<Record>* new_record_ptr = new ValuePointer<Record>(updated_record);
+                // TODO: Make sure the old record's pointer isn't modified in cas
+                if(!pair.table->records.cas(idx, old_record.ptr, new_record_ptr))
+                {
+                    // CAS failed, contention on the element
+                    some_contention = true;
+                }
+                else
+                {
+                    ++num_affected;
+                }
+            }
+        }
+
+        ManipResult result(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
+        if(some_contention)
+        {
+            result.result = ManipStatus::ERR_PARTIAL_CONTENTION;
+        }
+
+        result.rows_affected = num_affected;
+        return result;
     }
 
     // General error, this should never be reached
@@ -798,7 +862,7 @@ RecordReferences DataStore::searchTableForRefs(std::shared_ptr<DataTable>& table
                         value_pred->expected_value,
                         row_value).IsTrue())
             {
-                data.push_back(RecordReference(record.id, row_ptr));
+                data.push_back(RecordReference(record.id, accessor.value));
             }
         }
     }
@@ -985,4 +1049,44 @@ RecordCopy DataStore::copyRecord(Record* record)
 
     // Return the copied data
     return record_copy;
+}
+
+/**
+ *  \brief Creates an updated copy of a passed-in record
+ */
+Record* DataStore::updateRecord(const RecordData& old_record, RecordData& new_record)
+{
+    // Perform the update
+    int64_t idx = 0;
+    TervelData old_data = { .value = 0 };
+
+    Record* updated_record = new (std::nothrow) Record;
+    if(updated_record == nullptr)
+    {
+        return nullptr;
+    }
+
+    for(auto new_data : new_record)
+    {
+        // Grab the old data from the copy
+        old_data = old_record.at(idx);
+
+        // Reset the Tervel status bits for insertion into a new record (if needed)
+        old_data.data.tervel_status = 0;
+
+        // If the new data for this column is null,
+        // then we need to keep the old data,
+        // else bring in the new.
+        if(new_data.data.null)
+        {
+            updated_record->push_back_w_ra(old_data.value);
+        }
+        else
+        {
+            updated_record->push_back_w_ra(new_data.value);
+        }
+        ++idx;
+    }
+
+    return updated_record;
 }
