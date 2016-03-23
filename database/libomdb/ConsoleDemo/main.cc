@@ -90,22 +90,21 @@ int main () {
     std::transform(command.begin(), command.end(), command.begin(), ::tolower);
 
     while(command.compare("exit") != 0) {
-        if (command.empty()) {
-            continue;
-        }
-        char firstLetter = command.at(0);
-        if (firstLetter == 's') {
-            if (!connection.getMetaData().isValid()) {
-                std::cout << "You must first connect to a database" << std::endl;
+        if (!command.empty()) {
+            char firstLetter = command.at(0);
+            if (firstLetter == 's') {
+                if (!connection.getMetaData().isValid()) {
+                    std::cout << "You must first connect to a database" << std::endl;
+                } else {
+                    doQuery(connection, command);
+                }
             } else {
-                doQuery(connection, command);
-            }
-        } else {
-            if (!connection.getMetaData().isValid()) {
-                // Try to connect to the database
-                connection = doConnect(command);
-            } else {
-                doCommand(connection, command);
+                if (!connection.getMetaData().isValid()) {
+                    // Try to connect to the database
+                    connection = doConnect(command);
+                } else {
+                    doCommand(connection, command);
+                }
             }
         }
 
