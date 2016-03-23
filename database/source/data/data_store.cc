@@ -411,12 +411,21 @@ ManipResult DataStore::updateRecords(Predicate* predicates,
  */
 ManipResult DataStore::deleteRecords(Predicate* predicates, std::string table_name)
 {
+    bool some_contention = false;
+    uint64_t num_affected = 0;
+
     if(predicates == nullptr)
     {
         // TODO: Allow a full delete?
     }
     else
     {
+        SchemaTablePair pair;
+        if(!getTablePair(table_name, pair))
+        {
+            return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_TABLE_NOT_EXIST);
+        }
+
         RecordReferences record_refs;
         switch(predicates->type)
         {
@@ -425,12 +434,6 @@ ManipResult DataStore::deleteRecords(Predicate* predicates, std::string table_na
                 break;
             case PredicateType::VALUE:
             {
-                SchemaTablePair pair;
-                if(!getTablePair(table_name, pair))
-                {
-                    return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_TABLE_NOT_EXIST);
-                }
-
                 record_refs = searchTableForRefs(pair.table, reinterpret_cast<ValuePredicate*>(predicates));
             }
                 break;
@@ -440,7 +443,56 @@ ManipResult DataStore::deleteRecords(Predicate* predicates, std::string table_na
                 break;
         }
 
-        // TODO: Perform the delete using the record references and IDs gathered
+        // Go through the collected record references and attempt to delete them
+        for(auto old_record : record_refs)
+        {
+            int64_t table_len = pair.table->records.size();
+            for(int64_t idx = 0; idx < table_len; idx++)
+            {
+                VectorAccessor<Record> accessor;
+                if(!accessor.init(pair.table->records, idx))
+                {
+                    // Failed to initialize the accessor.
+                    // Not sure what to do here, I think it best would be to 
+                    // continue on and try the rest of the table.
+                    continue;
+                }
+
+                // TODO: Add a ID check?
+                if(old_record.ptr != accessor.value)
+                {
+                    continue;
+                }
+
+                ValuePointer<Record>* null_val_ptr = nullptr;
+                if(!pair.table->records.cas(idx, old_record.ptr, null_val_ptr))
+                {
+                    // CAS failed, contention on the element
+                    some_contention = true;
+                }
+                else
+                {
+                    ++num_affected;
+                }
+
+                if(!pair.table->records.eraseAt(idx, null_val_ptr))
+                {
+                    // Insert underneath me may have happened, but 
+                    // that shouldn't happen since we only push_back or pop_back.
+                    // This really shouldn't be reached
+                    some_contention = true;
+                }
+            }
+        }
+
+        ManipResult result(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
+        if(some_contention)
+        {
+            result.result = ManipStatus::ERR_PARTIAL_CONTENTION;
+        }
+
+        result.rows_affected = num_affected;
+        return result;
     }
 
     // General error, this should never be reached
