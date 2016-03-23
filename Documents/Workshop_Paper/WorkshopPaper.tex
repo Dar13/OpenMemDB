@@ -1,4 +1,5 @@
-\documentclass[letter,11pt]{article}
+\documentclass[conference, compsoc]{IEEEtran}
+%\documentclass[letter,11pt]{article}
 %\documentclass[letter,10pt]{scrartcl}
 
 \usepackage[utf8]{inputenc}
@@ -8,18 +9,26 @@
 \usepackage{color}
 \usepackage{float}
 \usepackage{bigfoot}
-\usepackage[square,sort,comma,numbers]{natbib}
-\usepackage{titling}
+%\usepackage[square,sort,comma,numbers]{natbib}
+%\usepackage{titling}
 %\usepackage{mathtools}
 \usepackage{helvet}
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
 
+\ifCLASSOPTIONcompsoc
+  % IEEE Computer Society needs nocompress option
+  % requires cite.sty v4.0 or later (November 2003)
+  \usepackage[nocompress]{cite}
+\else
+  % normal IEEE
+  \usepackage{cite}
+\fi
+
+
 \setlength{\parindent}{0cm}
 
-\title{OpenMemDB: A wait-free database\thanks{Sponsor: Dr. Damian Dechev}}
-\author{Michael McGee \and Robert Medina \and Neil Moore \and Jason Stavrinaky}
-\date{2/1/2016}
+
 
 \pdfinfo{%
   /Title    (OpenMemDB: A wait-free database)
@@ -43,6 +52,17 @@
 \newcommand{\inlinecode}[1]{\colorbox{codegrey}{\lstinline[language=C++]{#1}}}
 
 \begin{document}
+
+\title{OpenMemDB: A wait-free database\thanks{Sponsor: Dr. Damian Dechev}}
+\author{
+\IEEEauthorblockN{Michael McGee} \and 
+\IEEEauthorblockN{Robert Medina} \and 
+\IEEEauthorblockN{Neil Moore} \and 
+\IEEEauthorblockN{Jason Stavrinaky}
+}
+
+\date{2/1/2016}
+
 \pagenumbering{gobble}
 \maketitle
 \newpage
