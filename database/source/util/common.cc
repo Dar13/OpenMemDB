@@ -1,5 +1,7 @@
 /* TODO Copyright header */
 
+#include <cstring>
+
 #include "util/common.h"
 
 /**
@@ -32,4 +34,25 @@ bool checkDateFormat(std::string str)
 	}
 
 	return true;
+}
+
+void serializeMetaDataPacket(ResultMetaDataPacket packet, char* out_buffer)
+{
+    // Assume the buffer is long enough for this
+    std::memset(out_buffer, 0, sizeof(ResultMetaDataPacket));
+    std::memcpy(out_buffer, &packet, sizeof(ResultMetaDataPacket));
+}
+
+void serializeResultPacket(ResultPacket packet, char* out_buffer)
+{
+    std::memcpy(out_buffer, &packet, 9);
+    if(packet.data != nullptr)
+    {
+        std::memset(out_buffer + 9, packet.terminator, sizeof(char));
+    }
+    else
+    {
+        std::memcpy(out_buffer + 9, packet.data, packet.resultSize);
+        out_buffer[9 + packet.resultSize + 1] = packet.terminator;
+    }
 }

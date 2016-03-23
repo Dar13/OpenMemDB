@@ -50,9 +50,9 @@ template<typename T>
 using TervelVector = tervel::containers::wf::vector::Vector<T>;
 
 // Table data definitions
-using Record = tervel::containers::wf::vector::Vector<int64_t>;
+using Record = TervelVector<int64_t>;
 
-using RecordVector = tervel::containers::wf::vector::Vector<Record*>;
+using RecordVector = TervelVector<ValuePointer<Record>*>;
 
 using KeyHashFunctor = std::hash<std::string>;
 
@@ -84,10 +84,10 @@ struct RecordCopy
 struct RecordReference
 {
     RecordReference() : id(0), ptr(nullptr) {}
-    RecordReference(uint64_t i, Record* p) : id(i), ptr(p) {}
+    RecordReference(uint64_t i, ValuePointer<Record>* p) : id(i), ptr(p) {}
 
     uint64_t id;
-    Record* ptr;
+    ValuePointer<Record>* ptr;
 };
 
 // TODO: Is there a more efficient way?
@@ -144,9 +144,15 @@ struct DataTable
 	        for(int64_t i = 0; i < table_len; i++)
 	        {
 	            // Get the current row pointer
-	            Record* row = nullptr;
-	            while(!records.pop_back_w_ra(row)) {}
-	            delete row;
+                ValuePointer<Record>* row_ptr;
+	            if(!records.pop_back_w_ra(row_ptr))
+                {
+                    delete row_ptr->ptr;
+                }
+                else 
+                {
+                    printf("Unable to pop record off of table! Potential memory leak!\n");
+                }
 	        }
         }
     }
@@ -203,6 +209,7 @@ struct Result<ManipStatus> : public ResultBase
     Result(ResultStatus s, ManipStatus res) : ResultBase(s, ResultType::COMMAND), result(res) {}
 
     ManipStatus result;
+    uint32_t rows_affected;
 };
 
 template<>
@@ -263,6 +270,8 @@ private:
 
     RecordCopy copyRecord(RecordVector& table, int64_t row_idx);
     RecordCopy copyRecord(Record* record);
+
+    Record* updateRecord(const RecordData& old_record, RecordData& new_record);
 
     MultiRecordCopies searchTable(std::shared_ptr<DataTable>& table, ValuePredicate* value_pred);
     /*

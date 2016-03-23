@@ -273,6 +273,7 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
         return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_NO_MEMORY);
     }
 
+    // These inserts should never fail, the tervel data structure isn't shared yet
     for(auto data : record)
     {
         TervelData terv_data = { .value = 0 };
@@ -281,9 +282,7 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
         data.data.tervel_status = 0;
         terv_data.value = data.value;
 
-        printf("Inserting %ld\n", terv_data.value);
-        size_t ret = new_record->push_back_w_ra(terv_data.value);
-        printf("Pushback returned %lu\n", ret);
+        new_record->push_back_w_ra(terv_data.value);
     }
 
     // Push the record counter on the back of the record
@@ -293,9 +292,9 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
     counter_data.data.value = counter;
     new_record->push_back_w_ra(counter_data.value);
 
-    size_t ret = table_pair.table->records.push_back_w_ra(new_record);
-    printf("Pushback returned %lu\n", ret);
-    printf("Record address %p\n", new_record);
+    ValuePointer<Record>* record_ptr = new ValuePointer<Record>(new_record);
+
+    table_pair.table->records.push_back_w_ra(record_ptr);
 
     return ManipResult(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
 }
@@ -307,12 +306,21 @@ ManipResult DataStore::updateRecords(Predicate* predicates,
         std::string table_name,
         RecordData record)
 {
+    // Denotes whether there's been some contention in the update
+    bool some_contention = false;
+
     if(predicates == nullptr)
     {
         // TODO: Allow a full update?
     }
     else
     {
+        SchemaTablePair pair;
+        if(!getTablePair(table_name, pair))
+        {
+            return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_TABLE_NOT_EXIST);
+        }
+
         RecordReferences record_refs;
         switch(predicates->type)
         {
@@ -321,12 +329,6 @@ ManipResult DataStore::updateRecords(Predicate* predicates,
                 break;
             case PredicateType::VALUE:
             {
-                SchemaTablePair pair;
-                if(!getTablePair(table_name, pair))
-                {
-                    return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_TABLE_NOT_EXIST);
-                }
-
                 record_refs = searchTableForRefs(pair.table, reinterpret_cast<ValuePredicate*>(predicates));
             }
                 break;
@@ -336,7 +338,68 @@ ManipResult DataStore::updateRecords(Predicate* predicates,
                 break;
         }
 
-        // TODO: Perform the delete using the record references and IDs gathered and the template record
+        if(record_refs.size() == 0)
+        {
+            ManipResult result(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
+            // There just isn't anything to update
+            result.rows_affected = 0;
+            return result;
+        }
+
+        uint64_t num_affected = 0;
+        // Attempt to swap the various references with the calculated record
+        for(auto old_record : record_refs)
+        {
+            int64_t table_len = pair.table->records.size();
+            for(int64_t idx = 0; idx < table_len; idx++)
+            {
+                VectorAccessor<Record> accessor;
+                if(!accessor.init(pair.table->records, idx))
+                {
+                    // Failed to initialize the accessor.
+                    // Not sure what to do here, I think it best would be to 
+                    // continue on and try the rest of the table.
+                    continue;
+                }
+
+                // TODO: Add a ID check?
+                if(old_record.ptr != accessor.value)
+                {
+                    continue;
+                }
+
+                RecordCopy copy = copyRecord(accessor.value->ptr);
+
+                // Perform the update
+                Record* updated_record = updateRecord(copy.data, record); 
+                if(updated_record == nullptr)
+                {
+                    // TODO: Error handling
+                }
+
+                // Now perform the CAS with the new record
+                ValuePointer<Record>* new_record_ptr = new ValuePointer<Record>(updated_record);
+                // TODO: Make sure the old record's pointer isn't modified in cas
+                if(!pair.table->records.cas(idx, old_record.ptr, new_record_ptr))
+                {
+                    // CAS failed, contention on the element
+                    some_contention = true;
+                }
+                else
+                {
+                    ++num_affected;
+                }
+            }
+        }
+
+        ManipResult result(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
+        if(some_contention)
+        {
+            result.result = ManipStatus::ERR_PARTIAL_CONTENTION;
+        }
+
+        result.rows_affected = num_affected;
+        return result;
     }
 
     // General error, this should never be reached
@@ -348,12 +411,21 @@ ManipResult DataStore::updateRecords(Predicate* predicates,
  */
 ManipResult DataStore::deleteRecords(Predicate* predicates, std::string table_name)
 {
+    bool some_contention = false;
+    uint64_t num_affected = 0;
+
     if(predicates == nullptr)
     {
         // TODO: Allow a full delete?
     }
     else
     {
+        SchemaTablePair pair;
+        if(!getTablePair(table_name, pair))
+        {
+            return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_TABLE_NOT_EXIST);
+        }
+
         RecordReferences record_refs;
         switch(predicates->type)
         {
@@ -362,12 +434,6 @@ ManipResult DataStore::deleteRecords(Predicate* predicates, std::string table_na
                 break;
             case PredicateType::VALUE:
             {
-                SchemaTablePair pair;
-                if(!getTablePair(table_name, pair))
-                {
-                    return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_TABLE_NOT_EXIST);
-                }
-
                 record_refs = searchTableForRefs(pair.table, reinterpret_cast<ValuePredicate*>(predicates));
             }
                 break;
@@ -377,7 +443,56 @@ ManipResult DataStore::deleteRecords(Predicate* predicates, std::string table_na
                 break;
         }
 
-        // TODO: Perform the delete using the record references and IDs gathered
+        // Go through the collected record references and attempt to delete them
+        for(auto old_record : record_refs)
+        {
+            int64_t table_len = pair.table->records.size();
+            for(int64_t idx = 0; idx < table_len; idx++)
+            {
+                VectorAccessor<Record> accessor;
+                if(!accessor.init(pair.table->records, idx))
+                {
+                    // Failed to initialize the accessor.
+                    // Not sure what to do here, I think it best would be to 
+                    // continue on and try the rest of the table.
+                    continue;
+                }
+
+                // TODO: Add a ID check?
+                if(old_record.ptr != accessor.value)
+                {
+                    continue;
+                }
+
+                ValuePointer<Record>* null_val_ptr = nullptr;
+                if(!pair.table->records.cas(idx, old_record.ptr, null_val_ptr))
+                {
+                    // CAS failed, contention on the element
+                    some_contention = true;
+                }
+                else
+                {
+                    ++num_affected;
+                }
+
+                if(!pair.table->records.eraseAt(idx, null_val_ptr))
+                {
+                    // Insert underneath me may have happened, but 
+                    // that shouldn't happen since we only push_back or pop_back.
+                    // This really shouldn't be reached
+                    some_contention = true;
+                }
+            }
+        }
+
+        ManipResult result(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
+        if(some_contention)
+        {
+            result.result = ManipStatus::ERR_PARTIAL_CONTENTION;
+        }
+
+        result.rows_affected = num_affected;
+        return result;
     }
 
     // General error, this should never be reached
@@ -418,16 +533,16 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
         for(int64_t i = 0; i < table_len; i++)
         {
             // Get the current row pointer
-            Record* row = nullptr;
+            Record* row_ptr = nullptr;
 
-            // This essentially waits for an access to become available.
-            // TODO: Is this wait-free?
-            while(!records.at(i, row)) {}
+            VectorAccessor<Record> accessor;
+            if(accessor.init(table->records, i))
+            {
+                row_ptr = accessor.value->ptr;
 
-            printf("Retrieved record address: %p\n", row);
-
-            RecordCopy record_copy = copyRecord(row);
-            data.push_back(record_copy.data);
+                RecordCopy record_copy = copyRecord(row_ptr);
+                data.push_back(record_copy.data);
+            }
         }
 
         return MultiRecordResult(ResultStatus::SUCCESS, data);
@@ -532,26 +647,29 @@ MultiRecordCopies DataStore::searchTable(std::shared_ptr<DataTable>& table,
 
     for(int64_t idx = 0; idx < table_len; idx++)
     {
-        Record* row = nullptr;
+        Record* row_ptr = nullptr;
 
-        while(!table->records.at(idx, row)) {}
-
-        RecordCopy record = copyRecord(row);
-
-        if(record.data.size() <= value_pred->column.column_idx)
+        VectorAccessor<Record> accessor;
+        if(accessor.init(table->records, idx))
         {
-            // TODO: Propagate error up? This should be caught earlier
-            return MultiRecordCopies();
-        }
+            row_ptr = accessor.value->ptr;
 
-        ExpressionValue row_value(record.data.at(value_pred->column.column_idx));
+            RecordCopy record = copyRecord(row_ptr);
 
-        if(evaluateOperation(value_pred->op, 
-                    value_pred->expected_value,
-                    row_value).IsTrue())
-        {
-            printf("Record matches predicate!\n");
-            data.push_back(record);
+            if(record.data.size() <= value_pred->column.column_idx)
+            {
+                // TODO: Propagate error up? This should be caught earlier
+                return MultiRecordCopies();
+            }
+
+            ExpressionValue row_value(record.data.at(value_pred->column.column_idx));
+
+            if(evaluateOperation(value_pred->op, 
+                        value_pred->expected_value,
+                        row_value).IsTrue())
+            {
+                data.push_back(record);
+            }
         }
     }
 
@@ -771,27 +889,33 @@ RecordReferences DataStore::searchTableForRefs(std::shared_ptr<DataTable>& table
 
     for(int64_t idx = 0; idx < table_len; idx++)
     {
-        Record* row = nullptr;
+        Record* row_ptr = nullptr;
 
-        while(!table->records.at(idx, row)) {}
-
-        // TODO: Consider making this a more focused grab of data
-        RecordCopy record = copyRecord(row);
-
-        if(record.data.size() <= value_pred->column.column_idx)
+        VectorAccessor<Record> accessor;
+        if(accessor.init(table->records, idx))
         {
-            // TODO: Propagate error up? This should be caught earlier
-            return RecordReferences();
-        }
+            row_ptr = accessor.value->ptr;
 
-        ExpressionValue row_value(record.data.at(value_pred->column.column_idx));
+            // TODO: Consider making this a more focused grab of data
+            RecordCopy record = copyRecord(row_ptr);
 
-        if(evaluateOperation(value_pred->op, 
-                    value_pred->expected_value,
-                    row_value).IsTrue())
-        {
-            printf("Record matches predicate!\n");
-            data.push_back(RecordReference(record.id, row));
+            // Grabbing the record failed for whatever reason
+            if(record.data.size() == 0) { continue; }
+
+            if(record.data.size() <= value_pred->column.column_idx)
+            {
+                // TODO: Propagate error up? This should be caught earlier
+                return RecordReferences();
+            }
+
+            ExpressionValue row_value(record.data.at(value_pred->column.column_idx));
+
+            if(evaluateOperation(value_pred->op, 
+                        value_pred->expected_value,
+                        row_value).IsTrue())
+            {
+                data.push_back(RecordReference(record.id, accessor.value));
+            }
         }
     }
 
@@ -928,8 +1052,16 @@ RecordCopy DataStore::copyRecord(RecordVector& table, int64_t row_idx)
 {
     Record* record = nullptr;
 
-    // TODO: Handle non-trivial failure case (e.g. row_idx > table->size())
-    while(!table.at(row_idx, record)) {}
+    // TODO: Any gotchas here?
+    VectorAccessor<Record> accessor;
+    if(accessor.init(table, row_idx))
+    {
+        return copyRecord(record);
+    }
+    else
+    {
+        return RecordCopy();
+    }
 
     return copyRecord(record);
 }
@@ -969,4 +1101,44 @@ RecordCopy DataStore::copyRecord(Record* record)
 
     // Return the copied data
     return record_copy;
+}
+
+/**
+ *  \brief Creates an updated copy of a passed-in record
+ */
+Record* DataStore::updateRecord(const RecordData& old_record, RecordData& new_record)
+{
+    // Perform the update
+    int64_t idx = 0;
+    TervelData old_data = { .value = 0 };
+
+    Record* updated_record = new (std::nothrow) Record;
+    if(updated_record == nullptr)
+    {
+        return nullptr;
+    }
+
+    for(auto new_data : new_record)
+    {
+        // Grab the old data from the copy
+        old_data = old_record.at(idx);
+
+        // Reset the Tervel status bits for insertion into a new record (if needed)
+        old_data.data.tervel_status = 0;
+
+        // If the new data for this column is null,
+        // then we need to keep the old data,
+        // else bring in the new.
+        if(new_data.data.null)
+        {
+            updated_record->push_back_w_ra(old_data.value);
+        }
+        else
+        {
+            updated_record->push_back_w_ra(new_data.value);
+        }
+        ++idx;
+    }
+
+    return updated_record;
 }

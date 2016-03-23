@@ -10,8 +10,10 @@ template <typename S>
 class ValuePointer : public tervel::util::memory::hp::Element
 {
     public:
-        S* value;
+        S* ptr;
         std::atomic<int64_t> counter;
+
+        ValuePointer(S* value) : ptr(value), counter(0) {}
 
         bool on_is_watched() {
             return (counter.load() > 0);
@@ -19,7 +21,7 @@ class ValuePointer : public tervel::util::memory::hp::Element
 
         ~ValuePointer() {
             counter.store(std::numeric_limits<int64_t>::min());
-            delete value;
+            delete ptr;
         }
 };
 
@@ -30,6 +32,8 @@ class VectorAccessor {
 
         Value* value;
 
+        VectorAccessor() : value(nullptr) {}
+
         bool init(tervel::containers::wf::vector::Vector<Value*>& vector, uint32_t index) {
             Value* retrieved_value;
             if(vector.at(index, retrieved_value))
@@ -38,7 +42,7 @@ class VectorAccessor {
                 HazardPointer::watch(HazardPointer::SlotID::SHORTUSE, retrieved_value);
 
                 Value* test_value;
-                if(!vector->at(test_value) || retrieved_value != test_value)
+                if(!vector.at(index, test_value) || retrieved_value != test_value)
                 {
                     HazardPointer::unwatch(HazardPointer::SlotID::SHORTUSE, retrieved_value);
                     return false;
@@ -52,7 +56,7 @@ class VectorAccessor {
                 // hp_unwatch
                 HazardPointer::unwatch(HazardPointer::SlotID::SHORTUSE, retrieved_value);
 
-                T* check_2 = nullptr;
+                Value* check_2 = nullptr;
                 if(vector.at(index, check_2))
                 {
                     HazardPointer::unwatch(HazardPointer::SlotID::SHORTUSE, retrieved_value);
@@ -66,6 +70,7 @@ class VectorAccessor {
                     return false;
                 }
 
+                // Store the clean pointer and return true, the access is successful.
                 this->value = retrieved_value;
                 return true;
             }
@@ -76,6 +81,9 @@ class VectorAccessor {
         }
 
         ~VectorAccessor() {
-            value->counter.fetch_sub(1);
+            if(value)
+            {
+                value->counter.fetch_sub(1);
+            }
         }
 };
