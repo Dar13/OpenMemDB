@@ -273,6 +273,7 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
         return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_NO_MEMORY);
     }
 
+    // These inserts should never fail, the tervel data structure isn't shared yet
     for(auto data : record)
     {
         TervelData terv_data = { .value = 0 };
@@ -281,9 +282,7 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
         data.data.tervel_status = 0;
         terv_data.value = data.value;
 
-        printf("Inserting %ld\n", terv_data.value);
-        size_t ret = new_record->push_back_w_ra(terv_data.value);
-        printf("Pushback returned %lu\n", ret);
+        new_record->push_back_w_ra(terv_data.value);
     }
 
     // Push the record counter on the back of the record
@@ -293,9 +292,9 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
     counter_data.data.value = counter;
     new_record->push_back_w_ra(counter_data.value);
 
-    size_t ret = table_pair.table->records.push_back_w_ra(new_record);
-    printf("Pushback returned %lu\n", ret);
-    printf("Record address %p\n", new_record);
+    ValuePointer<Record>* record_ptr = new ValuePointer<Record>(new_record);
+
+    table_pair.table->records.push_back_w_ra(record_ptr);
 
     return ManipResult(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
 }
@@ -336,7 +335,7 @@ ManipResult DataStore::updateRecords(Predicate* predicates,
                 break;
         }
 
-        // TODO: Perform the delete using the record references and IDs gathered and the template record
+        // TODO: Attempt a swap using the swap() method in Tervel
     }
 
     // General error, this should never be reached
@@ -418,16 +417,16 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
         for(int64_t i = 0; i < table_len; i++)
         {
             // Get the current row pointer
-            Record* row = nullptr;
+            Record* row_ptr = nullptr;
 
-            // This essentially waits for an access to become available.
-            // TODO: Is this wait-free?
-            while(!records.at(i, row)) {}
+            VectorAccessor<Record> accessor;
+            if(accessor.init(table->records, i))
+            {
+                row_ptr = accessor.value->ptr;
 
-            printf("Retrieved record address: %p\n", row);
-
-            RecordCopy record_copy = copyRecord(row);
-            data.push_back(record_copy.data);
+                RecordCopy record_copy = copyRecord(row_ptr);
+                data.push_back(record_copy.data);
+            }
         }
 
         return MultiRecordResult(ResultStatus::SUCCESS, data);
@@ -532,26 +531,29 @@ MultiRecordCopies DataStore::searchTable(std::shared_ptr<DataTable>& table,
 
     for(int64_t idx = 0; idx < table_len; idx++)
     {
-        Record* row = nullptr;
+        Record* row_ptr = nullptr;
 
-        while(!table->records.at(idx, row)) {}
-
-        RecordCopy record = copyRecord(row);
-
-        if(record.data.size() <= value_pred->column.column_idx)
+        VectorAccessor<Record> accessor;
+        if(accessor.init(table->records, idx))
         {
-            // TODO: Propagate error up? This should be caught earlier
-            return MultiRecordCopies();
-        }
+            row_ptr = accessor.value->ptr;
 
-        ExpressionValue row_value(record.data.at(value_pred->column.column_idx));
+            RecordCopy record = copyRecord(row_ptr);
 
-        if(evaluateOperation(value_pred->op, 
-                    value_pred->expected_value,
-                    row_value).IsTrue())
-        {
-            printf("Record matches predicate!\n");
-            data.push_back(record);
+            if(record.data.size() <= value_pred->column.column_idx)
+            {
+                // TODO: Propagate error up? This should be caught earlier
+                return MultiRecordCopies();
+            }
+
+            ExpressionValue row_value(record.data.at(value_pred->column.column_idx));
+
+            if(evaluateOperation(value_pred->op, 
+                        value_pred->expected_value,
+                        row_value).IsTrue())
+            {
+                data.push_back(record);
+            }
         }
     }
 
@@ -771,27 +773,33 @@ RecordReferences DataStore::searchTableForRefs(std::shared_ptr<DataTable>& table
 
     for(int64_t idx = 0; idx < table_len; idx++)
     {
-        Record* row = nullptr;
+        Record* row_ptr = nullptr;
 
-        while(!table->records.at(idx, row)) {}
-
-        // TODO: Consider making this a more focused grab of data
-        RecordCopy record = copyRecord(row);
-
-        if(record.data.size() <= value_pred->column.column_idx)
+        VectorAccessor<Record> accessor;
+        if(accessor.init(table->records, idx))
         {
-            // TODO: Propagate error up? This should be caught earlier
-            return RecordReferences();
-        }
+            row_ptr = accessor.value->ptr;
 
-        ExpressionValue row_value(record.data.at(value_pred->column.column_idx));
+            // TODO: Consider making this a more focused grab of data
+            RecordCopy record = copyRecord(row_ptr);
 
-        if(evaluateOperation(value_pred->op, 
-                    value_pred->expected_value,
-                    row_value).IsTrue())
-        {
-            printf("Record matches predicate!\n");
-            data.push_back(RecordReference(record.id, row));
+            // Grabbing the record failed for whatever reason
+            if(record.data.size() == 0) { continue; }
+
+            if(record.data.size() <= value_pred->column.column_idx)
+            {
+                // TODO: Propagate error up? This should be caught earlier
+                return RecordReferences();
+            }
+
+            ExpressionValue row_value(record.data.at(value_pred->column.column_idx));
+
+            if(evaluateOperation(value_pred->op, 
+                        value_pred->expected_value,
+                        row_value).IsTrue())
+            {
+                data.push_back(RecordReference(record.id, row_ptr));
+            }
         }
     }
 
@@ -928,8 +936,16 @@ RecordCopy DataStore::copyRecord(RecordVector& table, int64_t row_idx)
 {
     Record* record = nullptr;
 
-    // TODO: Handle non-trivial failure case (e.g. row_idx > table->size())
-    while(!table.at(row_idx, record)) {}
+    // TODO: Any gotchas here?
+    VectorAccessor<Record> accessor;
+    if(accessor.init(table, row_idx))
+    {
+        return copyRecord(record);
+    }
+    else
+    {
+        return RecordCopy();
+    }
 
     return copyRecord(record);
 }

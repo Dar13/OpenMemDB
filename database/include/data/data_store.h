@@ -50,9 +50,9 @@ template<typename T>
 using TervelVector = tervel::containers::wf::vector::Vector<T>;
 
 // Table data definitions
-using Record = tervel::containers::wf::vector::Vector<int64_t>;
+using Record = TervelVector<int64_t>;
 
-using RecordVector = tervel::containers::wf::vector::Vector<Record*>;
+using RecordVector = TervelVector<ValuePointer<Record>*>;
 
 using KeyHashFunctor = std::hash<std::string>;
 
@@ -144,9 +144,15 @@ struct DataTable
 	        for(int64_t i = 0; i < table_len; i++)
 	        {
 	            // Get the current row pointer
-	            Record* row = nullptr;
-	            while(!records.pop_back_w_ra(row)) {}
-	            delete row;
+                ValuePointer<Record>* row_ptr;
+	            if(!records.pop_back_w_ra(row_ptr))
+                {
+                    delete row_ptr->ptr;
+                }
+                else 
+                {
+                    printf("Unable to pop record off of table! Potential memory leak!\n");
+                }
 	        }
         }
     }
