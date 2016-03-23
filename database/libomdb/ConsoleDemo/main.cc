@@ -47,7 +47,7 @@ libomdb::Connection doConnect(std::string command) {
 }
 
 void doQuery(libomdb::Connection connection, std::string command) {
-    std::cout << "Sending " << command << " to server" << std::endl;
+    std::cout << "Sending '" << command << "' to server" << std::endl;
     auto result = connection.executeQuery(command);
     // Print all the results in a pretty little box
     // Start by printing the metadata columns
@@ -73,7 +73,7 @@ void doQuery(libomdb::Connection connection, std::string command) {
 void doCommand(libomdb::Connection connection, std::string command) {
     auto result = connection.executeCommand(command);
     if (result.isSuccess) {
-        std::cout << "Executed command " << command << ", affected " << result.numAffected << std::endl;
+        std::cout << "Executed command '" << command << "' , affected " << result.numAffected << " rows:" << std::endl;
     } else {
         std::cout << "Something went wrong" << std::endl;
     }
@@ -87,12 +87,11 @@ int main () {
     std::cout << "Welcome to OMDB" << std::endl;
     std::cout << "To connect to a database type connect" << std::endl;
     std::getline(std::cin, command, '\n');
-    std::transform(command.begin(), command.end(), command.begin(), ::tolower);
 
     while(command.compare("exit") != 0) {
         if (!command.empty()) {
             char firstLetter = command.at(0);
-            if (firstLetter == 's') {
+            if (firstLetter == 's' || firstLetter == 'S') {
                 if (!connection.getMetaData().isValid()) {
                     std::cout << "You must first connect to a database" << std::endl;
                 } else {
@@ -109,7 +108,6 @@ int main () {
         }
 
         std::getline(std::cin, command, '\n');
-        std::transform(command.begin(), command.end(), command.begin(), ::tolower);
     }
 
     std::cout << "Thanks for using OMDB" << std::endl;
