@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-#define MESSAGE_SIZE 1024
+#define MESSAGE_SIZE 300
 
 namespace libomdb
 {

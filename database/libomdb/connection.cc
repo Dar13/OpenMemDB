@@ -174,6 +174,7 @@ libomdb::Result parseQueryResult(ResultHolder holder) {
  * @param socket The file descriptor of the listening socket
  */
 ResultHolder sendMessage(CommandPacket packet, int socket) {
+  printf("Packet size is: %lu\n", sizeof(packet));
   char *serializedPacket = SerializeCommandPacket(packet);
   int bytes_sent = send(socket, serializedPacket, sizeof(packet), 0);
   if (bytes_sent == -1) {
