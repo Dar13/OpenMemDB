@@ -35,12 +35,19 @@ libomdb::Connection doConnect(std::string command) {
     std::cout << "What is the database name?" << std::endl;
     std::cin >> database;
 
+    printf("Connecting with (%s, %d, %s)\n", ip.c_str(), port, database.c_str());
+
     auto connection = libomdb::Connection::connect(ip, port, database);
-    std::cout << "Successfully connected to " << database << std::endl;
+    if (connection.getMetaData().isValid()) {
+        std::cout << "Successfully connected to " << database << std::endl;
+    } else {
+        std::cout << "Connection unsuccessful" << std::endl;
+    }
     return connection;
 }
 
 void doQuery(libomdb::Connection connection, std::string command) {
+    std::cout << "Sending " << command << " to server" << std::endl;
     auto result = connection.executeQuery(command);
     // Print all the results in a pretty little box
     // Start by printing the metadata columns
@@ -79,7 +86,7 @@ int main () {
     std::string command;
     std::cout << "Welcome to OMDB" << std::endl;
     std::cout << "To connect to a database type connect" << std::endl;
-    std::cin >> command;
+    std::getline(std::cin, command, '\n');
     std::transform(command.begin(), command.end(), command.begin(), ::tolower);
 
     while(command.compare("exit") != 0) {
@@ -102,7 +109,7 @@ int main () {
             }
         }
 
-        std::cin >> command;
+        std::getline(std::cin, command, '\n');
         std::transform(command.begin(), command.end(), command.begin(), ::tolower);
     }
 
