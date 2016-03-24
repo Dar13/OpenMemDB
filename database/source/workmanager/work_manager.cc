@@ -26,6 +26,7 @@
 #include <util/common.h>
 #include <workmanager/work_manager.h>
 #include <workmanager/work_thread.h>
+#include <data/data_store.h>
 
 /**
  *  \brief Constructor that initializes internal variables properly.
@@ -34,6 +35,16 @@ WorkManager::WorkManager(uint32_t num_threads, tervel::Tervel* tervel)
     : m_tervel(tervel), m_num_threads(num_threads), m_thread_data(num_threads)
 {
     m_context = new tervel::ThreadContext(m_tervel);
+    this->m_data_store = new DataStore();
+}
+
+/**
+ *  \brief Destructor that releases managed resources properly.
+ */
+WorkManager::~WorkManager()
+{
+    delete m_context;
+    delete m_data_store;
 }
 
 /**
@@ -259,7 +270,7 @@ bool WorkManager::ReceiveCommand(omdb::Connection& conn)
         memcpy(&command, command_buffer, sizeof(CommandPacket));
 
         // Create the worker thread's task
-        Job j = WorkThread::GenerateJob(job_number, command.message, this->data_store);
+        Job j = WorkThread::GenerateJob(job_number, command.message, this->m_data_store);
         Job* job_ptr = new (std::nothrow) Job(std::move(j));
         if(job_ptr == nullptr)
         {
