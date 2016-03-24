@@ -42,6 +42,9 @@ void WorkThread::Run(WorkThreadData* data)
 
     ThreadNotifier* notifier = data->notifier;
 
+    // All threads must run this
+    setupTokenMappings();
+
     // Condition variables require an unique_lock
     std::unique_lock<std::mutex> thread_lock(notifier->mutex, std::defer_lock);
 

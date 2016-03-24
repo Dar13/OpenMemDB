@@ -274,12 +274,10 @@ bool WorkManager::ReceiveCommand(omdb::Connection& conn)
 
         // Push the job to the thread
         WorkThreadData& thread_data = m_thread_data[GetAvailableThread()];
-        printf("id = %u\n", thread_data.id);
 
         while(!thread_data.job_queue.enqueue(job_ptr)) {}
 
         // Notify the thread to wake-up
-        printf("thread notifier = %p\n", thread_data.notifier);
         thread_data.notifier->cond_var.notify_one();
 
         status.status_code = omdb::SUCCESS;
