@@ -393,12 +393,14 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
                 if(net_status.status_code != omdb::NetworkStatusCodes::SUCCESS)
                 {
                     // TODO: Handle error
+                    return false;
                 }
 
                 net_status = conn.send(result_buffer, metadata_packet.resultPacketSize);
                 if(net_status.status_code != omdb::NetworkStatusCodes::SUCCESS)
                 {
                     // TODO: Handle error
+                    return false;
                 }
 
                 delete metadata_buffer;
@@ -410,11 +412,11 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
                 ResultMetaDataPacket metadata_packet = {};
                 ResultPacket result_packet = {};
 
-                ManipResult* result = reinterpret_cast<ManipResult*>(result);
+                ManipResult* cmd_result = reinterpret_cast<ManipResult*>(result);
 
                 metadata_packet.type = PacketType::RESULT_METADATA;
-                metadata_packet.status = result->status;
-                metadata_packet.numColumns = static_cast<uint32_t>(result->result);
+                metadata_packet.status = cmd_result->status;
+                metadata_packet.numColumns = static_cast<uint32_t>(cmd_result->result);
 
                 // Leaving the columns set to 0, they're unused
 
@@ -426,7 +428,7 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
                 // Setup the metadata packet
                 result_packet.type = PacketType::RESULT_DATA;
                 result_packet.status = metadata_packet.status;
-                result_packet.resultSize = result->rows_affected;
+                result_packet.resultSize = cmd_result->rows_affected;
                 result_packet.terminator = THE_TERMINATOR;
                 // All other fields should be set to zero
                 
@@ -438,15 +440,23 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
 
                 // Now actually send the data
                 auto net_status = conn.send(metadata_buffer, sizeof(ResultMetaDataPacket));
-                if(net_status.status_code != omdb::NetworkStatusCodes::SUCCESS)
+                if(net_status.status_code != omdb::NetworkStatusCodes::SUCCESS &&
+                    net_status.status_code != omdb::NetworkStatusCodes::D_SEND_FULL)
                 {
                     // TODO: Handle error
+                    printf("Failed sending result metadata packet!\n");
+                    printf("Error code: %d\n", net_status.status_code);
+                    return false;
                 }
 
                 net_status = conn.send(result_buffer, metadata_packet.resultPacketSize);
-                if(net_status.status_code != omdb::NetworkStatusCodes::SUCCESS)
+                if(net_status.status_code != omdb::NetworkStatusCodes::SUCCESS &&
+                    net_status.status_code != omdb::NetworkStatusCodes::D_SEND_FULL)
                 {
                     // TODO: Handle error
+                    printf("Failed sending result packet!\n");
+                    printf("Error code: %d\n", net_status.status_code);
+                    return false;
                 }
 
                 // TODO: Remove when switched to static buffer
@@ -460,7 +470,7 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
             break;
     }
 
-    return false;
+    return true;
 }
 
 void WorkManager::Abort()

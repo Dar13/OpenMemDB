@@ -72,7 +72,10 @@ ManipResult DataStore::createTable(CreateTableCommand table_info)
         printf("Insertion failed\n");
     }
 
-    return ManipResult(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
+    ManipResult result(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
+    result.rows_affected = 0;
+
+    return result;
 }
 
 /**
@@ -130,6 +133,8 @@ ManipResult DataStore::deleteTable(std::string table_name)
     // DataTable destructor. Any call to getTablePair adds an owner to the shared
     // pointer, which increases its ref-count. Deleting this pair allows for the 
     // ref-count to hit zero, which triggers a delete.
+
+    // TODO: Calculate the rows deleted due to the drop
 
     return ManipResult(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
 }

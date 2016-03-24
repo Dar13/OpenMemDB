@@ -206,7 +206,9 @@ using ConstraintResult = Result<ConstraintStatus>;
 template<>
 struct Result<ManipStatus> : public ResultBase
 {
-    Result(ResultStatus s, ManipStatus res) : ResultBase(s, ResultType::COMMAND), result(res) {}
+    Result(ResultStatus s, ManipStatus res) 
+        : ResultBase(s, ResultType::COMMAND), result(res), rows_affected(0)
+    {}
 
     ManipStatus result;
     uint32_t rows_affected;
