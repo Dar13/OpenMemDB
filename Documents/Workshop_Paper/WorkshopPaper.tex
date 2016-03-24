@@ -68,6 +68,19 @@
 \newpage
 
 \pagenumbering{arabic}
+\begin{abstract}
+OpenMemDB is an in-memory database that is implemented using solely wait-free
+data structures. OpenMemDB is the first and only database currently developed in such a
+way. OpenMemDB also provides linearizable correctness guarantees for all operations
+executed on the database. OpenMemDB uses a form of snapshot isolation to ensure 
+linearizability, and avoids the write-skew problem that can occur when using
+snapshot isolation by eliminating writes that are out of data. 
+OpenMemDB's biggest contribution is it's completely wait-free 
+implementation. Every operation executed in OpenMemDB is guarenteed to be wait-free 
+and linearizeably correct. This implementation also scales extremely well, and performs 
+{{ENTER PERCENT HERE}} better than similar in-memory database management systems.
+{{NEED A LITTLE BIT MORE ABOUT THE PERFORMANCE}}
+\end{abstract}
 
 \section{Introduction}
 While hard drives are getting faster due to the introduction of NAND flash-based drives,
@@ -113,13 +126,22 @@ in \CC 11 and uses the modern constructs defined by that standard extensively.
 \par\vspace{\baselineskip}
 
 \section{Related Work}
-There have been some attempts to increase the performance of database management
-systems in recent years. Some solutions will sacrifice
-some data consistency in order to achieve better performance. Still others
-remain fully ACID compliant and attempt to parallelize individual steps in the 
-DBMS or solely use multiple threads when executing query plans. There are also those
-that attempt to implement some level of lock-freedom into their DBMS.
-\par\vspace{\baselineskip}
+There are several other in-memory database management systems that attempt to solve the 
+problem of data-contention. This being the main source of slow downs for in-memory systems.
+
+The database management system most related to OpenMemDB is MemSQL.
+MemSQL uses lock-free data structures for every component of their database management
+system. MemSQL uses lock-free skips lists and hash tables for the bulk of their data-store\cite{MemSQL}.
+They also use MVCC (Multi-version Concurrency Control) to provide fast transactions. 
+OpenMemDB does something similar with snapshot isolation. MemSQL also compiles SQL
+statement to C++ code and stores this code to be used if the SQL statement is ever called
+again. Something that OpenMemDB does not implement.
+
+VoltDB is an in-memory system that {{TODO}}
+
+Silo is {{TODO}}
+
+%TODO fix the rest of this
 MemSQL\footnote{MemSQL can be configured as a Columnstore that stores data on disk.}
 and VoltDB are both fully in-memory DBMS as is OpenMemDB. This is where the
 similarities end as far as OpenMemDB is concerned. MemSQL and VoltDB on the other 
@@ -136,7 +158,6 @@ there are a number of operations that need to be executed on the same table in a
 these operations will be scheduled sequentially. The only parallelism that occurs is during
 operations on unrelated data. Our approach allows for concurrent operations to take place
 no matter what data is being accessed.
-\newpage
 
 \section{Technical Approach}
 Our database is built upon wait-free data structures found in Tervel, a collection of
