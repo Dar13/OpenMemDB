@@ -24,13 +24,16 @@ enum class ResultStatus : uint16_t
 {
     SUCCESS = 0,
     FAILURE,
+    FAILURE_DB_UNKNOWN_STATE,
     FAILURE_OUT_MEMORY,
+    FAILURE_SYNTAX,
 };
 
 enum class ManipStatus : uint32_t
 {
     SUCCESS = 0,
     ERR,
+    ERR_UNKNOWN_STATEMENT,
     ERR_NO_MEMORY,
     ERR_TABLE_NOT_EXIST,
     ERR_TABLE_CMD_INVALID,

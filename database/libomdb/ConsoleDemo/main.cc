@@ -49,6 +49,16 @@ libomdb::Connection doConnect(std::string command) {
 void doQuery(libomdb::Connection connection, std::string command) {
     std::cout << "Sending '" << command << "' to server" << std::endl;
     auto result = connection.executeQuery(command);
+
+    // TODO: Create a way to check for a failed query!!
+    /*
+    if(!result.isSuccess) {
+        // TODO: Print out error string based on error code returned
+        printf("Error! I should be printing useful things...\n");
+        return;
+    }
+    */
+
     // Print all the results in a pretty little box
     // Start by printing the metadata columns
     auto metaData = result.getMetaData();
@@ -75,7 +85,8 @@ void doCommand(libomdb::Connection connection, std::string command) {
     if (result.isSuccess) {
         std::cout << "Executed command '" << command << "' , affected " << result.numAffected << " rows:" << std::endl;
     } else {
-        std::cout << "Something went wrong" << std::endl;
+        // TODO: Print out error string based on error code returned
+        printf("Error! I should be printing useful things...\n");
     }
 }
 
