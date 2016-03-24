@@ -239,7 +239,7 @@ class DataStore
 {
 public:
     DataStore()
-        : table_name_mapping(64)
+        : table_name_mapping(63)
     {}
 
     TervelVector<ValuePointer<Record>*> test;

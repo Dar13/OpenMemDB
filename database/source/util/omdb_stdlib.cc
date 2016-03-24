@@ -17,39 +17,24 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef UTIL_STDLIB_H
-#define UTIL_STDLIB_H
+#include "util/omdb_stdlib.h"
 
-// C++ includes
-#include <iterator>
-#include <functional>
+#include <map>
 
-// C includes
-#include <csignal>
+static std::map<int, std::function<void(int)>> handlers;
 
-/**
- * \brief Implements a safe advancement of the given iterator over a specified distance
- *
- * \return True if the advance is safe, false if it fails.
- */
-template <typename T>
-bool safe_advance(T& itr, const T end, size_t distance)
+static void signalDispatch(int sig)
 {
-    typedef typename std::iterator_traits<T>::iterator_category tag;
-    static_assert(std::is_base_of<std::forward_iterator_tag, tag>::value,
-            "Iterators passed to safe_advance must be forward iterators");
+    // Safe to assume that if this is called, a handler was setup
+    handlers[sig](sig);
 
-	while(itr != end && distance > 0)
-	{
-		itr++;
-		distance--;
-	}
-
-	// If this returns true, then the iterator never reached end
-	// Else it reached end early
-	return (distance == 0);
+    ::signal(sig, SIG_DFL);
+    ::raise(sig);
 }
 
-void setSignalHandler(int signal, std::function<void(int)> handler_functor);
+void setSignalHandler(int signal, std::function<void(int)> handler_functor)
+{
+    handlers[signal] = handler_functor;
 
-#endif
+    ::signal(signal, signalDispatch);
+}

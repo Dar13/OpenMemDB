@@ -67,6 +67,8 @@ public:
 
     int32_t Run();
 
+    void Abort();
+
     //! This constant also determines the maximum number of threads
     //! in the system.
     static const uint32_t MAX_NUM_MUTEXES = 64;

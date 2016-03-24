@@ -19,10 +19,7 @@
 
 #include <tervel/util/tervel.h>
 #include <workmanager/work_manager.h>
-
-/* TODO: REMOVE THIS, JUST FOR TESTING */
-#include <sql/omdb_parser.h>
-#include <data/data_store.h>
+#include <util/omdb_stdlib.h>
 
 /**
  *  @brief The entry point of the application.
@@ -38,6 +35,12 @@ int main(int argc, char** argv)
 
   tervel::Tervel* tervel_main = new tervel::Tervel(9);
   WorkManager work_manager(8, tervel_main);
+
+  // Setup some signal handlers
+  setSignalHandler(SIGINT, [&work_manager] (int) { work_manager.Abort(); });
+  setSignalHandler(SIGTERM, [&work_manager] (int) { work_manager.Abort(); });
+  setSignalHandler(SIGSEGV, [&work_manager] (int) { work_manager.Abort(); });
+  setSignalHandler(SIGABRT, [&work_manager] (int) { work_manager.Abort(); });
 
   int32_t status = 0;
 

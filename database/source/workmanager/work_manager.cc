@@ -451,3 +451,11 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
 
     return false;
 }
+
+void WorkManager::Abort()
+{
+    // Perform emergency clean-up
+    close(m_server_socket_fd);
+
+    // TODO: Others?
+}
