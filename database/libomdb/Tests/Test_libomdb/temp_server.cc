@@ -31,9 +31,10 @@ THE SOFTWARE.
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <cassert>
 
-#include "../../../include/util/libomdb.h"
-
+#include "../../../include/util/packets.h"
+#include "serialization_helper.h"
 
 /*
  * temp_server.cc
@@ -57,7 +58,7 @@ ResultPacket getStockResultPacket() {
     }
     ResultPacket resultPacket;
     resultPacket.type = PacketType::RESULT_DATA;
-    resultPacket.status = ResultStatus::OK;
+    resultPacket.status = ResultStatus::SUCCESS;
     resultPacket.rowLen = rows;
     resultPacket.resultSize = (rows * columns * sizeof(uint64_t));
     resultPacket.data = data;
@@ -66,19 +67,22 @@ ResultPacket getStockResultPacket() {
 }
 
 ResultMetaDataPacket getStockResultMetaDataPacket() {
-    ResultColumn columns[10];
-    for (int i = 0; i < 10; ++i) {
+    ResultColumn columns[20];
+    for (int i = 0; i < 20; ++i) {
         ResultColumn col;
-        std::string num(i);
-        col.name = "Name "+num;
+        std::string numberString = "Name"+std::to_string(i);
+        strcpy(col.name, numberString.c_str());
         col.type = 1; // TODO: Change to Neils types
         columns[i] = col;
     }
     ResultMetaDataPacket resultMetaDataPacket;
     resultMetaDataPacket.type = PacketType::RESULT_METADATA;
-    resultMetaDataPacket.status = ResultStatus::OK;
+    resultMetaDataPacket.status = ResultStatus::SUCCESS;
     resultMetaDataPacket.numColumns = 10;
-    resultMetaDataPacket.columns = mdColumns;
+    //resultMetaDataPacket.columns = columns;
+    memcpy(resultMetaDataPacket.columns, &columns, sizeof(ResultColumn) * 20);
+    resultMetaDataPacket.resultPacketSize = ((10 * 10 * sizeof(uint64_t)) + sizeof(PacketType) + sizeof(ResultStatus) +
+                                             sizeof(uint64_t) + sizeof(uint32_t) + sizeof(uint8_t)); // 10 rows 10 columns and then all of the other stuff in the result packet
     resultMetaDataPacket.terminator = THE_TERMINATOR;
     return resultMetaDataPacket;
 }
@@ -91,11 +95,18 @@ ResultPacket getStockComResult() {
     */
     ResultPacket packet;
     packet.resultSize = 10; // 10 rows affected
-    packet.status = ResultStatus::OK;
+    packet.status = ResultStatus::SUCCESS;
     packet.rowLen = 1; // ManipStatus is a uint32_t, don't know how this would work
     packet.data = nullptr;
     packet.terminator = THE_TERMINATOR;
     return packet;
+}
+
+ConnectionPacket getStockConnectionPacket() {
+  ConnectionPacket packet;
+  packet.type = PacketType::CONNECTION;
+  strcpy(packet.name, "Fake DB");
+  return packet;
 }
 
 void sigchld_handler(int s)
@@ -200,47 +211,64 @@ int main(void)
 
         if (!fork()) { // this is the child process
             close(sockfd); // child doesn't need the listener
-            if (send(new_fd, "Hello, world!", 13, 0) == -1) {
+            ConnectionPacket conPacket = getStockConnectionPacket();
+            auto serializedConPacket = SerializeConnectionPacket(conPacket);
+            if (send(new_fd, serializedConPacket, sizeof(serializedConPacket), 0) == -1) {
                 perror("send");
                 exit(1);
             }
 
             while(1) {
-                char receivedBuffer[1000];
-                int bytesReceived = recv(new_fd, receivedBuffer, 999, 0);
+                ResultMetaDataPacket resultMetaDataPacket;
+                char receivedBuffer[sizeof(CommandPacket)];
+                int bytesReceived = recv(new_fd, receivedBuffer, sizeof(CommandPacket), 0);
                 if (bytesReceived == -1) {
                     perror("recv");
                     exit(1);
                 }
-                receivedBuffer[bytesReceived] = '\0';
-                std::string messageToReturn;
-                std::string mdToReturn;
+                //receivedBuffer[bytesReceived] = '\0';
+                char* messageToReturn;
+                char* mdToReturn;
+                CommandPacket commandPacket = DeserializeCommandPacket(receivedBuffer);
+                printf("The command type is: %d\n\n", (int)commandPacket.commandType);
                 // Check if message is select or command
-                if (receivedBuffer[0] == 'S' || receivedBuffer[0] == 's') {
+                if (commandPacket.commandType == CommandType::SQL_STATEMENT) {
                     messageToReturn = SerializeResultPacket(getStockResultPacket());
-                    mdToReturn = SerializeResultMetaDataPacket(getStockResultMetaDataPacket());
-                } else {
+                    resultMetaDataPacket = getStockResultMetaDataPacket();
+                    mdToReturn = SerializeResultMetaDataPacket(resultMetaDataPacket);
+                } else if (commandPacket.commandType == CommandType::DB_COMMAND){
                     // Command results should be returned in
                     // ResultPacket with different values set
                     // see libomdb.h for specifics
-                    messageToReturn = SerializeResultPacket(getStockComRes());
-                    mdToReturn = SerializeResultMetaData(getStockResultMetaDataPacket());
+                    assert(false);
+                    printf("Building and returning command result\n");
+                    resultMetaDataPacket = getStockResultMetaDataPacket();
+                    messageToReturn = SerializeResultPacket(getStockComResult());
+                    resultMetaDataPacket.resultPacketSize = std::string(messageToReturn).length();
+                    mdToReturn = SerializeResultMetaDataPacket(resultMetaDataPacket);
+                } else {
+                    printf("Entered forbidden zone >:(\n");
                 }
-                printf("Server received message %s\n", receivedBuffer);
                 if (receivedBuffer[0] == '1') {
                     break;
                 }
-                int bytesSent = send(new_fd, messageToReturn.c_str(), messageToReturn.size(), 0);
+
+
+                int bytesSent2 = send(new_fd, mdToReturn, sizeof(ResultMetaDataPacket), 0);
+                if (bytesSent2 == -1) {
+                    perror("send");
+                    exit(1);
+                }
+
+                int bytesSent = send(new_fd, messageToReturn, resultMetaDataPacket.resultPacketSize, 0);
                 if (bytesSent == -1) {
                     perror("send");
                     exit(1);
                 }
 
-                int bytesSent2 = send(new_fd, mdToReturn.c_str(), mdToReturn.size(), 0);
-                if (bytesSent2 == -1) {
-                    perror("send");
-                    exit(1);
-                }
+
+                printf("\n--------------------------------------------------------------\n");
+
             }
             close(new_fd);
             exit(0);

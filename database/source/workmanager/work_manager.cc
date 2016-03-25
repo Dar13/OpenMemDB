@@ -23,8 +23,10 @@
 #include <algorithm>
 
 // Project includes
+#include <util/common.h>
 #include <workmanager/work_manager.h>
 #include <workmanager/work_thread.h>
+#include <data/data_store.h>
 
 /**
  *  \brief Constructor that initializes internal variables properly.
@@ -33,6 +35,16 @@ WorkManager::WorkManager(uint32_t num_threads, tervel::Tervel* tervel)
     : m_tervel(tervel), m_num_threads(num_threads), m_thread_data(num_threads)
 {
     m_context = new tervel::ThreadContext(m_tervel);
+    this->m_data_store = new DataStore();
+}
+
+/**
+ *  \brief Destructor that releases managed resources properly.
+ */
+WorkManager::~WorkManager()
+{
+    delete m_context;
+    delete m_data_store;
 }
 
 /**
@@ -61,10 +73,11 @@ int32_t WorkManager::Initialize()
 
         found_idx->used = true;
         WorkThreadData data(found_idx);
+        data.id = thread_id;
         data.tervel = m_tervel;
 
-        m_thread_data.push_back(std::move(data));
-        m_thread_data.back().thread = std::thread(WorkThread::Run, &m_thread_data.back());
+        m_thread_data[thread_id] = data;
+        m_thread_data[thread_id].thread = std::thread(WorkThread::Run, &m_thread_data[thread_id]);
     }
 
     // Create a socket and listen to it.
@@ -201,28 +214,6 @@ int32_t WorkManager::Run()
                 printf("Unable to send job!\n");
             }
 
-            // TODO: How to handle Command results?
-            // TODO: Generate ResultMetaData packet
-            // TODO: Generate Result packet
-
-            /*
-            status = conn.send((char*)&res.result, sizeof(uint64_t));
-            while(status.status_code == omdb::D_RECV_PART)
-            {
-                printf("Attempting to send entirety of response\n");
-                status = conn.send((char*)res.result, sizeof(uint64_t));
-            }
-
-            if(status.status_code != omdb::D_SEND_FULL &&
-               status.status_code != omdb::SUCCESS)
-            {
-                printf("Error sending result to client!\n");
-                printf("Code: %d Secondary: %s\n", status.status_code,
-                                                   strerror(status.secondary_code));
-                return E_NET_ERR;
-            }
-            */
-
             printf("Job number %d is done!\n", res.job_number);
             
             // Clean up result
@@ -254,7 +245,8 @@ uint32_t WorkManager::GetAvailableThread()
  */
 bool WorkManager::ReceiveCommand(omdb::Connection& conn)
 {
-    char buffer[MAX_PACKET_SIZE];
+    // TODO: Make static to avoid re-allocation?
+    char command_buffer[sizeof(CommandPacket)];
     
     // We're making this unsigned so the overflow behavior is predictable
     // If we ever get more than 3 billion concurrent requests, we'll be in trouble though...
@@ -263,7 +255,7 @@ bool WorkManager::ReceiveCommand(omdb::Connection& conn)
     omdb::NetworkStatus status;
 
     // Is there anything in the queue?
-    status = conn.recv(buffer, MAX_PACKET_SIZE);
+    status = conn.recv(command_buffer, sizeof(CommandPacket));
 
     // Generate a job and queue it into a worker thread if the full 
     // message was received
@@ -274,10 +266,11 @@ bool WorkManager::ReceiveCommand(omdb::Connection& conn)
         // TODO: Remove this, for debugging purposes only
         printf("Creating job number %d\n", job_number);
 
-        // TODO: Properly parse buffer
+        CommandPacket command;
+        memcpy(&command, command_buffer, sizeof(CommandPacket));
 
         // Create the worker thread's task
-        Job j = WorkThread::GenerateJob(job_number, buffer, this->data_store);
+        Job j = WorkThread::GenerateJob(job_number, command.message, this->m_data_store);
         Job* job_ptr = new (std::nothrow) Job(std::move(j));
         if(job_ptr == nullptr)
         {
@@ -296,7 +289,7 @@ bool WorkManager::ReceiveCommand(omdb::Connection& conn)
         while(!thread_data.job_queue.enqueue(job_ptr)) {}
 
         // Notify the thread to wake-up
-        thread_data.cond_var->notify_one();
+        thread_data.notifier->cond_var.notify_one();
 
         status.status_code = omdb::SUCCESS;
         return false;
@@ -381,26 +374,94 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
                     result_packet.data = result_data;
                     result_packet.terminator = THE_TERMINATOR;
                 }
+                
+                // TODO: Verify
+                metadata_packet.resultPacketSize = 9 + result_packet.resultSize + 1;
 
-                // Now actually send the packets
-                // TODO: Implement this
-                assert(false);
+                // Serialize the packets
+                // TODO: Convert to static buffers
+                char* metadata_buffer = new char[sizeof(ResultMetaDataPacket)];
+                memcpy(metadata_buffer, &metadata_packet, sizeof(ResultMetaDataPacket));
+
+                char* result_buffer = new char[metadata_packet.resultPacketSize];
+                memcpy(result_buffer, &result_packet, 9);
+                memcpy(result_buffer + 9, result_packet.data, result_packet.resultSize);
+                result_buffer[metadata_packet.resultPacketSize - 1] = THE_TERMINATOR;
+
+                // Now actually send the data
+                auto net_status = conn.send(metadata_buffer, sizeof(ResultMetaDataPacket));
+                if(net_status.status_code != omdb::NetworkStatusCodes::SUCCESS)
+                {
+                    // TODO: Handle error
+                    return false;
+                }
+
+                net_status = conn.send(result_buffer, metadata_packet.resultPacketSize);
+                if(net_status.status_code != omdb::NetworkStatusCodes::SUCCESS)
+                {
+                    // TODO: Handle error
+                    return false;
+                }
+
+                delete metadata_buffer;
+                delete result_buffer;
             }
             break;
         case ResultType::COMMAND:
             {
-                CommandResultPacket packet = {};
-                packet.type = PacketType::COMMAND_RESULT;
+                ResultMetaDataPacket metadata_packet = {};
+                ResultPacket result_packet = {};
 
-                ManipResult* manip_result = reinterpret_cast<ManipResult*>(result);
-                packet.status = manip_result->status;
-                // TODO: Rework ManipStatus to hold rows affected data
-                packet.secondaryStatus = manip_result->result;
-                packet.rowsAffected = 0;
+                ManipResult* cmd_result = reinterpret_cast<ManipResult*>(result);
 
-                packet.terminator = THE_TERMINATOR;
+                metadata_packet.type = PacketType::RESULT_METADATA;
+                metadata_packet.status = cmd_result->status;
+                metadata_packet.numColumns = static_cast<uint32_t>(cmd_result->result);
 
-                // TODO: Send the packet
+                // Leaving the columns set to 0, they're unused
+
+                // Tiny packet
+                metadata_packet.resultPacketSize = 10;
+
+                metadata_packet.terminator = THE_TERMINATOR;
+
+                // Setup the metadata packet
+                result_packet.type = PacketType::RESULT_DATA;
+                result_packet.status = metadata_packet.status;
+                result_packet.resultSize = cmd_result->rows_affected;
+                result_packet.terminator = THE_TERMINATOR;
+                // All other fields should be set to zero
+                
+                char* metadata_buffer = new char[sizeof(ResultMetaDataPacket)];
+                serializeMetaDataPacket(metadata_packet, metadata_buffer);
+
+                char* result_buffer = new char[metadata_packet.resultPacketSize];
+                serializeResultPacket(result_packet, result_buffer);
+
+                // Now actually send the data
+                auto net_status = conn.send(metadata_buffer, sizeof(ResultMetaDataPacket));
+                if(net_status.status_code != omdb::NetworkStatusCodes::SUCCESS &&
+                    net_status.status_code != omdb::NetworkStatusCodes::D_SEND_FULL)
+                {
+                    // TODO: Handle error
+                    printf("Failed sending result metadata packet!\n");
+                    printf("Error code: %d\n", net_status.status_code);
+                    return false;
+                }
+
+                net_status = conn.send(result_buffer, metadata_packet.resultPacketSize);
+                if(net_status.status_code != omdb::NetworkStatusCodes::SUCCESS &&
+                    net_status.status_code != omdb::NetworkStatusCodes::D_SEND_FULL)
+                {
+                    // TODO: Handle error
+                    printf("Failed sending result packet!\n");
+                    printf("Error code: %d\n", net_status.status_code);
+                    return false;
+                }
+
+                // TODO: Remove when switched to static buffer
+                delete metadata_buffer;
+                delete result_buffer;
             }
             break;
         default:
@@ -409,5 +470,13 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
             break;
     }
 
-    return false;
+    return true;
+}
+
+void WorkManager::Abort()
+{
+    // Perform emergency clean-up
+    close(m_server_socket_fd);
+
+    // TODO: Others?
 }

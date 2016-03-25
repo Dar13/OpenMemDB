@@ -79,6 +79,6 @@ bool libomdb::Result::next() {
     return false;  
   } else {
     this->m_rows.pop_back();
-    return true;
+    return !this->m_rows.empty();
   }
 }

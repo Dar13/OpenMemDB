@@ -18,7 +18,6 @@ namespace libomdb
   const uint32_t DB_NAME_LEN = 50;
   const uint32_t COL_NAME_LEN = 25;
   const uint32_t MAX_NUM_COLUMNS = 20;
-  //TODO: Verify with Mike on maximum packet size
   const uint32_t MAX_PACKET_SIZE = 512;
 
   enum class ResultStatus : uint16_t
@@ -100,6 +99,7 @@ namespace libomdb
     PacketType type;
     ResultStatus status;
     uint32_t numColumns;
+    uint32_t resultPacketSize; // This is the size of ResultPacket associated with this one
     ResultColumn columns[MAX_NUM_COLUMNS];  // Array containing name of each column and SQL type associated with it
     uint8_t terminator;
   }__attribute__((packed));
@@ -234,7 +234,7 @@ namespace libomdb
 
     /** Builds new ConnectionMetaData object */
     ConnectionMetaData(std::string dbName, bool isValid);
-    
+
     /** Gets the name of the connected database */
     std::string getDbName();    
 
@@ -322,7 +322,7 @@ namespace libomdb
      * // Cannot figure out how to not do this in the .h Be my guest to fix. C++ is annoying.
      */
     static Connection errorConnection() {
-      return Connection(0, ConnectionMetaData(NULL, false));
+      return Connection(0, ConnectionMetaData("", false));
     }
 
    private:

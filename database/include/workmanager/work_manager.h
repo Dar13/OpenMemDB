@@ -46,10 +46,7 @@ class WorkManager
 {
 public:
     WorkManager(uint32_t num_threads, tervel::Tervel* tervel);
-    ~WorkManager()
-    {
-        delete m_context;
-    }
+    ~WorkManager();
 
     /**
      *  @brief An enumeration of all error codes that can be returned when
@@ -66,6 +63,8 @@ public:
     int32_t Initialize();
 
     int32_t Run();
+
+    void Abort();
 
     //! This constant also determines the maximum number of threads
     //! in the system.
@@ -107,7 +106,7 @@ private:
     std::map<uint32_t, omdb::Connection> m_job_to_connection;
 
     //! The active data store object
-    DataStore* data_store;
+    DataStore* m_data_store;
 };
 
 #endif

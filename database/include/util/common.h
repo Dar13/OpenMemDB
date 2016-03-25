@@ -5,6 +5,11 @@
 
 #include <string>
 
+#include "packets.h"
+
 bool checkDateFormat(std::string str);
+
+void serializeMetaDataPacket(ResultMetaDataPacket packet, char* out_buffer);
+void serializeResultPacket(ResultPacket packet, char* out_buffer);
 
 #endif

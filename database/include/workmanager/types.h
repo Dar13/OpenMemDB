@@ -94,27 +94,29 @@ struct ThreadNotifier
 struct WorkThreadData
 {
     WorkThreadData()
-        : stop(nullptr), cond_var(nullptr), mutex(nullptr)
+        : notifier(nullptr) 
     {}
 
     WorkThreadData(ThreadNotifier* notifier)
-        : stop(&(notifier->stop)), cond_var(&notifier->cond_var), 
-        mutex(&notifier->mutex)
+        : notifier(notifier) 
     {}
 
     WorkThreadData(WorkThreadData&& data)
-        : tervel(data.tervel), stop(data.stop), thread(std::move(thread)), 
-        cond_var(data.cond_var), mutex(data.mutex)
+        : tervel(data.tervel), thread(std::move(thread)), notifier(data.notifier)
     {}
+
+    WorkThreadData& operator=(const WorkThreadData& other)
+    {
+        id = other.id;
+        tervel = other.tervel;
+        notifier = other.notifier;
+    }
 
     //! Thread ID
     uint16_t id;
 
     //! Pointer to the tervel object
     tervel::Tervel* tervel;
-
-    //! If set, this thread should return immediately
-    std::atomic_bool* stop;
     
     //! Thread object
     std::thread thread;
@@ -122,11 +124,7 @@ struct WorkThreadData
     //! Queue of jobs
     TervelQueue<Job*> job_queue;
 
-    //! Condition variable, allows for waking up from sleep
-    std::condition_variable* cond_var;
-
-    //! Mutex
-    std::mutex* mutex;
+    ThreadNotifier* notifier;
 };
 
 /**

@@ -43,8 +43,8 @@ using namespace libomdb;
  ************************************************************************/
 /** Used to hold result before parsing into objects **/
 struct ResultHolder {
-  char metaDataPacket[MESSAGE_SIZE];
-  char resultPacket[MESSAGE_SIZE];
+  char metaDataPacket[sizeof(ResultMetaDataPacket)];
+  char *resultPacket;
 };
 
 
@@ -70,9 +70,10 @@ void *get_in_addr(struct sockaddr *sa)
 CommandPacket buildPacket(CommandType type, std::string command) {
   CommandPacket commandPacket;
   // command needs to be made into char[]
-  strncpy(commandPacket.message, command.c_str(), sizeof(commandPacket.message));
-  commandPacket.message[sizeof(commandPacket.message) -1] = 0;
+  strncpy(commandPacket.message, command.c_str(), command.length());
+  commandPacket.message[command.length()] = '\0';
   commandPacket.commandType = type;
+  commandPacket.type = PacketType::COMMAND;
   commandPacket.terminator = THE_TERMINATOR;
 
   return commandPacket;
@@ -93,18 +94,23 @@ std::vector<libomdb::ResultRow> parseData(ResultPacket packet) {
   uint32_t numberOfRows = (packet.resultSize / rowSizeInBytes);
   uint64_t* dataPointer = &packet.data[0];
   // data is char* so data[0] is 1 byte
-  // so dataPointer++ moves up only one byte
+  // so dataPointer++ moves up 8 bytes, to the next uint64_t
   for (uint i = 0; i < numberOfRows; ++i) {
     libomdb::ResultRow row;
-    for (uint j = 0; j < packet.rowLen; ++i) {
+    for (uint j = 0; j < packet.rowLen; ++j) {
       int64_t* col = new int64_t;
       memcpy(col, dataPointer, 8); //Move the next 8 bytes into col
       row.push_back(*col);
       delete(col);
-      dataPointer += 8; // Move pointer up 8 bytes. dataPointer++ moves 1 byte
+      dataPointer++; // Move pointer to next uint64_t
     }
     rows.push_back(row);
   }
+
+  // Place empty row in ros so that first next call moves to actual data
+  // This is standar op for result sets
+  libomdb::ResultRow initRow;
+  rows.push_back(initRow);
 
   return rows;
 }
@@ -122,6 +128,7 @@ std::vector<libomdb::MetaDataColumn> parseMetaData(ResultMetaDataPacket packet) 
     libomdb::MetaDataColumn column;
     column.label = std::string(packet.columns[i].name);
     column.sqlType = packet.columns[i].type;
+    metaDataColumns.push_back(column);
   }
   return metaDataColumns;
 }
@@ -167,14 +174,9 @@ libomdb::Result parseQueryResult(ResultHolder holder) {
  * @param socket The file descriptor of the listening socket
  */
 ResultHolder sendMessage(CommandPacket packet, int socket) {
-  // Need to convert message to c string in order to send it.
-  char message[MESSAGE_SIZE];
-  memcpy(message, &packet, sizeof(packet));
-  std::cout << "Message being sent: " << message <<std::endl;
-  // const char* c_message = message.c_str();
-  std::cout << "Attempting to send message to socket" << socket << std::endl;
-  int bytes_sent = send(socket, message, sizeof message, 0);
-  std::cout<< "Bytes sent: " << bytes_sent << std::endl;
+  //printf("Packet size is: %lu\n", sizeof(packet));
+  char *serializedPacket = SerializeCommandPacket(packet);
+  int bytes_sent = send(socket, serializedPacket, sizeof(packet), 0);
   if (bytes_sent == -1) {
     perror("send");
     ResultHolder emptyHolder;
@@ -192,15 +194,16 @@ ResultHolder sendMessage(CommandPacket packet, int socket) {
   ResultHolder holder;
 
   int bytes_recieved = recv(socket, holder.metaDataPacket, sizeof(holder.metaDataPacket), 0);
-  std::cout << "Bytes relieved: " << bytes_recieved << std::endl;
   if (bytes_recieved == -1) {
     perror("recv");
     ResultHolder emptyHolder;
     return emptyHolder;
   }
 
+  ResultMetaDataPacket resultMetaDataPacket = DeserializeResultMetaDataPacket(holder.metaDataPacket);
+  holder.resultPacket = new char[resultMetaDataPacket.resultPacketSize];
   // Now receive result packet
-  bytes_recieved = recv(socket, holder.resultPacket, sizeof(holder.resultPacket), 0);
+  bytes_recieved = recv(socket, holder.resultPacket, resultMetaDataPacket.resultPacketSize, 0);
   if (bytes_recieved == -1) {
     perror("recv");
     ResultHolder emptyHolder;
@@ -289,7 +292,6 @@ libomdb::Connection libomdb::Connection::connect(std::string hostname,
 
   inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr),
                                                           s, sizeof s);
-  printf("client: connecting to %s\n", s);
   freeaddrinfo(servinfo); // all done with this structure
 
   if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
@@ -299,24 +301,6 @@ libomdb::Connection libomdb::Connection::connect(std::string hostname,
 
   buf[numbytes] = '\0';
 
-  printf("client: received '%s'\n",buf);
-  std::string dbConnectString = "k:"+db;
-  const char* dbString = dbConnectString.c_str();
-  // Sending the name of the database to the server.
-  int bytesSent = send(sockfd, dbString, dbConnectString.length(), 0);
-  if (bytesSent == -1) {
-    perror("send");
-    return errorConnection();
-  }
-
-  int bytesReceived = recv(sockfd, buf, MAXDATASIZE -1, 0);
-  if (bytesReceived == -1) {
-    perror("recv");
-    return errorConnection();
-  }
-
-  buf[bytesReceived] = '\0';
-  printf("client received response from server: %s\n", buf);
 
   return libomdb::Connection::buildConnectionObj(sockfd, buf);
 }

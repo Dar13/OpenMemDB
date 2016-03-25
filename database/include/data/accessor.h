@@ -10,8 +10,10 @@ template <typename S>
 class ValuePointer : public tervel::util::memory::hp::Element
 {
     public:
-        S* value;
+        S* ptr;
         std::atomic<int64_t> counter;
+
+        ValuePointer(S* value) : ptr(value), counter(0) {}
 
         bool on_is_watched() {
             return (counter.load() > 0);
@@ -19,6 +21,7 @@ class ValuePointer : public tervel::util::memory::hp::Element
 
         ~ValuePointer() {
             counter.store(std::numeric_limits<int64_t>::min());
+            delete ptr;
         }
 };
 
@@ -29,18 +32,21 @@ class VectorAccessor {
 
         Value* value;
 
+        VectorAccessor() : value(nullptr) {}
+
         bool init(tervel::containers::wf::vector::Vector<Value*>& vector, uint32_t index) {
             Value* retrieved_value;
             if(vector.at(index, retrieved_value))
             {
                 // hp_watch
-                if(HazardPointer::watch(HazardPointer::SlotID::SHORTUSE, retrieved_value))
-                {
-                    // TODO: ?
-                }
+                HazardPointer::watch(HazardPointer::SlotID::SHORTUSE, retrieved_value);
 
-                // c != vector->at(x))
-                // TODO: What is c?
+                Value* test_value;
+                if(!vector.at(index, test_value) || retrieved_value != test_value)
+                {
+                    HazardPointer::unwatch(HazardPointer::SlotID::SHORTUSE, retrieved_value);
+                    return false;
+                }
 
                 uintptr_t clean_ptr = reinterpret_cast<uintptr_t>(retrieved_value) & (~0xF);
                 retrieved_value = reinterpret_cast<Value*>(clean_ptr);
@@ -50,9 +56,13 @@ class VectorAccessor {
                 // hp_unwatch
                 HazardPointer::unwatch(HazardPointer::SlotID::SHORTUSE, retrieved_value);
 
-                T* check_2 = nullptr;
-                // TODO: Handle a failure here?
-                vector.at(index, check_2);
+                Value* check_2 = nullptr;
+                if(vector.at(index, check_2))
+                {
+                    HazardPointer::unwatch(HazardPointer::SlotID::SHORTUSE, retrieved_value);
+                    return false;
+                }
+
                 check_2 = (Value*)(((uintptr_t)check_2) & (~0xF));
                 if(res < 0 || retrieved_value != check_2)
                 {
@@ -60,6 +70,7 @@ class VectorAccessor {
                     return false;
                 }
 
+                // Store the clean pointer and return true, the access is successful.
                 this->value = retrieved_value;
                 return true;
             }
@@ -70,6 +81,9 @@ class VectorAccessor {
         }
 
         ~VectorAccessor() {
-            value->counter.fetch_sub(1);
+            if(value)
+            {
+                value->counter.fetch_sub(1);
+            }
         }
 };

@@ -62,6 +62,7 @@ ParseResult parse(std::string input, DataStore* data_store)
     Parse(parser, 0, nullptr, &builder);
     ParseFree(parser, free);
 
+    // Clean up the tokens
     for(auto token_pair : tokens)
     {
         delete token_pair.token;

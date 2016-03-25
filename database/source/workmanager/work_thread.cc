@@ -40,22 +40,27 @@ void WorkThread::Run(WorkThreadData* data)
     // If this throws, then we're dead in the water anyways. Let it crash
     tervel::ThreadContext* thread_context = new tervel::ThreadContext(data->tervel);
 
+    ThreadNotifier* notifier = data->notifier;
+
+    // All threads must run this
+    setupTokenMappings();
+
     // Condition variables require an unique_lock
-    std::unique_lock<std::mutex> thread_lock(*data->mutex, std::defer_lock);
+    std::unique_lock<std::mutex> thread_lock(notifier->mutex, std::defer_lock);
 
     while(true)
     {
         thread_lock.lock();
 
         // TODO: try/catch block needed?
-        while(!data->cond_var->wait_for(thread_lock, std::chrono::milliseconds(15),
-                [&data] () -> bool
+        while(!notifier->cond_var.wait_for(thread_lock, std::chrono::milliseconds(15),
+                [&data, notifier] () -> bool
                 {
-                    return (data->stop->load() || !data->job_queue.empty());
+                    return (notifier->stop.load() || !data->job_queue.empty());
                 })) {}
         thread_lock.unlock();
 
-        if(data->stop->load()) { break; }
+        if(notifier->stop.load()) { break; }
 
         Job* job = nullptr;
         TervelQueue<Job*>::Accessor queue_getter;
@@ -98,9 +103,15 @@ Job WorkThread::GenerateJob(int job_num, std::string command, DataStore* store)
 
                 if(store == nullptr)
                 {
-                    // TODO: Error handling
+                    res.result = new ManipResult(ResultStatus::FAILURE_DB_UNKNOWN_STATE,
+                            ManipStatus::ERR);
+
+                    // No point going any further, the database is in an
+                    // unknown state.
+                    return res;
                 }
 
+                // TODO: Remove this at some point
                 printf("Command: %s\n", command.c_str());
 
                 // Parse the command
@@ -116,7 +127,8 @@ Job WorkThread::GenerateJob(int job_num, std::string command, DataStore* store)
                 else
                 {
                     // Propagate error back to work manager
-                    // TODO: Error handling
+                    res.result = new ManipResult(ResultStatus::FAILURE_SYNTAX,
+                            ManipStatus::ERR);
                 }
 
                 return res;
@@ -223,9 +235,10 @@ ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
             break;
         // Invalid or unknown statement, don't attempt to execute
         default:
-            // TODO: Error handling
-            // Shouldn't happen, assert
-            assert(false);
+            // Might as well give them an error code and continue to run
+            // This code should never be run though
+            return new (std::nothrow) ManipResult(ResultStatus::FAILURE,
+                    ManipStatus::ERR_UNKNOWN_STATEMENT);
             break;
     }
 
@@ -247,19 +260,21 @@ ManipResult WorkThread::ExecuteCommand(ParsedStatement* statement, DataStore* st
             return store->deleteTable(reinterpret_cast<DropTableCommand*>(statement)->table_name);
             break;
         case SQLStatement::UPDATE:
+            printf("Updating!\n");
             break;
         case SQLStatement::INSERT_INTO:
+            printf("Inserting!\n");
             break;
         case SQLStatement::DELETE:
+            printf("Deleting!\n");
             break;
         default:
             // Should never be hit
-            std::terminate();
             break;
     }
 
     // Shouldn't be hit at all, but will when the command isn't implemented
-    return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR);
+    return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_UNKNOWN_STATEMENT);
 }
 
 /**
