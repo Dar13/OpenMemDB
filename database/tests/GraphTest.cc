@@ -81,7 +81,20 @@ GraphTest::GraphTest(int mode, int threadCount)
                                
     // timeVals.push_back(result.duration);
 
-    createPerformanceTest(threadCount);
+    switch(mode) 
+    {
+
+        case MODE_CREATE:
+            createPerformanceTest(threadCount);
+            break;
+        case MODE_DROP:
+            dropPerformanceTest(threadCount);
+            break;
+        case MODE_INSERT:
+            insertPerformanceTest(threadCount);
+            break;
+    }
+
 
 }
 
@@ -98,7 +111,7 @@ GraphTest::GraphTest(int mode, int threadCount)
 *   ... etc
 */
 
-void GraphTest::createOrAppendOutputFile(int time, int threadCount)
+void GraphTest::createOrAppendOutputFile(int mode, int time, int threadCount)
 {
     std::ofstream outputFile;
 
@@ -109,7 +122,20 @@ void GraphTest::createOrAppendOutputFile(int time, int threadCount)
         outputFile.open("test_data.omdbt");
         if(outputFile.is_open())
         {
-            outputFile << "CreateTest\n";
+
+            switch(mode) 
+            {
+                case MODE_CREATE:
+                    outputFile << "create_test\n";
+                    break;
+                case MODE_DROP:
+                    outputFile << "drop_test\n";
+
+                    break;
+                case MODE_INSERT:
+                    outputFile << "insert_test\n";
+                    break;
+            }
             outputFile << threadCount << "\n";
             outputFile << time << "\n";
             outputFile.close();
@@ -135,6 +161,31 @@ void GraphTest::createPerformanceTest(int threadCount)
                                   .setThreadCount(threadCount)
                                   .test();
 
-    createOrAppendOutputFile(result.duration, threadCount);
+    createOrAppendOutputFile(MODE_CREATE, result.duration, threadCount);
 
+}
+
+void GraphTest::dropPerformanceTest(int threadCount)
+{
+    DataStoreTest dataStoreTest;
+
+    TestResult result = dataStoreTest.with(MODE_DROP)
+                                  .generateCases(0b0000)
+                                  .setThreadCount(threadCount)
+                                  .test();
+
+    createOrAppendOutputFile(MODE_DROP, result.duration, threadCount);
+
+}
+
+void GraphTest::insertPerformanceTest(int threadCount)
+{
+    DataStoreTest dataStoreTest;
+
+    TestResult result = dataStoreTest.with(MODE_INSERT)
+                                    .generateCases(0b0000)
+                                    .setThreadCount(threadCount)
+                                    .test();
+
+    createOrAppendOutputFile(MODE_INSERT, result.duration, threadCount);
 }

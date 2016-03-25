@@ -4,7 +4,7 @@
 // Use a namespace to declare constants
 namespace TestConstants
 {
-  const int MaxTables = 64;
+  const int MaxTables = 100000;
 }
 
 #endif

@@ -16,8 +16,7 @@ test_case_count = test_data[1]
 thread_time = []
 
 for x in range(2, len(test_data)):
-	if(test_data[x] != "end"):
-		thread_time.append(int(test_data[x]))
+	thread_time.append(int(test_data[x]))
 
 
 for x in thread_time:

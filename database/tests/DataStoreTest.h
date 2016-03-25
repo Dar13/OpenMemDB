@@ -38,7 +38,7 @@ class DataStoreTest
 		int complexity, mode, threadCount;
 		bool isRandomized = false;
 		std::vector<std::string> statements;
-        std::vector<int64_t> test_data;
+        std::vector<std::string> test_data;
         std::vector<std::string> table_name;
         
 		void parseComplexity(int complexity);
@@ -46,7 +46,7 @@ class DataStoreTest
 		static tervel::ThreadContext* loadTables(std::vector<std::string> statements, void *t_data);
         static void dropTest(std::vector<std::string> table_name, void *t_data);
 		//static void dropTest(std::vector<std::string> statements, std::vector<std::string> table_name, void *t_data);
-        static void insertTest(std::vector<int64_t> record, void *t_data);
+        static void insertTest(std::vector<std::string> record, void *t_data);
 		std::vector<std::string> generateCases();
 		i2tuple calculateArrayCut(int threadCount, int threadNumber);
 

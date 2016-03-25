@@ -48,13 +48,13 @@ void DataStoreTest::createTest(std::vector<std::string> statements, void *t_data
             auto err = data->createTable(*create_table);
             if(err.status == ResultStatus::SUCCESS)
             {
-                printf("Table created\n");
+                // printf("Table created\n");
                 successCount++;
 
             }
             else
             {
-                printf("Unable to create table!\n");
+                // printf("Unable to create table!\n");
             }
         }
     }
@@ -80,8 +80,6 @@ tervel::ThreadContext* DataStoreTest::loadTables(std::vector<std::string> statem
     tervel::ThreadContext* main_context = new tervel::ThreadContext(grab->tervel_test);
     DataStore *data = grab->data;
 
-    printf("%p\n", data);
-
     // Execute create table commands from statements vector (defined in h file)
     for(auto i = statements.begin(); i  != statements.end(); i++)
     {
@@ -94,7 +92,7 @@ tervel::ThreadContext* DataStoreTest::loadTables(std::vector<std::string> statem
             auto err = data->createTable(*create_table);
             if(err.status == ResultStatus::SUCCESS)
             {
-                printf("Table created\n");
+                // printf("Table created\n");
                 successCount++;
 
             }
@@ -113,6 +111,7 @@ void DataStoreTest::dropTest(std::vector<std::string> table_name, void *t_data)
     struct thread_data *grab;
     grab = (struct thread_data *) t_data;
 
+    setupTokenMappings();
 
     tervel::Tervel* tervel_test = grab->tervel_test;
     tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);
@@ -128,13 +127,13 @@ void DataStoreTest::dropTest(std::vector<std::string> table_name, void *t_data)
 
         if(err.status == ResultStatus::SUCCESS)
         {
-            std::cout << "Table " << *i << " deleted" << std::endl;
+            // std::cout << "Table " << *i << " deleted" << std::endl;
         }
         else
         {
-            printf("Unable to delete table\n");
+        //     printf("Unable to delete table\n");
 
-            std::cout << "Table " << *i << " cant be found" << std::endl;
+        //     std::cout << "Table " << *i << " cant be found" << std::endl;
         }
     }
 
@@ -142,33 +141,50 @@ void DataStoreTest::dropTest(std::vector<std::string> table_name, void *t_data)
 }
 
 
-void DataStoreTest::insertTest(std::vector<int64_t> record, void *t_data)
+void DataStoreTest::insertTest(std::vector<std::string> records, void *t_data)
 {
     struct thread_data *grab;
     grab = (struct thread_data *) t_data;
+
+    setupTokenMappings();
 
     tervel::Tervel* tervel_test = grab->tervel_test;
     tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);    
     DataStore *data = grab->data;
 
-    std::vector<TervelData> table_row;
-    for(int i = 0; i < record.size(); i++)
+    for(auto i = records.begin(); i != records.end(); i++)
     {
-        TervelData new_int = {.value = 0};
+        ParseResult parse_result = parse(*i, data);
 
-        new_int.data.tervel_status = 0;
-        new_int.data.null = 0;
-        new_int.data.value = record.at(i);
+        std::cout << *i << std::endl;
 
-        //TODO: Would null integer be null? How to set null flag...
-
-        table_row.push_back(new_int);
-        auto err = data->insertRecord("TestT0", table_row);
-        if(err.status != ResultStatus::SUCCESS)
+        if(parse_result.status == ResultStatus::SUCCESS)
         {
-            printf("Unable to insert record\n");
+            printf("We succeed!\n");
         }
     }
+
+    // for(auto i = statements.begin(); i  != statements.end(); i++)
+    // {
+
+    //     ParseResult parse_result = parse(*i, data);
+
+    //     if(parse_result.status == ResultStatus::SUCCESS)
+    //     {
+    //         CreateTableCommand* create_table = reinterpret_cast<CreateTableCommand*>(parse_result.result);
+    //         auto err = data->createTable(*create_table);
+    //         if(err.status == ResultStatus::SUCCESS)
+    //         {
+    //             // printf("Table created\n");
+    //             successCount++;
+
+    //         }
+    //         else
+    //         {
+    //             // printf("Unable to create table!\n");
+    //         }
+    //     }
+    // }
 
     delete main_context;
 }
@@ -224,15 +240,24 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
         
         case MODE_INSERT:
         {
-            for(int i = 0; i < threadCount; i++)
+            for(int i = 0; i < TestConstants::MaxTables; i++)
             {
-                std::string create_table = "CREATE TABLE TestT"+ std::to_string(i) +" (A STRING, B INTEGER);";
+                std::string create_table = "CREATE TABLE TestT"+ std::to_string(i) +" (A DATE, B INTEGER);";
                 statements.push_back(create_table);
             }
 
-            for(int64_t i = 0; i < threadCount; i++)
+            int year = 2016;
+            
+            for(int i = 0; i < TestConstants::MaxTables; i++)
             {
-                test_data.push_back(i);
+                std::string date = std::to_string(year) + "-04-12";
+                std::string insert_into = "INSERT INTO TestT"+ std::to_string(i) +" VALUES (" + date + "," +
+                std::to_string(i) + ");";
+                
+                // std::cout << insert_into << std::endl;
+                test_data.push_back(insert_into);
+
+                year++;
             }
         }
             break;
@@ -289,8 +314,6 @@ TestResult DataStoreTest::test()
             std::vector<std::thread> v_t;
 
             tervel::ThreadContext* old_context = loadTables(statements, (void *) &share);
-
-            // std::this_thread::sleep_for(std::chrono::seconds(5));
             
             auto time_start = std::chrono::high_resolution_clock::now();
 
@@ -324,24 +347,15 @@ TestResult DataStoreTest::test()
         }
         case MODE_INSERT:
         {
-            std::vector<std::thread> v;
             std::vector<std::thread> v_t;
 
-            //create table
-            for (int i = 0; i < threadCount; ++i)
-            {
-                std::thread t1(createTest, statements, (void *) &share);
-                v.push_back(std::move(t1));
-            }
+            // Create the tables
+            tervel::ThreadContext* old_context = loadTables(statements, (void *) &share);
 
-            for (int i = 0; i < threadCount; ++i)
-            {
-                v.at(i).join();
-            }
 
-            auto time_start = std::chrono::high_resolution_clock::now();
+            // auto time_start = std::chrono::high_resolution_clock::now();
 
-            //insert data
+            // insert threads
             for(int i = 0; i < threadCount; i++)
             {
                 std::thread t(insertTest, test_data, (void *) &share);
@@ -352,8 +366,8 @@ TestResult DataStoreTest::test()
             {
                 v_t.at(i).join();
             }
-            auto time_end = std::chrono::high_resolution_clock::now();
-            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+            // auto time_end = std::chrono::high_resolution_clock::now();
+            // auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
         }
     }
 
@@ -408,6 +422,7 @@ void DataStoreTest::parseComplexity(int complexity)
 DataStoreTest& DataStoreTest::setThreadCount(int count)
 {
     threadCount = count;
+    share.tervel_test = new tervel::Tervel(2*threadCount);
     return *this;
 }
 
