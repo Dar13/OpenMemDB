@@ -18,6 +18,14 @@ case $1 in
 		python graph_test.py
 		
 		;;
+	"irt")
+		echo "Performing Insert Row Test"
+		time ./tests pit 1
+		time ./tests pit 2
+		time ./tests pit 4
+
+		;;
+
 	*)
 		echo "No test selected options are:"
 		echo "ct: Create Test"

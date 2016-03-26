@@ -2,11 +2,12 @@
 #include <sql/omdb_parser.h>
 #include <tervel/util/tervel.h>
 #include <workmanager/work_manager.h>
+#include <workmanager/work_thread.h>
+
 #include "DataStoreTest.h"
 #include "SQLGenerator.h"
 #include "TestResult.h"
 #include "Modes.h"
-
 #include "TestConstants.h"
 
 #include <vector>
@@ -48,13 +49,8 @@ void DataStoreTest::createTest(std::vector<std::string> statements, void *t_data
             auto err = data->createTable(*create_table);
             if(err.status == ResultStatus::SUCCESS)
             {
-                // printf("Table created\n");
                 successCount++;
 
-            }
-            else
-            {
-                // printf("Unable to create table!\n");
             }
         }
     }
@@ -64,7 +60,6 @@ void DataStoreTest::createTest(std::vector<std::string> statements, void *t_data
              
     thread_local static auto threadTime = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
 
-    std::cout << "Time " << threadTime.count() << std::endl;
 
     delete main_context;
 }
@@ -92,13 +87,8 @@ tervel::ThreadContext* DataStoreTest::loadTables(std::vector<std::string> statem
             auto err = data->createTable(*create_table);
             if(err.status == ResultStatus::SUCCESS)
             {
-                // printf("Table created\n");
                 successCount++;
 
-            }
-            else
-            {
-                printf("Unable to create table!\n");
             }
         }
     }
@@ -118,23 +108,11 @@ void DataStoreTest::dropTest(std::vector<std::string> table_name, void *t_data)
 
     DataStore *data = grab->data;
 
-    printf("%p\n", data);
 
     //Drop tables after creating them
     for(auto i = table_name.begin(); i != table_name.end(); i++)
     {
         auto err = data->deleteTable(*i);
-
-        if(err.status == ResultStatus::SUCCESS)
-        {
-            // std::cout << "Table " << *i << " deleted" << std::endl;
-        }
-        else
-        {
-        //     printf("Unable to delete table\n");
-
-        //     std::cout << "Table " << *i << " cant be found" << std::endl;
-        }
     }
 
     delete main_context;
@@ -156,35 +134,14 @@ void DataStoreTest::insertTest(std::vector<std::string> records, void *t_data)
     {
         ParseResult parse_result = parse(*i, data);
 
-        std::cout << *i << std::endl;
-
         if(parse_result.status == ResultStatus::SUCCESS)
         {
-            printf("We succeed!\n");
+            auto result = WorkThread::ExecuteStatement(parse_result.result, data);
+            if(result-> status == ResultStatus::SUCCESS) 
+            {
+            }
         }
     }
-
-    // for(auto i = statements.begin(); i  != statements.end(); i++)
-    // {
-
-    //     ParseResult parse_result = parse(*i, data);
-
-    //     if(parse_result.status == ResultStatus::SUCCESS)
-    //     {
-    //         CreateTableCommand* create_table = reinterpret_cast<CreateTableCommand*>(parse_result.result);
-    //         auto err = data->createTable(*create_table);
-    //         if(err.status == ResultStatus::SUCCESS)
-    //         {
-    //             // printf("Table created\n");
-    //             successCount++;
-
-    //         }
-    //         else
-    //         {
-    //             // printf("Unable to create table!\n");
-    //         }
-    //     }
-    // }
 
     delete main_context;
 }
@@ -204,9 +161,6 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
     complexity = testComplexity;
     parseComplexity(complexity);
     share.tervel_test = new tervel::Tervel(2*threadCount);
-
-
-    printf("Thread count: %d\n", threadCount);
 
     switch(mode)
     {
@@ -248,13 +202,12 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
 
             int year = 2016;
             
-            for(int i = 0; i < TestConstants::MaxTables; i++)
+            for(int i = 0; i < TestConstants::MaxInserts; i++)
             {
                 std::string date = std::to_string(year) + "-04-12";
-                std::string insert_into = "INSERT INTO TestT"+ std::to_string(i) +" VALUES (" + date + "," +
+                std::string insert_into = "INSERT INTO TestT0 VALUES (" + date + "," +
                 std::to_string(i) + ");";
                 
-                // std::cout << insert_into << std::endl;
                 test_data.push_back(insert_into);
 
                 year++;
@@ -287,11 +240,9 @@ TestResult DataStoreTest::test()
             {
                 i2tuple tuple = calculateArrayCut(threadCount, i);
 
-                std::cout << std::get<0>(tuple) << " ";
-                std::cout << std::get<1>(tuple) << "\n";
                 std::vector<std::string> cut(&statements[std::get<0>(tuple)], &statements[std::get<1>(tuple)]);
-
                 std::thread t1(createTest, cut, (void *) &share);
+
                 v.push_back(std::move(t1));
             }
 
@@ -353,12 +304,17 @@ TestResult DataStoreTest::test()
             tervel::ThreadContext* old_context = loadTables(statements, (void *) &share);
 
 
-            // auto time_start = std::chrono::high_resolution_clock::now();
+            auto time_start = std::chrono::high_resolution_clock::now();
 
             // insert threads
             for(int i = 0; i < threadCount; i++)
             {
-                std::thread t(insertTest, test_data, (void *) &share);
+
+                i2tuple tuple = calculateArrayCut(threadCount, i); 
+
+                std::vector<std::string> cut(&test_data[std::get<0>(tuple)], &test_data[std::get<1>(tuple)]);
+                std::thread t(insertTest, cut, (void *) &share);
+
                 v_t.push_back(std::move(t));
             }
 
@@ -366,8 +322,13 @@ TestResult DataStoreTest::test()
             {
                 v_t.at(i).join();
             }
-            // auto time_end = std::chrono::high_resolution_clock::now();
-            // auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+            auto time_end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+
+            delete old_context;
+
+            TestResult testResult(duration.count(), threadCount);
+            return testResult;
         }
     }
 
@@ -378,7 +339,7 @@ TestResult DataStoreTest::test()
 
 i2tuple DataStoreTest::calculateArrayCut(int threadCount, int threadNumber)
 {
-    int size = statements.size();
+    int size = test_data.size();
     int cutPerThread = size / threadCount;
     int start = cutPerThread*threadNumber;
     int end = start + cutPerThread;

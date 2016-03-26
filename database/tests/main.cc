@@ -37,6 +37,16 @@ int main(int argc, char* argv[])
 		GraphTest graphTest(MODE_DROP, threadCount);
 	}
 
+	if(strcmp(argv[1], "pit") == 0)
+	{
+		int threadCount;
+		sscanf(argv[2], "%d", &threadCount);
+
+		printf("%d main thread count\n", threadCount);
+
+		GraphTest graphTest(MODE_INSERT, threadCount);
+	}
+
 
 	// int threadCount = 1;
 	// GraphTest graphTest(MODE_INSERT, threadCount);
