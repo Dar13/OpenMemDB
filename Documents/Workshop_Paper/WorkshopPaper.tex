@@ -137,27 +137,48 @@ OpenMemDB does something similar with snapshot isolation. MemSQL also compiles S
 statement to C++ code and stores this code to be used if the SQL statement is ever called
 again. Something that OpenMemDB does not implement.
 
-VoltDB is an in-memory system that {{TODO}}
+VoltDB is an in-memory database management system that uses pure SQL, is completely ACID
+compliant, and does not use locks. They claim to achieve 100 times the performance of 
+a traditional relation database management system, with near linear scaling with added nodes \cite{voltdb2010voltdb}. They claim to achieve 560,000 transaction per second on a 12
+partition set up. 
+VoltDB uses a shared nothing architecture. Their execution engine is single threaded, 
+avoiding the overhead of locking or latching \cite{voltdb2010voltdb}. This requires
+intelligent partitioning of data and does not allow for multi-threaded execution 
+on a single partition. 
 
-Silo is {{TODO}}
+Silo is an in-memory database that uses optimistic concurrency control (OCC) to try and 
+limit the affects of locks on their system. Silo avoids locking during the computation
+of a transaction and waits until commit time to execute all writes to shared memory.
+This avoids the contention involved in acquiring a lock until a short period of time 
+at the end of transaction. This style of system can be particularly effective if
+concurrent writes to shared memory are uncommon. Silo claims to achieve 700,000
+transaction per second an a 32 core machine. Silo relies heavily on concurrent 
+B+ tree for its back end data-store \cite{tu2013speedy}. 
+
+Hekaton is Microsoft's main memory optimized database engine.
+Hekaton uses a combination of lock-free data-structures and optimistic concurrency control
+in order to achieve scaleable performance gains. Hekaton is like Silo and OpenMemDB in that 
+it does not use partitioning to achieve performance gains. Any thread can access any 
+row in a table without acquiring a lock\cite{diaconu2013hekaton}. Hekaton claims to gain
+an order of magnitude performance gain over standards SQL Server\cite{diaconu2013hekaton}
 
 %TODO fix the rest of this
-MemSQL\footnote{MemSQL can be configured as a Columnstore that stores data on disk.}
-and VoltDB are both fully in-memory DBMS as is OpenMemDB. This is where the
-similarities end as far as OpenMemDB is concerned. MemSQL and VoltDB on the other 
-hand both use distributed systems to achieve performance gains and they both differ from 
-OpenMemDB in a few ways. MemSQL uses lock-free data structures
-to store data and stores pre-compiled commonly used queries\cite{MemSQL}.
-VoltDB tries to make its performance gains by what they call Concurreny through
-scheduling\cite{VoltDB}. This is the process of using a single-threaded pipeline 
-that performs the task it was scheduled. This limits the need for locking during
-transactions by intelligently scheduling the transactions so that locks are not
-necessary. This approach eliminates the time spent obtaining and updating a lock
-but limits parallelization. There can not be true concurrent access on shared data. If 
-there are a number of operations that need to be executed on the same table in a database; 
-these operations will be scheduled sequentially. The only parallelism that occurs is during
-operations on unrelated data. Our approach allows for concurrent operations to take place
-no matter what data is being accessed.
+%MemSQL\footnote{MemSQL can be configured as a Columnstore that stores data on disk.}
+%and VoltDB are both fully in-memory DBMS as is OpenMemDB. This is where the
+%similarities end as far as OpenMemDB is concerned. MemSQL and VoltDB on the other 
+%hand both use distributed systems to achieve performance gains and they both differ from 
+%OpenMemDB in a few ways. MemSQL uses lock-free data structures
+%to store data and stores pre-compiled commonly used queries\cite{MemSQL}.
+%VoltDB tries to make its performance gains by what they call Concurreny through
+%scheduling\cite{VoltDB}. This is the process of using a single-threaded pipeline 
+%that performs the task it was scheduled. This limits the need for locking during
+%transactions by intelligently scheduling the transactions so that locks are not
+%necessary. This approach eliminates the time spent obtaining and updating a lock
+%but limits parallelization. There can not be true concurrent access on shared data. If 
+%there are a number of operations that need to be executed on the same table in a database; 
+%these operations will be scheduled sequentially. The only parallelism that occurs is during
+%operations on unrelated data. Our approach allows for concurrent operations to take place
+%no matter what data is being accessed.
 
 \section{Technical Approach}
 Our database is built upon wait-free data structures found in Tervel, a collection of
