@@ -70,7 +70,7 @@ ParseResult parse(std::string input, DataStore* data_store)
 
     if(builder.statement == nullptr || !builder.valid)
     {
-        return ParseResult(ResultStatus::FAILURE, nullptr);
+        return ParseResult(ResultStatus::FAILURE_SYNTAX, nullptr);
     }
     else
     {
@@ -83,6 +83,7 @@ ParseResult parse(std::string input, DataStore* data_store)
         return ParseResult(ResultStatus::SUCCESS, builder.statement);
     }
 
+    // Shouldn't be hit unless some weird stuff happens
     return ParseResult(ResultStatus::FAILURE, nullptr);
 }
 
@@ -355,30 +356,35 @@ std::vector<TokenPair> tokenize(std::string input)
   return tokens;
 }
 
+/**
+ *  \brief Sets up the token mappings used by the tokenizer and parser
+ *
+ *  \detail Each worker thread must call this function before calling \refer parse.
+ */
 void setupTokenMappings()
 {
-  // TODO: Update this as necessary
-  keywords["CREATE"] = TK_CREATE;
-  keywords["DROP"] = TK_DROP;
-  keywords["SELECT"] = TK_SELECT;
-  keywords["UPDATE"] = TK_UPDATE;
-  keywords["INSERT"] = TK_INSERT;
-  keywords["INTO"] = TK_INTO;
-  keywords["DELETE"] = TK_DELETE;
+    // Update as tokens are added
+    keywords["CREATE"] = TK_CREATE;
+    keywords["DROP"] = TK_DROP;
+    keywords["SELECT"] = TK_SELECT;
+    keywords["UPDATE"] = TK_UPDATE;
+    keywords["INSERT"] = TK_INSERT;
+    keywords["INTO"] = TK_INTO;
+    keywords["DELETE"] = TK_DELETE;
 
-  keywords["TABLE"] = TK_TABLE;
-  keywords["AS"] = TK_AS;
-  keywords["WHERE"] = TK_WHERE;
-  keywords["FROM"] = TK_FROM;
-  keywords["ALL"] = TK_ALL;
-  keywords["DISTINCT"] = TK_DISTINCT;
-  //keywords["UNIQUE"] = TK_UNIQUE;
-  keywords["AUTO_INCREMENT"] = TK_AUTO_INCREMENT;
-  keywords["NOT"] = TK_NOT;
-  keywords["NULL"] = TK_NULL;
-  keywords["DEFAULT"] = TK_DEFAULT;
-  keywords["AND"] = TK_AND;
-  keywords["OR"] = TK_OR;
-  keywords["VALUES"] = TK_VALUES;
-  keywords["SET"] = TK_SET;
+    keywords["TABLE"] = TK_TABLE;
+    keywords["AS"] = TK_AS;
+    keywords["WHERE"] = TK_WHERE;
+    keywords["FROM"] = TK_FROM;
+    keywords["ALL"] = TK_ALL;
+    keywords["DISTINCT"] = TK_DISTINCT;
+    //keywords["UNIQUE"] = TK_UNIQUE;
+    keywords["AUTO_INCREMENT"] = TK_AUTO_INCREMENT;
+    keywords["NOT"] = TK_NOT;
+    keywords["NULL"] = TK_NULL;
+    keywords["DEFAULT"] = TK_DEFAULT;
+    keywords["AND"] = TK_AND;
+    keywords["OR"] = TK_OR;
+    keywords["VALUES"] = TK_VALUES;
+    keywords["SET"] = TK_SET;
 }

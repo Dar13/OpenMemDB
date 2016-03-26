@@ -22,19 +22,39 @@
 #include <util/omdb_stdlib.h>
 
 /**
- *  @brief The entry point of the application.
+ *  \brief The entry point of the application.
  */
 int main(int argc, char** argv)
 {
-  // TODO: Handle passed in parameters
-  printf("Arguments passed in:\n");
-  for(int i = 0; i < argc; i++)
+  int num_threads = 8;
+
+  for(int i = 1; i < argc; i++)
   {
-    printf("\t- %s\n", argv[i]);
+      if(strcmp(argv[i], "help") == 0)
+      {
+          printf("Thanks for using OpenMemDB!\n");
+          printf("Usage: openmemdb [help] [<num_threads>]\n");
+          printf("Defaults to using 8 threads if no parameter is found.\n");
+          return 0;
+      }
+
+      std::string arg(argv[i]);
+      try
+      {
+          num_threads = std::stoi(arg);
+      }
+      catch(const std::invalid_argument& inv_arg)
+      {
+          std::cout << "Invalid commandline argument! './openmemdb help' for usage "
+              "instructions" << std::endl;
+          std::cout << "Defaulting to 8 threads..." << std::endl;
+          num_threads = 8;
+      }
   }
 
-  tervel::Tervel* tervel_main = new tervel::Tervel(9);
-  WorkManager work_manager(8, tervel_main);
+  // TODO: Is the plus 1 needed?
+  tervel::Tervel* tervel_main = new tervel::Tervel(num_threads + 1);
+  WorkManager work_manager(num_threads, tervel_main);
 
   // Setup some signal handlers
   setSignalHandler(SIGINT, [&work_manager] (int) { work_manager.Abort(); });
@@ -44,6 +64,7 @@ int main(int argc, char** argv)
 
   int32_t status = 0;
 
+  // Initialize the work manager
   status = work_manager.Initialize();
   if(status != WorkManager::E_NONE)
   {
@@ -52,6 +73,7 @@ int main(int argc, char** argv)
     return 1;
   }
 
+  // Run the server!
   status = work_manager.Run();
   if(status != WorkManager::E_NONE)
   {

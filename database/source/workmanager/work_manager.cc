@@ -43,12 +43,15 @@ WorkManager::WorkManager(uint32_t num_threads, tervel::Tervel* tervel)
  */
 WorkManager::~WorkManager()
 {
-    delete m_context;
-    delete m_data_store;
+    if(m_context)
+        delete m_context;
+    
+    if(m_data_store)
+        delete m_data_store;
 }
 
 /**
- *  @brief Initialize the internal data structures and members, prepare to 
+ *  \brief Initialize the internal data structures and members, prepare to 
  *         begin executing tasks.
  */
 int32_t WorkManager::Initialize()
@@ -76,6 +79,8 @@ int32_t WorkManager::Initialize()
         data.id = thread_id;
         data.tervel = m_tervel;
 
+        // Have to set the thread after the copy into the vector so that it's a 
+        // proper move rather than a copy(std::thread can't be copied)
         m_thread_data[thread_id] = data;
         m_thread_data[thread_id].thread = std::thread(WorkThread::Run, &m_thread_data[thread_id]);
     }
@@ -103,7 +108,7 @@ int32_t WorkManager::Initialize()
 }
 
 /**
- *  @brief Start the processing of client requests/commands, this method is 
+ *  \brief Start the processing of client requests/commands, this method is 
  *         essentially starting the database server.
  */
 int32_t WorkManager::Run()
@@ -116,6 +121,7 @@ int32_t WorkManager::Run()
     std::vector<JobResult> results;
 
     // Quick lambda for use in std::remove_if()
+    // Checks for the future to be finished, returns true if it is.
     auto check_future_result = [&results] (std::future<JobResult>& res) -> bool
     {
         if(res.valid() &&
@@ -137,7 +143,7 @@ int32_t WorkManager::Run()
 
     std::cout << "Starting the main loop!\n";
 
-    // The main loop
+    // The main loop of the application
     bool running = true;
     while(running)
     {
@@ -146,6 +152,7 @@ int32_t WorkManager::Run()
         sockaddr_storage conn_addr;
         memset(&conn_addr, 0, sizeof(sockaddr_storage));
 
+        // Check for a waiting connection
         status = omdb::AcceptConnection(m_server_socket_fd,
                                         &conn_socket_fd,
                                         &conn_addr);
@@ -241,11 +248,10 @@ uint32_t WorkManager::GetAvailableThread()
 }
 
 /**
- *  @brief Handle incoming commands from client connections.
+ *  \brief Handle incoming commands from client connections.
  */
 bool WorkManager::ReceiveCommand(omdb::Connection& conn)
 {
-    // TODO: Make static to avoid re-allocation?
     char command_buffer[sizeof(CommandPacket)];
     
     // We're making this unsigned so the overflow behavior is predictable
