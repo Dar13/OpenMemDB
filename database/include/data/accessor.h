@@ -1,9 +1,15 @@
+#ifndef DATA_ACCESSOR_H
+#define DATA_ACCESSOR_H
+
+// STL includes
 #include <atomic>
 #include <limits>
 
+// Tervel includes
 #include "tervel/util/memory/hp/hp_element.h"
 #include "tervel/containers/wf/vector/vector.hpp"
 
+// Gets rid of long namespaces
 using namespace tervel::util::memory::hp;
 
 template <typename S>
@@ -87,3 +93,5 @@ class VectorAccessor {
             }
         }
 };
+
+#endif
