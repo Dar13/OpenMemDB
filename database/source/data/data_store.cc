@@ -63,13 +63,10 @@ ManipResult DataStore::createTable(CreateTableCommand table_info)
 
     size_t key = hash_functor(table_info.table_name);
 
-    if(table_name_mapping.insert( key, pair))
+    // Attempt to insert into the hash table
+    if(!table_name_mapping.insert( key, pair))
     {
-        printf("Key value pair inserted\n");
-    }
-    else
-    {
-        printf("Insertion failed\n");
+        return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR);
     }
 
     ManipResult result(ResultStatus::SUCCESS, ManipStatus::SUCCESS);
@@ -93,10 +90,8 @@ ManipResult DataStore::deleteTable(std::string table_name)
         TableMap::ValueAccessor hash_accessor;
         if(table_name_mapping.at(key, hash_accessor))
         {
-            printf("Found key\n");
             if(hash_accessor.valid())
             {
-                printf("Accessor is valid\n");
                 // TODO: Is this safe? I think so, but ...
                 pair_ptr = (*hash_accessor.value());
             }
@@ -105,7 +100,6 @@ ManipResult DataStore::deleteTable(std::string table_name)
 
     if(pair_ptr == nullptr)
     {
-        printf("Table doesn't exist!\n");
         return ManipResult(ResultStatus::FAILURE,
                 ManipStatus::ERR_TABLE_NOT_EXIST);
     }
