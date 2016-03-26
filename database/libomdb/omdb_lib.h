@@ -156,8 +156,6 @@ namespace libomdb
      */
     std::string getColumnLabel(int index);
 
-
-
     /**
      * Gets the type of the data stored in the column at the index 
      * passed in
@@ -201,6 +199,11 @@ namespace libomdb
      */
     int64_t getValue(int index);
 
+    /**
+     *  Validity of the result, used to determine success of operation that
+     *  generated this result.
+     */
+    bool isValid;
 
     /**
      * Gets the next row in the result set

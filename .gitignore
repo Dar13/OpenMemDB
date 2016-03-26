@@ -9,6 +9,7 @@ openmemdb
 lemon
 test_libomdb
 temp_server
+omdb_console
 
 # Precompiled Headers
 *.gch

@@ -164,7 +164,18 @@ libomdb::Result parseQueryResult(ResultHolder holder) {
       parseMetaData(resultMetaDataPacket);
   libomdb::ResultMetaData metaData =
       libomdb::ResultMetaData::buildResultMetaDataObject(metaDataColumns);
-  return libomdb::Result::buildResultObject(rows, metaData);
+  auto result = libomdb::Result::buildResultObject(rows, metaData);
+
+  if(resultMetaDataPacket.status != ResultStatus::SUCCESS)
+  {
+      result.isValid = false;
+  }
+  else
+  {
+      result.isValid = true;
+  }
+
+  return result;
 }
 
 

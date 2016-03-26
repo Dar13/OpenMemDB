@@ -50,14 +50,11 @@ void doQuery(libomdb::Connection connection, std::string command) {
     std::cout << "Sending '" << command << "' to server" << std::endl;
     auto result = connection.executeQuery(command);
 
-    // TODO: Create a way to check for a failed query!!
-    /*
-    if(!result.isSuccess) {
+    if(!result.isValid) {
         // TODO: Print out error string based on error code returned
         printf("Error! I should be printing useful things...\n");
         return;
     }
-    */
 
     // Print all the results in a pretty little box
     // Start by printing the metadata columns

@@ -57,8 +57,7 @@ libomdb::Result::Result(std::vector<ResultRow> rows,
 
 libomdb::Result libomdb::Result::buildResultObject(std::vector<ResultRow> rows,
                                                    ResultMetaData metaData) {
-  libomdb::Result* result = new libomdb::Result(rows, metaData);
-  return *result;
+  return libomdb::Result(rows, metaData);
 }
 
 
