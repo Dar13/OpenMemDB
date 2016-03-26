@@ -24,11 +24,12 @@
 #include <string>
 
 // Project includes
-#include "data/data_store.h"
+#include "data/table.h"
 
 #include "util/types.h"
 
 #include "sql/common.h"
+#include "sql/predicate.h"
 #include "sql/statements/common.h"
 
 // TODO: Document these structures
@@ -72,8 +73,12 @@ struct UpdateCommand : public ParsedStatement
     UpdateCommand() : ParsedStatement(SQLStatement::UPDATE) {}
 
     std::string table;
+    TableSchema table_schema;
     std::vector<ColumnUpdate> columns;
+    RecordData full_record;
     Predicate* predicate;
+
+    bool runnable;
 };
 
 struct DeleteCommand : public ParsedStatement
@@ -83,6 +88,5 @@ struct DeleteCommand : public ParsedStatement
     std::string table;
     Predicate* predicate;
 };
-
 
 #endif

@@ -88,6 +88,7 @@ void builderFinishInsertcommand(StatementBuilder* builder);
 // Update command functions
 void builderAddUpdateExpr(StatementBuilder* builder, Token operation,
         Token left, Token right);
+void builderFinishUpdateCommand(StatementBuilder* builder);
 
 // Somewhat generic helper functions
 void builderAddColumn(StatementBuilder* builder, 

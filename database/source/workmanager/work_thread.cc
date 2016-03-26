@@ -260,13 +260,30 @@ ManipResult WorkThread::ExecuteCommand(ParsedStatement* statement, DataStore* st
             return store->deleteTable(reinterpret_cast<DropTableCommand*>(statement)->table_name);
             break;
         case SQLStatement::UPDATE:
-            printf("Updating!\n");
+            {
+                UpdateCommand* update_cmd = reinterpret_cast<UpdateCommand*>(statement);
+                if(update_cmd->runnable)
+                {
+                    return store->updateRecords(update_cmd->predicate, update_cmd->table, 
+                            update_cmd->full_record);
+                }
+                else
+                {
+                    return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_TABLE_NOT_EXIST);
+                }
+            }
             break;
         case SQLStatement::INSERT_INTO:
-            printf("Inserting!\n");
+            {
+                InsertCommand* insert_cmd = reinterpret_cast<InsertCommand*>(statement);
+                return store->insertRecord(insert_cmd->table, insert_cmd->data);
+            }
             break;
         case SQLStatement::DELETE:
-            printf("Deleting!\n");
+            {
+                DeleteCommand* delete_cmd = reinterpret_cast<DeleteCommand*>(statement);
+                return store->deleteRecords(delete_cmd->predicate, delete_cmd->table);
+            }
             break;
         default:
             // Should never be hit

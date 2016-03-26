@@ -19,6 +19,8 @@
 
 #include "sql/statements/builder.h"
 
+#include "data/data_store.h"
+
 #include <cstdio>
 
 // Helper functions
@@ -188,7 +190,7 @@ void builderFinishInsertCommand(StatementBuilder* builder)
 {
 }
 
-// Delete command helper functions ////////////////////////////////////////////
+// Update command helper functions ////////////////////////////////////////////
 
 void builderAddUpdateExpr(StatementBuilder* builder, Token operation,
         Token left, Token right)
@@ -207,6 +209,16 @@ void builderAddUpdateExpr(StatementBuilder* builder, Token operation,
 
     UpdateCommand* update = reinterpret_cast<UpdateCommand*>(builder->statement);
     ColumnUpdate update_info;
+
+    SchemaResult schema_res = builder->data_store->getTableSchema(update->table);
+    if(schema_res.status != ResultStatus::SUCCESS)
+    {
+        // TODO: Table doesn't exist
+        printf("%s: Unable to retrieve table schema! Handle this TODO!\n", __FUNCTION__);
+    }
+
+    update->table_schema = schema_res.result;
+
     auto column_idx_result = builder->data_store->getColumnIndex(update->table, left->text);
     if(column_idx_result.status == ResultStatus::SUCCESS)
     {
@@ -229,6 +241,41 @@ void builderAddUpdateExpr(StatementBuilder* builder, Token operation,
     }
 
     update->columns.push_back(update_info);
+}
+
+void builderFinishUpdateCommand(StatementBuilder* builder)
+{
+    if(builder->started && builder->valid)
+    {
+        UpdateCommand* update_cmd = reinterpret_cast<UpdateCommand*>(builder->statement);
+
+        if(update_cmd->table_schema.columns.size() == 0)
+        {
+            // Attempt to get the table schema one more time
+            SchemaResult schema_check = builder->data_store->getTableSchema(update_cmd->table);
+            if(schema_check.status != ResultStatus::SUCCESS)
+            {
+                update_cmd->runnable = false;
+                // No point going any further
+                return;
+            }
+            else
+            {
+                update_cmd->table_schema = schema_check.result;
+            }
+        }
+
+        TervelData null_data = { .value = 0 };
+        null_data.data.null = 1;
+
+        update_cmd->full_record.resize(update_cmd->table_schema.columns.size(), null_data);
+        for(auto updated_col : update_cmd->columns)
+        {
+            update_cmd->full_record[updated_col.column_idx] = updated_col.new_data;
+        }
+
+        update_cmd->runnable = true;
+    }
 }
 
 // Generic-ish helper functions ///////////////////////////////////////////////
@@ -289,6 +336,17 @@ void builderAddTableName(StatementBuilder* builder, Token table_name)
             {
                 UpdateCommand* update = reinterpret_cast<UpdateCommand*>(builder->statement);
                 update->table = table_name->text;
+
+                // Grab the table schema
+                SchemaResult schema_check = builder->data_store->getTableSchema(update->table);
+                if(schema_check.status == ResultStatus::SUCCESS)
+                {
+                    update->table_schema = schema_check.result;
+                }
+                else
+                {
+                    // TODO: Handle error here?
+                }
             }
             break;
         case SQLStatement::DELETE:
