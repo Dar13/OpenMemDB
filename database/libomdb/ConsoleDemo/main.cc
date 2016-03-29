@@ -26,6 +26,27 @@ std::string getInput() {
     return input;
 }
 
+void printErrorString(libomdb::ResultStatus err_code)
+{
+    using libomdb::ResultStatus;
+    switch(err_code)
+    {
+        case ResultStatus::FAILURE_DB_UNKNOWN_STATE:
+            std::cout << "Database is in an unknown state!" << std::endl;
+            break;
+        case ResultStatus::FAILURE_OUT_MEMORY:
+            std::cout << "Database cannot allocate more memory!" << std::endl;
+            break;
+        case ResultStatus::FAILURE_SYNTAX:
+            std::cout << "Syntax error in statement. Please try again." << std::endl;
+            break;
+        case ResultStatus::FAILURE:
+        default:
+            std::cout << "General unknown error when executing statement" << std::endl;
+            break;
+    }
+}
+
 libomdb::Connection doConnect(std::string command) {
     if (command.compare("connect") != 0) {
         std::cout << "Be sure to type connect to connect :-)" << std::endl;
@@ -70,9 +91,8 @@ void doQuery(libomdb::Connection connection, std::string command) {
     std::cout << "Sending '" << command << "' to server" << std::endl;
     auto result = connection.executeQuery(command);
 
-    if(!result.isValid) {
-        // TODO: Print out error string based on error code returned
-        printf("Error! I should be printing useful things...\n");
+    if(result.status != libomdb::ResultStatus::SUCCESS) {
+        printErrorString(result.status);
         return;
     }
 
@@ -99,11 +119,10 @@ void doQuery(libomdb::Connection connection, std::string command) {
 
 void doCommand(libomdb::Connection connection, std::string command) {
     auto result = connection.executeCommand(command);
-    if (result.isSuccess) {
+    if (result.status == libomdb::ResultStatus::SUCCESS) {
         std::cout << "Executed command '" << command << "' , affected " << result.numAffected << " rows:" << std::endl;
     } else {
-        // TODO: Print out error string based on error code returned
-        printf("Error! I should be printing useful things...\n");
+        printErrorString(result.status);
     }
 }
 

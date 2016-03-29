@@ -191,11 +191,6 @@ void builderFinishSelectQuery(StatementBuilder* builder)
             query->tables.push_back(col_ref.table);
         }
     }
-
-    for(auto output : query->output_columns)
-    {
-        printf("Outputs: %s\n", output.c_str());
-    }
 }
 
 // Insert command helper functions ////////////////////////////////////////////

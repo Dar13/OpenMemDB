@@ -24,7 +24,9 @@ namespace libomdb
   {
     SUCCESS = 0,
     FAILURE,
+    FAILURE_DB_UNKNOWN_STATE,
     FAILURE_OUT_MEMORY,
+    FAILURE_SYNTAX,
   };
   
   enum class ManipStatus : uint32_t
@@ -63,7 +65,7 @@ namespace libomdb
   
   /** Represents result of database command */
   struct CommandResult {
-      bool isSuccess;
+      ResultStatus status;
       int numAffected;
   };
   
@@ -203,7 +205,7 @@ namespace libomdb
      *  Validity of the result, used to determine success of operation that
      *  generated this result.
      */
-    bool isValid;
+    ResultStatus status;
 
     /**
      * Gets the next row in the result set

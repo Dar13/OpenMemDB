@@ -189,7 +189,7 @@ ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
                     for(auto column : query->output_columns)
                     {
                         ResultColumn res_column;
-                        memcpy(res_column.name, column.c_str(), column.length());
+                        strcpy(res_column.name, column.c_str());
                         res_column.type = static_cast<uint16_t>(DataType::INTEGER);
 
                         query_data.metadata.push_back(res_column);
@@ -215,7 +215,7 @@ ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
                     if(col_name.length() < sizeof(column.name))
                     {
                         // Assumes chars are 1 byte
-                        memcpy(column.name, col_name.c_str(), col_name.length());
+                        strcpy(column.name, col_name.c_str());
                     }
                     else
                     {

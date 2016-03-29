@@ -140,7 +140,7 @@ libomdb::CommandResult parseCommandResult(ResultHolder result) {
   //ResultMetaDataPacket metaDataPacket = DeserializeResultMetaDataPacket(result.metaDataPacket);
   ResultPacket packet = DeserializeResultPacket(result.resultPacket);
   libomdb::CommandResult commandResult;
-  commandResult.isSuccess = packet.status == ResultStatus::SUCCESS;
+  commandResult.status = packet.status;
   commandResult.numAffected = packet.resultSize; // TODO: Confirm with neil
   return commandResult;
 }
@@ -163,14 +163,7 @@ libomdb::Result parseQueryResult(ResultHolder holder) {
       libomdb::ResultMetaData::buildResultMetaDataObject(metaDataColumns);
   auto result = libomdb::Result::buildResultObject(rows, metaData);
 
-  if(resultMetaDataPacket.status != ResultStatus::SUCCESS)
-  {
-      result.isValid = false;
-  }
-  else
-  {
-      result.isValid = true;
-  }
+  result.status = resultMetaDataPacket.status;
 
   return result;
 }
