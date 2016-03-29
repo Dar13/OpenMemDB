@@ -133,7 +133,6 @@ CommandPacket DeserializeCommandPacket(char* serializedPacket){
   return commandPacket;
 }
 
-
 ConnectionPacket DeserializeConnectionPacket(const char* serializedPacket){
   ConnectionPacket connectionPacket;
   char* type = new char[sizeof(ConnectionPacket)];
@@ -145,13 +144,11 @@ ConnectionPacket DeserializeConnectionPacket(const char* serializedPacket){
   return connectionPacket;
 }
 
-
 ResultMetaDataPacket DeserializeResultMetaDataPacket(char* serializedPacket){
   ResultMetaDataPacket metaDataPacket;
   memcpy(&metaDataPacket, serializedPacket, sizeof(ResultMetaDataPacket));
   return metaDataPacket;
 }
-
 
 ResultPacket DeserializeResultPacket(char* serializedPacket){
   ResultPacket packet;
@@ -159,7 +156,7 @@ ResultPacket DeserializeResultPacket(char* serializedPacket){
   memcpy(&packet, serializedPacket, 9);
   packet.data = new uint64_t[packet.resultSize/sizeof(uint64_t)];
   memset(packet.data, 0, (packet.resultSize/sizeof(uint64_t)));
-  memcpy(packet.data, &serializedPacket[9], packet.resultSize);
-  packet.terminator = serializedPacket[9 + packet.resultSize];
+  memcpy(packet.data, &serializedPacket[10], packet.resultSize);
+  packet.terminator = serializedPacket[10 + packet.resultSize + 1];
   return packet;
 }

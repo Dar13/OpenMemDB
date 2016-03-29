@@ -366,6 +366,8 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
                     // TODO: Implement packet splitting to stay within packet maximums
 
                     uint64_t* result_data = new uint64_t[result_size/sizeof(uint64_t)];
+                    memset(result_data, 0, result_size / sizeof(uint64_t));
+
                     uint32_t result_idx = 0;
                     for(auto record : query->result.data)
                     {

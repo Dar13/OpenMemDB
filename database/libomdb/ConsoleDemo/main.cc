@@ -18,6 +18,14 @@ void printLine(char symbol) {
     std::cout<<std::endl;
 }
 
+std::string getInput() {
+    std::string input;
+    std::cout << "> ";
+    std::getline(std::cin, input, '\n');
+
+    return input;
+}
+
 libomdb::Connection doConnect(std::string command) {
     if (command.compare("connect") != 0) {
         std::cout << "Be sure to type connect to connect :-)" << std::endl;
@@ -26,14 +34,26 @@ libomdb::Connection doConnect(std::string command) {
     // Connect to the database with the given instructions
     std::string ip;
     int port;
+    bool valid_port = false;
     std::string database;
 
     std::cout << "What is the ip to connect to?" << std::endl;
-    std::cin >> ip;
+    ip = getInput();
     std::cout << "What is the port?" << std::endl;
-    std::cin >> port;
+    while(!valid_port)
+    {
+        try {
+            port = std::stoi(getInput());
+        } catch (std::invalid_argument& inv_arg) {
+            continue;
+        } catch (std::out_of_range& out_range) {
+            continue;
+        }
+
+        valid_port = true;
+    }
     std::cout << "What is the database name?" << std::endl;
-    std::cin >> database;
+    database = getInput();
 
     printf("Connecting with (%s, %d, %s)\n", ip.c_str(), port, database.c_str());
 
@@ -92,9 +112,9 @@ int main () {
     // Ask the user to connect to a database
     // What port and ip is the database running on
     std::string command;
-    std::cout << "Welcome to OMDB" << std::endl;
+    std::cout << "Welcome to OpenMemDB" << std::endl;
     std::cout << "To connect to a database type connect" << std::endl;
-    std::getline(std::cin, command, '\n');
+    command = getInput();
 
     while(command.compare("exit") != 0) {
         if (!command.empty()) {
@@ -115,9 +135,9 @@ int main () {
             }
         }
 
-        std::getline(std::cin, command, '\n');
+        command = getInput();
     }
 
-    std::cout << "Thanks for using OMDB" << std::endl;
+    std::cout << "Thanks for using OpenMemDB" << std::endl;
     return 0;
 }

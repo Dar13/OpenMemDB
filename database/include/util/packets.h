@@ -92,9 +92,9 @@ struct ResultMetaDataPacket {
  *  rowLen // errorCode
  */
 struct ResultPacket {
-    PacketType type;
-    ResultStatus status;  //16 bits
-    uint16_t rowLen;       // Length of the row in columns, number of columns in the row
+    PacketType type;      // 1 byte
+    ResultStatus status;  // 2 bytes
+    uint16_t rowLen;      // Length of the row in columns, number of columns in the row
     uint32_t resultSize;  // Size in bytes that he data array will be
     uint64_t* data;
     uint8_t terminator;

@@ -277,9 +277,9 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
     {
         TervelData terv_data = { .value = 0 };
 
-        // Ensure Tervel's bits are zeroed and then copy the rest of the data over
-        data.data.tervel_status = 0;
+        // Ensure Tervel's bits are zeroed and copy the rest of the data over
         terv_data.value = data.value;
+        terv_data.data.tervel_status = 0;
 
         new_record->push_back_w_ra(terv_data.value);
     }
@@ -525,7 +525,6 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
         int64_t table_len = records.size(0);
         if(table_len == 0)
         {
-            printf("Table is empty\n");
             // Finished, table is empty
             return MultiRecordResult(ResultStatus::SUCCESS, MultiRecordData());
         }
@@ -542,10 +541,6 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
 
                 RecordCopy record_copy = copyRecord(row_ptr);
                 data.push_back(record_copy.data);
-            }
-            else
-            {
-                printf("Unable to initialize accessor\n");
             }
         }
 
@@ -1092,8 +1087,6 @@ RecordCopy DataStore::copyRecord(Record* record)
         while(!record->at(i, tervel_data)) {}
 
         data.value = tervel_data;
-
-        printf("Retrieved value: %ld\n", tervel_data);
 
         // TODO: This is ugly af, rethink this naming scheme in Data/TervelData
         // Clear out any Tervel status bits so as to make later comparisons trivial
