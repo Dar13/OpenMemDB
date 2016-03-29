@@ -131,6 +131,8 @@ Job WorkThread::GenerateJob(int job_num, std::string command, DataStore* store)
                             ManipStatus::ERR);
                 }
 
+                printf("Returning from job #%d\n", job_num);
+
                 return res;
             });
 
@@ -183,9 +185,18 @@ ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
                 QueryData query_data;
                 if(statement_result.result.size() == 0)
                 {
-                    query_data.metadata.clear();
+                    // Just copy over the metadata, leave result empty
+                    for(auto column : query->output_columns)
+                    {
+                        ResultColumn res_column;
+                        memcpy(res_column.name, column.c_str(), column.length());
+                        res_column.type = static_cast<uint16_t>(DataType::INTEGER);
+
+                        query_data.metadata.push_back(res_column);
+                    }
+
                     query_data.data.clear();
-                    // TODO: Error handling?
+
                     return new (std::nothrow) QueryResult(ResultStatus::SUCCESS, query_data);
                 }
 
@@ -302,12 +313,22 @@ MultiRecordResult WorkThread::ExecuteQuery(ParsedStatement* statement, DataStore
 {
     // Only one type of query, no need for a switch
     // Verify the type of statement is correct though
+    if(statement == nullptr)
+    {
+        printf("Parsed statement is null!\n");
+    }
+
     if(statement->type != SQLStatement::SELECT)
     {
         return MultiRecordResult(ResultStatus::FAILURE, MultiRecordData());
     }
 
     SelectQuery* query = reinterpret_cast<SelectQuery*>(statement);
+
+    for(auto table : query->tables)
+    {
+        printf("Table: %s\n", table.c_str());
+    }
 
     return store->getRecords(query->predicate, query->tables.front());
 }

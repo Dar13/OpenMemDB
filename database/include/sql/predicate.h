@@ -60,13 +60,6 @@ SQLBoolean operator==(ExpressionValue& lhs, ExpressionValue& rhs);
 SQLBoolean operator!=(ExpressionValue& lhs, ExpressionValue& rhs);
 
 // TODO: Document this
-struct ColumnReference
-{
-    std::string table;
-    uint32_t column_idx;
-};
-
-// TODO: Document this
 struct Predicate
 {
 public:

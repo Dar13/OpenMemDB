@@ -141,6 +141,9 @@ cmd ::= DROP TABLE name(A). {builderStartDropTable(builder, A);}
 // SELECT STATEMENT ///////////////////////////////////////////////////////////
 
 cmd ::= SELECT set_quantifier select_columns select_table.
+{
+  builderFinishSelectQuery(builder);
+}
 
 set_quantifier ::= DISTINCT|ALL.
 set_quantifier ::= .

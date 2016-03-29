@@ -525,6 +525,7 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
         int64_t table_len = records.size(0);
         if(table_len == 0)
         {
+            printf("Table is empty\n");
             // Finished, table is empty
             return MultiRecordResult(ResultStatus::SUCCESS, MultiRecordData());
         }
@@ -541,6 +542,10 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
 
                 RecordCopy record_copy = copyRecord(row_ptr);
                 data.push_back(record_copy.data);
+            }
+            else
+            {
+                printf("Unable to initialize accessor\n");
             }
         }
 

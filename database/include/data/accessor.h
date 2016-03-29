@@ -42,6 +42,7 @@ class VectorAccessor {
 
         bool init(tervel::containers::wf::vector::Vector<Value*>& vector, uint32_t index) {
             Value* retrieved_value;
+            Value* value_ptr;
             if(vector.at(index, retrieved_value))
             {
                 // hp_watch
@@ -54,22 +55,21 @@ class VectorAccessor {
                     return false;
                 }
 
-                uintptr_t clean_ptr = reinterpret_cast<uintptr_t>(retrieved_value) & (~0xF);
-                retrieved_value = reinterpret_cast<Value*>(clean_ptr);
+                uintptr_t clean_ptr = reinterpret_cast<uintptr_t>(retrieved_value) & (~0x7);
+                value_ptr = reinterpret_cast<Value*>(clean_ptr);
 
-                int64_t res = retrieved_value->counter.fetch_add(1);
+                int64_t res = value_ptr->counter.fetch_add(1);
 
                 // hp_unwatch
                 HazardPointer::unwatch(HazardPointer::SlotID::SHORTUSE, retrieved_value);
 
                 Value* check_2 = nullptr;
-                if(vector.at(index, check_2))
+                if(!vector.at(index, check_2))
                 {
                     HazardPointer::unwatch(HazardPointer::SlotID::SHORTUSE, retrieved_value);
                     return false;
                 }
 
-                check_2 = (Value*)(((uintptr_t)check_2) & (~0xF));
                 if(res < 0 || retrieved_value != check_2)
                 {
                     retrieved_value->counter.fetch_sub(1);
@@ -77,7 +77,7 @@ class VectorAccessor {
                 }
 
                 // Store the clean pointer and return true, the access is successful.
-                this->value = retrieved_value;
+                this->value = value_ptr;
                 return true;
             }
             else

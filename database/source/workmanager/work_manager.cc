@@ -161,9 +161,8 @@ int32_t WorkManager::Run()
         if(status.status_code != E_NONE)
         {
             printf("Error accepting connection\n");
-            printf("Code: %d Secondary Code: %d\n", status.status_code,
-                                                    status.secondary_code);
-
+            printf("Code: %d Secondary: %s\n", status.status_code,
+                                                strerror(status.secondary_code));
             running = false;
             continue;
         }
@@ -385,27 +384,29 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
                 metadata_packet.resultPacketSize = 9 + result_packet.resultSize + 1;
 
                 // Serialize the packets
-                // TODO: Convert to static buffers
+                // TODO: Convert to static buffer
                 char* metadata_buffer = new char[sizeof(ResultMetaDataPacket)];
-                memcpy(metadata_buffer, &metadata_packet, sizeof(ResultMetaDataPacket));
+                serializeMetaDataPacket(metadata_packet, metadata_buffer);
 
                 char* result_buffer = new char[metadata_packet.resultPacketSize];
-                memcpy(result_buffer, &result_packet, 9);
-                memcpy(result_buffer + 9, result_packet.data, result_packet.resultSize);
-                result_buffer[metadata_packet.resultPacketSize - 1] = THE_TERMINATOR;
+                serializeResultPacket(result_packet, result_buffer);
 
                 // Now actually send the data
                 auto net_status = conn.send(metadata_buffer, sizeof(ResultMetaDataPacket));
-                if(net_status.status_code != omdb::NetworkStatusCodes::SUCCESS)
+                if(net_status.status_code != omdb::NetworkStatusCodes::SUCCESS &&
+                    net_status.status_code != omdb::NetworkStatusCodes::D_SEND_FULL)
                 {
                     // TODO: Handle error
+                    printf("Actual error sending metadata for query\n");
                     return false;
                 }
 
                 net_status = conn.send(result_buffer, metadata_packet.resultPacketSize);
-                if(net_status.status_code != omdb::NetworkStatusCodes::SUCCESS)
+                if(net_status.status_code != omdb::NetworkStatusCodes::SUCCESS &&
+                    net_status.status_code != omdb::NetworkStatusCodes::D_SEND_FULL)
                 {
                     // TODO: Handle error
+                    printf("Actual error sending data for query\n");
                     return false;
                 }
 

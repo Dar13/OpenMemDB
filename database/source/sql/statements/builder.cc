@@ -174,6 +174,30 @@ void builderAddQualifiedSelectColumn(StatementBuilder* builder,
     query->output_columns.push_back(output_column->text);
 }
 
+void builderFinishSelectQuery(StatementBuilder* builder)
+{
+    if(!builder->started || builder->statement->type != SQLStatement::SELECT)
+    {
+        return;
+    }
+
+    SelectQuery* query = reinterpret_cast<SelectQuery*>(builder->statement);
+
+    // Push all unique tables into the tables vector in the query.
+    for(auto col_ref : query->source_columns)
+    {
+        if(std::find(query->tables.begin(), query->tables.end(), col_ref.table) == query->tables.end())
+        {
+            query->tables.push_back(col_ref.table);
+        }
+    }
+
+    for(auto output : query->output_columns)
+    {
+        printf("Outputs: %s\n", output.c_str());
+    }
+}
+
 // Insert command helper functions ////////////////////////////////////////////
 
 void builderAddDataItem(StatementBuilder* builder, Token data)

@@ -74,6 +74,13 @@ struct ColumnUpdate
     TervelData new_data;
 };
 
+// TODO: Document this
+struct ColumnReference
+{
+    std::string table;
+    uint32_t column_idx;
+};
+
 enum class SQLStatement : uint16_t
 {
   INVALID = 0,
