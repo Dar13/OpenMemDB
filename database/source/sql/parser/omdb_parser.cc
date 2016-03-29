@@ -70,6 +70,7 @@ ParseResult parse(std::string input, DataStore* data_store)
 
     if(builder.statement == nullptr || !builder.valid)
     {
+        printf("Parse failed!\n");
         return ParseResult(ResultStatus::FAILURE_SYNTAX, nullptr);
     }
     else

@@ -27,11 +27,12 @@
 %extra_argument { StatementBuilder* builder}
 
 %syntax_error {
+  printf("Syntax error!\n");
   int n = sizeof(yyTokenName) / sizeof(yyTokenName[0]);
   for(int i = 0; i < n; ++i) {
     int a = yy_find_shift_action(yypParser, (YYCODETYPE)i);
     if (a < YYNSTATE + YYNRULE) {
-      //printf("possible token: %s\n", yyTokenName[i]);
+      printf("possible token: %s\n", yyTokenName[i]);
     }
   }
 }
@@ -188,15 +189,26 @@ comparison_predicate ::= expr. { }
 // UPDATE STATEMENT ///////////////////////////////////////////////////////////
 
 cmd ::= UPDATE update_table SET update_expr_list where_clause.
+{
+  builderFinishUpdateCommand(builder);
+}
 
 update_table(A) ::= name(X).
 {
   A = X;
-  // TODO: update builder functions
+  builderStartUpdateCommand(builder);
+  builderAddTableName(builder, A);
+  printf("UPDATE: table set!\n");
 }
 
 update_expr_list ::= update_expr_list COMMA update_expr.
-update_expr ::= column_id(X) EQ(OP) term(Y). { builderAddUpdateExpr(builder, OP, X, Y); }
+update_expr_list ::= update_expr.
+
+update_expr ::= column_id(X) EQ(OP) term(Y).
+{ 
+  printf("UPDATE: Adding expression\n");
+  builderAddUpdateExpr(builder, OP, X, Y);
+}
 
 // INSERT INTO STATEMENT //////////////////////////////////////////////////////
 
@@ -226,5 +238,5 @@ cmd ::= DELETE FROM delete_table where_clause.
 delete_table(A) ::= name(X).
 {
   A = X;
-  // TODO: Update builder functions
+  builderAddTableName(builder, A);
 }

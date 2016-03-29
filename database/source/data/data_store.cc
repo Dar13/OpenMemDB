@@ -370,7 +370,7 @@ ManipResult DataStore::updateRecords(Predicate* predicates,
                 RecordCopy copy = copyRecord(accessor.value->ptr);
 
                 // Perform the update
-                Record* updated_record = updateRecord(copy.data, record); 
+                Record* updated_record = updateRecord(copy, record); 
                 if(updated_record == nullptr)
                 {
                     // TODO: Error handling
@@ -526,7 +526,7 @@ MultiRecordResult DataStore::getRecords(Predicate* predicates,
         if(table_len == 0)
         {
             // Finished, table is empty
-            return MultiRecordResult(ResultStatus::SUCCESS, MultiRecordData());
+            return MultiRecordResult(ResultStatus::SUCCESS, data);
         }
 
         for(int64_t i = 0; i < table_len; i++)
@@ -1103,7 +1103,7 @@ RecordCopy DataStore::copyRecord(Record* record)
 /**
  *  \brief Creates an updated copy of a passed-in record
  */
-Record* DataStore::updateRecord(const RecordData& old_record, RecordData& new_record)
+Record* DataStore::updateRecord(const RecordCopy& old_record, RecordData& new_record)
 {
     // Perform the update
     int64_t idx = 0;
@@ -1118,7 +1118,7 @@ Record* DataStore::updateRecord(const RecordData& old_record, RecordData& new_re
     for(auto new_data : new_record)
     {
         // Grab the old data from the copy
-        old_data = old_record.at(idx);
+        old_data = old_record.data.at(idx);
 
         // Reset the Tervel status bits for insertion into a new record (if needed)
         old_data.data.tervel_status = 0;
@@ -1136,6 +1136,8 @@ Record* DataStore::updateRecord(const RecordData& old_record, RecordData& new_re
         }
         ++idx;
     }
+
+    updated_record->push_back_w_ra(old_record.id);
 
     return updated_record;
 }

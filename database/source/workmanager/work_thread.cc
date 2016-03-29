@@ -67,10 +67,10 @@ void WorkThread::Run(WorkThreadData* data)
         if(data->job_queue.dequeue(queue_getter))
         {
             uintptr_t job_ptr = reinterpret_cast<uintptr_t>(queue_getter.value());
-            // Mask off the bottom 4 bits, as Tervel modified them
+            // Mask off the bottom 3 bits, as Tervel likely modified them.
             // Malloc/new on Linux guarantees that the address will be a
             // multiple of 16
-            job_ptr = job_ptr & (~0xF);
+            job_ptr = job_ptr & (~0x7);
             job = reinterpret_cast<Job*>(job_ptr);
         }
         else
@@ -212,7 +212,7 @@ ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
                     column.type = static_cast<uint16_t>(data.data.type);
 
                     std::string& col_name = query->output_columns[itr];
-                    if(col_name.length() < sizeof(column.name))
+                    if((col_name.length() + 1) < sizeof(column.name))
                     {
                         // Assumes chars are 1 byte
                         strcpy(column.name, col_name.c_str());
@@ -231,6 +231,14 @@ ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
 
                 // TODO: Enforce this being a move rather than a copy
                 query_data.data = statement_result.result;
+                for(auto r_data : query_data.data)
+                {
+                    for(auto t_data : r_data)
+                    {
+                        printf("%lu, ", t_data.value);
+                    }
+                    printf("\n");
+                }
 
                 QueryResult* query_result = new (std::nothrow) QueryResult(ResultStatus::SUCCESS,
                                                                             query_data);

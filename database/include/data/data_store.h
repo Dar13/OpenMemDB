@@ -126,7 +126,7 @@ private:
     RecordCopy copyRecord(RecordVector& table, int64_t row_idx);
     RecordCopy copyRecord(Record* record);
 
-    Record* updateRecord(const RecordData& old_record, RecordData& new_record);
+    Record* updateRecord(const RecordCopy& old_record, RecordData& new_record);
 
     MultiRecordCopies searchTable(std::shared_ptr<DataTable>& table, ValuePredicate* value_pred);
     /*

@@ -90,6 +90,7 @@ void builderStartInsertCommand(StatementBuilder* builder)
 void builderStartUpdateCommand(StatementBuilder* builder)
 {
     UpdateCommand* cmd = new (std::nothrow) UpdateCommand();
+    // TODO: Error handling
 
     builder->started = true;
     builder->statement = cmd;
@@ -99,6 +100,7 @@ void builderStartUpdateCommand(StatementBuilder* builder)
 void builderStartDeleteCommand(StatementBuilder* builder)
 {
     DeleteCommand* cmd = new (std::nothrow) DeleteCommand();
+    // TODO: Error handling
 
     builder->started = true;
     builder->statement = cmd;
@@ -247,6 +249,7 @@ void builderAddUpdateExpr(StatementBuilder* builder, Token operation,
     {
         // Column doesn't exist
         // TODO: Error handling
+        printf("%s: Unable to find column!\n", __FUNCTION__);
     }
 
     if(right->is_value)
@@ -257,6 +260,7 @@ void builderAddUpdateExpr(StatementBuilder* builder, Token operation,
     {
         // Not a value
         // TODO: Error handling
+        printf("%s: Invalid type! Handle TODO!\n", __FUNCTION__);
     }
 
     update->columns.push_back(update_info);
