@@ -86,6 +86,7 @@ void builderAddDataItem(StatementBuilder* builder, Token data);
 void builderFinishInsertcommand(StatementBuilder* builder);
 
 // Update command functions
+void builderStartUpdateCommand(StatementBuilder* builder);
 void builderAddUpdateExpr(StatementBuilder* builder, Token operation,
         Token left, Token right);
 void builderFinishUpdateCommand(StatementBuilder* builder);

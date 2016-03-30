@@ -24,7 +24,9 @@ namespace libomdb
   {
     SUCCESS = 0,
     FAILURE,
+    FAILURE_DB_UNKNOWN_STATE,
     FAILURE_OUT_MEMORY,
+    FAILURE_SYNTAX,
   };
   
   enum class ManipStatus : uint32_t
@@ -63,7 +65,7 @@ namespace libomdb
   
   /** Represents result of database command */
   struct CommandResult {
-      bool isSuccess;
+      ResultStatus status;
       int numAffected;
   };
   
@@ -156,8 +158,6 @@ namespace libomdb
      */
     std::string getColumnLabel(int index);
 
-
-
     /**
      * Gets the type of the data stored in the column at the index 
      * passed in
@@ -201,6 +201,11 @@ namespace libomdb
      */
     int64_t getValue(int index);
 
+    /**
+     *  Validity of the result, used to determine success of operation that
+     *  generated this result.
+     */
+    ResultStatus status;
 
     /**
      * Gets the next row in the result set

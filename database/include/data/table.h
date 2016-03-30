@@ -52,7 +52,7 @@ using SchemaResult = Result<TableSchema>;
 struct DataTable
 {
     //! The constructor that initializes the record counter to a sane value
-    DataTable() : record_counter(0) {}
+    DataTable() : records(10000), record_counter(0) {}
     ~DataTable()
     {
         // Remove table contents

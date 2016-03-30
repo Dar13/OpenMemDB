@@ -90,6 +90,7 @@ void builderStartInsertCommand(StatementBuilder* builder)
 void builderStartUpdateCommand(StatementBuilder* builder)
 {
     UpdateCommand* cmd = new (std::nothrow) UpdateCommand();
+    // TODO: Error handling
 
     builder->started = true;
     builder->statement = cmd;
@@ -99,6 +100,7 @@ void builderStartUpdateCommand(StatementBuilder* builder)
 void builderStartDeleteCommand(StatementBuilder* builder)
 {
     DeleteCommand* cmd = new (std::nothrow) DeleteCommand();
+    // TODO: Error handling
 
     builder->started = true;
     builder->statement = cmd;
@@ -174,6 +176,25 @@ void builderAddQualifiedSelectColumn(StatementBuilder* builder,
     query->output_columns.push_back(output_column->text);
 }
 
+void builderFinishSelectQuery(StatementBuilder* builder)
+{
+    if(!builder->started || builder->statement->type != SQLStatement::SELECT)
+    {
+        return;
+    }
+
+    SelectQuery* query = reinterpret_cast<SelectQuery*>(builder->statement);
+
+    // Push all unique tables into the tables vector in the query.
+    for(auto col_ref : query->source_columns)
+    {
+        if(std::find(query->tables.begin(), query->tables.end(), col_ref.table) == query->tables.end())
+        {
+            query->tables.push_back(col_ref.table);
+        }
+    }
+}
+
 // Insert command helper functions ////////////////////////////////////////////
 
 void builderAddDataItem(StatementBuilder* builder, Token data)
@@ -228,6 +249,7 @@ void builderAddUpdateExpr(StatementBuilder* builder, Token operation,
     {
         // Column doesn't exist
         // TODO: Error handling
+        printf("%s: Unable to find column!\n", __FUNCTION__);
     }
 
     if(right->is_value)
@@ -238,6 +260,7 @@ void builderAddUpdateExpr(StatementBuilder* builder, Token operation,
     {
         // Not a value
         // TODO: Error handling
+        printf("%s: Invalid type! Handle TODO!\n", __FUNCTION__);
     }
 
     update->columns.push_back(update_info);

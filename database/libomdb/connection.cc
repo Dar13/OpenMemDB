@@ -98,11 +98,8 @@ std::vector<libomdb::ResultRow> parseData(ResultPacket packet) {
   for (uint i = 0; i < numberOfRows; ++i) {
     libomdb::ResultRow row;
     for (uint j = 0; j < packet.rowLen; ++j) {
-      int64_t* col = new int64_t;
-      memcpy(col, dataPointer, 8); //Move the next 8 bytes into col
-      row.push_back(*col);
-      delete(col);
-      dataPointer++; // Move pointer to next uint64_t
+        row.push_back(*dataPointer);
+        dataPointer++; // Move pointer to next uint64_t
     }
     rows.push_back(row);
   }
@@ -143,7 +140,7 @@ libomdb::CommandResult parseCommandResult(ResultHolder result) {
   //ResultMetaDataPacket metaDataPacket = DeserializeResultMetaDataPacket(result.metaDataPacket);
   ResultPacket packet = DeserializeResultPacket(result.resultPacket);
   libomdb::CommandResult commandResult;
-  commandResult.isSuccess = packet.status == ResultStatus::SUCCESS;
+  commandResult.status = packet.status;
   commandResult.numAffected = packet.resultSize; // TODO: Confirm with neil
   return commandResult;
 }
@@ -164,7 +161,11 @@ libomdb::Result parseQueryResult(ResultHolder holder) {
       parseMetaData(resultMetaDataPacket);
   libomdb::ResultMetaData metaData =
       libomdb::ResultMetaData::buildResultMetaDataObject(metaDataColumns);
-  return libomdb::Result::buildResultObject(rows, metaData);
+  auto result = libomdb::Result::buildResultObject(rows, metaData);
+
+  result.status = resultMetaDataPacket.status;
+
+  return result;
 }
 
 

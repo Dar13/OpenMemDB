@@ -67,10 +67,10 @@ void WorkThread::Run(WorkThreadData* data)
         if(data->job_queue.dequeue(queue_getter))
         {
             uintptr_t job_ptr = reinterpret_cast<uintptr_t>(queue_getter.value());
-            // Mask off the bottom 4 bits, as Tervel modified them
+            // Mask off the bottom 3 bits, as Tervel likely modified them.
             // Malloc/new on Linux guarantees that the address will be a
             // multiple of 16
-            job_ptr = job_ptr & (~0xF);
+            job_ptr = job_ptr & (~0x7);
             job = reinterpret_cast<Job*>(job_ptr);
         }
         else
@@ -131,6 +131,8 @@ Job WorkThread::GenerateJob(int job_num, std::string command, DataStore* store)
                             ManipStatus::ERR);
                 }
 
+                printf("Returning from job #%d\n", job_num);
+
                 return res;
             });
 
@@ -183,9 +185,18 @@ ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
                 QueryData query_data;
                 if(statement_result.result.size() == 0)
                 {
-                    query_data.metadata.clear();
+                    // Just copy over the metadata, leave result empty
+                    for(auto column : query->output_columns)
+                    {
+                        ResultColumn res_column;
+                        strcpy(res_column.name, column.c_str());
+                        res_column.type = static_cast<uint16_t>(DataType::INTEGER);
+
+                        query_data.metadata.push_back(res_column);
+                    }
+
                     query_data.data.clear();
-                    // TODO: Error handling?
+
                     return new (std::nothrow) QueryResult(ResultStatus::SUCCESS, query_data);
                 }
 
@@ -201,10 +212,10 @@ ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
                     column.type = static_cast<uint16_t>(data.data.type);
 
                     std::string& col_name = query->output_columns[itr];
-                    if(col_name.length() < sizeof(column.name))
+                    if((col_name.length() + 1) < sizeof(column.name))
                     {
                         // Assumes chars are 1 byte
-                        memcpy(column.name, col_name.c_str(), col_name.length());
+                        strcpy(column.name, col_name.c_str());
                     }
                     else
                     {
@@ -220,6 +231,14 @@ ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
 
                 // TODO: Enforce this being a move rather than a copy
                 query_data.data = statement_result.result;
+                for(auto r_data : query_data.data)
+                {
+                    for(auto t_data : r_data)
+                    {
+                        printf("%lu, ", t_data.value);
+                    }
+                    printf("\n");
+                }
 
                 QueryResult* query_result = new (std::nothrow) QueryResult(ResultStatus::SUCCESS,
                                                                             query_data);
@@ -302,12 +321,22 @@ MultiRecordResult WorkThread::ExecuteQuery(ParsedStatement* statement, DataStore
 {
     // Only one type of query, no need for a switch
     // Verify the type of statement is correct though
+    if(statement == nullptr)
+    {
+        printf("Parsed statement is null!\n");
+    }
+
     if(statement->type != SQLStatement::SELECT)
     {
         return MultiRecordResult(ResultStatus::FAILURE, MultiRecordData());
     }
 
     SelectQuery* query = reinterpret_cast<SelectQuery*>(statement);
+
+    for(auto table : query->tables)
+    {
+        printf("Table: %s\n", table.c_str());
+    }
 
     return store->getRecords(query->predicate, query->tables.front());
 }

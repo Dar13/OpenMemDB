@@ -46,13 +46,13 @@ void serializeMetaDataPacket(ResultMetaDataPacket packet, char* out_buffer)
 void serializeResultPacket(ResultPacket packet, char* out_buffer)
 {
     std::memcpy(out_buffer, &packet, 9);
-    if(packet.data != nullptr)
+    if(packet.data == nullptr)
     {
-        std::memset(out_buffer + 9, packet.terminator, sizeof(char));
+        std::memset(out_buffer + 10, packet.terminator, sizeof(char));
     }
     else
     {
-        std::memcpy(out_buffer + 9, packet.data, packet.resultSize);
+        std::memcpy(out_buffer + 10, packet.data, packet.resultSize);
         out_buffer[9 + packet.resultSize + 1] = packet.terminator;
     }
 }

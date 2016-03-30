@@ -141,6 +141,9 @@ cmd ::= DROP TABLE name(A). {builderStartDropTable(builder, A);}
 // SELECT STATEMENT ///////////////////////////////////////////////////////////
 
 cmd ::= SELECT set_quantifier select_columns select_table.
+{
+  builderFinishSelectQuery(builder);
+}
 
 set_quantifier ::= DISTINCT|ALL.
 set_quantifier ::= .
@@ -185,15 +188,26 @@ comparison_predicate ::= expr. { }
 // UPDATE STATEMENT ///////////////////////////////////////////////////////////
 
 cmd ::= UPDATE update_table SET update_expr_list where_clause.
+{
+  builderFinishUpdateCommand(builder);
+}
 
 update_table(A) ::= name(X).
 {
   A = X;
-  // TODO: update builder functions
+  builderStartUpdateCommand(builder);
+  builderAddTableName(builder, A);
+  printf("UPDATE: table set!\n");
 }
 
 update_expr_list ::= update_expr_list COMMA update_expr.
-update_expr ::= column_id(X) EQ(OP) term(Y). { builderAddUpdateExpr(builder, OP, X, Y); }
+update_expr_list ::= update_expr.
+
+update_expr ::= column_id(X) EQ(OP) term(Y).
+{ 
+  printf("UPDATE: Adding expression\n");
+  builderAddUpdateExpr(builder, OP, X, Y);
+}
 
 // INSERT INTO STATEMENT //////////////////////////////////////////////////////
 
@@ -223,5 +237,5 @@ cmd ::= DELETE FROM delete_table where_clause.
 delete_table(A) ::= name(X).
 {
   A = X;
-  // TODO: Update builder functions
+  builderAddTableName(builder, A);
 }
