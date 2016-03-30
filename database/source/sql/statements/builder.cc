@@ -408,10 +408,10 @@ void builderStartNestedExpr(StatementBuilder* builder, Token operation)
 void builderAddValueExpr(StatementBuilder* builder,
 	Token operation, Token left_term, Token right_term)
 {
-    printf("Adding value expression: %s %s %s\n",
-            left_term->text.c_str(),
-            operation->text.c_str(),
-            right_term->text.c_str());
+    // printf("Adding value expression: %s %s %s\n",
+    //         left_term->text.c_str(),
+    //         operation->text.c_str(),
+    //         right_term->text.c_str());
 
     if(builder->expr == nullptr)
     {
@@ -424,7 +424,7 @@ void builderAddValueExpr(StatementBuilder* builder,
     }
     else
     {
-        printf("Non-null builder->expr\n");
+        // printf("Non-null builder->expr\n");
         // Create nested expression and set the previous to the left child
         Expression* right = createExpression(operation, left_term, right_term);
         if(right == nullptr)
@@ -447,7 +447,7 @@ void builderAddValueExpr(StatementBuilder* builder,
         builder->expr = parent;
     }
 
-    printExpressionTree(builder->expr);
+    // printExpressionTree(builder->expr); 
 }
 
 Expression* createExpression(Token op, Token left, Token right)
