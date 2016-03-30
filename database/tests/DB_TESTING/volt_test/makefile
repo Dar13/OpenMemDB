@@ -2,7 +2,7 @@ CP = -classpath
 JFLAGS = -g
 JC = javac
 JJ = java
-CLASS_FILES = ".:/home/heyblackduck/workspace/voltdb/voltdb/*"
+CLASS_FILES = ".:/home/OpenMemDb/voltdb/voltdb/*"
 .SUFFIXES: .java .class
 .java.class:
 	$(JC) $(JFLAGS) $(CP) $(CLASS_FILES) $*.java
@@ -20,4 +20,4 @@ run:
 	$(JJ) $(CP) $(CLASS_FILES) main
 
 clean:
-	$(RM) *.class
+	$(RM) *.class *.jar

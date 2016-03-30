@@ -61,19 +61,13 @@ public class connector
         }
     }
 
-    /*
-    //prints out database using a select query on test tables
-    public void print()
+    public void print(ClientResponse response)
     {
-        VoltTable[] results;
-        try {
-            db.callProcedure("Print");
-        } catch(Exception e)
-        {
-            e.printStackTrace();
-        }
+        //response would need to check if the custom made procedure returns success
+
+        VoltTable results[];
+        //db.callProcedure("Print");
     }
-    */
 
     public void close()
     {
