@@ -35,8 +35,6 @@ void DataStoreTest::createTest(std::vector<std::string> statements, void *t_data
     tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);
     DataStore *data = grab->data;
 
-    auto time_start = std::chrono::high_resolution_clock::now();
-
     // Execute create table commands from statements vector (defined in h file)
     for(auto i = statements.begin(); i  != statements.end(); i++)
     {
@@ -54,12 +52,6 @@ void DataStoreTest::createTest(std::vector<std::string> statements, void *t_data
             }
         }
     }
-
-    auto time_end = std::chrono::high_resolution_clock::now();
-
-             
-    thread_local static auto threadTime = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
-
 
     delete main_context;
 }
@@ -146,6 +138,65 @@ void DataStoreTest::insertTest(std::vector<std::string> records, void *t_data)
     delete main_context;
 }
 
+tervel::ThreadContext* DataStoreTest::loadRows(std::vector<std::string> records, 
+    std::vector<std::string> statements, void *t_data)
+{
+    struct thread_data *grab;
+    grab = (struct thread_data *) t_data;
+
+    setupTokenMappings();
+
+    DataStore *data = grab->data;
+
+    tervel::ThreadContext* main_context = loadTables(statements, t_data);
+
+    for(auto i = records.begin(); i != records.end(); i++)
+    {
+        ParseResult parse_result = parse(*i, data);
+
+        if(parse_result.status == ResultStatus::SUCCESS)
+        {
+            auto result = WorkThread::ExecuteStatement(parse_result.result, data);
+            if(result-> status == ResultStatus::SUCCESS) 
+            {
+            }
+        }
+    }
+
+    return main_context;
+}
+
+
+void DataStoreTest::selectTest(std::vector<std::string> select_statements, void *t_data)
+{
+    struct thread_data *grab;
+    grab = (struct thread_data *) t_data;
+
+    setupTokenMappings();   
+
+    tervel::Tervel* tervel_test = grab->tervel_test;
+    tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);    
+    DataStore *data = grab->data;
+
+    for(auto i = select_statements.begin(); i != select_statements.end(); i++)
+    {
+        std::cout << *i << std::endl;
+        ParseResult parse_result = parse(*i, data);
+
+        if(parse_result.status == ResultStatus::SUCCESS)
+        {
+            printf("we did it\n");
+    //         // auto result = WorkThread::ExecuteStatement(parse_result.result, data);
+    //         // if(result-> status == ResultStatus::SUCCESS) 
+    //         // {
+    //         //     printf("reddit\n");
+    //         // }
+        }
+    }
+
+    delete main_context;
+}
+
 // First method that should be called when making a test, passes in just the type of test. 
 // Later on we will have the ability to set your own sql strings, this will also be passed in here
 DataStoreTest& DataStoreTest::with(int mode)
@@ -194,7 +245,7 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
         
         case MODE_INSERT:
         {
-            for(int i = 0; i < TestConstants::MaxTables; i++)
+            for(int i = 0; i < TestConstants::InsertToTables; i++)
             {
                 std::string create_table = "CREATE TABLE TestT"+ std::to_string(i) +" (A DATE, B INTEGER);";
                 statements.push_back(create_table);
@@ -212,8 +263,39 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
 
                 year++;
             }
-        }
             break;
+        }
+
+        case MODE_SELECT:
+        {
+
+            for (int i = 0; i < TestConstants::SelectFromTables; ++i)
+            {
+                std::string create_table = "CREATE TABLE TestT" + std::to_string(i) + " (A DATE, B INTEGER);";
+                statements.push_back(create_table);
+            }
+
+            int year = 2016;
+            
+            for(int i = 0; i < TestConstants::MaxSelects; ++i)
+            {
+                std::string date = std::to_string(year) + "-04-12";
+                std::string insert_into = "INSERT INTO TestT0 VALUES (" + date + "," +
+                std::to_string(i) + ");";
+
+                test_data.push_back(insert_into);
+
+                year++;
+            }
+
+            for (int i = 0; i < TestConstants::MaxSelects; ++i)
+            {
+                std::string select_from = "SELECT TestT0.B FROM TestT0 WHERE TestT0.B==" + std::to_string(i) + ";";
+                select_data.push_back(select_from);
+            }
+
+            break;
+        }
     }
 
     return *this;
@@ -330,6 +412,17 @@ TestResult DataStoreTest::test()
             TestResult testResult(duration.count(), threadCount);
             return testResult;
         }
+        case MODE_SELECT:
+        {
+            tervel::ThreadContext* old_context2 = loadRows(test_data, statements, (void *) &share);
+
+            std::thread t(selectTest, select_data, (void*) &share);
+
+            t.join();
+            // delete old_context1, old_context2;
+
+            break;
+        }
     }
 
     // Placeholder
@@ -339,7 +432,25 @@ TestResult DataStoreTest::test()
 
 i2tuple DataStoreTest::calculateArrayCut(int threadCount, int threadNumber)
 {
-    int size = test_data.size();
+    int size;
+
+    switch(mode) 
+    {
+
+        case MODE_CREATE:
+        case MODE_DROP:
+            size = statements.size();
+            break;
+        case MODE_INSERT:
+            size = test_data.size();
+            break;
+        case MODE_SELECT:
+            size = select_data.size();
+        default:
+            size = 0;
+            break;
+    }
+
     int cutPerThread = size / threadCount;
     int start = cutPerThread*threadNumber;
     int end = start + cutPerThread;
@@ -383,6 +494,7 @@ void DataStoreTest::parseComplexity(int complexity)
 DataStoreTest& DataStoreTest::setThreadCount(int count)
 {
     threadCount = count;
+    printf("%d\n", threadCount);
     share.tervel_test = new tervel::Tervel(2*threadCount);
     return *this;
 }

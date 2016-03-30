@@ -4,8 +4,12 @@
 // Use a namespace to declare constants
 namespace TestConstants
 {
-  const int MaxTables = 1;
+  const int MaxTables = 10000;
   const int MaxInserts = 500000;
+  const int MaxSelects = 4;
+
+  const int InsertToTables = 1;
+  const int SelectFromTables = 1;
 }
 
 #endif

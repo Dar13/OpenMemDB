@@ -7,7 +7,7 @@ enum TestType
     MODE_CREATE = 0,
     MODE_DROP = 1,
     MODE_INSERT = 2,
-    MODE_SELECT
+    MODE_SELECT = 3
 };
 
 

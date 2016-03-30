@@ -93,6 +93,9 @@ GraphTest::GraphTest(int mode, int threadCount)
         case MODE_INSERT:
             insertPerformanceTest(threadCount);
             break;
+        case MODE_SELECT:
+            selectPerformanceTest(threadCount);
+            break;
     }
 
 
@@ -188,4 +191,16 @@ void GraphTest::insertPerformanceTest(int threadCount)
                                     .test();
 
     createOrAppendOutputFile(MODE_INSERT, result.duration, threadCount);
+}
+
+void GraphTest::selectPerformanceTest(int threadCount)
+{
+    DataStoreTest dataStoreTest;
+
+    TestResult result = dataStoreTest.with(MODE_SELECT)
+                                    .generateCases(0b0000)
+                                    .setThreadCount(threadCount)
+                                    .test();
+
+    createOrAppendOutputFile(MODE_SELECT, result.duration, threadCount);
 }

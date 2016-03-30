@@ -20,16 +20,17 @@ case $1 in
 		;;
 	"irt")
 		echo "Performing Insert Row Test"
-		time ./tests pit 1
-		time ./tests pit 2
-		time ./tests pit 4
-
+		time ./tests pirt 1
+		time ./tests pirt 2
+		time ./tests pirt 4
+		python graph_test.py
 		;;
 
 	*)
 		echo "No test selected options are:"
 		echo "ct: Create Test"
 		echo "dtt: Drop Table Test"
+		echo "irt: Insert Row Test"
 
 esac
 

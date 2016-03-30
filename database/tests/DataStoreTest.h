@@ -40,13 +40,16 @@ class DataStoreTest
 		std::vector<std::string> statements;
         std::vector<std::string> test_data;
         std::vector<std::string> table_name;
-        
+        std::vector<std::string> select_data;
+                
 		void parseComplexity(int complexity);
 		static void createTest(std::vector<std::string> statements, void *t_data);
-		static tervel::ThreadContext* loadTables(std::vector<std::string> statements, void *t_data);
         static void dropTest(std::vector<std::string> table_name, void *t_data);
-		//static void dropTest(std::vector<std::string> statements, std::vector<std::string> table_name, void *t_data);
         static void insertTest(std::vector<std::string> record, void *t_data);
+        static void selectTest(std::vector<std::string> select_statements, void *t_data);
+		static tervel::ThreadContext* loadTables(std::vector<std::string> statements, void *t_data);
+		static tervel::ThreadContext* loadRows(std::vector<std::string> records, 
+			std::vector<std::string> statements, void *t_data);
 		std::vector<std::string> generateCases();
 		i2tuple calculateArrayCut(int threadCount, int threadNumber);
 

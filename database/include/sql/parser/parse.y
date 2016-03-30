@@ -31,7 +31,7 @@
   for(int i = 0; i < n; ++i) {
     int a = yy_find_shift_action(yypParser, (YYCODETYPE)i);
     if (a < YYNSTATE + YYNRULE) {
-      //printf("possible token: %s\n", yyTokenName[i]);
+      printf("possible token: %s\n", yyTokenName[i]);
     }
   }
 }
