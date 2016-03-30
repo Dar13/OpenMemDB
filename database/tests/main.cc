@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <string.h>
 #include "Test.h"
 #include "DataStoreTest.h"
 #include "Modes.h"
