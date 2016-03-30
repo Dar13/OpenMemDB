@@ -63,3 +63,6 @@ omdb_console
 GPATH
 GRTAGS
 GTAGS
+
+# Generated graphs
+*.png

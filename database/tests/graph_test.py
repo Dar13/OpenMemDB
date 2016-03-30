@@ -23,7 +23,7 @@ for x in thread_time:
 	print(x)
 
 # create and show plot
-xticks = ['1','2','4','8','16','32','48']
+xticks = ['1','2','4','8','16','24','32','64','64']
 x = list(range(len(thread_time)))
 
 style.use('ggplot')
