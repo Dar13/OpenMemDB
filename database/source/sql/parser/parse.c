@@ -862,17 +862,17 @@ static void yy_reduce(
   */
       case 5: /* explain ::= */
       case 49: /* comparison_predicate ::= expr */ yytestcase(yyruleno==49);
-#line 56 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 55 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { }
 #line 868 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 8: /* create_table ::= CREATE TABLE name */
-#line 64 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 63 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 {builderStartCreateTable(builder, yymsp[0].minor.yy0);}
 #line 873 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 12: /* column ::= column_id type column_args */
-#line 72 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 71 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 {
   (void)yygotominor.yy0;
   builderAddColumn(builder, yymsp[-2].minor.yy0, yymsp[-1].minor.yy0, yymsp[0].minor.yy0);
@@ -885,49 +885,49 @@ static void yy_reduce(
       case 17: /* type ::= typetoken */ yytestcase(yyruleno==17);
       case 18: /* typetoken ::= typename */ yytestcase(yyruleno==18);
       case 19: /* typename ::= ID|STRING */ yytestcase(yyruleno==19);
-#line 77 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 76 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 {yygotominor.yy0 = yymsp[0].minor.yy0;}
 #line 891 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 16: /* type ::= */
       case 39: /* as_clause ::= */ yytestcase(yyruleno==39);
-#line 87 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 86 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { yygotominor.yy0 = nullptr; }
 #line 897 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 22: /* column_constraints ::= DEFAULT term */
-#line 99 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 98 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 {
   builderAddColumnConstraint(builder, SQLConstraintType::DEFAULT, yymsp[0].minor.yy0);
 }
 #line 904 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 23: /* column_constraints ::= NOT NULL */
-#line 104 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 103 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 {
   builderAddColumnConstraint(builder, SQLConstraintType::NOT_NULL);
 }
 #line 911 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 24: /* column_constraints ::= AUTO_INCREMENT */
-#line 109 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 108 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 {
   builderAddColumnConstraint(builder, SQLConstraintType::AUTO_INCREMENT);
 }
 #line 918 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 25: /* expr ::= expr AND|OR expr */
-#line 120 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 119 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { builderStartNestedExpr(builder, yymsp[-1].minor.yy0);}
 #line 923 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 26: /* expr ::= term NE|EQ term */
-#line 121 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 120 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { builderAddValueExpr(builder, yymsp[-1].minor.yy0, yymsp[-2].minor.yy0, yymsp[0].minor.yy0); }
 #line 928 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 27: /* term ::= name DOT column_id */
-#line 123 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 122 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { 
     yymsp[-2].minor.yy0->table_name = yymsp[-2].minor.yy0->text;
     yymsp[-2].minor.yy0->column_name = yymsp[0].minor.yy0->text;
@@ -939,12 +939,12 @@ static void yy_reduce(
 #line 940 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 28: /* term ::= column_id */
-#line 131 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 130 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { yygotominor.yy0 = yymsp[0].minor.yy0; /*printf("expression term\n");*/ }
 #line 945 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 29: /* term ::= INTEGER|FLOAT|DATE|TIME */
-#line 133 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 132 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { 
   //printf("Numeric term handling\n");
   yygotominor.yy0 = yymsp[0].minor.yy0;
@@ -952,43 +952,43 @@ static void yy_reduce(
 #line 953 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 30: /* cmd ::= DROP TABLE name */
-#line 140 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 139 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 {builderStartDropTable(builder, yymsp[0].minor.yy0);}
 #line 958 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 31: /* cmd ::= SELECT set_quantifier select_columns select_table */
-#line 145 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 144 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 {
   builderFinishSelectQuery(builder);
 }
 #line 965 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 36: /* select_column ::= name DOT ASTERISK */
-#line 155 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 154 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { builderAddSelectAllColumns(builder, yymsp[-2].minor.yy0); }
 #line 970 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 37: /* select_column ::= name DOT name as_clause */
-#line 156 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 155 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 {
   builderAddQualifiedSelectColumn(builder, yymsp[-3].minor.yy0, yymsp[-1].minor.yy0, yymsp[0].minor.yy0);
 }
 #line 977 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 38: /* as_clause ::= AS name */
-#line 160 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 159 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { yygotominor.yy0 = yymsp[0].minor.yy0; }
 #line 982 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 41: /* select_table ::= FROM name */
       case 42: /* table_references ::= table_references COMMA table_reference */ yytestcase(yyruleno==42);
       case 43: /* table_references ::= table_reference */ yytestcase(yyruleno==43);
-#line 164 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 163 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { (void)yymsp[0].minor.yy0; }
 #line 989 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 44: /* table_reference ::= name as_clause */
-#line 170 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 169 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 {
   (void)yygotominor.yy0;
   (void)yymsp[-1].minor.yy0; 
@@ -998,14 +998,14 @@ static void yy_reduce(
 #line 999 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 50: /* cmd ::= UPDATE update_table SET update_expr_list where_clause */
-#line 192 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 191 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 {
   builderFinishUpdateCommand(builder);
 }
 #line 1006 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 51: /* update_table ::= name */
-#line 197 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 196 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 {
   yygotominor.yy0 = yymsp[0].minor.yy0;
   builderStartUpdateCommand(builder);
@@ -1015,7 +1015,7 @@ static void yy_reduce(
 #line 1016 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 54: /* update_expr ::= column_id EQ term */
-#line 208 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 207 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { 
   printf("UPDATE: Adding expression\n");
   builderAddUpdateExpr(builder, yymsp[-1].minor.yy0, yymsp[-2].minor.yy0, yymsp[0].minor.yy0);
@@ -1023,7 +1023,7 @@ static void yy_reduce(
 #line 1024 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 56: /* insert_table ::= name */
-#line 218 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 217 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 { 
   yygotominor.yy0 = yymsp[0].minor.yy0; 
   builderStartInsertCommand(builder);
@@ -1033,7 +1033,7 @@ static void yy_reduce(
 #line 1034 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 59: /* insert_term ::= INTEGER|FLOAT|DATE|TIME|NULL */
-#line 229 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 228 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 {
   yygotominor.yy0 = yymsp[0].minor.yy0;
   builderAddDataItem(builder, yymsp[0].minor.yy0);
@@ -1041,7 +1041,7 @@ static void yy_reduce(
 #line 1042 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
         break;
       case 61: /* delete_table ::= name */
-#line 239 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 238 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 {
   yygotominor.yy0 = yymsp[0].minor.yy0;
   builderAddTableName(builder, yygotominor.yy0);
@@ -1121,7 +1121,7 @@ static void yy_parse_failed(
   while( yypParser->yyidx>=0 ) yy_pop_parser_stack(yypParser);
   /* Here code is inserted which will be executed whenever the
   ** parser fails */
-#line 40 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 39 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 
   builderClean(builder);
 #line 1128 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
@@ -1141,15 +1141,14 @@ static void yy_syntax_error(
 #define TOKEN (yyminor.yy0)
 #line 29 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 
-  printf("Syntax error!\n");
   int n = sizeof(yyTokenName) / sizeof(yyTokenName[0]);
   for(int i = 0; i < n; ++i) {
     int a = yy_find_shift_action(yypParser, (YYCODETYPE)i);
     if (a < YYNSTATE + YYNRULE) {
-      printf("possible token: %s\n", yyTokenName[i]);
+      //printf("possible token: %s\n", yyTokenName[i]);
     }
   }
-#line 1153 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 1152 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
   ParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 
@@ -1168,10 +1167,10 @@ static void yy_accept(
   while( yypParser->yyidx>=0 ) yy_pop_parser_stack(yypParser);
   /* Here code is inserted which will be executed whenever the
   ** parser accepts */
-#line 44 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
+#line 43 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.y"
 
   //printf("Parse accepts input!\n");
-#line 1175 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
+#line 1174 "/home/nmoore/Development/OpenMemDB/database/include/sql/parser/parse.c"
   ParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 

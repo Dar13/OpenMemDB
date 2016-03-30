@@ -27,12 +27,11 @@
 %extra_argument { StatementBuilder* builder}
 
 %syntax_error {
-  printf("Syntax error!\n");
   int n = sizeof(yyTokenName) / sizeof(yyTokenName[0]);
   for(int i = 0; i < n; ++i) {
     int a = yy_find_shift_action(yypParser, (YYCODETYPE)i);
     if (a < YYNSTATE + YYNRULE) {
-      printf("possible token: %s\n", yyTokenName[i]);
+      //printf("possible token: %s\n", yyTokenName[i]);
     }
   }
 }
