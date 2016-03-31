@@ -17,6 +17,8 @@
 #include <chrono>
 #include <atomic>
 #include <tuple>
+#include <iostream>
+#include <fstream>
 
 DataStoreTest::DataStoreTest()
 {
@@ -499,3 +501,87 @@ DataStoreTest& DataStoreTest::setThreadCount(int count)
     return *this;
 }
 
+void DataStoreTest::printStatementsToFile()
+{
+    std::ofstream outputFile;
+    outputFile.open("sql_statements.omdbt");
+
+    switch(mode)
+    {
+        case MODE_CREATE:
+        {
+            outputFile << "create" << std::endl;
+            for(auto i = statements.begin(); i  != statements.end(); i++)
+            {
+                outputFile << *i << std::endl;
+            }
+
+            break;
+        }
+        case MODE_DROP:
+        {
+            outputFile << "drop" << std::endl;
+
+            for(auto i = statements.begin(); i  != statements.end(); i++)
+            {
+                outputFile << *i << std::endl;
+            }    
+
+            outputFile << "names" << std::endl;
+
+            for(auto i = table_name.begin(); i  != table_name.end(); i++)
+            {
+                outputFile << *i << std::endl;
+            }     
+
+            break;
+        }
+        case MODE_INSERT:
+        {
+            outputFile << "insert" << std::endl;
+            outputFile << "tables" << std::endl;
+            
+            for(auto i = statements.begin(); i  != statements.end(); i++)
+            {
+                outputFile << *i << std::endl;
+            }
+
+            outputFile << "inserts" << std::endl;
+            for(auto i = test_data.begin(); i  != test_data.end(); i++)
+            {
+                outputFile << *i << std::endl;
+            }
+
+            break;
+        }
+        case MODE_SELECT:
+        {
+            outputFile << "select" << std::endl;
+            outputFile << "tables" << std::endl;
+            
+            for(auto i = statements.begin(); i  != statements.end(); i++)
+            {
+                outputFile << *i << std::endl;
+            }
+
+            outputFile << "inserts" << std::endl;
+
+            for(auto i = test_data.begin(); i  != test_data.end(); i++)
+            {
+                outputFile << *i << std::endl;
+            }
+
+            outputFile << "selects" << std::endl;
+
+            for(auto i = select_data.begin(); i  != select_data.end(); i++)
+            {
+                outputFile << *i << std::endl;
+            }
+
+            break;
+        }
+    }
+    
+    outputFile << "end" << std::endl;
+    outputFile.close();
+}

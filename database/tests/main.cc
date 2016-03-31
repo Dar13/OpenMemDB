@@ -45,6 +45,40 @@ int main(int argc, char* argv[])
 		GraphTest graphTest(MODE_SELECT, threadCount);
 	}
 
+	if(strcmp(argv[1], "sqltf") == 0) 
+	{
+		DataStoreTest test;
+		
+		if(strcmp(argv[2], "ct") == 0)
+		{
+			test.with(MODE_CREATE)
+				.generateCases(0b0000)
+				.printStatementsToFile();
+		}
+		if(strcmp(argv[2], "dt") == 0)
+		{
+			test.with(MODE_DROP)
+				.generateCases(0b0000)
+				.printStatementsToFile();			
+		}
+		if(strcmp(argv[2], "irt") == 0)
+		{
+			test.with(MODE_INSERT)
+				.generateCases(0b0000)
+				.printStatementsToFile();				
+		}
+		if(strcmp(argv[2], "st") == 0)
+		{
+			test.with(MODE_SELECT)
+				.generateCases(0b0000)
+				.printStatementsToFile();			
+		}
+		if(strcmp(argv[2], "ut") == 0)
+		{
+			
+		}
+	}
+
 
 	// int threadCount = 1;
 	// GraphTest graphTest(MODE_INSERT, threadCount);

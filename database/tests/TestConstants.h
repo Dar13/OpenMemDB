@@ -5,7 +5,7 @@
 namespace TestConstants
 {
   const int MaxTables = 10000;
-  const int MaxInserts = 500000;
+  const int MaxInserts = 10000;
   const int MaxSelects = 4;
 
   const int InsertToTables = 1;

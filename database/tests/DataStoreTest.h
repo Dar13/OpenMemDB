@@ -22,6 +22,8 @@ class DataStoreTest
 		DataStoreTest& generateCases(int complexity);
 		DataStoreTest& setThreadCount(int count);
 		TestResult test();
+		void printStatementsToFile();
+		
 
 	private:
 		
@@ -50,7 +52,6 @@ class DataStoreTest
 		static tervel::ThreadContext* loadTables(std::vector<std::string> statements, void *t_data);
 		static tervel::ThreadContext* loadRows(std::vector<std::string> records, 
 			std::vector<std::string> statements, void *t_data);
-		std::vector<std::string> generateCases();
 		i2tuple calculateArrayCut(int threadCount, int threadNumber);
 
 };
