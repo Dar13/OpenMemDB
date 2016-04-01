@@ -87,42 +87,52 @@ While hard drives are getting faster due to the introduction of NAND flash-based
 they are still relatively slow when compared to main memory. Meanwhile main memory is 
 following a long running pattern where it has precipitously dropped in price from costing 
 thousands of dollars for a few megabytes to about \$40 for 8 gigabytes \cite{jcmit}. 
-With this trend, we can take advantage and design fast databases that reside entirely in main memory. While there are many 
-applications that current database solutions are fast enough for (website logins for 
-example), these solutions leave something to be desired for massively concurrent 
-systems with high throughput requirements or for embedded systems that have maximum latency 
-requirements. While the largest of these datasets are still too large for main memory, 
+With this trend, we can take advantage and design fast databases that reside entirely in main memory. While the largest of datasets are still too large for main memory, 
 some datasets are finally able to fit into main memory in modern systems due to the 
-cheapness and advancement of memory module technology. Making it possible for a data 
-analysis algorithm to make full use of the database server's processing power to extract 
-and manipulate data would make that analysis quicker and more efficient in terms of hardware use.
+cheapness and advancement of memory module technology. 
 \par\vspace{\baselineskip}
-An example of the need for fast databases is a problem that was experienced by Zynga 
-(the developers of Words with Friends and Farmville). They had so many users that their 
-database solution was not able to provide enough throughput to supply their real-time 
-analysis algorithms adequately. Switching to an in-memory database, MemSQL finally 
-provided them with the speed they required. With this solution, Zynga can process 
-billions of data points in real-time. This allows them to personalize a user's game 
-as they are playing it, increasing customer satisfaction.
-
-\subsection{Motivation}
-Over the last 30 years there has been tremendous advances in computing
-hardware. Processor speeds have increased significantly and memory is cheaper than ever
-\cite{stonebraker2007end}. Most technologies have advanced 
+Most technologies have advanced 
 along with hardware, however database management systems have struggled to improve
 at a similar rate. This is mostly due to concurrency issues. Databases spend more than 30\% 
 of execution time in synchronization-related operations, even when only running a single
-client thread\cite{soares2015database}.
+client thread\cite{soares2015database}. And in this era, where a powerful server
+can have more than a terabyte of RAM and well over 64 cores, effectively utilizing all of 
+this processing power is essential. 
 \par\vspace{\baselineskip}
-Our approach, OpenMemDB, attempts to solve this problem by implementing a data-store 
-using only wait-free data structures. The goal is to use these powerful wait-free data 
-structures to parallelize a SQL DBMS so that it can scale with available processors
-and memory. It is our assumption that the achievement of a fully wait-free DBMS will 
-achieve the performance gains that have been lacking in the DBMS field while eliminating 
-the complexity of multi-threaded systems, all while retaining necessary ACID properties. 
-The requirements of being wait-free dictate that OpenMemDB is an in-memory database and 
-thus avoids all of the slow downs associated with going to hard disk. OpenMemDB is written 
-in \CC 11 and uses the modern constructs defined by that standard extensively.
+Our approach, OpenMemDB, solves this problem by implementing a data-store 
+using only wait-free data structures that scale extremely well with added cores. 
+OpenMemDB is a SQL database designed from the ground up to provide fast access to shared
+data without using any locks. This is achieved through the use of wait-free
+data-structures provided by Tervel, a library of wait-free and lock-free data-structures
+developed by Feldman et. al\cite{tervel:hazard_pointer}\cite{tervel:hash_map}\cite{tervel:vector}. The lack of contention on locks and the wait-free
+guarantees that the Tervel data-structures provide will achieve the performance gains that 
+have been lacking in the DBMS field. 
+\par\vspace{\baselineskip}
+OpenMemDB's biggest contribution is in being the first completely wait-free database 
+management system. Wait-freedom is a progress guarantee for concurrent data-structures 
+which states that all threads running operations on the data-structure are guaranteed 
+to complete in a finite number of steps. This sort of guarantee can be vital in 
+real-time systems where a hard limit needs to be placed on how long an operation 
+is allowed to take. One situation in which OpenMemDB would be ideal is for use in real-time 
+database systems, where data has a temporal validity, and all calculations using this data 
+must complete within this valid range of time. An example of a real-time database system 
+is a stock market analysis database. A database that is used to track the current state
+of the stock market and run calculations based on the temporarily valid data. 
+\par\vspace{\baselineskip}
+OpenMemDb
+is also well suited for any situation in which a large amount of calculations need to be 
+executed on a relatively centralized data-set. This is due to the fact that OpenMemDB 
+provides all threads access to every part of the database. Some database systems attempt to 
+use data partitioning to help parallelize their operations, these systems would not be a 
+good choice if the data-set could not be efficiently partitioned. OpenMemDB does not do any 
+partitioning and still manages to achieve {{INSERT SCALING HERE}} scaling. 
+\par\vspace{\baselineskip}
+OpenMemDB also 
+retains all necessary ACID properties, which is vital for most database systems. 
+The requirements of being wait-free dictate that 
+OpenMemDB is an in-memory database and thus avoids the bottlenecks associated with 
+going to hard disk. OpenMemDB is written in \CC 11 and uses the modern constructs defined by 
+that standard extensively.
 \par\vspace{\baselineskip}
 
 \section{Related Work}
