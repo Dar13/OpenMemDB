@@ -511,6 +511,7 @@ void DataStoreTest::printStatementsToFile()
         case MODE_CREATE:
         {
             outputFile << "create" << std::endl;
+
             for(auto i = statements.begin(); i  != statements.end(); i++)
             {
                 outputFile << *i << std::endl;
@@ -520,14 +521,14 @@ void DataStoreTest::printStatementsToFile()
         }
         case MODE_DROP:
         {
-            outputFile << "drop" << std::endl;
+            outputFile << "create" << std::endl;
 
             for(auto i = statements.begin(); i  != statements.end(); i++)
             {
                 outputFile << *i << std::endl;
             }    
 
-            outputFile << "names" << std::endl;
+            outputFile << "drop" << std::endl;
 
             for(auto i = table_name.begin(); i  != table_name.end(); i++)
             {
@@ -538,15 +539,15 @@ void DataStoreTest::printStatementsToFile()
         }
         case MODE_INSERT:
         {
-            outputFile << "insert" << std::endl;
-            outputFile << "tables" << std::endl;
-            
+            outputFile << "create" << std::endl;
+
             for(auto i = statements.begin(); i  != statements.end(); i++)
             {
                 outputFile << *i << std::endl;
             }
 
-            outputFile << "inserts" << std::endl;
+            outputFile << "insert" << std::endl;
+
             for(auto i = test_data.begin(); i  != test_data.end(); i++)
             {
                 outputFile << *i << std::endl;
@@ -556,22 +557,21 @@ void DataStoreTest::printStatementsToFile()
         }
         case MODE_SELECT:
         {
-            outputFile << "select" << std::endl;
-            outputFile << "tables" << std::endl;
-            
+            outputFile << "create" << std::endl;
+
             for(auto i = statements.begin(); i  != statements.end(); i++)
             {
                 outputFile << *i << std::endl;
             }
 
-            outputFile << "inserts" << std::endl;
+            outputFile << "insert" << std::endl;
 
             for(auto i = test_data.begin(); i  != test_data.end(); i++)
             {
                 outputFile << *i << std::endl;
             }
 
-            outputFile << "selects" << std::endl;
+            outputFile << "select" << std::endl;
 
             for(auto i = select_data.begin(); i  != select_data.end(); i++)
             {
