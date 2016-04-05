@@ -19,6 +19,11 @@
 #include <tuple>
 #include <iostream>
 #include <fstream>
+#include <mutex>
+#include <condition_variable>
+
+std::mutex mu;
+std::condition_variable cond;
 
 DataStoreTest::DataStoreTest()
 {
@@ -123,6 +128,13 @@ void DataStoreTest::insertTest(std::vector<std::string> records, void *t_data)
     tervel::Tervel* tervel_test = grab->tervel_test;
     tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);    
     DataStore *data = grab->data;
+
+    std::unique_lock<std::mutex> locker(mu);
+    printf("Waiting..\n");
+    cond.wait(locker);
+    printf("Unlocked!\n");
+    locker.unlock();
+
 
     for(auto i = records.begin(); i != records.end(); i++)
     {
@@ -388,7 +400,6 @@ TestResult DataStoreTest::test()
             tervel::ThreadContext* old_context = loadTables(statements, (void *) &share);
 
 
-            auto time_start = std::chrono::high_resolution_clock::now();
 
             // insert threads
             for(int i = 0; i < threadCount; i++)
@@ -401,6 +412,13 @@ TestResult DataStoreTest::test()
 
                 v_t.push_back(std::move(t));
             }
+
+            printf("Artificial work\n");
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+
+            auto time_start = std::chrono::high_resolution_clock::now();
+
+            cond.notify_all();
 
             for(int i = 0; i < threadCount; i++)
             {

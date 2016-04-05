@@ -43,7 +43,7 @@ class DataStoreTest
         std::vector<std::string> test_data;
         std::vector<std::string> table_name;
         std::vector<std::string> select_data;
-                
+
 		void parseComplexity(int complexity);
 		static void createTest(std::vector<std::string> statements, void *t_data);
         static void dropTest(std::vector<std::string> table_name, void *t_data);
