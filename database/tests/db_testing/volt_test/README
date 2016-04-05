@@ -1,0 +1,44 @@
+This Java application connects to voltdb using a localhost configuration to perfrom multicore programming tests on certain functions
+The results are displayed as a line graph.
+
+The flow of the application is to establish a connection to the desired database. Perform uniform testing on that database and then 
+save that result into a test result graph.
+
+The line graph is displayed as number of threads and execution time (seconds probably)
+
+A requirement is that all the databases must be running before the test so the connection can be made. This may be provided already in the a script depending
+if it exists.
+
+Each file explanation:
+Connector - Uses voltdb client to create a connection, do inserts, other procedures that can be defined in another class or defined in ddl.sql
+Main - runs benchmark applciation
+thread - Uses voltdb client to make concurrent procedures such as inserts or reads.
+deployment.xml - for later user, doesn't do anything
+ddl.sql - needed to pipeline commands into voltdb when hosting the database
+
+How to Run:
+Start Voltdb first:
+1 Go to voltdb source directory
+2 run bin/voltdb create &
+
+Go to your testing directory:
+1 run make - compile all classes
+2 run jar cxf "anyname".jar *.class
+3 ~/voltdb/bin/sqlcmd
+
+Now you are in the sqlcmd command promopt type the following
+
+1 load classes "anyname".jar;
+2 file ddl.sql;
+3 exit;
+
+The jar file has been loaded into voltdb and ddl sql commands has been stored into voltdb.
+Now run the tests using the makefile from the testing directory
+
+1 make run
+
+Now the results has been printed to the screen
+
+Interupting the Results:
+The tests return the number of threads and the time it took to insert those results.
+Results are only printed back to the console at this time. It would be benefical to save this result to an output file
