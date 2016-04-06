@@ -32,6 +32,7 @@
 #include "../source/sql/parser/parse.c"
 
 static thread_local std::map<std::string, int> keywords;
+static thread_local void* parser = nullptr;
 
 /**
  *  \brief Attempts to parse the given SQL statement in the context of the 
@@ -43,10 +44,14 @@ static thread_local std::map<std::string, int> keywords;
  */
 ParseResult parse(std::string input, DataStore* data_store)
 {
-    void* parser = ParseAlloc(malloc);
     if(parser == nullptr)
     {
-        return ParseResult(ResultStatus::FAILURE_OUT_MEMORY, nullptr);
+        parser = ParseAlloc(malloc);
+
+        if(parser == nullptr)
+        {
+            return ParseResult(ResultStatus::FAILURE_OUT_MEMORY, nullptr);
+        }
     }
 
     StatementBuilder builder;
@@ -55,12 +60,16 @@ ParseResult parse(std::string input, DataStore* data_store)
     // Tokenize the input string
     std::vector<TokenPair> tokens = tokenize(input);
 
+    /*
+    for(auto token_pair = tokens.begin();
+        token_pair != tokens.end() || token_pair->token_type != TK_ILLEGAL;
+        token_pair++)
+        */
     for(auto token_pair : tokens)
     {
         Parse(parser, token_pair.token_type, token_pair.token, &builder);
     }
     Parse(parser, 0, nullptr, &builder);
-    ParseFree(parser, free);
 
     // Clean up the tokens
     for(auto token_pair : tokens)
@@ -109,6 +118,7 @@ std::vector<TokenPair> tokenize(std::string input)
   std::string::iterator itr = input.begin();
 
   std::vector<TokenPair> tokens;
+  tokens.reserve(16);
 
   TokenPair pair;
 

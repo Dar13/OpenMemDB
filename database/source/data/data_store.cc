@@ -79,7 +79,7 @@ ManipResult DataStore::createTable(CreateTableCommand table_info)
  *  \brief Delete the table from the mapping and clean up the memory
  *  appropriately
  */
-ManipResult DataStore::deleteTable(std::string table_name)
+ManipResult DataStore::deleteTable(const std::string& table_name)
 {
     KeyHashFunctor hasher;
     size_t key = hasher(table_name);
@@ -136,7 +136,7 @@ ManipResult DataStore::deleteTable(std::string table_name)
 /**
  *  \brief Returns the schema associated with the given table name.
  */
-SchemaResult DataStore::getTableSchema(std::string table_name)
+SchemaResult DataStore::getTableSchema(const std::string& table_name)
 {
     SchemaTablePair pair;
     if(!getTablePair(table_name, pair))
@@ -153,7 +153,7 @@ SchemaResult DataStore::getTableSchema(std::string table_name)
 /**
  *	\brief Returns the column index of the given column in the table
  */
-UintResult DataStore::getColumnIndex(std::string table_name, std::string column_name)
+UintResult DataStore::getColumnIndex(const std::string& table_name, const std::string& column_name)
 {
     SchemaTablePair table_pair;
     if(getTablePair(table_name, table_pair))
@@ -251,7 +251,7 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair& table_pair, RecordDat
 /**
  *	\brief Inserts a record into the given data table, if it exists.
  */
-ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
+ManipResult DataStore::insertRecord(const std::string& table_name, RecordData record)
 {
     // Get the table
     SchemaTablePair table_pair;
@@ -302,7 +302,7 @@ ManipResult DataStore::insertRecord(std::string table_name, RecordData record)
  *	\brief Update the appropriate record(s) with the given \refer RecordData object
  */
 ManipResult DataStore::updateRecords(Predicate* predicates,
-        std::string table_name,
+        const std::string& table_name,
         RecordData record)
 {
     // Denotes whether there's been some contention in the update
@@ -408,7 +408,7 @@ ManipResult DataStore::updateRecords(Predicate* predicates,
 /**
  *  \brief Delete the appropriate records that satisfy the given predicate
  */
-ManipResult DataStore::deleteRecords(Predicate* predicates, std::string table_name)
+ManipResult DataStore::deleteRecords(Predicate* predicates, const std::string& table_name)
 {
     bool some_contention = false;
     uint64_t num_affected = 0;
@@ -502,7 +502,7 @@ ManipResult DataStore::deleteRecords(Predicate* predicates, std::string table_na
  *	\brief Retrieves the appropriate record(s) based on the predicates given
  */
 MultiRecordResult DataStore::getRecords(Predicate* predicates,
-        std::string table_name)
+        const std::string& table_name)
 {
     // Get the table pair
     SchemaTablePair table_pair;
