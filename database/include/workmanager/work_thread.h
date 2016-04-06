@@ -31,7 +31,7 @@ class WorkThread
 public:
     static void Run(WorkThreadData* data);
 
-    static ResultBase* ExecuteStatement(ParsedStatement* statement, DataStore* store);
+    static JointResult ExecuteStatement(ParsedStatement* statement, DataStore* store);
     static ManipResult ExecuteCommand(ParsedStatement* statement, DataStore* store);
     static MultiRecordResult ExecuteQuery(ParsedStatement* statement, DataStore* store);
 

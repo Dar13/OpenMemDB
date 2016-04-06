@@ -150,7 +150,7 @@ void DataStoreTest::insertTest(std::vector<std::string> records, void *t_data)
         if(parse_result.status == ResultStatus::SUCCESS)
         {
             auto result = WorkThread::ExecuteStatement(parse_result.result, data);
-            if(result-> status == ResultStatus::SUCCESS) 
+            if(result.status == ResultStatus::SUCCESS) 
             {
             }
         }
@@ -178,7 +178,7 @@ tervel::ThreadContext* DataStoreTest::loadRows(std::vector<std::string> records,
         if(parse_result.status == ResultStatus::SUCCESS)
         {
             auto result = WorkThread::ExecuteStatement(parse_result.result, data);
-            if(result-> status == ResultStatus::SUCCESS) 
+            if(result.status == ResultStatus::SUCCESS) 
             {
             }
         }

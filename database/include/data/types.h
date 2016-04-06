@@ -32,6 +32,7 @@
 #include "accessor.h"
 #include "hash_functor.h"
 #include "util/types.h"
+#include "util/result.h"
 
 // Some typedefs(C++11-style) so that we don't have all that meaningless
 // namespace and template junk pop up everywhere.
@@ -106,5 +107,50 @@ using RecordReferences = std::vector<RecordReference>;
 
 //! A typedef that allows returning multiple sets of records from multiple tables
 using MultiTableRecordData = std::map<std::string, MultiRecordData>;
+
+// Some helper typedefs
+using ManipResult = Result<ManipStatus>;
+using MultiRecordResult = Result<MultiRecordData>;
+using ConstraintResult = Result<ConstraintStatus>;
+
+template<>
+struct Result<ManipStatus> : public ResultBase
+{
+    Result(ResultStatus s, ManipStatus res) 
+        : ResultBase(s, ResultType::COMMAND), result(res), rows_affected(0)
+    {}
+
+    Result()
+        : ResultBase(ResultStatus::SUCCESS, ResultType::COMMAND),
+        result(ManipStatus::SUCCESS), rows_affected(0)
+    {}
+
+    ManipStatus result;
+    uint32_t rows_affected;
+};
+
+template<>
+struct Result<RecordData> : public ResultBase
+{
+    Result(ResultStatus s, const RecordData& res) :
+        ResultBase(s, ResultType::QUERY), result(res)
+    {}
+
+    RecordData result;
+};
+
+template<>
+struct Result<MultiRecordData> : public ResultBase
+{
+    Result(ResultStatus s, MultiRecordData res) :
+        ResultBase(s, ResultType::QUERY), result(res)
+    {}
+
+    Result()
+        : ResultBase(ResultStatus::SUCCESS, ResultType::QUERY)
+    {}
+
+    MultiRecordData result;
+};
 
 #endif
