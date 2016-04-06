@@ -31,6 +31,7 @@
 #include <condition_variable>
 
 // Project includes
+#include <data/types.h>
 #include <util/types.h>
 #include <util/result.h>
 #include <util/packets.h>
@@ -39,6 +40,34 @@
 // Tervel includes
 #include <tervel/util/tervel.h>
 #include <tervel/containers/wf/linked_list_queue/queue.h>
+
+struct JointResult
+{
+    JointResult(const ManipResult& result) :
+        command(result)
+    {}
+
+    JointResult(const MultiRecordResult& result) :
+        query(result)
+    {}
+
+    ManipResult command;
+    MultiRecordResult query;
+};
+
+template<>
+struct Result<JointResult> : public ResultBase
+{
+    Result(ResultStatus s, const ManipResult& res) :
+        ResultBase(s, ResultType::COMMAND), result(res.result)
+    {}
+
+    Result(ResultStatus s, const MultiRecordResult& res) :
+        ResultBase(s, ResultTypes::QUERY), result(res.result)
+    {}
+
+    JointResult result;
+};
 
 /**
  *  \brief Struct that relates a job number to its result
