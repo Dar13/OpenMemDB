@@ -530,6 +530,7 @@ void DataStoreTest::printStatementsToFile()
     {
         case MODE_CREATE:
         {
+            outputFile << "create_test" << std::endl;
             outputFile << "create" << std::endl;
 
             for(auto i = statements.begin(); i  != statements.end(); i++)
@@ -541,6 +542,7 @@ void DataStoreTest::printStatementsToFile()
         }
         case MODE_DROP:
         {
+            outputFile << "drop_test" << std::endl;
             outputFile << "create" << std::endl;
 
             for(auto i = statements.begin(); i  != statements.end(); i++)
@@ -559,6 +561,7 @@ void DataStoreTest::printStatementsToFile()
         }
         case MODE_INSERT:
         {
+            outputFile << "insert_test" << std::endl;
             outputFile << "create" << std::endl;
 
             for(auto i = statements.begin(); i  != statements.end(); i++)
@@ -577,6 +580,7 @@ void DataStoreTest::printStatementsToFile()
         }
         case MODE_SELECT:
         {
+            outputFile << "select_test" << std::endl;
             outputFile << "create" << std::endl;
 
             for(auto i = statements.begin(); i  != statements.end(); i++)
