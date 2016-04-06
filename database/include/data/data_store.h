@@ -101,24 +101,24 @@ public:
 
     ManipResult createTable(CreateTableCommand table_info);
 
-    ManipResult deleteTable(std::string table_name);
+    ManipResult deleteTable(const std::string& table_name);
 
-    UintResult getColumnIndex(std::string table_name, std::string column_name);
+    UintResult getColumnIndex(const std::string& table_name, const std::string& column_name);
 
-    SchemaResult getTableSchema(std::string table_name);
+    SchemaResult getTableSchema(const std::string& table_name);
 
-    ManipResult insertRecord(std::string table_name,
+    ManipResult insertRecord(const std::string& table_name,
                              RecordData record);
 
     ManipResult updateRecords(Predicate* predicates, 
-                             std::string table_name,
+                             const std::string& table_name,
                              RecordData record);
 
     ManipResult deleteRecords(Predicate* predicates,
-                              std::string table_name);
+                              const std::string& table_name);
 
     MultiRecordResult getRecords(Predicate* predicates,
-                                 std::string table_name);
+                                 const std::string& table_name);
 
 private:
     bool getTablePair(std::string table_name, SchemaTablePair& pair);
