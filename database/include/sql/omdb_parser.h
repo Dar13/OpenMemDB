@@ -45,6 +45,7 @@ typedef uint64_t u64;
  */
 struct TokenPair
 {
+    TokenPair() : token(nullptr), token_type(TK_ILLEGAL) {}
   //! The actual token
   Token token;
 
