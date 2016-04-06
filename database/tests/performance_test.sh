@@ -27,11 +27,10 @@ case $1 in
 		./tests pirt 1
 		./tests pirt 2
 	 	./tests pirt 4
-	 	# ./tests pirt 8
-	 	# ./tests pirt 16
-	 	# ./tests pirt 24
-	 	# ./tests pirt 32
-	 	# ./tests pirt 64
+	 	./tests pirt 8
+	 	./tests pirt 16
+	 	./tests pirt 32
+	 	./tests pirt 64
 
 		python graph_test.py
 		;;

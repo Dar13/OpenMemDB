@@ -130,9 +130,7 @@ void DataStoreTest::insertTest(std::vector<std::string> records, void *t_data)
     DataStore *data = grab->data;
 
     std::unique_lock<std::mutex> locker(mu);
-    printf("Waiting..\n");
     cond.wait(locker);
-    printf("Unlocked!\n");
     locker.unlock();
 
 
