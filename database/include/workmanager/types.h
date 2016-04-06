@@ -31,6 +31,7 @@
 #include <condition_variable>
 
 // Project includes
+#include <data/types.h>
 #include <util/types.h>
 #include <util/result.h>
 #include <util/packets.h>
@@ -41,17 +42,69 @@
 #include <tervel/containers/wf/linked_list_queue/queue.h>
 
 /**
+ *  \brief Struct that holds the necessary data for composing the packets
+ *  given back to the client that requested the query be run.
+ */
+struct QueryData
+{
+    //! Vector that holds the column information needed for a ResultMetadataPacket
+    std::vector<ResultColumn> metadata;
+
+    //! Vector of vectors of the data to be put into the ResultPacket
+    std::vector<std::vector<TervelData>> data;
+};
+
+//! Convenience typedef for the result
+typedef Result<QueryData> QueryResult;
+
+//! Specialization of the template result to make sure its constructor is correct
+template<>
+struct Result<QueryData> : public ResultBase
+{
+    Result() : ResultBase(ResultStatus::FAILURE, ResultType::QUERY) {}
+    Result(ResultStatus s, QueryData res) : ResultBase(s, ResultType::QUERY), result(res) {}
+    Result(const QueryResult& query_res)
+        : ResultBase(query_res.status, ResultType::QUERY), result(query_res.result) {}
+
+    QueryData result;
+};
+
+struct DummyJoint {};
+
+template<>
+struct Result<DummyJoint> : public ResultBase
+{
+    Result()
+        : ResultBase(ResultStatus::FAILURE, ResultType::OTHER)
+    {}
+
+    Result(const ManipResult& res) 
+        : ResultBase(res.status, ResultType::COMMAND), command_result(res)
+    {}
+
+    Result(const QueryResult& res) 
+        : ResultBase(res.status, ResultType::QUERY), query_result(res)
+    {}
+
+    DummyJoint result;
+    QueryResult query_result;
+    ManipResult command_result;
+};
+
+using JointResult = Result<DummyJoint>;
+
+/**
  *  \brief Struct that relates a job number to its result
  */
 struct JobResult
 {
-    JobResult() : job_number(0), result(nullptr) {}
-    JobResult(uint32_t num, ResultBase* result = nullptr)
+    JobResult() : job_number(0) {}
+    JobResult(uint32_t num, JointResult result)
         : job_number(num), result(result)
     {}
 
-    uint32_t job_number;    //!< The job number that's associated to this result
-    ResultBase* result;     //!< Pointer to result
+    uint32_t job_number;            //!< The job number that's associated to this result
+    JointResult result;     //!< The result
 };
 
 //! Typedef of a function pointer that returns a @refer Result and takes a pointer
@@ -127,29 +180,5 @@ struct WorkThreadData
     ThreadNotifier* notifier;
 };
 
-/**
- *  \brief Struct that holds the necessary data for composing the packets
- *  given back to the client that requested the query be run.
- */
-struct QueryData
-{
-    //! Vector that holds the column information needed for a ResultMetadataPacket
-    std::vector<ResultColumn> metadata;
-
-    //! Vector of vectors of the data to be put into the ResultPacket
-    std::vector<std::vector<TervelData>> data;
-};
-
-//! Convenience typedef for the result
-typedef Result<QueryData> QueryResult;
-
-//! Specialization of the template result to make sure its constructor is correct
-template<>
-struct Result<QueryData> : public ResultBase
-{
-    Result(ResultStatus s, QueryData res) : ResultBase(s, ResultType::QUERY), result(res) {}
-
-    QueryData result;
-};
 
 #endif

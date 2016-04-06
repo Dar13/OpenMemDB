@@ -56,37 +56,6 @@ using MultiRecordResult = Result<MultiRecordData>;
 using ManipResult = Result<ManipStatus>;
 using ConstraintResult = Result<ConstraintStatus>;
 
-template<>
-struct Result<ManipStatus> : public ResultBase
-{
-    Result(ResultStatus s, ManipStatus res) 
-        : ResultBase(s, ResultType::COMMAND), result(res), rows_affected(0)
-    {}
-
-    ManipStatus result;
-    uint32_t rows_affected;
-};
-
-template<>
-struct Result<RecordData> : public ResultBase
-{
-    Result(ResultStatus s, const RecordData& res) :
-        ResultBase(s, ResultType::QUERY), result(res)
-    {}
-
-    RecordData result;
-};
-
-template<>
-struct Result<MultiRecordResult> : public ResultBase
-{
-    Result(ResultStatus s, MultiRecordData res) :
-        ResultBase(s, ResultType::QUERY), result(res)
-    {}
-
-    MultiRecordData result;
-};
-
 /**
  *  @brief The interface into the data that is shared between all worker threads.
  */

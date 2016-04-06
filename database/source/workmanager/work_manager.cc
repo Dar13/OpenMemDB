@@ -213,17 +213,12 @@ int32_t WorkManager::Run()
                 continue;
             }
 
-            printf("Job %d has result of type %u\n", res.job_number, res.result->type);
-
             if(!SendResult(conn, res.result))
             {
                 printf("Unable to send job!\n");
             }
 
             printf("Job number %d is done!\n", res.job_number);
-            
-            // Clean up result
-            delete res.result;
         }
         results.clear();
     }
@@ -319,11 +314,11 @@ bool WorkManager::ReceiveCommand(omdb::Connection& conn)
     return false;
 }
 
-bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
+bool WorkManager::SendResult(omdb::Connection& conn, const JointResult& result)
 {
     // Convert the result into a packet and then serialize into a buffer
 
-    switch(result->type)
+    switch(result.type)
     {
         case ResultType::QUERY:
             // Query results turn into two packets: ResultMetaData and ResultData
@@ -331,21 +326,21 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
                 ResultMetaDataPacket metadata_packet = {};
                 ResultPacket result_packet = {};
 
-                QueryResult* query = reinterpret_cast<QueryResult*>(result);
+                const QueryResult& query = result.query_result;
 
                 // First, set up the metadata packet
                 metadata_packet.type = PacketType::RESULT_METADATA;
-                metadata_packet.status = query->status;
+                metadata_packet.status = query.status;
 
                 // Only finish writing the packet if the result is successful
-                if(query->status == ResultStatus::SUCCESS)
+                if(query.status == ResultStatus::SUCCESS)
                 {
-                    metadata_packet.numColumns = query->result.metadata.size();
+                    metadata_packet.numColumns = query.result.metadata.size();
                     for(uint32_t itr = 0; itr < metadata_packet.numColumns; itr++)
                     {
-                        metadata_packet.columns[itr].type = query->result.metadata[itr].type;
+                        metadata_packet.columns[itr].type = query.result.metadata[itr].type;
                         strcpy(metadata_packet.columns[itr].name,
-                                query->result.metadata[itr].name);
+                                query.result.metadata[itr].name);
                     }
                 }
                 metadata_packet.terminator = THE_TERMINATOR;
@@ -358,7 +353,7 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
                 {
                     result_packet.rowLen = metadata_packet.numColumns;
 
-                    size_t result_size = result_packet.rowLen * query->result.data.size();
+                    size_t result_size = result_packet.rowLen * query.result.data.size();
                     result_size *= sizeof(uint64_t);
 
                     result_packet.resultSize = result_size;
@@ -369,7 +364,7 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
                     memset(result_data, 0, result_size / sizeof(uint64_t));
 
                     uint32_t result_idx = 0;
-                    for(auto record : query->result.data)
+                    for(auto record : query.result.data)
                     {
                         for(auto data : record)
                         {
@@ -421,11 +416,11 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
                 ResultMetaDataPacket metadata_packet = {};
                 ResultPacket result_packet = {};
 
-                ManipResult* cmd_result = reinterpret_cast<ManipResult*>(result);
+                const ManipResult& cmd_result = result.command_result;
 
                 metadata_packet.type = PacketType::RESULT_METADATA;
-                metadata_packet.status = cmd_result->status;
-                metadata_packet.numColumns = static_cast<uint32_t>(cmd_result->result);
+                metadata_packet.status = cmd_result.status;
+                metadata_packet.numColumns = static_cast<uint32_t>(cmd_result.result);
 
                 // Leaving the columns set to 0, they're unused
 
@@ -437,7 +432,7 @@ bool WorkManager::SendResult(omdb::Connection& conn, ResultBase* result)
                 // Setup the metadata packet
                 result_packet.type = PacketType::RESULT_DATA;
                 result_packet.status = metadata_packet.status;
-                result_packet.resultSize = cmd_result->rows_affected;
+                result_packet.resultSize = cmd_result.rows_affected;
                 result_packet.terminator = THE_TERMINATOR;
                 // All other fields should be set to zero
                 

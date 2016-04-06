@@ -66,3 +66,6 @@ GTAGS
 
 # Generated graphs
 *.png
+
+# Generated data
+*.omdbt

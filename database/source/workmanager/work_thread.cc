@@ -99,16 +99,15 @@ Job WorkThread::GenerateJob(int job_num, std::string command, DataStore* store)
 {
     Job job([job_num, command, store] (void) -> JobResult
             {
-                JobResult res(job_num);
-
                 if(store == nullptr)
                 {
-                    res.result = new ManipResult(ResultStatus::FAILURE_DB_UNKNOWN_STATE,
-                            ManipStatus::ERR);
+                    JobResult fail_result(job_num, 
+                            JointResult(ManipResult(ResultStatus::FAILURE_DB_UNKNOWN_STATE, 
+                                                ManipStatus::ERR)));
 
                     // No point going any further, the database is in an
                     // unknown state.
-                    return res;
+                    return fail_result;
                 }
 
                 // TODO: Remove this at some point
@@ -119,21 +118,24 @@ Job WorkThread::GenerateJob(int job_num, std::string command, DataStore* store)
 
                 // Check if the parse succeeded and the statement is non-null
                 // (trust, but verify)
+                JointResult statement_result;
                 if(parse_result.status == ResultStatus::SUCCESS &&
                     parse_result.result != nullptr)
                 {
-                    res.result = ExecuteStatement(parse_result.result, store);
+                    statement_result = ExecuteStatement(parse_result.result, store);
                 }
                 else
                 {
                     // Propagate error back to work manager
-                    res.result = new ManipResult(ResultStatus::FAILURE_SYNTAX,
+                    statement_result = ManipResult(ResultStatus::FAILURE_SYNTAX,
                             ManipStatus::ERR);
                 }
 
                 printf("Returning from job #%d\n", job_num);
 
-                return res;
+                JobResult result(job_num, statement_result);
+
+                return result;
             });
 
     return job;
@@ -143,9 +145,8 @@ Job WorkThread::GenerateJob(int job_num, std::string command, DataStore* store)
  *  \brief Executes the given statement on the data store object, returning a 
  *  result.
  */
-ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* store)
+JointResult WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* store)
 {
-    ResultBase* result = nullptr;
     switch(statement->type)
     {
         // Commands
@@ -156,17 +157,8 @@ ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
         case SQLStatement::DELETE:
             {
                 ManipResult statement_result = ExecuteCommand(statement, store);
-                // TODO: Make this a move constructor for performance
-                result = new (std::nothrow) ManipResult(statement_result);
-                if(result == nullptr)
-                {
-                    // Uhh, what now?
-                    // Crash for now
-                    std::terminate();
-                    return nullptr;
-                }
 
-                return result;
+                return JointResult(statement_result);
             }
             break;
         // Query
@@ -197,7 +189,7 @@ ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
 
                     query_data.data.clear();
 
-                    return new (std::nothrow) QueryResult(ResultStatus::SUCCESS, query_data);
+                    return JointResult(QueryResult(ResultStatus::SUCCESS, query_data));
                 }
 
                 // Grab first record to get metadata
@@ -239,29 +231,17 @@ ResultBase* WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
                     }
                     printf("\n");
                 }
-
-                QueryResult* query_result = new (std::nothrow) QueryResult(ResultStatus::SUCCESS,
-                                                                            query_data);
-                if(query_result == nullptr)
-                {
-                    // What do?
-                    assert(false);
-                    return nullptr;
-                }
                 
-                return query_result;
+                return JointResult(QueryResult(ResultStatus::SUCCESS, query_data));
             }
             break;
         // Invalid or unknown statement, don't attempt to execute
         default:
             // Might as well give them an error code and continue to run
             // This code should never be run though
-            return new (std::nothrow) ManipResult(ResultStatus::FAILURE,
-                    ManipStatus::ERR_UNKNOWN_STATEMENT);
+            return JointResult();
             break;
     }
-
-    return result;
 }
 
 /**
