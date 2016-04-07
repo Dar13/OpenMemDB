@@ -180,7 +180,7 @@ UintResult DataStore::getColumnIndex(const std::string& table_name, const std::s
 ConstraintResult DataStore::schemaChecker(SchemaTablePair& table_pair, RecordData *row)
 {
     //table, schema
-    std::shared_ptr<DataTable> table = table_pair.table;
+    std::shared_ptr<DataTable>& table = table_pair.table;
     TableSchema *schema = table_pair.schema;
 
     //number of columns, number of inputs from row, number of constraints in each column

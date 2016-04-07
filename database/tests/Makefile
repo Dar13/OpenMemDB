@@ -27,6 +27,9 @@ OBJECTS=$(SOURCES:.cc=.o)
 
 all: $(SOURCES) $(EXEC)
 
+release: CFLAGS += -O2
+release: $(EXEC)
+
 $(EXEC): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 

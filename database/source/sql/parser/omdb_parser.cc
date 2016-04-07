@@ -65,7 +65,7 @@ ParseResult parse(std::string input, DataStore* data_store)
         token_pair != tokens.end() || token_pair->token_type != TK_ILLEGAL;
         token_pair++)
         */
-    for(auto token_pair : tokens)
+    for(auto&& token_pair : tokens)
     {
         Parse(parser, token_pair.token_type, token_pair.token, &builder);
     }
