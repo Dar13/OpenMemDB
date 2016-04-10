@@ -208,10 +208,14 @@ by Tervel's vector data structure. The CAS operation checks if the element in th
 expected value and swaps the value with the given value if that check succeeds. Tervel's CAS
 operation is wait-free and atomic, any contention will have a clear ``winner'' or ``loser'' in terms
 of if a thread succeeds in updating or writing to the vector. The loser thread or threads then report
-that they encountered contention to the client, so they can handle it as they wish.
+that they encountered contention during execution, but continue to perform their operation as best as 
+possible.
 
 \section{Experimental Results}
-PENDING
+Our experiments took place on a 64-core AMD Opteron system with 300 GB of system memory running Ubuntu 14.04 and 
+GCC 4.8.4. Each database was given the same series of operations to perform for each test, with each database 
+connected to locally so as to remove network latency from the test. We explicitly only tested other databases
+with SQL frontends, as our goal was a SQL database.
 
 \section{Conclusions}
 PENDING
