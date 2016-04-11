@@ -206,12 +206,11 @@ void DataStoreTest::selectTest(std::vector<std::string> select_statements, void 
 
         if(parse_result.status == ResultStatus::SUCCESS)
         {
-            printf("we did it\n");
-    //         // auto result = WorkThread::ExecuteStatement(parse_result.result, data);
-    //         // if(result-> status == ResultStatus::SUCCESS) 
-    //         // {
-    //         //     printf("reddit\n");
-    //         // }
+            auto result = WorkThread::ExecuteStatement(parse_result.result, data);
+            if(result.status == ResultStatus::SUCCESS) 
+            {
+                // TODO
+            }
         }
     }
 

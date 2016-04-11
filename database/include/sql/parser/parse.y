@@ -197,7 +197,7 @@ update_table(A) ::= name(X).
   A = X;
   builderStartUpdateCommand(builder);
   builderAddTableName(builder, A);
-  printf("UPDATE: table set!\n");
+  //printf("UPDATE: table set!\n");
 }
 
 update_expr_list ::= update_expr_list COMMA update_expr.
@@ -205,7 +205,7 @@ update_expr_list ::= update_expr.
 
 update_expr ::= column_id(X) EQ(OP) term(Y).
 { 
-  printf("UPDATE: Adding expression\n");
+  //printf("UPDATE: Adding expression\n");
   builderAddUpdateExpr(builder, OP, X, Y);
 }
 
