@@ -1,0 +1,3355 @@
+\documentclass[letterpaper, 11pt]{article}
+%\documentclass[letterpaper,10pt]{scrartcl}
+
+\usepackage[utf8]{inputenc}
+\usepackage[pass,letterpaper]{geometry}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{float}
+\usepackage{bigfoot}
+\usepackage[square,sort,comma,numbers]{natbib}
+\usepackage{titling}
+\usepackage{mathtools}
+\usepackage{helvet}
+
+% Temporarily ignore graphics
+% \renewcommand{\includegraphics}[2][]{\fbox{}}
+
+\setlength{\parindent}{0cm}
+
+\makeatletter
+\renewcommand{\@pnumwidth}{3em}
+\renewcommand{\@tocrmarg}{4em}
+\makeatother
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codered}{rgb}{0.6,0,0}
+\definecolor{codegrey}{gray}{0.9}
+
+\lstdefinestyle{omdb_code}{
+keepspaces=true,
+showspaces=false,
+showstringspaces=false,
+showtabs=false,
+tabsize=2,
+basicstyle=\footnotesize,
+backgroundcolor=\color{codegrey},
+commentstyle=\color{codegreen},
+keywordstyle=\color{blue},
+stringstyle=\color{codered}
+}
+\lstset{style=omdb_code}
+
+\newcommand{\inlinecode}[1]{\colorbox{codegrey}{\lstinline[language=C++]{#1}}}
+
+\renewcommand{\familydefault}{\sfdefault}
+
+\pretitle{%
+  \begin{center}
+  %\includegraphics{graphics/OMDB_logo_text_trans.png}
+  \hfill\includegraphics[scale=.25]{graphics/OpenMemDB_new_text_trans.png}\hspace*{\fill}
+  \newline
+  \LARGE
+}
+\posttitle{\end{center}}
+
+\title{Non-Blocking In-Memory Database\thanks{Sponsor: Dr. Damian Dechev}}
+\author{Michael McGee \and Robert Medina \and Neil Moore \and Jason Stavrinaky}
+\date{11/4/2015}
+
+\pdfinfo{%
+  /Title    (Non-blocking, In-memory Database)
+  /Author   (Michael McGee, Robert Medina, Neil Moore, Jason Stavrinaky)
+  /Creator  (Neil Moore)
+  /Producer ()
+  /Subject  (Final Design Document for COP4934)
+  /Keywords ()
+}
+
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\newpage
+
+\pagenumbering{roman}
+\tableofcontents
+\newpage
+
+\pagenumbering{arabic}
+
+\section{Executive Summary}
+The database as a concept has always emphasized speed, as many other pieces of both software
+and business rely on the information contained within them. As such, these pieces of software
+are part of a class of software that strive for every piece of performance possible, either through
+hardware improvements or algorithmic optimizations. While in-memory databases are not a new concept,
+Random Access Memory (RAM) has, until recently, not been cheap enough to completely house a useful
+set of data. The ability to do this in such a way beyond simply using main memory as a cache for the
+actual data on the hard disk opens up the possibility of fully utilizing the processing power
+available to the system fully.
+\par\vspace{\baselineskip}
+Utilizing the full hardware resources available to us requires the use of multiple threads or
+multiple processes spread out over all the cores available. Accessing the same data location
+from multiple threads or processes causes issues where threads are unable to progress further in their
+work. This state is called deadlock, and is the bane of any programmer that creates multi-threaded
+programs. Our project attempts to entirely avoid both deadlock and their common mitigator, locks,
+by implementing and using wait-free data structures and algorithms.
+\par\vspace{\baselineskip}
+Wait-free is a guarantee that the system will always progress, as a whole, within a given period of time
+regardless of work-load or contention over resources. The application of this guarantee to many
+of the common algorithms and data structures familiar to computer scientists is still under heavy research
+(as an example, there is still no widely-accepted implementation of a wait-free binary search tree).
+\par\vspace{\baselineskip}
+The objectives for this project is to successfully implement a SQL database that is both fully in-memory
+and fully wait-free, even at the cost of performance. In order for this to be possible within the time
+given to us, the scope of this project must be toned down and strictly enforced. While we will
+attempt to be SQL-compliant, certain aspects of that standard heavily imply a type of mutual
+exclusion be used which we obviously cannot use if we wish to remain wait-free. The pure size of
+the standard is also a major obstacle to this objective.
+\par\vspace{\baselineskip}
+While our technical approach is prone to change as our understanding of the various concepts
+and systems at play in a Database Management System (DBMS), we do have a general sense that we
+wish to utilize a functional or imperative style of data flow. Objects will be used when appropriate
+but we would not describe the overall design as object-oriented in any way. On the contrary, we would
+find a much more suitable term in data-oriented programming as we are almost entirely dealing
+with large amounts of arbitrary manipulation rather than the interaction of objects.
+\par\vspace{\baselineskip}
+To facilitate a wait-free system, we will implement a system where a pre-determined pool of threads
+that will be assigned a queue of tasks, whether they be SQL queries or database-specific commands.
+These threads will be almost entirely distinct and independent of the others, with as little
+inter-communication as possible in order to avoid the possibility of deadlock or the necessity of
+locking. The assignment of these tasks will be done by a work manager that will perform some form
+of load-balancing when distributing the tasks among the pool of threads.
+\par\vspace{\baselineskip}
+Each thread will independently analyze, plan and execute its tasks in such a way that no shared memory
+outside of the actual data is needed. The access to the data store, necessary in any database,
+will be handled via a common set of interfaces that will then utilize the algorithms and data structures
+given to us by our sponsor. The planning and optimization of these tasks will be primary source
+of technical challenge in this project as the task language chosen (SQL) is declarative rather
+than imperative or functional in nature. In other words, the tasks' language only tells us what
+to retrieve rather than how to retrieve it.
+\par\vspace{\baselineskip}
+The advantages given to us by the approach detailed above is the inherent and explicit wait-freedomn
+that occurs when the need for locking or shared state is removed entirely. As a result of that, we
+hope to be at least competitive or comparable to current in-memory or traditional databases in terms
+of performance.
+
+\newpage
+
+\section{Project Motivation}
+As hardware reaches the limits in Moore's Law and processors stop becoming faster and faster
+and instead focus on becoming more and more parallel, algorithms and the software that implement
+them must adapt to maximize both performance and hardware utilization.
+\par\vspace{\baselineskip}
+% Graphic showing Moore's Law tapering off (graph of GHz and number of cores?)
+%\includegraphics{graphics/Moores_Law_core_freq_comparison.png}
+Recent research done by multiple universities and companies have yielded the concept of wait-freedom,
+the guarantee that the entire system will make progress towards a goal in a given period of time.
+This is a stronger guarantee than lock-freedom as lock-freedom only guarantees that a single thread
+will make progress in a period of time. Our sponsor, Dr. Dechev, and his lab here at the University
+of Central Florida have created a framework of wait-free data structures named Tervel ~\cite{tervel}.
+
+\subsection{Personal Motivations}
+\subsubsection{Neil Moore}
+This project is one that I knew would be incredibly challenging, yet also had the greatest
+potential in terms of personal growth and end product. These technologies are only going to
+become more and more important and widespread throughout the software industry as hardware
+continues to parallelize, memory becomes faster and cheaper, and wait-free/lock-free  \\ algorithms
+become more mature. Experience working with high performance, memory-intensive, and
+standards-defined technologies opens the door for later opportunities in cutting-edge technologies.
+
+\subsubsection{Michael McGee}
+My motivation for choosing this project is simply a desire to learn. I have always been
+interested in database systems as well concurrent programming. Nowhere do these issues
+more converge than in the project that Dr. Dechev proposed. I hope to gain from this
+project, a greater understanding of the underlying principles of database system design,
+as well as discover broader applications for lock-free and wait-free data structures. I
+know that throughout the course of this project I will learn a great deal and come out
+as a much improved software developer and computer scientist.
+
+\subsubsection{Jason Stavrinaky}
+I have always been interested in multiprocessor programming.  Considering the
+future  of  programming  is  almost  certainly  heading  towards  a  multiprocessor
+heavy paradigm, it is an essential skill.  Working on a big project involving this
+is a great opportunity to learn.  Not only about multiprocessor programming
+but also memory management.  In addition, creating an open source solution to
+memSQL sounds like an exciting challenge to undertake while also contributing
+to the programming community.
+
+\subsubsection{Robert Medina}
+One of the best things about this project is the process of making a \\ database from scratch.
+I am currently taking a database systems course and when Dr. Dechev pitched the idea of
+creating a non-blocking database it was simply one of the projects I had to be apart of.
+I consider multicore programming a necessary skill to learn since new emerging technologies
+in hardware are utilizing more and more processors. This project also gives me a chance to
+learn more about outside coursework on higher level theory such as non-blocking algorithms
+and efficent data retrevial. I know that after completing this project I will have learned
+more about database management systems, non-blocking algortihms and multicore programming.
+It is also something that others within the university or anyone really can work and improve
+on. This is a project that I hope will have a long lasting effect on future students who
+intend to work and contribute towards this program.
+
+\newpage
+
+\section{Broader Impacts}
+An open-source, in-memory and wait-free database would allow for startups or students to
+experiment with extremely high-frequency applications that still need relational
+models without dealing with proprietary software such as MemSQL. As the product
+will be wait-free, scalability with additional hardware should be near-linear as each
+additional hardware-backed thread allows more concurrent SQL queries to be processed.
+The applications of such a technology are the same as any other database system,
+though the speed and scalability of the system lends itself to high-frequency and
+relatively low storage size databases.
+\par\vspace{\baselineskip}
+In addition to the commercial or practical impacts, this project can also influence the
+amount of research done by other companies or universities in this area, specifically the
+usage of wait-free data structures. This can then lead to unique or more efficient
+algorithms that then lead to better multi-threaded or multi-core programs. As most hardware,
+even in the embedded sector, is moving to multi-core architectures these benefits could
+then impact many areas within the technology sector. As a database that is quite decoupled
+from its data structures this provides a unique test-case for stress-testing different wait-free
+algorithms and data-structures given that they implement a base set of features.
+\newpage
+
+\section{Specification and Requirements}
+The requirements for this project as given to us by our sponsor, Dr. Dechev, are as follows:
+\begin{itemize}
+ \item A wait-free, massively parallel, in-memory database
+ \item Project must be open-source (MIT or BSD licensing)
+ \item The database must be able to run a simple benchmark that allows a comparison of its performance against
+ against competing in-memory databases and conventional databases
+ \item A workshop paper that details the problems solved by wait-freedom and how we
+ implemented those solutions
+ \item In-depth documentation on both the design and implementation of our database
+\end{itemize}
+\par\vspace{\baselineskip}
+Dr. Dechev left the specifics of how we implement the database and interfaces to the database
+up to us. In the interest of being similar to the database management systems we are being
+tasked with competing with, we chose to implement the relational database model using SQL. This way we
+can directly compare our feature level to other databases. This also allows us to easily generate
+a shared test and benchmark suite to profile our project's performance characteristics as is needed
+to satisfy by our requirements.
+\par\vspace{\baselineskip}
+As such, the following are the specification for this project:
+\begin{itemize}
+ \item A wait-free data store that can be performant when handling large amounts
+ of memory without utilizing the hard disk
+ \item A minimalistic implementation of the SQL standard:
+ \begin{itemize}
+  \item CREATE TABLE, DROP TABLE commands
+  \item SELECT query, with qualifications such as no nesting of queries 
+  \item INSERT, UPDATE, and DELETE commands with certain clauses not implemented
+  \item Certain datatypes:
+    \begin{itemize}
+      \item Integral types (e.g. INTEGER, SMALLINT, BIGINT)
+      \item Boolean types (e.g. BOOLEAN)
+      \item Floating-precision types (e.g. FLOAT)
+      \item Date and time types (e.g. DATE, TIME)
+    \end{itemize}
+  \item Table constraints: NOT NULL, DEFAULT, AUTO\_INCREMENT
+  \item WHERE, IN, BETWEEN clauses with support for boolean expressions within them
+  \item Custom library used to interface with the database
+ \end{itemize}
+\end{itemize}
+
+\newpage
+
+\section{Research}
+
+\subsection{IDEs}
+% Author: Jason
+When undertaking a big project, an often under-looked area is IDE research. IDEs provide
+invaluable tools that aid the programmer in one convenient package. A few of these tools include:
+
+\begin{itemize}
+	\item Compilers
+	\item Debuggers
+	\item Version control integration
+	\item Many, many more
+\end{itemize}
+
+As such, IDE choice is very important since they are essential to a stable, comfortable
+work-flow. The following sections describe the IDEs we chose.
+
+\subsubsection{Vim}
+
+Vim stands for Vi-improved. Stemming from the popular Unix text editor Vi, Vim
+provides an almost proper superset. Pretty much everything you can do in Vi you
+can do in Vim. Additionally, Vim adds many features on top of Vi that caused Vim
+to gain a huge following of programmers everywhere with plugin support being the main
+reason. We chose Vim for that reason as well as its customizability. It can tweaked
+to work exactly how we want it to work. With plugins, we can add essentially infinite
+functionality.
+
+\begin{figure}
+    \centering
+	\includegraphics[scale=0.25]{graphics/vimide.png}
+    \caption{Vim} \label{vim}
+\end{figure}
+
+In figure \ref{vim}, we have Vim running with the powerline plugin as
+well as git integration. 
+ 
+\newpage
+
+\subsubsection{Atom}
+We chose Github Atom for similar reasons we did Vim. Atom is highly configurable, and it
+comes with a built in package manager. Atom is basically a much more user friendly
+version of Vim. When making quick edits, Atom does the job perfectly. Also, for
+those of us who aren't too familiar with Vim.
+
+\begin{figure}
+    \centering
+	\includegraphics[scale=0.25]{graphics/atomide.png}
+    \caption{Atom} \label{atom}
+\end{figure}
+
+Figure \ref{atom} shows our simple yet effective Atom setup.
+
+\newpage
+
+\subsubsection{Sublime Text}
+Sublime text is a great, versatile text editor that also provides incredible customizability.
+As competitor to Atom, Sublime Text has its advantages over Atom. Being older than Atom,
+Sublime Text has many more packages available that gives it the edge in versatility. In
+addition, Sublime has higher performance at the cost of CPU usage. While Atom uses less
+CPU and more RAM. In all, both editors have their uses and are great for different things,
+and as such we use them both.  
+
+\begin{figure}
+    \centering
+	\includegraphics[scale=0.24]{graphics/sublimeide.png}
+    \caption{Sublime Text} \label{sublime}
+\end{figure}
+
+Figure \ref{sublime} shows a similar setup to our Atom setup.
+
+\newpage
+
+\subsubsection{Texmaker}
+When writing research papers, there is nothing better than LaTex. However it can be really
+inconvenient manually compiling and opening the pdf every time we want to see a change.
+Texmaker takes care of that. It integrates all the LaTex packages we need into one piece
+of software. It also has additional features such as preview windows, spell check,
+structure browser, and more. It has become very useful to us for writing all the
+papers for this project.
+
+\begin{figure}
+    \centering
+	\includegraphics[scale=0.25]{graphics/texstudioide.png}
+    \caption{Texmaker/Texstudio} \label{texmaker}
+\end{figure}
+
+Figure \ref{texmaker} shows Texmaker in action!
+
+\newpage
+
+\subsection{Other Tools}
+
+\subsubsection{Zeal}
+Undertaking a big project is a challenge. Not only is ample research required, but learning
+new things is a big part of the process. This is not an easy task as it is a lot of information
+to take in at once. Some say after learning a programming language, it is not hard to learn a
+new one with similar syntax and the hardest part is just memorizing the small changes. This
+is the case with us. Zeal is an offline documentation browser that lets us load in all
+the docsets of almost any language and search through all of it in an instant. This tool
+has become invaluable to our development process.
+
+\begin{figure}
+    \centering
+	\includegraphics[scale=0.25]{graphics/zealdoc.png}
+    \caption{Zeal documentation browser} \label{zeal}
+\end{figure}
+
+Zeal is shown in figure \ref{zeal}.
+
+\newpage
+
+
+\subsection{Database Management Systems}
+To begin researching a database management system you must first understand what a
+database is. According to the book "Database Management Systems" a database is
+
+\begin{quote}
+"... a collection of data, typically describing the activities of one or more related
+organizations."\cite{ramakrishnan2000database}
+\end{quote}
+
+A database management system, according to the same text is
+
+\begin{quote}
+"... software designed to assist in maintaining and utilizing large collections of data".
+\cite{ramakrishnan2000database}
+\end{quote}
+
+There are many different types of database management system that can achieve the
+goal of maintaining large collections of data. Some are specialized for the larger, and
+more volatile web data, while some are more suited for large persistent data.
+\par\vspace{\baselineskip}
+Some different types of database management systems are:
+\begin{itemize}
+\item Relational
+\item Hierarchical
+\item Network
+\item Object-oriented
+\item NoSQL
+\item NewSQL
+\end{itemize}
+
+\subsubsection{Relational}
+Perhaps the most common and well known of all database management systems is the
+Relational DBMS. The relation data model is based off of tables that represent
+the data, as well as the relationship among the data. It is defined in the book
+"Fundamentals of Relational Database Management Systems" as such:
+\begin{quote}
+"The relational model uses a collection of tables to represent both data and
+the relationships among those data. Tables are logical structures maintained
+by the database manager. The relational model is a combination of three
+components, such as Structural, Integrity, and Manipulative parts."
+\cite{sumathi2007fundamentals}
+\end{quote}
+\par\vspace{\baselineskip}
+An example of an RDBMS structure can be seen in Figure~\ref{fig:RDBMS_structure}
+\begin{figure}
+  \centering
+  \label{fig:RDBMS_structure}
+  \textbf{Relational DBMS Structure}
+  \includegraphics[scale=.5]{graphics/dbms_RDBMS_structure.png}
+  \caption{Represents a disk based RDBMS. Printed with permission \cite{wikiRDBMS}}
+\end{figure}
+The three components can be further broken down.
+\par\vspace{\baselineskip}
+\textit{The Structural Part} is what defines the database as a collection of relations,
+\par\vspace{\baselineskip}
+\textit{The Integrity Part} is maintained using primary and foreign keys,
+\par\vspace{\baselineskip}and
+\textit{The Manipulative Part} are the tools, such as relational algebra and
+relational calculus, that are used to manipulate the data.
+\par\vspace{\baselineskip}
+The author lists the key features of the relational model as follows:
+\begin{itemize}
+\item Each row in the table is called tuple
+\item Each column in the table is called attribute.
+\item The intersection of row with the column will have data value.
+\item In relational model rows can be in any order.
+\item In relational model attributes can be in any order.
+\item By definition, all rows in a relation are distinct. No two rows can be exactly
+the same.
+\item Relations must have a key. Keys can be a set of attributes
+\item For each column of a table there is a set of possible values called its
+domain. The domain contains all possible values that can appear under
+that column.
+\item  Domain is the set of valid values for an attribute.
+\item Degree of the relation is the number of attributes (columns) in the relation.
+\item Cardinality of the relation is the number of tuples (rows) in the relation.
+\end{itemize}
+
+The idea of a \textit{key} is an important one in the world of relational database
+management systems. So it is worth taking some time to talk about it. "A key is an
+attribute or a group of attributes, which is used to identify a row in a relation."
+\cite{sumathi2007fundamentals}
+According to the author of "Fundamentals of Relational Database Management Systems" a
+key can be classified into one of three categories.
+\begin{itemize}
+\setlength{\itemsep}{1pt}
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+\item Superkey
+\item Candidate key
+\item Primary key
+\end{itemize}
+A superkey is "a subset of attributes of an entity-set that uniquely identifies
+the entities. Superkeys represent a constraint that prevents two entities from
+ever having the same value for those attributes."\cite{sumathi2007fundamentals}
+\par\vspace{\baselineskip}
+A candidate key is "a minimal superkey. A candidate key for a relation schema
+is a minimal set of attributes whose values uniquely identify tuples in the
+corresponding relation."\cite{sumathi2007fundamentals}
+\par\vspace{\baselineskip}
+A primary key is a " designated candidate key. It is to be noted that the
+primary key should not be null."\cite{sumathi2007fundamentals}
+\par\vspace{\baselineskip}
+There is also a key known as a foreign key, which is a "set of fields or attributes in one
+relation that is used to “refer” to a tuple in another relation."
+\cite{sumathi2007fundamentals}
+\par\vspace{\baselineskip}
+\par\vspace{\baselineskip}
+There are many other aspects that full make up what it is to be a relational database
+management system. The most important of which being relational algebra.
+\par\vspace{\baselineskip}
+"Relational algebra is a theoretical language with operations that work on
+one or more relations to define another relation without changing the original
+relation"\cite{sumathi2007fundamentals}
+Operations of relational algebra include such things as selection operations, projection
+operations, rename operations, union operations, intersection operations, difference
+operations, division operations, as well as joins.
+\par\vspace{\baselineskip}
+The advantages of relational algebra is that is has a solid mathematical background.
+This mathematical background is beneficial when it comes to optimization of queries,
+because if two expressions can be proven to be equivalent a query optimizer can
+substitute the more efficient operation whenever necessary.
+\par\vspace{\baselineskip}
+There are some disadvantages to using a relational model and to relational algebra in
+particular. One disadvantage is the growing complexity of the data that needs to be
+stored. Relational database management systems are good for linking together similar types
+of data, and with the movement towards increasingly complex data-types these similarities
+are becoming less common. Another disadvantage of an RDBMS is that it can be a complex
+system to set up. A database administrator must take significantly more into consideration
+when designing and RDBMS then when dealing with a simple object store.
+
+\subsubsection{Hierarchical}
+Hierarchical Databases are a data model in which the data is organized into a tree type
+structure with a one-to-many relationship from the parent to the children. The data
+within the tree are stored as records that are connected together through links. Each
+record contains a set of fields with each field containing only one value.
+\par\vspace{\baselineskip}
+The hierarchical database model is typically used for large amounts of data that are
+unlikely to change. It is recognized as the first database model used by IBM in
+the 1960s.\cite{hierarchical_dbms_techopedia}
+\par\vspace{\baselineskip}
+
+An example of a Hierarchical DBMS structure can be seen in Figure~\ref{fig:hierarchicalDBMS_structure}
+\begin{figure}
+  \centering
+  \label{fig:hierarchicalDBMS_structure}
+  \includegraphics[scale=.5]{graphics/Hierarchical_Model.png}
+  \caption{Example structure for hierarchical database. This work is in the public domain in the United States because it is a work prepared by an officer or employee of the United States Government as part of that person’s official duties \cite{wikiHierarchicalDBMS}}
+\end{figure}
+
+\subsubsection{Network}
+The Network Model for a database management system is structures similarly to that of the
+hierarchical model in that it consists of parent and child nodes. However the network
+model does not limit itself to having every child have only one parent. In the network
+model all children can have multiple parents, and obviously parents can have multiple
+children. The network model also consists of items called "records" that which is a
+collection of data items. Each data item has a name and a value.
+\par\vspace{\baselineskip}
+An example of a network model record can be seen in Figure~\ref{fig:networkDBMS_record}
+\begin{figure}
+  \centering
+  \textbf{Network model record example}
+  \includegraphics{graphics/dbms_network_model_record.png}
+  \caption{Example of network model record. \newline \copyright H.Maurer and N.Scherbakov. Reprinted with permission  \cite{network_model_coronet}}
+  \label{fig:networkDBMS_record}
+\end{figure}
+
+Each record can have it's own grouping within by grouping two or more elementary items.
+A record can also contain a table, which is a collection of values that are grouped
+under one data item.
+\par\vspace{\baselineskip}
+The data within the network model consists of two main parts: data objects, and
+relationships.
+\par\vspace{\baselineskip}
+An example of network model structure can be seen in Figure~\ref{fig:networkDBMS_structure}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=.90]{graphics/dbms_network_data.png}
+  \caption{Network information model. \newline \copyright H.Maurer and N.Scherbakov. Reprinted with permission \cite{network_model_coronet}}
+  \label{fig:networkDBMS_structure}
+\end{figure}
+
+Relationships between records can be implemented by using logical constructions.
+This is called a "Data Set" . In the most basic case, each set consists of a father
+and a child. The "Data Set" has the following properties:
+\begin{itemize}
+  \item Each set includes exactly one record of the first type. This record is called an Owner of the set.
+  \item Each set may include 0 (i.e. an Empty set occurrence), 1 or N records of the same type. These records are called members of the data set.
+  \item All members within one set occurrence have a fixed order (i.e. are sorted)
+\end{itemize}
+An example of a network model relationship can be seen in Figure~\ref{fig:networkDBMS_relationship}.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=.9]{graphics/dbms_network_relationship.png}
+  \caption{Example of network model relationship \copyright H.Maurer \newline and N.Scherbakov. Reprinted with permission \cite{network_model_coronet}}
+  \label{fig:networkDBMS_relationship}
+\end{figure}
+
+The basic setup of a network model is therefore a collection of record occurrences and
+data sets.
+
+\subsubsection{Object-oriented}
+Object oriented databases are databases where the information stored within is organized
+in the form of objects, like what would be used in an object oriented programming
+language. An OODBMS combines the the features of an object-oriented language and a
+DBMS. The OODBMS permits a much tighter coupling between the database and the application. 
+This allows the programmer to maintain consistency within a single environment. An example 
+of an object oriented DBMS model can be seen in Figure~\ref{fig:ooDBMS_structure}.
+
+\par\vspace{\baselineskip}
+In an OODBMS data is encapsulated in \textit{abstract data objects}, also known
+as ADOs. ADOs all have the following properties:
+
+\begin{itemize}
+  \item It has a unique identity
+  \item It has a private memory and a number of operations that can be applied to the current state of that memory.
+  \item The values held in the private memory are themselves ADOs that are referenced from
+within by means of variable identifiers called instance variables. Note the emphasis
+“from within”, which underlines the idea of encapsulation, ie. such instance variables
+or objects they denote or any organisation of the objects into any structure in the
+private memory are not visible from outside the ADO.
+  \item The only way that the internal state of an ADO can be accessed or modified from
+outside is through the invocation of operations it provides. An operation can be
+invoked by sending a message to it. The message must of course contain enough
+information to decide which operation to invoke and provide also any input needed
+by that operation. The object can respond to the message in a number of ways, but
+typically by returning some (other) object back to the message sender and/or causing
+some observable change (eg. in a graphical user interface).
+\end{itemize} \cite{object_oriented_data_model}
+\par\vspace{\baselineskip}
+\begin{figure}
+  \centering
+  \includegraphics[scale=.5]{graphics/dbms_oodbms_example.png}
+  \caption{An example of an object-oriented model. Public Domain \cite{wikiObjectOrientedDBMS}}
+  \label{fig:ooDBMS_structure}
+\end{figure}
+
+\subsubsection{NoSQL}
+NoSQL databases, which originally stood for "Non SQL" and now some people refer to as
+"Not only SQL", are databases that store information in a non-relational, non-tabular
+manner. Some of the ways that a NoSQL database management system may store information are:
+
+\begin{itemize}
+  \item Document-style stores
+  \item Key-value stores.
+\end{itemize}
+
+Some examples of document-style stores are CouchDB and MongoDB. These are stores
+"in which a database record consists of a collection of key-value pairs plus a payload."
+\cite{stonebraker2010sql}
+\par\vspace{\baselineskip}
+Examples of key-value stores include MemcacheDB and Dynamo. These type of database
+management system store data by strict key value pairs and are usually implemented by
+distributed hash tables. An example of a NoSQL architecture, specifically MongoDB,
+can be seen in Figure~\ref{fig:nosqlDBMS_structure}. With both of these styles you 
+will be accessing the data one record at at time as apposed to a SQL style database.
+\par\vspace{\baselineskip}
+There are typically two different arguments for choosing a NoSQL database management
+system. These arguments can be summarized as such:
+\begin{quote}
+``There are two possible reasons
+to move to either of these alternate
+DBMS technologies: performance and
+flexibility.
+The performance argument goes
+something like the following: I started
+with MySQL for my data storage needs
+and over time found performance to be
+inadequate. My options were:
+
+\begin{enumerate}
+  \item “Shard” my data to partition it
+across several sites, giving me a serious
+headache managing distributed data
+in my application or
+  \item Abandon MySQL and pay big licensing
+fees for an enterprise SQL
+DBMS or
+\item Move to something other
+than a SQL DBMS.
+\end{enumerate}
+
+The flexibility argument goes something
+like the following: My data does
+not conform to a rigid relational schema.
+Hence, I can’t be bound by the
+structure of a RDBMS and need something
+more flexible``\cite{stonebraker2010sql}\footnote{Formatting mine}
+\end{quote} 
+\par\vspace{\baselineskip}
+%\newpage
+
+\begin{figure}[H]
+  \centering
+  \textbf{Example NoSQL Architecture}
+  \includegraphics[scale=.4]{graphics/dbms_nosql_mongo_architecture.jpg}
+  \caption{Example NoSQL Architecture \copyright mongoDB   \citep{mongodb_architecture} Reprinted with permission}
+  \label{fig:nosqlDBMS_structure}
+\end{figure}
+\newpage
+
+\subsubsection{NewSQL}
+NewSQL is a database management system that attempts to provide
+the same scalable performance that a NoSQL DBMS can provide while still conforming to
+the relational model. ''Generally speaking, NewSQL data stores meet many of the
+requirements for data management in cloud environments and also offer the benefits of
+the well-known SQL standard''\cite{grolinger2013data}
+\par\vspace{\baselineskip}
+Since NewSQL is based on the relational model, every NewSQL DBMS must offer their clients
+a pure relational view of data. This means that the data is interacted in terms of tables
+and relations. This does not mean that the internal data representation is the same across
+all NewSQL stores.
+\par\vspace{\baselineskip}
+``One of the main characteristics of the NoSQL and NewSQL data stores is their ability to
+scale horizontally and effectively by adding more servers into the resource pool. Even
+though there have been attempts to scale relational databases horizontally, on the contrary,
+RDBs are designed to scale vertically by means of adding more power to a single existing
+server''\cite{grolinger2013data}
+\par\vspace{\baselineskip}
+The scalability of different data stores can be found in Grolinger et al's 
+report on NoSQL and NewSQL databases\cite{grolinger2013data}.
+
+\newpage
+
+\subsection{Work Manager}
+The Work Manager is a conglomeration of multiple minor, but not insignificant, roles
+within the DBMS. Specifically, it is the:
+\begin{itemize}
+  \item Main thread
+  \item Sole communicator with the client
+  \item Load-balancer between the primary worker threads
+  \item System resource monitor
+\end{itemize}
+
+Work distribution between threads is done through a task-queue that each thread in the
+thread pool pulls work from. Tasks are C++11 lambda functions that are packaged up
+via the standard library's \inlinecode{std::packaged_task<>} class.
+This class provides an interface that allows us to generate a \\ \inlinecode{std::future<>}
+object that is a thread-safe interface to a thread's return value. The bulk of the
+ideas behind this thread pool were found online \cite{stackoverflow1} though we substituted
+the command queue that was initially implemented using a \inlinecode{std::mutex}
+and \inlinecode{std::queue<>}, with a Tervel FIFO queue that allows
+non-blocking and wait-free access and insertion into the command queue.
+\par\vspace{\baselineskip}
+The reference used mutual exclusion objects such as \inlinecode{std::mutex}
+which is contrary to our goal of a fully non-blocking and wait-free system. Using the Tervel
+queue as detailed above allows us to remain non-blocking and wait-free as Tervel
+is non-blocking and wait-free. While our implementation does use condition variables,
+they are used to sleep inactive threads and are woken immediately upon the queue receiving 
+a job for the inactive thread. Letting these threads sleep allow the operating system to 
+schedule other threads in their place such as background processes or other worker threads 
+and their helper threads. This practice is also considered common courtesy in multi-process 
+systems so that the server is able to run more than a single process and can conserve power 
+in times of low demand.
+\par\vspace{\baselineskip}
+The task of communicating between the client and the server, which is the database itself,
+is given to the work manager as it is the main thread and is where all the results of
+the SQL query end up. This task also requires initialization and management of the network
+sockets as well as the management of the socket identification numbers that are assigned
+to specific connections. In turn, the module that manages these connections must be able to
+determine which connection a query came from and where the query's results should be
+returned to. The module that is in the best place for this work is the work manager
+and has therefore been assigned these tasks.
+\par\vspace{\baselineskip}
+The work manager is also the part of the database management system that will be cognizant
+of the amount of resources used by the system. Processor utilization, memory usage, thread
+performance, and various other metrics listed below will be measured and able to be
+requested by clients or management software. The full list of system resources measured
+and reported by the server is as follows:
+\begin{itemize}
+ \item Shortest execution time of a query
+ \item Longest execution time of a query
+ \item Median execution time of a query
+ \item Average ``load'' of a worker thread
+ \item Current total size of data store
+\end{itemize}
+
+There would be more extensive reporting features, except that a lot of 
+nice statistics about process memory and the system in general are found through files within the /proc
+directory. While these are likely memory-mapped files, Linux's file I/O cannot be guaranteed to be
+asynchronous or non-blocking which means that we cannot use them safely. As such, we have decided
+to shelve those monitoring features until further testing can be done.
+\par\vspace{\baselineskip}
+
+\subsection{Database Internals}
+%author Robert Medina
+Data Store receives data requests and based on those requests will return a subset of data from
+the database. This database will represent data in a table format using nested vectors as shown
+in Figure~\ref{fig:tables_in_memory}. Each table will be stored in a table hashmap to allow for 
+easy table lookup. Each table contains a relational schema for the type of data each column 
+can accept. This is represented as a pair in the table lookup hashmap.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=.45]{graphics/Table_In_Memory.png}
+  \caption{Example of Tervel vector table representation in memory}
+  \label{fig:tables_in_memory}
+\end{figure}
+
+These nested vectors can be used as either a row store or column store, both of which are defined below.
+\par\vspace{\baselineskip}
+
+Row store architectures store the memory of a row in a vector of multiple types and then
+a table would be composed of a vector of those rows as shown in Figure~\ref{fig:row_store_ex}.
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=.6]{graphics/row_store_example.png}
+  \caption{An example of a row store architecture. \copyright Oracle Learning Library 2014, reprinted with permission.\cite{rowstore}}
+  \label{fig:row_store_ex}
+\end{figure}
+
+Column store architecture stores the memory of a row in a vector of one type and then 
+creates another vector that holds those vectors as shown in Figure~\ref{fig:column_store_ex}.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=.6]{graphics/column_store_example.png}
+  \caption{An example of a column store architecture. \copyright Oracle Learning Library 2014, reprinted with permission.\cite{rowstore}}
+  \label{fig:column_store_ex}
+\end{figure}
+
+A side-by-side difference between row and column store architectures is shown in Figure~\ref{fig:row_column_diff}.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=.6]{graphics/row_store_and_column_example.png}
+  \caption{A row store and column store side-by-side comparison. \newline \copyright Oracle Learning Library 2014, reprinted with permission.\cite{rowstore}}
+  \label{fig:row_column_diff}
+\end{figure}
+
+Whenever a data request inquires about a table or more the data store will return a subset of that
+data in the form of nested vectors.
+\par\vspace{\baselineskip}
+
+The advantage of column based tables are faster data access, better compression, and better parallel processing.
+To change a column in a row store architecture, each row in the table must be searched to find the
+column and then it requires to change the value. This makes it slow to check for integrity constraints. Column store
+is a simply search through one vector row or column. Column vectors are very similar to each other value, which allows
+for easy compression of data, unlike row vectors which could contain many different data types. In column store, data
+is already partition into seperate columns so each column can be processed by itself.
+\par\vspace{\baselineskip}
+
+The advantages of row based tables are easy row inserts into tables, and easy row access. This is useful when a query
+wants to manipulate the entire row data instead of a few columns. In column store this would require multiple column vectors
+being rewritten and maniuplated which would be a costly operation to perform.
+\par\vspace{\baselineskip}
+
+Figure~\ref{fig:row_col_access_data} shows that it would be 
+difficult to find the sales column in a row store column, and it is also easily
+noticeable to see how adding a new row in column store would require multiple
+access to multiple column vectors.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=.5]{graphics/row_store_column_accessing_data.png}
+  \caption{A visualization of accessing the same data in a row store versus a column store. \copyright SAP HANA 2015, reprinted with permission.\cite{saphana}}
+  \label{fig:row_col_access_data}
+\end{figure}
+
+\subsubsection{ACID}
+%author Robert Medina
+Properties of a reliable database are traditionally defined as Atomicity, Consistency, Isolation, 
+and Durability(ACID). These properties are required to reliably process SQL transactions as well as
+be able to handle edge cases and extreme conditions that are experienced by databases in 
+production environments.
+\par\vspace{\baselineskip}
+
+Atomicity refers to the ability of a database to guarantee that all transactions
+are performed or none of them are. Transactions that abort operations midway leaves
+for data inconsistency. In the event that a transaction is aborted then the database
+returns to the last commited transaction state.
+\par\vspace{\baselineskip}
+
+Consistency refers to the ability of a transaction to take the database from one valid state
+to another. Before a transaction and after a transaction the database must remain in a valid state.
+Any data written to the database must be valid according to any constraints, cascades and triggers.
+\par\vspace{\baselineskip}
+
+Isolation refers to the level of visibility of transactions to other users or systems. In other words,
+transactions from two users cannot interact with one another and if two concurrent transactions occur then
+those changes to the state of the database are not reflected to each other user. If those transactions occur
+concurrently and rely on each other then locking will occur.
+\par\vspace{\baselineskip}
+
+Durability means that once a transaction is committed in a SQL statement then those changes on the database 
+will be reflected to the user and will be recorded pernamently. This is usually performed by backing 
+up valid states of the database.
+\par\vspace{\baselineskip}
+
+\subsubsection{Indexing}
+%author Robert Medina
+Indexing allows for fast retrieval from a collection of data. There are many ways to accomplish this,
+and some ways are better suited depending on the constraints. Tree-based indexing and Hash-based indexing
+are two popular solutions for an implementation of a database. Given a set of data in memory, indexing takes
+a key data value and stores it into a data structure. Based off this key value, the indexing data structure
+will point to the file in memory or memory address, depending on how the data is stored. Based on this, a
+file scan of the database is now just reduced to scanning an index file. Figure~\ref{fig:index_entry} shows
+a typical index layout.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \includegraphics{graphics/indexentry.png}
+  \caption{Index key abstract concept for keys and data relations \newline \copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
+  \label{fig:index_entry}
+\end{figure}
+
+However searching through an index file can still be a costly operation. Index files are smaller than the
+data it is referencing but it can still use a considerable amount of memory space. Therefore it would be
+reasonable to use a data structure for fast retrieval of data based on a range of values or based on
+the actual data value stored.
+\par\vspace{\baselineskip}
+
+\subsubsection{Tree-based Indexing}
+%author Robert Medina
+Tree-based indexing is an index file structured into a variant of a binary search tree. The tree is based off
+the key value and references to where that key is stored. Indexing requires fast retrieval of data, low cost
+insertion and low cost deletion of data. There are two types of trees that are useful for this type of operation,
+ISAM and B+ Tree.
+\par\vspace{\baselineskip}
+
+B+ trees are a variant of a B-tree. A B-tree is an $n$-ary tree that splits data
+based on a key value into nodes with $T(j)$ subtrees and $K(j)$ nodes, where $j = (1<j<m)$.
+By definition a B-tree is a tree with the following properties:
+\begin{itemize}
+  \item Each node consists of $T(i)$ subtrees and $K(i)$ keys, \\ where $i = (0,...,j)$
+  \item There is a single root that contains a range of $m$ children, $2<= m < j$
+  \item Each node contains a range of $m$ children, $(m/2) <= m < j$
+  \item For each sub-tree $T(i)$ where $i = (0,...,j)$ each sub-tree contains keys $k(j)$ such that:
+  \begin{itemize}
+    \item The $T(0)$ sub-tree have keys $k(0)$ where $k(0) < k(i)$
+    \item The $T(i)$ sub-trees have keys $k(i)$, where $i = (1, ..., j-1)$ and $k(0) <= k(i) <= k(j)$
+    \item The $T(j)$ sub-tree have keys $k(j)$ where $k(j) < k(j)$
+    \item All $T(i)$ sub-trees are either non-empty or empty.
+  \end{itemize}
+  \item B Trees have a height of $log_m(N)$, where $m$ is the number of children
+\end{itemize}
+An example of a B-tree can be seen in Figure~\ref{fig:b_tree_ex}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=.50]{graphics/B_Tree_Example.png}
+  \caption{Example of a B Tree with symbols \copyright Morris 1998, reprinted with permission.\cite{b+tree}}
+  \label{fig:b_tree_ex}
+\end{figure}
+
+A B+ tree differs slightly in the fact that B-trees store their data (keys) within the internal nodes while 
+B+ trees only points to the data. All the data in a B+ tree is stored in the leaves of tree. In addition,
+B+ trees link all their leaves together with a doubly linked list. Figure~\ref{fig:b_b+_tree_diff} shows
+the difference between the two types of tree data structures visually.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=.70]{graphics/B_B+_Tree_Difference.png}
+  \caption{A graphic depicting the differences between a B-tree and a B+ tree. \copyright Perrone 2012, reprinted with permission.\cite{b+tree}}
+  \label{fig:b_b+_tree_diff}
+\end{figure}
+
+The runtime for the various operations possible when using a B+ tree is shown
+in Figure~\ref{fig:b+_tree_runtimes}.
+
+\begin{figure}[H]
+  \centering
+  \begin{tabular}{l | c}
+    Operation & Runtime \\ \hline \hline
+    Search & $log_m(n)$ \\ \hline
+    Search with range & $log_m(n) + k$ \\ \hline
+    Insert & $log_m(n)$ \\ \hline
+    Delete & $log_m(n)$ \\ \hline
+  \end{tabular}
+  \caption{The Big-O notation for various operations done on B+ trees. Where $m$ is the 
+	   number of index entries and $k$ is the number of data records. \copyright Ramakrishnan 2000, reprinted with permission}
+  \label{fig:b+_tree_runtimes}
+\end{figure}
+
+The height of a B+ tree is $log_m(n)$, where $m$ is the number of children and $n$ is the number of data entries.
+Traditionally for databases on disk the number of data entries would be based on the size of the data and
+the size of the page. This is because tree nodes should fit on a single page, if B+ tree leaves take up more
+memory than a page offers then B+ tree is resized to fit onto a page. Since the page can only fit so much
+data this is why the number of data entries is dependent on the size of data entries. So, it is reasonable
+to max the number of data entries by making the size of data smaller. This enures that more entires will
+fit on a page and the height of the B+ tree would remain small, thus keeping data retrevial performance fast.
+\par\vspace{\baselineskip}
+
+%author Robert Medina
+The Indexed Sequential Access Method(ISAM) tree is a variant of a B tree. In many ways it is similiar to a B+ tree 
+however there are minor details about how memory is handled that makes ISAM a better method than B+ tree. 
+Although this is usually not the case due to the further optimizations done in B+ tree implementations. 
+ISAM follows the exact same rules for a B tree but it does not contain data internally with in its nodes. 
+All the data from an ISAM resides in its leaf pages. Figure~\ref{fig:isam_visual} visualizes what an ISAM tree
+looks like.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+  \centering
+  \textbf{Abstract Diagram of ISAM structure}
+  \includegraphics[scale=.71]{graphics/ISAM_abstract_diagram.png}
+  \caption{Behavior similiar to B+ Tree Structure \copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
+  \label{fig:isam_visual}
+\end{figure}
+
+All non-leaf pages contain pointers that reference to the data in a leaf page. It is common for
+ISAM to never change the reference of a pointer since ISAM allocates memory statically. At creation
+ISAM statically creates a default number of leaf pages. Insertions and deletions change the data
+itself and not the leaf pages memory block. This static memory allocation in a sense can
+provide a better performance than a dynamic B+ tree depending on the situation. At creation all
+leaf pages are allocated squentially and sorted on the search key value. The non-leaf pages
+are then allocated in memory. In the event that there is more data than ISAM can handle with its
+default leaf page count then those pages go into an overflow page. Figure~\ref{fig:isam_memory} shows 
+how ISAM memory allocation occurs.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+  \centering
+  %\textbf{Page Allocation for ISAM}
+  \includegraphics{graphics/ISAM_page_allocation.png}
+  \caption{The order of which memory gets allocated on the page \newline \copyright Ramakrishnan 2000, 
+  reprinted with permission.\cite{ramakrishnan2000database}}
+  \label{fig:isam_memory}
+\end{figure}
+
+Basic operations of insertion, deletion and search are very straightforward. An search starts at the
+root node and determines which subtree to search by comparing the value of the key value in the node
+with the search key value. This is standard in most tree data structures. Insertions and deletion are
+based off the search operation and will either insert a new data to the pointer reference in the leaf
+page or delete a data value from the reference of the pointer in the leaf page. None of the leaf
+pages de-allocate memory. In addition the overflow pages are linked to the end of a leaf page array.
+This way the overflow page will also be considered in the basic operations of ISAM. Figure~\ref{fig:isam_runtimes}
+gives the specific runtimes of the various operations.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+  \centering
+  \begin{tabular}{l | c | l}
+  \hline
+  Operation & Runtime  & Sidenote \\ \hline \hline
+  Search & $ log_f N $ & \\ \hline
+  Insert & $ log_f N $ & \begin{tabular}{@{}l@{}}There is some overhead for leaf-page\\and overflow pages\end{tabular} \\ \hline
+  Deletion & $ log_f N $ & If an empty overflow exists it will be de-allocated \\ \hline
+  \end{tabular}
+  \caption{The runtimes of common operations done on an ISAM tree \copyright Ramakrishnan 2000, reprinted with permission}
+  \label{fig:isam_runtimes}
+\end{figure}
+
+Figures~\ref{fig:isam_example_vis},~\ref{fig:isam_example_insert}, and~\ref{fig:isam_example_delete} show a populated ISAM
+tree, an insert operation on that tree, and a delete operation on that tree, respectively.
+\par\vspace{\baselineskip}
+
+ISAM is an indexing solution for the very expensive binary search on a file. This modification to the 
+B-tree attempts to solve this problem with consideration to the underlying memory devices in the 
+system such as hard disks.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \textbf{Example of an ISAM structure}
+  \includegraphics[scale=.71]{graphics/ISAM_example.png}
+  
+  \caption{Some exisiting data that is already inserted.\copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
+  \label{fig:isam_example_vis}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \textbf{After inserting 23*, 48*, 41*, 42*}
+  \includegraphics[scale=.75]{graphics/ISAM_example_insertion.png}
+  \caption{ISAM insertion operation \copyright Ramakrishnan 2000, reprinted \newline with permission.\cite{ramakrishnan2000database}}
+  \label{fig:isam_example_insert}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \textbf{After deleting 42*, 51*, 97*}
+  \includegraphics[scale=.65]{graphics/ISAM_example_deletion.png}
+  \caption{ISAM deletion operation \copyright Ramakrishnan 2000, reprinted \newline with permission.\cite{ramakrishnan2000database}}
+  \label{fig:isam_example_delete}
+\end{figure}
+
+\subsubsection{Hash-based Indexing}
+%author Robert Medina
+Hash-based Indexing references a key value to a data entry using a hash function. This can be
+used for indexing when there is an equal key value within the hash. Range operations using
+a key value is not possible with a hash function since it would simply be too costly of an
+operation. Hash-based indexing suffers from overflow chaining such as ISAM, which can hinder
+performance. There exists multiple hash-based indexing strategies such as static hashing, extendible hashing,
+and linear hashing.
+\subsection{Hash Function}
+%author Robert Medina
+Good hash functions are deterministic, provide uniformity, and have variable range. Deterministic means
+that for any given key value it will generate the corrseponding index consistently. This is
+necessary to provide accurate data retrevial from a hash map. Uniformity means that a hash
+map will evenly distribute hash index values over its value range. Without this the
+performance will suffer greatly since the number of collisions will increase this hinders performance.
+\subsubsection{Static Hashing}
+%author Robert Medina
+Static hashing a technique usually reserved for hash tables that uses a key value and maps to a bucket containing pages. These
+data entries may be sorted but it depends on the application. This data structure is static
+for the most part but it does allow for overflow page allocation. In the event of inserting
+beyond the memory allocated, this data entry is placed into a new page and the page is added
+to an overflow chain in the bucket. An abstract view of a static hashing data structure is given in 
+Figure~\ref{fig:static_abstract}.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=.70]{graphics/Static_Hashing_Abstract.png}
+  \caption{Abtract data structure representation of static hashing \newline \copyright Ramakrishnan 2000, 
+  reprinted with permission.\cite{ramakrishnan2000database}}
+  \label{fig:static_abstract}
+\end{figure}
+
+A good hash function is imperative to uniformly distribute values over the collection of buckets.
+An example of a good hash would be $hash(key) = (a*key + b)$, where $a$ and $b$ are constants. Some problems
+of static hashing are the fact that it is static. When the index file is created bucket sizes
+are known at time of creation, so pages can be stored successively in the buckets. However
+as the index file continues to grow if the same key value is stored repeatedly then a long
+overflow chain develops. Since the number of buckets are static if the index file shrinks
+in size then there is wasted memory space. If the file grows too large then it results in
+poor performance. Otherwise, the performance for operations is very fast. The runtimes
+for data structures that don't utilitize overflow chains can be found in Figure~\ref{fig:static_hash_runtimes}
+while the runtimes for data structures that use overflow chains can be found in
+Figure~\ref{fig:static_hash_runtimes_overflow}.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+\centering
+\textbf{Runtimes without overflow chains}
+\begin{tabular}{l | c | c}
+  \hline
+  Operation & Runtime & Number of I/O reads and writes \\ \hline \hline
+  Search & O(1) & 1  \\ \hline
+  Insert & O(1) & 2  \\ \hline
+  Delete & O(1) & 2  \\ \hline
+\end{tabular}
+\caption{The Big-O runtimes of common operations done when using static hashing}
+\label{fig:static_hash_runtimes}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\textbf{Runtimes with Overflow Chains}
+\\
+\begin{tabular}{l | c}
+  \hline
+  Operation & Runtime \\ \hline \hline
+  Search & O(n) \\ \hline
+  Insert & O(1) \\ \hline
+  Delete & O(n) \\ \hline
+\end{tabular}
+\caption{The Big-O runtimes of common operations done when using static hashing
+when overflow chains are added to the data structure}
+\label{fig:static_hash_runtimes_overflow}
+\end{figure}
+
+If there are multiple collisions then the hashmap usefullness becomes impared. The hashmap devolves into a more
+of a linked list so having long chains can really hinder performance as you see above. Therefore static hashing
+is not a reliable method for inserting new objects since the possiblity of overflow chains and re-indexing can
+ruin the property of a hashmap.
+\par\vspace{\baselineskip}
+
+Intuitively a simple hash table with a pointer to a page would make sense. However in the case of
+additional pages, without an overflow chain rehashing the table would be necessary. In this
+case rehashing the table would be a costly operation. This is mainly due to the fact that the data structure is unusable
+while rehashing is in progress. Dynamic hashing techniques such as extendible hashing solve this problem.
+\par\vspace{\baselineskip}
+
+Extendible hashing is a hash map of pointers that maps to buckets with various levels of depth. This directory
+is based on an index value using $ X\ modulo\ 2\textsuperscript{global depth} $. The global depth is the number of bits for the binary
+representation of that index value. Each bucket in the directory has a shared data entry limit for the number of
+entries each bucket can hold. An example of an extendible hashmap can be seen in Figure~\ref{fig:ext_hash_example},
+and a graphic depicting the splitting of a bucket after an insert is found in Figure~\ref{fig:ext_hash_split}.
+
+\begin{figure}[H]
+  \centering
+  \textbf{Extendible Hashmap}
+  \includegraphics{graphics/ExtendibleHashing_Depth_2.png}
+  \caption{Example of Extendible Hashing at Depth 2 \copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
+  \label{fig:ext_hash_example}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \textbf{Splitting Occurs}
+  \includegraphics{graphics/ExtendibleHashing_Spliting.png}
+  \caption{New bucket is made \copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
+  \label{fig:ext_hash_split}
+\end{figure}
+
+Whenever a data entry is inserted, the local depth of that bucket is compared with the global depth. If the local depth
+is equal to the global depth then the directory is doubled and each pointer in the newly allocated memory is mapped to the
+original buckets respectively. Also the global depth is increased by one and the directory index values are reindex to new
+bit values. When this overflow occurs the maximum bucket gets split up into two buckets, one at the original index and the
+second one at this new index value. This new index value holds the data entry and it's local depth is increased by one, along with
+the original bucket local depth value. Figure~\ref{fig:ext_hash_dir_dbl} shows the directory doubling and the depth increasing
+after an insertion.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \includegraphics{graphics/ExtendibleHashing_Depth_3.png}
+  \caption{Directory doubles and the global depth increases to three. \copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
+  \label{fig:ext_hash_dir_dbl}
+\end{figure}
+
+When looking at Figure~\ref{fig:ext_hash_runtimes}, it may seem like there is no performance 
+benefit to using extendible hashing despite the more complex algorithms and data structures. 
+In practice however, the length of a bucket is much smaller than static hashing and has
+a uniform limit. This makes it more desirable in terms of performance on an average.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+\centering
+\begin{tabular}{l | c }
+  \hline
+  Operation & Runtime \\ \hline \hline
+  Search & O(n) \\ \hline
+  Insert & O(1) \\ \hline
+  Delete & O(n) \\ \hline
+\end{tabular}
+\caption{The Big-O runtimes of an extendible hash map}
+\label{fig:ext_hash_runtimes}
+\end{figure}
+
+Linear Hashing is a dynamic hashing technique that adjusts to inserts and deletes in a stable manner.
+Unlike Extendible Hashing, Linear Hashing does not have a directory to where the data is
+stored. Linear Hashing deals with collisions naturally and contains a lot of flexibility with
+the timing of bucket splits. However if the data distribution is bery skewed overflow chains could cause Linear Hashing performance to be
+worse than Extendible Hashing.
+\par\vspace{\baselineskip}
+
+Linear hashing utilizes a famiy of hash functions $H(a), h(1), h(2), ... , h(n)$, with each function 
+having the property that each function's range is twice of that of its predecessor. This means that 
+if $h(i)$ maps a data entry into one of M buckets then $h(i+1)$ maps a data entry into one of $2M$ 
+buckets. This family typically contains a hash function $h(i) = value = h(value)\ modulo\ (2^i * N) $, 
+where $N$ is the initial number of buckets which normally is 2. If $N$ is a power of 2 then the hash 
+function $h$ will look at the last $d(i)$ bits. $d(o)$ is the number of bits needed to represent $N$, 
+and $N$ can change as the number of buckets increase from splitting. $d(i)$ is the next modulo value, 
+which is equal to $d(i) = d(a)+i$, for the next hash function in this family of hash functions.
+\par\vspace{\baselineskip}
+
+In the split operation, there exists a split policy that determines when splitting is the appropiate. 
+This can occur in terms of rounds. During a round, represented as round number $level$ only hash 
+functions $h(level)$ and \\ $h(level+1)$ are in use. The buckets from first to last are split depending 
+on the timing in a round. At any time there exists buckets that have split, have yet to be split and new 
+buckets that were created recently. A visual representation of this operation can be found in 
+Figure~\ref{fig:lin_hash_split}.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+  \centering
+  \textbf{Splitting Occurs}
+  \includegraphics[scale=.95]{graphics/Linear_hashing_splitting}
+  \caption{Abstract view of bucket splitting. \newline \copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
+  \label{fig:lin_hash_split}
+\end{figure}
+
+When a split occurs the data may not necessary reside in the newly split bucket. An overflow page is
+added to store the newly inserted data entry. However this is not a big issue since bucket splitting
+occurs in a round robin fashion, eventually all buckets are split including overflow chains.
+This redistributes data into split buckets and each bucket is prevented from getting too large,
+including overflow chains.
+\par\vspace{\baselineskip}
+
+The counter $level$ is used to indicate the current round number. The bucket to be split is called
+next and is initially the first bucket. The number of buckets is denoted by $level$ and $Nlevel$.
+$N(o)$ is the number of buckets, also called $N$. A spliting policy can be a wide range of logic
+such as whenever overflow chains are created or if a certain number of space is taken up with
+in a bucket and so forth. Whenever a split is triggered by the split policy then the Next containing
+the bucket will be split and the hash function $h(level+1)$ will redistributes the entries
+between the buckets to the newest created buckets. These definitions will be reflected in the following
+figures. A typical inserting using linear hashing is shown in Figure~\ref{fig:linear_hash_insert}.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+  \centering
+  \textbf{Insertion of 43*, 43 mod (4) = 3 = (011)2 binary representation}
+  \includegraphics{graphics/Linear_hashing_insertion}
+  \caption{Overflowing occurs \copyright Ramakrishnan 2000, reprinted with \newline permission.\cite{ramakrishnan2000database}}
+  \label{fig:linear_hash_insert}
+\end{figure}
+
+After the insertion, the bucket next is split into a new bucket. Each buckets between $Next$ and $Nlevel$ have not yet been split,
+using $h(level)$ on a data entry the result is the bucket location where the data will be stored.
+When $Next = Nlevel - 1$ and a split is triggered, the last of the buckets are split. The 
+number of buckets after the split is twice the number at the beginning of the round and a new round is 
+started with a level incremented by 1 and next rest to 0. Since level is increased by one the number 
+of potential keys to be hashed will be doubled as Figure~\ref{fig:linear_hash_level_inc} shows.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \textbf{Linear hashing level increased due to maximum capacity}
+  \includegraphics{graphics/Linear_hashing_level_increased}
+  \caption{Notice that the number of bits increased as well, since $d(i) = d(a) + i$.  \copyright Ramakrishnan 2000, reprinted with permission.\cite{ramakrishnan2000database}}
+  \label{fig:linear_hash_level_inc}
+\end{figure}
+
+Extendible hashing and linear hashing are very similar in terms of their operations and 
+how each data structure handles these operations. When linear hashing splitting occurs in a round, the 
+number of buckets to be split is up to the last bucket in the range $N$. This is essentially the same 
+principle with respect to extendible hashing but occurs more frequently. The hashing functions are 
+very similar to extendible hashing, in a sense that the hashing function relates to a family of 
+hashing functions. Linear hashing with uniform distributions can have a lower average cost for 
+equality selections since the directory level hierarchy is eliminated but for skewed data 
+distributions this can result in empty buckets which is is allocated in memory. This can lead 
+to poor performance when compared to extendible hashing.
+
+\subsection{Data Compression}
+%author Robert Medina
+Lossless data compression is a type of data compression algorithm that allows
+the original data to be perfectly reconstructed from the compressed data. When
+compared to lossy compression, these algorithms are a type of classification that
+allows for an approximation of the orignal data to be recovered from compress data.
+Loseless data compression is useful for any type of application when memory space is
+necessary to be conserved. In the case of loseless data compression there are three
+popular algorithms, run-length encoding, huffman coding, and LZ77/78.
+\par\vspace{\baselineskip}
+
+\subsubsection{Run-Length encoding}
+Run-length encoding is a very simple form of loseless data compression that is sequences
+in which the same data value occur in many consecutive data elements are not stored as a
+single data value and counter instead of the duplicate form. In other words, this algorithm
+replaces large sequences of repeating data with only one item with a counter. When considering
+that an data primitive for ints are four bytes and a characater is 1 byte. It would be useful
+to represent multiple characters as a counter instead of multiple characters. The same principle
+continues for multiple integers and other data primitives.
+\par\vspace{\baselineskip}
+For example if a string line contains ``WWWWWWWWBWWWWWWWB'' then ``8W1B7W'' size would be considerably
+smaller than the first data input. In the case of the uncompressed data it took over 20 bytes to
+represent that input while run-length encoding took 6 bytes. This can be a huge impact on memory
+allocation in areas where memory is size sensitve such as main memory, cahce, or pages.
+This compression may not have the same impact in all applications since it requires data to be
+in a sequence and contain repeating data. In soe applications this may not occur as often as one would
+hope for but nonetheless it is a useful compression algorithm for repeating data sets.
+\subsubsection{Huffman coding}
+Huffman coding is a type of prefix code that is used for lossless data compression. Prefix code is a type
+of code system that is only distinguished by its possession of a prefix proferty. This prefix property requires
+that no code word in the system that is a prefix of any other code word in the system. Therefore each code word
+must be unique to their own scopes. The output from Huffman's algortihm is a variable length code table for encoding
+a symbol into a prefix.
+\par\vspace{\baselineskip}
+Based on a given set of sybols with weights, Huffman's Algortihm determines the minimalistic required prefix coding
+table to represent the data set. This algorithm starts by creating a binary tree of nodes. These nodes
+are stored in a regular array which size depends on the symbol placed into the node. Initally all nodes are leaf
+nodes and all those nodes contain the symbol and the weight of the symbol. Internal nodes contain a symbol weight
+and links to two child nodes. Here is an example of a text that is initalized into Huffman's algorithm with the
+frequency of the characters being used as the weight of the symbol.
+\par\vspace{\baselineskip}
+As an example, ``Eerie eyes seen near lake'' translates into the following symbols ``E e r i [space] y s n a r l k .''
+Those symbol weights are the ones seen in Figure~\ref{fig:huffman_ex_sym_freq}.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=.9]{graphics/huffman_example_symbol_freq.png}
+  \caption{Symbols with frequencies as weights data set \copyright Daescu 2012, reprinted with permission.\cite{huffman}}
+  \label{fig:huffman_ex_sym_freq}
+\end{figure}
+
+Once the data set is prepared it is inserted into a priority queue. In Figure \ref{huff_example}, the priority 
+queue sets the least frequency symbol counter to be of the highest priority.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=.9]{graphics/huffman_example_initial.png}
+  \caption{Data set inserted into a priority queue  \copyright Daescu 2012, reprinted with permission.\cite{huffman}}
+  \label{huff_example}
+\end{figure}
+
+The process begins with the leaf nodes turning into a new node with children whose symbol weight is smaller than
+the parent node. This is continued until all the nodes on the queue become attached to one big Huffman tree.
+Algorithmic Steps:
+Using a priority queue where the node with the lowest probability is given the highest priority.
+\begin{enumerate}
+ \item Create a leaf node for each symbol and add it to the priority queue.
+ \item While there is more than one node in the queue
+ \begin{enumerate}
+    \item Remove the two nodes of the highest priority from the queue.
+    \item Create a new internal node with these two nodes as children and with the probability equal to
+	  the sum of the two nodes' probabilities.
+    \item Add the new node to the queue
+  \end{enumerate}
+  \item The remaining node is the root node and the tree is complete.
+\end{enumerate}
+
+Continuing with the example in Figure \ref{huff_example}, the first two leaf nodes are added as children to a parent node whose
+weight is the sum of the two children nodes. This is shown in Figures~\ref{fig:huffman_ex_int_1} and
+~\ref{fig:huffman_ex_int_2}.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=.63]{graphics/huffman_example_internal_node.png}
+  \cite{huffman}
+  \caption{Highest priority on queue is merged together  \copyright Daescu 2012, reprinted with permission}
+  \label{fig:huffman_ex_int_1}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=.58]{graphics/huffman_example_internal_node_added.png}
+  \cite{huffman}
+  \caption{New node inserted into queue  \copyright Daescu 2012, reprinted with permission}
+  \label{fig:huffman_ex_int_2}
+\end{figure}
+
+This continues repeatedly until one tree is created from the data set as shown in Figure~\ref{fig:huffman_full_tree}.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=.75]{graphics/huffman_example_end.png}
+  \caption{Complete Huffman Tree from priority queue  \copyright Daescu 2012, reprinted with permission.\cite{huffman}}
+  \label{fig:huffman_full_tree}
+\end{figure}
+
+The last node in the queue contains the root to the Huffman tree. This Huffman tree
+contains the new code words for each character. This new prefix code will allow for easy
+data representation for the text and obviously any data set with a symbol and an weight can
+be applied to this algorithm and can be compressed into a prefix code symbol table.
+Assuming that going left is 0 and going right is 1 on the tranversal of this tree, one complete
+word can be found after a tranversal of its symbol into the Huffman tree. This is shown in
+Figure~\ref{fig:huffman_prefix_table}.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=.6]{graphics/huffman_example_prefix_table}
+  \caption{Prefix Code Table derived from Huffman Tree  \copyright Daescu 2012, reprinted with permission.\cite{huffman}}
+  \label{fig:huffman_prefix_table}
+\end{figure}
+
+\par\vspace{\baselineskip}
+After the prefix table in Figure~\ref{fig:huffman_prefix_table} is applied to the original data set the following result is the compressed
+data for this data set as shown in Figure~\ref{fig:huffman_compressed}.
+\par\vspace{\baselineskip}
+\begin{figure}
+  \centering
+  \includegraphics[scale=.75]{graphics/huffman_example_compressed_result}
+  \caption{Prefix code representation of original data set.  \copyright Daescu 2012, reprinted with permission.\cite{huffman}}
+  \label{fig:huffman_compressed}
+\end{figure}
+
+Considering that the original size of the set in ASCII would take 8*26 = 208 bits, when compared to
+the newly compressed data the new compressed data size is 73 bits.
+\par\vspace{\baselineskip}
+The unique prefix property must be maintained in order for the Huffman property to remain a valid prefix
+data symbol table. No code is a prefix to any other code in a system as initially described.
+\par\vspace{\baselineskip}
+
+\subsubsection{LZ77/78}
+LZ77/78 are two lossless data compression algorithms. LZ77 algorithms achieves compression by replacing
+occurences of data with references to a single copy of that data existing earlier in the uncompressed
+data stream. Length-distance pair is a pair numbers that are used primarily for enconding matches. In order
+to spot matches the encoder tracks a small subset of data of the most recent data. This structure in which
+the most recent data is stored is called a sliding window. LZ77, also known as sliding window compression, is
+a compression algorithm for sequential data compression. The sliding window consists of two parts, a search
+buffer and a look-ahead buffer. The search buffer contains a portion of recently encoded sequence data and
+the look-ahead buffer contains the next portion of data to be encoded.
+\par\vspace{\baselineskip}
+
+In order for the data in the look-ahead buffer to be encoded, the encoder searches back through the
+search buffer until it finds a match to the first symbol in the look-ahead buffer. This distance between
+the pointer from look-ahead is called the offset. Once a match is found for the first symbol then the encoder
+determines whether or not the symbol matches with the symbol from the look-ahead buffer. The number of
+consecutive symbols in the search buffer that match consecutive symbols in the look-ahead buffer is called
+the length of the match. Now the encode encodes this longest match symbol into a type of format of triple
+variable pair: offset, length of match, and codeword for symbol. The full pseudo code for this compression 
+algorithm is found in Figure~\ref{fig:lz77_algo}.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \includegraphics{graphics/LZ77_compression_code}
+  \caption{Psuedo Algorithm for encoding processes for look-ahead and search buffer \copyright Wikipedia 2015, reprinted with permission.\cite{LZ77_78}}
+  \label{fig:lz77_algo}
+\end{figure}
+
+\newpage
+
+A clear limitation of LZ77 algorithm is that the window only can allocate enough memory for the dictionary. At
+larger window sizes performance begins to dwindle. A smaller window size also means that valuable dictionary data
+encoding is being toss away because they are removed from the dictionary to make room for the newly encoded data sets
+from the look-ahead buffer as since in Figure~\ref{fig:lz77_format}.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=.6]{graphics/LZ77_example_window}
+  \caption{The format is more clearly defined with in this example. \copyright Wikipedia 2015, reprinted with permission.\cite{LZ77_78}}
+  \label{fig:lz77_format}
+\end{figure}
+
+Much like LZ77 the LZ78 lossless data compression algorithm replicates many of the LZ77 compression features however
+LZ78 attempts to address some of the more underlying problems with LZ77 such as a finite amount of memory for
+the dictionary. With LZ78, the dictionary is an unlimited collection of seen phrases. LZ78 schemes work by inputing
+phrases into a dictionary and then when a repeated occurance of that phrase is found, the output of the format for
+the search buffer match will now be an index to the dictionary referencing to the search buffer format stored in
+the dictionary also known as phrase. LZ78 is only a slight modification of LZ77 and the compression algorithm is still
+the same format as LZ77 as well as the encoder.
+
+\newpage
+
+\subsection{Dynamic Memory Allocation in C++}
+Memory in a C++ program is dived into two parts, the stack and the heap, as shown in Figure~\ref{fig:cpp_mem_heirarchy}. The stack contains all the 
+variables declared inside the function and will take up memory from the stack. While the heap is responsible 
+for all unused memory of the program. This memory can be allocated dynamically when the program runs but 
+the program must also insure that this memory gets cleaned up after it is done with it.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+  \centering
+  \includegraphics{graphics/c++_memory_heirarchy.png}
+  \caption{A visualization of the C++ memory heirarchy. \copyright Adrian, 2006, reprinted with permission. \cite{stackheap}}
+  \label{fig:cpp_mem_heirarchy}
+\end{figure}
+
+Programs cannot predict how much memory will be required at run time. This memory can be allocated 
+by the new operator and is referenced by the address of the space allocated. This memory can 
+also be deleted by the delete operator. This is used when memory is no longer used purposely. 
+If it is not cleaned up then it creates garbage memory that could otherwise be used resourcefully. 
+There are other ways to dynamically allocate memory, such as malloc(), calloc(), and realloc(). 
+There are major differences between the new operator and the other memory allocation functions.  
+The following are some useful concepts and guidelines to keep in mind when using these functions. 
+It is imperative to learn about these guidelines otherwise potential problems could occur 
+such as memory corruption. \cite{newerror}
+
+\begin{enumerate}
+  \item {\bfseries Delete and free do not mix}:
+  The delete operator works for the new operator but it causes undefined behavior when used 
+  on a piece of memory allocated via \inlinecode{malloc()}. Using the \inlinecode{free()} function 
+  is used on an object allocated via new also results in undefined behavior. When deallocating memory for 
+  new or malloc it is necessary to apply the correct functions to free up memory. The alternative may or may not work
+  depending on how the implementation of C++ decided to handle that edge case.
+  
+  \item {\bfseries Placement new is extremely dangerous}:
+  If a placement new is used to create an object in memory(e.g. \inlinecode{foo* f = new(place) foo();}) 
+  then you as the programmer are given sole responsibility for managing that memory location. This can
+  be extremely dangerous as you have to account of platform alignment and memory allocation manually
+  rather than being able to rely on C++'s standard library. You are also responsible for calling that
+  object's destructor at the end of its lifetime or else that memory will leak. As such, we recommend 
+  not using this unless you are manually implementing a memory pool or some other advanced memory construct.
+
+  \item {\bfseries New operator}:
+  There is a difference between the \inlinecode{new} operator and \inlinecode{operator new}. The new operator 
+  is the default memory allocation function as defined by the standard library, while \inlinecode{operator new} 
+  is an overloaded version of the new operator. The default operator always works in the way specified by
+  the standard and cannot be directly edited. That behavior is as follows:
+  \begin{itemize}
+   \item It allocates a block of memory that can house the provided class or data type
+   \item If the given class or data type has a constructor, call it
+  \end{itemize}
+  To provide the programmer fine-grained control over the memory allocation process, C++
+  provides a way to overload the default new operator and use a custom memory allocator. This is referred to
+  as \inlinecode{operator new} so as to differentiate it from the default new operator.
+  \par\vspace{\baselineskip}
+  The memory returned by operator new cannot be guaranteed to be in any particular state as it is 
+  defined by the programmer. As such, be wary of what assumptions you make in handling the memory
+  returned to you by operator new.
+
+  \item {\bfseries Allocating raw buffers}:
+  If a programmer wishes to allocate a buffer of $n$ bytes in C++, they have a couple of options:
+  \begin{enumerate}
+   \item Use \inlinecode{new} to allocate an array of \inlinecode{char} or \inlinecode{uint8_t}:
+   \begin{lstlisting}[language=C++]
+   uint8_t* buffer = new uint8_t[n];
+   \end{lstlisting}
+   \item Use \inlinecode{malloc} to allocate a block of memory that is $n$ bytes long:
+   \begin{lstlisting}[language=C++]
+   uint8_t* buffer = malloc(sizeof(uint8_t)  * n);
+   \end{lstlisting}
+  \end{enumerate}
+  Both of the returned blocks of memory will be uninitialized and the programmer is responsible
+  for their release via \inlinecode{delete} or \inlinecode{free()}, respectively.
+  
+  \item {\bfseries Error Handling}:
+  By default, \inlinecode{new} throws an exception if it cannot allocate the amount of memory
+  requested of it. This exception is usually considered a fatal error as the internal state of
+  the application may no longer be valid. However, there is a variation on \inlinecode{new} that
+  does not throw: \inlinecode{new (std::nothrow) uint8_t[n]}. That variant behaves like \inlinecode{malloc()}
+  in that it returns \inlinecode{nullptr} when it cannot allocate the amount of memory requested.
+
+  \item {\bfseries Memory Corruption}:
+  There exist two reasons that memory corruption could occur in a program. The source of the 
+  memory corruption and its manifestation may be far apart. This makes it difficult to finding 
+  the cause of the memory corruption in relation to its effect. The second reason is that symptoms 
+  occurring during bizarre conditions which make them significantly harder to replicate. Memory 
+  corruption errors can be categorized into four categories. One of the more common errors is using 
+  uninitialized memory. This refers to the contents of uninitialized memory are treated as garbage 
+  values. The usage of such garbage values can lead to unpredictable program behavior. Second error 
+  is using none-owned memory. It is common that pointers are used to access and modify memory. 
+  Whenever this pointer is a null pointer (also known as a dangling pointer) or to a memory location 
+  outside of current stack or heap bounds, it is referring to memory that is not possessed by the program. 
+  Using these pointers causes serious flaws. Accessing such memory usually cause operating system exceptions that commonly 
+  lead to program crashes such as a segmentation fault. Third, using memory beyond the memory that was 
+  allocated (also known as a buffer overflow). For example, an array that is inside a loop contains an 
+  incorrect terminating condition then memory that is accessed beyond the bounds of the array may be 
+  manipulated that was otherwise not supposed to. Lastly, the fourth category that causes memory corruption 
+  is faulty heap memory management. Memory leaks and freeing non-heap or un-allocated memory are the 
+  most frequent errors caused by fault heap memory management. Since C++ gives so much freedom to 
+  allocate any amount of memory the program needs it can lead to such errors when the program does 
+  not properly take care of its memory. More specifically memory leaks are blocks of allocated memory 
+  that are not released and the pointers pointing to them go out of scope or are overwritten. These blocks
+  are ''lost`` to the program and cannot be cleaned up until the process exits. This causes the program to 
+  consume memory and reduce the available memory in the heap and system as a whole.
+\end{enumerate}
+
+\subsection{Parallelism}
+% Author: Jason
+% TODO: restructure this section to flow better
+With current strategies for processor research shifting paradigms from pure speed to cores,
+we must also adjust to reflect the changes. Parallelism has become more and more essential
+over the past few years to developing fast programs.
+
+\par\vspace{\baselineskip}
+
+It is important to take advantage of parallelization because processors have hit a wall of
+reasonable clock speed\citep{processorspeed}. The maximum consumer processor clock speed has
+hovered around 4GHz for many years now. Instead of increasing clock speed, processor
+manufacturers are starting to introduce more cores and new technologies such as hyperthreading
+to compensate for clock speed stagnancy. Processors just aren't getting faster fast enough.
+Adopting parallelism strategies is the easiest way to take advantage of these new technologies
+and continue to increase performance.
+
+\subsubsection{Code Speedup}
+Parallelism has massive potential for increasing performance. Parallelization of algorithms
+allows the processor to carry out many calculations simultaneously. In fact, if we can
+parallelize the entire algorithm, a theoretical speed up of $n$ times can be
+achieved where $n$ is the number of processors we can split the calculations on.
+Most modern computers today have at least 2 cores, with 4 cores being common. This means
+if we can parallelize every part of an algorithm, we can theoretically speed up performance
+by 2 or 4 times for 2 or 4 cores, respectively.
+
+\par\vspace{\baselineskip}
+Of course, in reality the speed up is less than that. We have memory latency, I/O, locks
+(more on that in the next section), ''inter-processor communication and coordination``\citep[p. 13]{artofmulti},
+and much more to worry about. Still, the gain from parallelization is often large enough to spend
+the time to implement. To decide whether or not it is worth it, we can make estimates of
+how much of the code can be parallelized.
+
+\par\vspace{\baselineskip}
+
+\newpage
+Consider the following situation:
+\begin{quotation}
+	''Five friends who decide to paint a five-room house. If all the rooms are the same size,
+	then it makes sense to assign one friend to paint one room, and as long as everyone paints at
+	about the same rate, we would get a five-fold speed-up over the single-painter case.
+	The task becomes more complicated if the rooms are of different sizes. For example, if one
+	room is twice the size of the others, then the five painters will not achieve a five-fold
+	speedup because the overall completion time is dominated by the one room that takes the
+	longest to paint``\citep[p. 13]{artofmulti}.
+\end{quotation}
+
+We can use {\bfseries Ahmdal's Law} to approximate the speedup to be gained from painting the house with five friends, or in a real scenario, the estimated parallelizable code.
+
+\begin{equation}
+	S = \frac{1}{1-p+\frac{p}{n}}
+\end{equation}
+
+Where:
+
+\begin{itemize}
+	\item {\bfseries S} is the potential speedup
+	\item {\bfseries n} is the number of concurrent processors
+	\item {\bfseries p} is the fraction of the code that can be executed in parallel
+\end{itemize}
+
+In our example, we have 5 rooms, one of them being worth 2. So in total we have 5 painters for 6 rooms, so
+{\bfseries p} = \(\frac{5}{6}\).
+
+
+\begin{equation}
+	S = \frac{1}{1-p+\frac{p}{n}} = \frac{1}{1-\frac{5}{6}+\frac{\frac{5}{6}}{5}} = \frac{1}{\frac{1}{6}+\frac{1}{6}} = 3
+\end{equation}
+
+The potential speedup ends up being only 3 times faster with 5 painters. Even though a big section
+(5/6 or roughly 83\%) could have been done in parallel. It is clear that parallelizing as much
+code as is possible is very important to maintain high performance.
+
+\subsubsection{Caveats}
+
+Though parallelism is a great tool that certainly affects performance tremendously in a positive way,
+it also has it's own caveats. Imagine we have two threads, {\bfseries t1} and {\bfseries t2}
+working in parallel and that eventually there comes a point where both threads need to write a value {\bfseries i}.
+Figure~\ref{fig:race_cond_1} shows the initial conditions in this situation.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+\centering
+\begin{tabular}{|l|l|l|}
+	\hline
+	& {\bfseries Thread t1} & {\bfseries Thread t2} \\
+	\hline
+	1 & Read Value i & Read Value i \\
+	\hline
+	2 & Add 1 to i & Add 1 to i \\
+	\hline
+	3 & Write back to i & Write back to i \\
+	\hline
+\end{tabular}
+\caption{Race Condition}
+\label{fig:race_cond_1}
+\end{figure}
+
+Since execution of parallel threads does not guarantee that the above steps will occur in
+any specific order, a few possibilities occur. If thread t2 executes step 1 while
+t1 is any time between steps 1 and 3 or similarly if thread t1 executes step 1 while
+t2 is between 1 and 3, we will get wrong values. In this case, the threads race
+to get the value because no real order is established. Therefore, one of the
+threads can get the old value before it is updated. This is called a {\bfseries race condition}.
+Let's take a look at a specific example. Figure~\ref{fig:race_cond_2} shows the execution path described
+above, assuming {\bfseries i} is set to 2.
+
+\begin{figure}[H]
+\centering
+\begin{tabular}{|l|l|l|}
+	\hline
+	& {\bfseries Thread t1} & {\bfseries Thread t2} \\
+	\hline
+	1 &  & Read Value i(2) \\
+	\hline
+	2 & Read Value i(2) & Add 1 to i \\
+	\hline
+	3 & Add 1 to i & Write back to i(3) \\
+	\hline
+	4 & Write back to i(3) &  \\
+	\hline
+\end{tabular}
+\caption{Race Condition}
+\label{fig:race_cond_2}
+\end{figure}
+
+Due to the unpredictable order of execution, we end up with {\bfseries i} = 3,
+when in reality we should have gotten 4. How do we solve this problem?
+We can use {\bfseries mutual exclusion}.
+\par\vspace{\baselineskip}
+
+{\bfseries Mutual exclusion} allows us to lock a piece of data to ensure no other thread can
+access  or edit it while it is locked. This ensures that we don't read a value
+before another thread writes to it, for example.
+
+\par\vspace{\baselineskip}
+
+Consider the updated scenario as shown in Figure~\ref{fig:race_cond_3}.
+
+\begin{figure}[H]
+\centering
+\begin{tabular}{|l|l|l|}
+	\hline
+	& {\bfseries Thread t1} & {\bfseries Thread t2} \\
+	\hline
+	1 & Lock i & Lock i \\
+	\hline
+	2 & Read Value i & Read Value i\\
+	\hline
+	3 & Add 1 to i & Add 1 to i \\
+	\hline
+	4 & Write back to i & Write back to i \\
+	\hline
+	5 & Unlock i & Unlock i \\
+	\hline
+\end{tabular}
+\caption{Race Condition}
+\label{fig:race_cond_3}
+\end{figure}
+
+Locking the variable allows a thread exclusive access to it. In this case, it doesn't
+matter if {\bfseries t1} or {\bfseries t2} gets it first, the thread that did
+not get the lock will be locked out until the lock is released. Lets take a
+look at our example with locks, assuming {\bfseries t1 got the lock first} in 
+Figure~\ref{fig:race_cond_4}.
+
+\begin{figure}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+	\hline
+	& {\bfseries Thread t1} & {\bfseries Thread t2} \\
+	\hline
+	1 & Lock i & See i is locked, wait \\
+	\hline
+	2 & Read Value i(2) & Wait\\
+	\hline
+	3 & Add 1 to i & Wait \\
+	\hline
+	4 & Write back to i(3) & Wait \\
+	\hline
+	5 & Unlock i & Wait \\
+	\hline
+	6 &  & Lock i \\
+	\hline
+	7 & & Read Value i(3)\\
+	\hline
+	8 & & Add 1 to i \\
+	\hline
+	9 & & Write back to i(4) \\
+	\hline
+	10 & & Unlock i\\
+	\hline
+\end{tabular}
+\caption{Race Condition}
+\label{fig:race_cond_4}
+\end{figure}
+
+In this case, {\bfseries i} correctly gets assigned 4.
+\par\vspace{\baselineskip}
+
+The caveat there is that this slows down parallel execution. Threads have to wait for
+the variable to be unlocked, wasting valuable time. Of course, not all variables
+will need locks, otherwise parallelism would not be any faster than serial code execution.
+\par\vspace{\baselineskip}
+
+Locks can be very useful tools to prevent race conditions, however they should be used carefully.
+Using locks can cause a {\bfseries deadlock}. {\bfseries Deadlocks} can happen when a thread
+{\bfseries t1} holds a lock and is waiting on a piece of data that is locked by another thread
+{\bfseries t2}, while at the same time {\bfseries t2} is waiting on the lock from {\bfseries t1}.
+This causes a loop, and neither lock ever gets released.
+\par\vspace{\baselineskip}
+
+Not all threads are created equal. In reality some threads take up resources much more often than others.
+"{\bfseries Starvation} describes a situation where a thread is unable to gain regular access
+to shared resources and is unable to make progress. This happens when shared resources are
+made unavailable for long periods by 'greedy' threads"\citep{oracleconcurrency}.
+
+\par\vspace{\baselineskip}
+
+In \textit{The Art of Multiprocessor Programming}\citep{artofmulti} it is stated that a good lock algorithm should have:
+
+\begin{itemize}
+	\item {\bfseries Mutual Exclusion}: Critical sections of different threads do not overlap.
+	\item {\bfseries Freedom from Deadlock}: If some thread attempts to acquire the lock, them some thread will succeed in acquiring the lock.
+	\item {\bfseries Freedom from Starvation}: Every thread that attempts to acquire a lock will eventually succeed.
+\end{itemize}
+
+These guidelines are great for safe parallel programming by today's standards, but we can do better.
+We present our implementation of a DBMS without the use of locks, while still maintaining a highly 
+parallelizable data structure core.
+\par\vspace{\baselineskip}
+
+It is important to understand that if we could remove locks, we would get a noticeable increase in performance.
+{\bfseries Non-blocking} algorithms help us solve this problem. We will talk about them in the next section.
+
+\subsection{Non-Blocking Properties}
+% Author: Jason
+
+Now that we have explained the traditional and most popular approaches to parallel programming, we introduce non-blocking algorithms.
+
+\par\vspace{\baselineskip}
+An algorithm that has the non-blocking property ensures the system makes progress. There are 
+two types of non-blocking algorithms. These are defined as:
+\begin{itemize}
+	\item \textit{Lock-free}: Ensures at least one thread makes progress in a finite amount of time.
+	\item \textit{Wait-free}: Ensures all threads make progress in a finite amount of time.
+\end{itemize}
+To take advantage of modern processors, we implement a wait-free data store module.
+After some research, we have discovered that no current DBMS uses wait-free data
+structures, at most they are lock-free. The core of OpenMemDB relies on non-blocking algorithms and data
+structures. Non-blocking properties ensure a massively parallelizable database architecture.
+
+\par\vspace{\baselineskip}
+
+From looking at the definitions, it is clear that wait-freedom grants much more
+powerful guarantees in regards to system progress. It is also easy to conclude that
+it is much harder to implement. In the next few sections we discuss this, other parallel 
+programming algorithm categories, as well as the advantages and disadvantages each of them.
+
+We will talk about:
+
+\begin{itemize}
+	\item Blocking
+	\begin{itemize}
+		\item Starvation Free
+	\end{itemize}
+	\item Obstruction Free
+	\item Lock Free
+	\item Wait Free
+	\begin{itemize}
+		\item Bounded
+		\item Population Oblivious
+	\end{itemize}
+\end{itemize}
+
+\newpage
+
+Before we continue, it's important to define {\bfseries fairness}. {\bfseries Fairness} 
+is done to avoid starvation. It prevents one thread from holding a lock for too long, 
+disallowing other threads to execute their {\bfseries critical section}(the part of 
+their execution that cannot be done concurrently).
+
+\subsubsection{Blocking}
+A blocking algorithm is the most common of the list. Pretty much anything that uses locks is 
+blocking. 
+\par\vspace{\baselineskip}
+
+Figure \ref{code:block_ex} is an example of a blocking algorithm.
+The code simply creates a obtains a lock by calling \inlinecode{lock.lock()}. While it is locked, 
+the thread will do some work with \inlinecode{dowork()} and when it's done it will unlock it via 
+\inlinecode{lock.unlock()}. If for example, another thread wanted to acquire the lock, it would not be 
+able to until \inlinecode{method1()} unlocks it. The thread would just wait until it can acquire the 
+lock, otherwise doing nothing until then.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+\begin{lstlisting}[language=Java]
+Lock lock = new Lock();
+
+public void method1(){
+  lock.lock();
+
+  dowork();
+
+  lock.unlock();
+}
+\end{lstlisting}
+\caption{Blocking Example}
+\label{code:block_ex}
+\end{figure}	
+
+
+{\bfseries Advantage}\newline
+The advantage to this is that it is very easy to code. There is no worry about two threads 
+accessing a piece of data at the same time, it just wouldn't be possible.
+\par\vspace{\baselineskip}
+
+{\bfseries Disadvantage}\newline
+This is the slowest technique of parallel programming. Whenever a lock is needed, one gives up 
+almost all benefits of multiple threads.
+
+\newpage
+\subsubsection{Starvation Free}
+
+\begin{quotation}
+"As long as one thread is in the critical section, then some other thread that wants 
+to enter in the critical section will eventually succeed (even if the thread in the 
+critical section has halted)." \citep{artofmulti}.
+\end{quotation}
+
+An example of a Starvation Free algorithm would be some code with a very strict fairness 
+policy. This allows all threads to be able to execute their critical sections.
+\par\vspace{\baselineskip}
+
+{\bfseries Advantage}\newline
+Allows all threads to have a chance to execute its critical section.
+\par\vspace{\baselineskip}
+
+{\bfseries Disadvantage}\newline
+Not much faster than Blocking, it just guarantees more threads will execute their critical section.
+
+\subsubsection{Obstruction Free}
+
+\begin{quotation}
+''A synchronization technique is obstruction-free if it  guarantees progress for any 
+thread that  eventually executes  in  isolation. Even  though other  threads  may  be  
+in the  midst  of  executing operations,  a  thread  is  considered to execute in 
+isolation as long as the other threads do not take any steps.`` \citep{obsfree}
+\end{quotation}
+
+Obstruction freedom basically states that a threads makes progress only if it doesn't encounter 
+any resistance from any other threads. In simpler terms: when a thread executes in isolation, 
+it finishes in a finite number of steps\citep{artofmulti}.
+
+\par\vspace{\baselineskip}
+{\bfseries Advantage}\newline
+Slightly more guarantees than Blocking.
+\par\vspace{\baselineskip}
+
+{\bfseries Disadvantage}\newline
+Though it is stronger than Blocking, this is an even weaker guarantee than lock freedom.
+
+\par\vspace{\baselineskip}
+In all, Obstruction Free is a nice in-between solution
+
+\subsubsection{Lock Free}
+\begin{quotation}
+	''A method is lock-free if it guarantees that infinitely often some method call finishes 
+	in a finite number of steps``\citep[p. 60]{artofmulti}.
+\end{quotation}
+
+Lock freedom simply says that at all times, at least one thread is making progress. It might 
+take infinitely many steps, but it always makes progress.  
+\par\vspace{\baselineskip}
+
+The chart in Figure~\ref{lockfreechart} shows an easy to follow process to figuring out if an algorithm is lock free.
+
+\begin{figure}
+    \centering
+	\includegraphics[scale=0.63]{graphics/lockfreechart.png}
+    \caption{Is it lock free? Printed with permission. Copyright\copyright 2015 Jeff Preshing}
+    \citep{introlockfree} 
+    \label{lockfreechart}
+\end{figure}
+
+Figure \ref{fig:lockfree_ex} is an example of a lock free algorithm.
+\par\vspace{\baselineskip}
+
+\begin{figure}
+\begin{lstlisting}[language=Java]
+AtomicInteger atomicVar = new AtomicInteger(0);
+
+public void funcLockFree() {
+  int localVar = atomicVar.get();
+
+  while (!atomicVar.compareAndSet(localVar, localVar+1)) {
+    localVar = atomicVar.get();
+  }
+}
+\end{lstlisting} 
+\caption{Lockfree Example} \label{fig:lockfree_ex}
+\citep{concurrencyfreaks}
+\end{figure}
+
+
+In this case, we are incrementing an atomic integer in a loop. This guarantees that 
+some thread is always working. If the compare and swap operation fails on some thread, 
+that just means another thread is making progress and working on their compare and swap.
+\par\vspace{\baselineskip}
+
+Lock free programming isn't easy, there are many problems that can be faced. Each 
+problem requires a unique technique to solve. Some can't even be solved. 
+\par\vspace{\baselineskip}
+
+Figure \ref{techniques} shows a variety of these problems and some proposed solutions.
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.67]{graphics/techniques.png}
+  \caption{Techniques. Printed with permission. Copyright\copyright 2015 Jeff Preshing.\cite{introlockfree}}
+  \label{techniques}
+\end{figure} 
+\newpage
+
+{\bfseries Atomic operations} are ones that happen without the possibility of another thread 
+messing with it. In other words, atomic operations happen in a single step. Atomic operations 
+are immensely helpful in implementing lock-free and wait-free algorithms; since most 
+processors already have built in support for many atomic operations. 
+\par\vspace{\baselineskip}
+
+One set of atomic operations that is particularly useful are {\bfseries read-modify-write (RMW)} 
+operations. These allow us to read and write to a new memory location simultaneously. In general, 
+they help us out because they allow for multiple threads writing to memory at the same time. 
+If a few of these threads happen to collide and want to write to the same location for example, 
+the threads will just execute one at a time. This guarantees that the system as a whole can move 
+forward, making progress (though individual thread starvation is still possible).  
+\par\vspace{\baselineskip}
+
+
+{\bfseries Advantage} \par\vspace{\baselineskip}
+Guarantees system level progress, the system is always doing something useful.
+\par\vspace{\baselineskip}
+
+{\bfseries Disadvantage} 
+\par\vspace{\baselineskip}
+Starvation is still possible. Does not guarantee thread level progress. 
+
+
+\subsubsection{Wait Free}
+\begin{quotation}
+	"A method is wait-free if it guarantees that every call finishes its execution
+	in a finite number of steps"\citep[p. 59]{artofmulti}.
+\end{quotation}
+
+Wait freedom holds the strongest guarantee of system progress. It is so complex that it is 
+even divided into categories itself, the categories are as follows:
+
+\begin{itemize}
+  \item Unbounded
+  \item Bounded
+  \item Population Oblivious
+\end{itemize}
+\newpage
+
+{\bfseries Unbounded Wait Freedom}, or just wait freedom, corresponds to the definition above. There is no bound on how many steps a method can take. 
+
+\par\vspace{\baselineskip}
+
+{\bfseries Bounded Wait Freedom} limits the number of steps a method call can take. "This bound 
+may depend on the number of threads"\citep[p. 59]{artofmulti}. Let's take a look at a 
+piece of code. 
+\par\vspace{\baselineskip}
+
+Figure \ref{boundedwaitfree_ex} shows a bounded wait free algorithm. 
+In this case, we are writing to an array that depends on the number of threads. Notice that this can't be 
+population oblivious because the array depends on the number of threads, a dependency that is not 
+true in population oblivious wait freedom.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+\begin{lstlisting}[language=Java]
+AtomicIntegerArray arr = new AtomicIntegerArray(MAX_THREADS);
+
+public void funcWaitFreeBounded() {
+  for (int i = 0; i < MAX_THREADS ; i++) {
+    arr.set(i, 1);
+  }
+}
+\end{lstlisting}
+\caption{Bounded Wait Free Example.\citep{concurrencyfreaks}} \label{boundedwaitfree_ex}
+\end{figure}
+ 
+
+Finally, in {\bfseries Population Oblivious} wait freedom, "performance does not depend on the 
+number of active threads" \citep[p. 59]{artofmulti}. Let's take a look at a piece of code in
+Figure~\ref{wfpo_ex}.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+\begin{lstlisting}[language=C++]
+atomic<int> counter;
+
+void funcWaitFreeBoundedPopulationOblivious() {
+  counter.fetch_add(1);
+}
+\end{lstlisting} 
+\caption{Wait Free Population Oblivious Example.\cite{concurrencyfreaks}} \label{wfpo_ex}
+\end{figure}
+
+Simply incrementing a variable using the fetch-and-add atomic operation. It can be seen in the code snippet that no 
+matter how many or how little threads we have, the performance isn't any better or any worse. 
+It is simply doing one operation with no complex sub operations.
+\par\vspace{\baselineskip}
+
+As we can see, the definitions the more and more specific and with such specification, it becomes 
+harder to implement. However it also becomes a stronger guarantee of progress. In the case of 
+wait free algorithms, progress is guaranteed at the thread level. Starvation is not possible.
+\par\vspace{\baselineskip}
+
+These algorithms form a hierarchy, a wait free population oblivious algorithm is also wait 
+free bounded, and wait free, and lock free. The following diagram better illustrates 
+this hierarchy.
+\par\vspace{\baselineskip}
+
+As we can see from figure \ref{paralleltypes}, lock free is the most general and provides the least guarantee. Then 
+wait free is next, then wait free bounded, and finally wait free population oblivious.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.42]{graphics/paralleltypes.png}
+  \caption{Parallel guarantee hierarchy. Printed with permission. \newline Copyright\copyright 2015 Pedro Ramalhete.\citep{concurrencyfreaks}}
+  \label{paralleltypes}
+\end{figure}
+
+{\bfseries Advantage}
+\par\vspace{\baselineskip}
+\begin{itemize}
+	\item Guarantees thread level progress, no thread can starve
+	\item It has been proven that every algorithm can be written wait free
+\end{itemize}
+
+
+{\bfseries Disadvantage}
+\par\vspace{\baselineskip}
+\begin{itemize}
+	\item Very hard to implement properly
+	\item Though it has been proven that every algorithm can be written wait free, not all implementations are fast
+\end{itemize}
+
+\newpage
+\subsection{SQL Engine}
+%author Mike McGee
+One of the most important pieces of a Database Management System is the SQL Engine.
+This component is responsible for receiving commands written in the standard query
+language and transforming those commands into an internal representation that can be
+executed by the DBMS. The SQL Engine often consists of three pieces: the tokenizer \and
+parser, code generator/query planner, and the query executor.
+
+\subsubsection{Tokenizer}
+%initial author Neil Moore
+To start the query planning and execution process, we must tokenize the provided query
+from a straight string into a format readable by the parser. This tokenizer is very
+similar to a generic compiler tokenizer though it's job is made considerably easier
+by the importance of spaces in SQL queries/commands regarding token delineation.
+\par\vspace{\baselineskip}
+We encountered issues directly adapting current open-source implementations of a
+SQL query/command tokenizer. As a tokenizer isn't a particuarly difficult piece of
+code to replicate, we chose to implement our own tokenizer so that
+we can optimize for our use cases without worrying about breaking things later on.
+As most of the tokenizers were using C and we are using C++ we can also use C++-specific
+constructs such as iterators and ``for each'' loops which introduce certain safety guarantees
+that simply aren't possible with pointers as used in C.
+
+\subsubsection{Parser}
+%author Mike McGee
+When researching SQL parsers we found that most database management systems use a
+parser generator tool to develop a parser for the query language that they support.
+The purpose of any parser generator is to implement a parser in the programming
+language desired that will accurately parse the context free grammar that it
+was passed in the grammar specification file.
+\par\vspace{\baselineskip}
+The two parser generators that we found were "Lemon" and "YACC". PostgreSQL uses
+"YACC", which stands for "Yet Another Compiler Compiler", while SQLite uses
+"Lemon", which was created to be a simpler alternative to YACC. Both tools will
+generate a Look-Ahead Left-to-right Right-most-derivation (LALR) parser in C when
+given a grammar specification file. Both tools share a base syntax in their grammar files,
+but Lemon varies from YACC in some very important ways and enumerates those in its tutorial document.
+\par\vspace{\baselineskip}
+“It uses a different grammar syntax which is designed to reduce the number of coding
+errors. Lemon also uses a more sophisticated parsing engine that is faster than yacc and
+bison and which is both reentrant and thread-safe. Furthermore, Lemon implements features
+that can be used to eliminate resource leaks, making is suitable for use in long-running
+programs such as graphical user interfaces or embedded controllers.”\cite{lemon_parser}
+\par\vspace{\baselineskip}
+It is because of these benefits, especially thread safety, that we chose to use Lemon
+as our parser generator. The Lemon parser generator is contained in one C code file and
+is used by running the program with the grammar specification file as an argument.
+This terminal command would resemble \textit{lemon gram.y}
+Upon completion Lemon will produce between one and three files.\\ Those files are:
+\begin{itemize}
+	\item \textit{gram.c}: C code implementation of the parser
+	\item \textit{gram.h}: A header file defining an integer ID for each terminal sybmol
+	\item \textit{gram.out}: An information file that describes the states of the
+	generated parser automaton
+\end{itemize}
+Lemon does not generate a complete program, it only creates a few subroutines that
+implement a parser. It is up to the developer to call those subroutines in an appropriate
+way to produce a complete system. To use a Lemon generated parser the
+developer must first create the parser as follows:
+\begin{lstlisting}
+	void *pParser = ParseAlloc( malloc );
+\end{lstlisting}
+This call allocates and initializes a new parser and returns a pointer to it. The
+parameter to the call is the subroutine used to allocate memory. For our purposes it will
+most likely be something Tervel specific.
+
+After the programmer is done using the parser they must free the memory that was allocated
+to the parser using a subroutine of their choice. It is done as follows
+\begin{lstlisting}
+	ParseFree (pParser, free)
+\end{lstlisting}
+where free is the subroutine used to reclaim the memory, again probably Tervel specific for our purposes.
+
+After the parser is allocated, the developer will provide the parser with a sequence of
+tokens to be parsed. This is done by calling:
+\begin{lstlisting}
+	Parse(pParser, hTokenID, sTokenData, pArg);
+\end{lstlisting}
+
+\begin{quotation}
+“The first argument to the Parse() routine is the pointer returned by ParseAlloc(). The
+second argument is a small positive integer that tells the parse the type of the next
+token in the data stream. There is one token type for each terminal symbol in the grammar.
+The gram.h file generated by Lemon contains \#define statements that map symbolic terminal
+symbol names into appropriate integer values. (A value of 0 for the second argument is a
+special flag to the parser to indicate that the end of input has been reached.) The third
+argument is the value of the given token. By default, the type of the third argument is
+integer, but the grammar will usually redefine this type to be some kind of structure.
+Typically the second argument will be a broad category of tokens such as ``identifier'' or
+``number'' and the third argument will be the name of the identifier or the value of the
+number. The Parse() function may have either three or four arguments, depending on the
+grammar. If the grammar specification file request it, the Parse() function will have a
+fourth parameter that can be of any type chosen by the programmer. The parser doesn't do
+anything with this argument except to pass it through to action routines. This is a
+convenient mechanism for passing state information down to the action routines without
+having to use global variables.”\cite{lemon_parser}
+\end{quotation}
+
+
+\subsubsection{Query Planner}
+The query planner is the most challenging and important piece of a typical DBMS as it
+determines how the data in the SQL tables are retrieved which has a huge impact on
+the overall performance of the DBMS. The need for a query planner comes from the
+declarative nature of SQL queries, where the query doesn't tell you how to retrieve the
+data but instead tells you what to retrieve. This is similar to languages such as Prolog where
+a theorem solver is employed to determine how to solve the given problem. A large theorem
+solver is impractical in a system with high-performance, low-latency requirements such as
+a DBMS, so we must generate our own significantly stripped-down version that can handle a
+specific set of query relations extremely fast.
+\par\vspace{\baselineskip}
+Luckily, due to the subset of features we are supporting in this project, we do not need to
+implement a very strong or robust query planner with large amounts of optimizing or scheduling
+capability. This is due to the fact that we have determined that the queries we are supporting
+can be decomposed into a series of predicates that then can be evaluated almost independently.
+These predicates are modeled in a way similar to the tree formed by boolean expressions, as shown
+in Figure~\ref{fig:bool_expr_tree}. This does mean that we do not support SQL joins as that would
+necessitate the implementation of a scheduler and query planner.
+\par\vspace{\baselineskip}
+
+\begin{figure}[H]
+ \centering
+ \textbf{A Boolean Expression as a Binary Tree}
+ \includegraphics{graphics/boolean_expression_tree.png}
+ \caption{A typical boolean expression found within SQL decomposed into a binary tree}
+ \label{fig:bool_expr_tree}
+\end{figure}
+
+Therefore, we deduced that there are three different types of predicates that a given tree of
+boolean expressions can be reduced to. They are as follows:
+\begin{enumerate}
+ \item Value predicates
+ \item Column predicates
+ \item Nested predicates
+\end{enumerate}
+\par\vspace{\baselineskip}
+The value predicate is the core predicate when determining which rows to return to the client.
+It performs a boolean operation on either two literal values or a column and a literal value.
+This is the general predicate that the other two specialize upon and is by far the most important
+in terms of implementing the WHERE clause as defined by the SQL standard.
+\par\vspace{\baselineskip}
+The column predicate is the predicate that is a true specialization of the value predicate that is
+needed to handle an edge case, namely the case when a query is comparing two different columns.
+This comparison requires extra information that cannot be contained within a normal value predicate
+so that a cross-reference between the two tables can be generated. Whether a row satisfies this
+predicate is determined by whether or not the row exists within the cross-reference contained by
+the predicate. This predicate is particularly important as it implements a very foundational
+part of the relational model, the ability to point to a specific row or range of
+rows between tables (i.e. foreign keys).
+\par\vspace{\baselineskip}
+The nested predicate permits a boolean operation to be performed upon the results
+of two predicates that are considered its children in the tree of expressions to be
+evaluated. This predicate has a more limited subset of operators compared to
+the value and column predicates and is limited to the following operators:
+\begin{itemize}
+ \item AND
+ \item OR
+ \item XOR
+\end{itemize}
+This predicate enables complex boolean expressions to be evaluated as part of queries or
+commands which then allows users to perform powerful and specific queries upon the database.
+\par\vspace{\baselineskip}
+As an example of the reduction of a query into a series of predicates, take a
+typical statement that would be supported by OpenMemDB:
+\begin{lstlisting}[language=SQL]
+SELECT A.*
+FROM A,B
+WHERE A.x = B.x AND
+      (B.y = 1 OR B.z = 2);
+\end{lstlisting}
+This query references two tables, A \& B, and features a three-level boolean expression.
+Using the model defined previously, we are left with five predicates:
+\begin{enumerate}
+ \item An overarching nested predicate using the AND operator between its children, 2 and 3, that are defined below.
+ \item A column predicate checking the equality between A.x and B.x.
+ \item Another nested predicate that uses the OR operator between its children, 4 and 5, that are defined below.
+ \item A value predicate checking the equality between B.y and the literal value ``1''.
+ \item A value predicate checking the equality between B.z and the literal value ``2''.
+\end{enumerate}
+This model lends itself particularly well to a top-down evaluation model of this binary tree
+where a particularly large or complex subtree can then be given to a worker thread to be evaluated.
+Special care has be taken when handling truly large trees of predicates so that the entire
+pool of worker threads is not exhausted by a single statement, but that is easily handled
+by a hard limit of workers per statement.
+
+
+\subsection{Related Works}
+Over the last 30 years the there has been tremendous advancements \\ in computing
+hardware. ``Processors are thousands of times faster and memory is thousands of
+times times larger''\cite{stonebraker2007end}. Most technologies have advanced
+along with hardware, however database management systems have struggled to improve
+at a similar rate. This is mostly due to concurrency issues. ``Existing studies show
+that current database engines can spend more than 30\% of time in
+synchronization-related operations (e.g.locking and latching), even when only a
+single client thread is running.`` \cite{soares2015database}
+\par\vspace{\baselineskip}
+There have been several attempts to solve this problem. Some of which will sacrifice
+some data consistency to achieve better performance. Still others
+remain fully ACID compliant and attempt to parallelize individual steps in the
+DBMS or solely use multiple threads when executing query plans. Then there are those
+that attempt to implement some level of lock freedom into their DBMS.
+\par\vspace{\baselineskip}
+\subsubsection{MemSQL and VoltDB}
+MemSQL\footnote{MemSQL can be configured as a Columnstore that stores data on disk}
+and VoltDB are both fully in memory DBMS as is OpenMemDB. This is where the
+similarities end as far as OpenMemDB is concerned. MemSQL and VoltDB on the other
+hand both use distributed systems to achieve performance gains. MemSQL differs from
+VoltDB in a few ways, the most important being it's use of lock free data structures
+for storing data and its storing of pre-compiled commonly used queries\cite{MemSQL}.
+\par\vspace{\baselineskip}
+An sample overview of MemSQL architecture can be seen in Figure~\ref{fig:memsql_architecture}.
+\begin{figure}[H]
+  \centering
+  \textbf{MemSQL Two-tiered Architecture}
+  \includegraphics[scale=.5]{graphics/memsql_dbms_architecture.png}
+  \caption{MemSQL Architecture \copyright MemSQL \cite{MemSQL}}
+  \label{fig:memsql_architecture}
+\end{figure}
+
+VoltDB tries increase its performance by using a architecture they call \\ ``[c]oncurrency through
+scheduling''\cite{VoltDB}. This is the process of using a single-threaded pipeline
+that performs the task it was scheduled. This limits the need for locking during
+transactions by intelligently scheduling the transactions so that locks are not
+necessary.
+\par\vspace{\baselineskip}
+VoltDB's serialized processing architecture can be seen in Figure~\ref{fig:voltdb_serialized}.
+\begin{figure}[H]
+  \centering
+  \textbf{VoltDB Serialized Architecture}
+  \includegraphics[scale=.5]{graphics/voltdb_serialized_architecture.png}
+  \caption{VoltDB Serialized Processing \copyright VoltDB \cite{VoltDB}}
+  \label{fig:voltdb_serialized}
+\end{figure}
+
+OpenMemDB aims to take a different approach, one that is fully wait free. The goal is
+to use powerful wait free data structures that will allow for a massively parallel
+DBMS that can scale with the addition of processors and memory. It is our assumption
+that the achievement of a fully wait free DBMS will achieve the performance gains
+that have been lacking in the DBMS world while eliminating the complexity of
+distributed systems, all while retaining near-full ACID compliance.
+\par\vspace{\baselineskip}
+
+\subsubsection{Other Database Management Systems}
+The two DBMS systems listed above are far from the only ones that exist. They were
+researched more heavily because of their perceived similarities to our project and
+because the documentation for them was thorough. However, there are numerous lesser
+known and less well documented DBMS that are worthy of note:
+
+\begin{itemize}
+  \item Aerospike is an AGPL licensed NoSQL flash-optimized in memory
+  DBMS. Aerospike is an open source project that follows the similar pattern of
+  a distributed shared-nothing architecture that is becoming common among most
+  in-memory DBMS.
+  \begin{quote}
+  ``Aerospike's architecture is derived from its core principles –  NoSQL scalability and
+  flexibility, along with traditional \\ database consistency, reliability and
+  extensibility.'' \cite{aerospike}
+  \end{quote}
+  \par\vspace{\baselineskip}
+  An illustration of Aerospikes architecture can be seen in Figure~\ref{fig:aerospike_architecture}.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale=.25]{graphics/aerospike_dbms_architecture.png}
+    \caption{Aerospike Architecture \copyright 2015 Aerospike, Inc. \cite{aerospike}}
+    \label{fig:aerospike_architecture}
+  \end{figure}
+  \cite{aerospike}
+  \par\vspace{\baselineskip}
+  \item Apache Geode is an Apache licensed distributed in-memory DBMS. Apache Geode is
+  a brand new project and as such has very limited documentation. They claim on there
+  github page to be
+  \begin{quote}
+  "... a data management platform that provides real-time, consistent access to
+  data-intensive applications throughout widely distributed cloud architectures."
+  \cite{aerospike}
+  \end{quote}
+  The specifics of their architecture is not listed.
+  \par\vspace{\baselineskip}
+  \item dashDB is IBM's in-memory data warehouse. Self described as
+  \begin{quote}
+  "a high performance, massively scalable cloud data warehouse service,
+  fully managed by IBM." \cite{dashDB}
+  \end{quote}
+  dashDB comes in a couple different configurations, the one that most resembles
+  our project is the MPP, "Massively Parallel Processing", configuration.
+  MPP operates by allowing the data warehouse to leverage multiple servers
+  in a network cluster to process data simultaneously.
+  \par\vspace{\baselineskip}
+  An example of dashDB's MPP architecture can be seen in Figure~\ref{fig:dashdb_mpp}.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale=.45]{graphics/dashDB_mpp_architecture.png}
+    \caption{Example of dashDB MPP Architecture \copyright 2015 dashDB \cite{dashDB}}
+    \label{fig:dashdb_mpp}
+  \end{figure}
+  \par\vspace{\baselineskip}
+  Each server in this data warehouse utilizes a number of key technologies, including:
+  \begin{itemize}
+    \item Dynamic in-memory processing: Even when a dataset
+    does not fit entirely in memory, dashDB still processes at
+    lightning fast speeds using a series of patented algorithms
+    that enable in-memory acceleration. While every workload
+    is different, dashDB only requires RAM size to be 5 percent
+    of the original pre-load source data size to run at
+in-memory optimized speeds.
+\item Actionable compression: dashDB performs a broad range
+    of operations—including joins and predicate evaluations—
+    directly on compressed data, therefore improving memory
+    and cache bandwidth, and saving CPU costs.
+   \item Parallel vector processing: dashDB is CPU optimized
+   and designed for the latest generation of microprocessors.
+   Both multi-core parallelism and SIMD vector instructions
+nable dashDB to maximize hardware performance.
+   \item Data skipping: BLU enables dashDB to intelligently avoid
+   scanning entire ranges of column data that don’t qualify for
+   analysis, preserving time and resources.
+ \end{itemize}
+
+  dashDB uses a highly parallelized infrastructure optimized for columnar data
+  exchange that is organized as such:
+  \par\vspace{\baselineskip}
+  A example of dasDB's query architecture can be seen in Figure~\ref{fig:dashdb_query}.
+  \begin{figure}
+ 	\centering
+ 	\includegraphics[scale=.45]{graphics/dashDB_query_architecture.png}
+	\caption{Example of dashDB Query Architecture \copyright dashDB \cite{dashDB}}
+ 	\label{fig:dashdb_query} 
+  \end{figure}
+\par\vspace{\baselineskip}
+\item eXtremeDB is the in-memory variant of the McObject family of data management projects.
+  It stores its data entirely in main memory, eliminating the need for disk I/O.
+  eXtremeDB claims to have an "Ultra-small" footprint stating that through
+  streamlining of core database functions they are able to reduce their RAM footprint
+  to around 100KB. They also do not translate the data they store in memory. They
+  store the data exactly how it will be used by the application. "No mapping a C data
+  element to a relational representation"\cite{extremeDB} eXtremeDB claims to fully
+  support ACID properties. It does this by ensuring that operations grouped into
+  transactions will complete together or the database will be rolled back to a
+  pre-transaction state.\cite{extremeDB}
+  \par\vspace{\baselineskip}
+  An illustration of extremeDB's architecture can be seen in Figure~\ref{fig:extremedb_architecture}.
+  \begin{figure}
+	\centering
+	\includegraphics[scale=.5]{graphics/extremeDB_dbms_architecture.jpg}
+	\caption{extremeDB architecture \copyright 2014 McObject LLC \cite{extremeDB}}
+	\label{fig:extremedb_architecture}  
+  \end{figure}
+  \par\vspace{\baselineskip}
+
+  \item GemFire is a distributed, in-memory, shared-nothing, NoSQL key-value store.
+  GemFire is designed for working with operational data needed by real time
+  applications. It is not meant for working on very large quantities. To
+  achieve massive speeds GemFire relies on being primarily, not fully,
+  main memory based. " It uses highly-concurrent main-memory data structures to avoid
+  lock contention and a data distribution
+  layer that avoids redundant message copying, and it uses native serialization and
+  smart buffering to ensure messages move from node to node faster than what
+  traditional messaging would provide."\cite{gemfire}
+  \par\vspace{\baselineskip}
+  An illustration of GemFire's peer architecture can be seen in Figure~\ref{fig:gemfire_peer}.
+  \begin{figure}
+  	\centering
+  	\includegraphics[scale=.5]{graphics/gemfire_peer_architecture.png}
+  	\caption{GemFire peer architecture \newline \copyright GemStone Systems, Inc. 2006 \cite{gemfire}}
+  	\label{fig:gemfire_peer}
+  \end{figure}
+  \par\vspace{\baselineskip}
+
+  \item Hekaton is Microsoft's database engine that is optimized for memory \\ resident
+  OLTP data. Hekaton is fully implemented within SQL Server and can be utilized from
+  within.
+  \begin{quote}
+  ``Hekaton is designed for high levels of concurrency but \\ does not
+  rely on partitioning to achieve this. Any thread can access any row
+  in a table without acquiring latches or locks. The engine uses latchfree
+  (lock-free) data structures to \\ avoid physical interference
+  among threads and a new optimistic, multiversion concurrency
+  control technique to avoid interference among transactions''\cite{hekaton}
+  \end{quote}
+  Hekaton stores it's data in two different formats: a lock-free hash table and a
+  lock free B-tree called a Bw-tree. Data is always accessed with an index lookup.
+  \par\vspace{\baselineskip}
+  Hekaton's Architecture:
+\begin{itemize}
+  \item The Hekaton storage engine manages user data and indexes.\\
+  It provides transactional operations on tables of records, hash
+  and range indexes on the tables, and base mechanisms for storage,
+  checkpointing, recovery and high-availability.
+  \item The Hekaton compiler takes an abstract tree representation of
+  a T-SQL stored procedure, including the queries within it, plus
+  table and index metadata and compiles the procedure into native
+  code designed to execute against tables and indexes managed
+  by the Hekaton storage engine.
+  \item The Hekaton runtime system is a relatively small component
+  that provides integration with SQL Server resources and
+  serves as a common library of additional functionality needed
+  by compiled stored procedures.
+  \item Metadata: Metadata about Hekaton's tables, indexes, etc. is
+  stored in the regular SQL Server catalog. Users view and manage
+  them using exactly the same tools as regular tables and indexes.
+  \item Query optimization: Queries embedded in compiled stored
+  procedures are optimized using the regular SQL Server optimizer.
+  The Hekaton compiler compiles the query plan into native
+  code.
+  \item Query interop: Hekaton provides operators for accessing data
+  in Hekaton tables that can be used in interpreted SQL Server
+  query plans. There is also an operator for inserting, deleting,
+  and updating data in Hekaton tables.
+  \item Transactions: A regular SQL Server transaction can access
+  and update data both in regular tables and Hekaton tables.
+  Commits and aborts are fully coordinated across the two engines.
+  \item High availability: Hekaton is integrated with AlwaysOn,
+  SQL \\ Server’s high availability feature. Hekaton tables in a database
+  fail over in the same way as other tables and are also
+  readable on secondary servers.
+  \item Storage, log: Hekaton logs its updates to the regular SQL
+  Server transaction log. It uses SQL Server file streams for storing \\
+  checkpoints. Hekaton tables are recovered when a database is \\ recovered.
+  \end{itemize} \cite{hekaton}
+
+  \item SAP HANA
+  is short for "High Performance Analytic Appliance" and is an in-memory,
+  column-oriented, relational database management system. SAP HANA employs a
+  massively parallel in-memory architecture to eliminate the I/O bottleneck
+  that slows disk backed database management systems.
+  \par\vspace{\baselineskip}
+  An example of a massively parallel layout can be seen in Figure~\ref{fig:saphana_architecture}
+  \begin{figure}[H]
+	\centering
+	\includegraphics[scale=.5]{graphics/sap_hana_dbms_architecture.png}
+	\caption{SAP HANA Massively Parallel Architecture \copyright 2015 SAP \citep{saphana}}
+	\label{fig:saphana_architecture}	
+  \end{figure}
+  \par\vspace{\baselineskip}
+\end{itemize}
+
+\newpage
+
+\section{Design Summary}
+%% A summary describing the overall architecture should go here. Followed by subsections
+%% for each major piece.
+OpenMemDB is a SQL-compliant database that utilizes advanced multiprocessor techniques and non-blocking
+data structures to offer high scalability and guaranteed high throughput. To accomplish this
+multiple components are necessary to meet the technical requirements of the project. OpenMemDB is 
+comprised of an application connector API, SQL Engine, Data Store, and Work Manager.
+It is necessary for the client to be able to communicate with the database through the connector, 
+dubbed libomdb. On the server since the client is using SQL to provide
+statements to the database a SQL Engine is necessary to correctly and efficently parse
+such statements into a type of representation that the database can then understand and evaluate.
+It is also important that certain statements be distributed in an organized manner. More specifically, 
+the Work Manager will be responsible for distributing the system's workload among its pool of worker threads. 
+The Data Store will be responsible for the efficient storage and retrieval of the data inserted and requested 
+from clients via SQL statements.
+\par\vspace{\baselineskip}
+
+  \subsection{libomdb: The Connection API}
+  With any database management system it is common to provide an easy way to connect
+  to a specific database, and to execute commands that act on that database. The most common
+  way to provide this connectivity is to support either ODBC or JDBC. However, the work
+  required to be an ODBC or JDBC compliant database is considerable, and given that it is
+  not one of the requirements of our project we will not be going down that road. We have
+  decided instead to design our own connection library, which we are calling
+  ``libomdb``. libomdb will provide all of the absolutely necessary components needed to
+  connect to a specific database and to execute all of the supported SQL operations on
+  that database.
+  \par\vspace{\baselineskip}
+  
+  libomdb is broken in to two main operations: connecting to a database, and performing
+  operations on the database that you are connected to. To connect to the database
+  the application developer will call the
+  \inlinecode{connect()} method that is provided by the libomdb API.
+  This method will return a \inlinecode{Connection} object that can
+  then be used to execute queries or commands to the database that was connected to.
+  \par\vspace{\baselineskip}
+  
+  The high-level design of the classes used in libomdb can be seen in Figure~\ref{fig:lib_class}
+  and shows the relationship between them.
+
+  \begin{figure}[H]
+    \centering
+    \textbf{Overall libomdb Class Architecture}
+    \includegraphics[scale=.5]{graphics/libomdb_Class.png}
+    \caption{libomdb Class Diagram}
+    \label{fig:lib_class}
+  \end{figure}
+
+  To connect to a database the application developer must provide the
+  host-name of the server, the port the server is listening on, and the name of the
+  database that is being connected to. These are provided as arguments to the
+  \inlinecode{connect(host-name, port-number, database-name)}
+  method.
+  \par\vspace{\baselineskip}
+  The connection object returned to the application developer after making this method
+  call represents a connection to only the database that was passed in the call. If the
+  application developer needs a connection to another database, they must create a new
+  connection object through a separate
+  \inlinecode{connect()} call.
+  \par\vspace{\baselineskip}
+  Once the connection is established, the returned connection object is then used for all
+  operations on the database. Queries can be made against the database by calling
+  the \inlinecode{executeQuery( query )}
+  method. This will return a \inlinecode{Result} object, which can
+  then be used to access the results of the query. Accessing the results of the query
+  through a \inlinecode{Result} object is simple and can be done by
+  by cycling through the rows in the
+  \inlinecode{Result} and accessing the data at the column that
+  is desired. Contained in the \inlinecode{Result} object is a
+  \inlinecode{ResultMetaData} object than can be used to obtain
+  information about the \inlinecode{Result} that was returned.
+  The \inlinecode{ResultMetaData} object corresponding to the
+  \inlinecode{Result} object is obtained by calling the
+  \inlinecode{getMetaData()} method and contains
+  methods for accessing the number of columns in the
+  \inlinecode{Result} through the
+  \inlinecode{getColumnCount()} method, the
+  label of a specific column through the
+  \inlinecode{getColumnLabel( index )},
+  and the data type of a specific column with the \\
+  \inlinecode{getColumnType( index )} method.
+  \par\vspace{\baselineskip}
+  
+  A sample of how to query for data and cycle through the results is shown in Figure~\ref{code:lib_query_cycle}.
+  \begin{figure}[H]
+  \begin{lstlisting}[language=C++]
+Connection conn = Connection.connect("localhost", 3310, "users");
+
+Result result = conn.executeQuery("SELECT * FROM Employees;");
+
+ResultMetaData metaData = result.getMetaData();
+
+while (result.next()) {
+  // Access data
+  for (int i = 0, j = metaData.getColumnCount(); i < j; ++i) {
+    cout << result.getValue(i);
+  }
+}
+  \end{lstlisting}
+  \label{code:lib_query_cycle}
+  \caption{Querying and cycling through results in libomdb}
+  \end{figure}
+  
+  The high-level sequence diagram of querying data in libomdb is shown in Figure~\ref{fig:lib_query_activity}
+  and details the various steps in communicating to the server and then returning it to the
+  caller.
+  \par\vspace{\baselineskip}
+
+  \begin{figure}[H]
+    \centering
+    \textbf{Sequence Diagram for Querying Data}
+    \includegraphics[scale=.47]{graphics/libomdb_query_activity.png}
+    \caption{Querying Database Sequence Diagram}
+    \label{fig:lib_query_activity}
+  \end{figure}
+
+  An update command can be executed in much the same way as a query. First
+  a connection needs to be established to the desired database using the
+  \inlinecode{Connection.connect()} method. Then the desired non-query
+  command is executed using the \inlinecode{executeCommand( command )} method.
+  A \inlinecode{CommandResult} will be returned from this call,
+  which is a struct that has two fields: a boolean field,
+  \inlinecode{isSuccess}, and an integer field,
+  \inlinecode{numAffected}, which represents the number of rows
+  that were effected by the command.
+  \par\vspace{\baselineskip}
+  An example of executing a command against a database in libomdb would be something similar
+  to Figure~\ref{code:lib_cmd_exec}.
+  \par\vspace{\baselineskip}
+  
+  \begin{figure}[H]
+  \begin{lstlisting}[language=C++]
+Connection conn = Connection.connect("localhost", 3310, "users");
+
+CommandResult result;
+result = conn.executeCommand("UPDATE employees SET pay=pay+1;");
+
+if (result.isSuccess) {
+  cout << "Rows affected: " << result.numAffected;
+}
+  \end{lstlisting}
+  \label{code:lib_cmd_exec}
+  \caption{Code snippet showing how to execute a command using libomdb}
+  \end{figure}
+ 
+  \par\vspace{\baselineskip}
+  The sequence diagram of executing a command with libomdb is shown Figure~\ref{fig:libomdb_command_sequence}.
+  
+  \begin{figure}[H]
+    \centering
+    \textbf{Sequence Diagram for Executing Command}
+    \includegraphics[scale=.49]{graphics/libomdb_command_activity.png}
+    \caption{Executing Command Sequence Diagram}
+    \label{fig:libomdb_command_sequence}
+  \end{figure}
+
+  \par\vspace{\baselineskip}
+
+  \subsubsection{Design}
+  There are two main classes used in the libomdb library:  \\
+  \inlinecode{Connection} and \inlinecode{Result}. The uses of these classes
+  are obvious. \inlinecode{Connection} is used to represent a connection to
+  a specific database and \inlinecode{Result} is used to hold the results of a
+  query against the connected database.
+
+  \par\vspace{\baselineskip}
+  The \inlinecode{Connection} class is made up of two private
+  member fields \inlinecode{m_socket_fd} and
+  \inlinecode{m_metaData}.
+  \inlinecode{m_socket_fd} is the the socket file descriptor that is
+  used to communicate with the server hosting the database.
+  \inlinecode{m_metaData} is the related
+  \inlinecode{ConnectionMetaData} object that contains some
+  information about the connection represented by the
+  \inlinecode{Connection} object. Some of the information contained
+  in this \inlinecode{ConnectionMetaData} object are
+  the name of the database that the \inlinecode{Connection} object
+  is connected to, and whether or not the connection is still active. The
+  \inlinecode{Connection} class also contains three public
+  instance methods and two public static methods. The instance methods are:
+  \begin{itemize}
+    \item \inlinecode{executeCommand( string command ): CommandResult}
+    \item \inlinecode{executeQuery( string query ): Result}
+    \item \inlinecode{getMetaData(): ConnectionMetaData}
+  \end{itemize}
+  The static methods contained in the \inlinecode{Connection} class
+  are:
+  \begin{itemize}
+  	\item \inlinecode{Connection.connect(string hostname, uint16_t port, string db): Connection}
+  	\item \inlinecode{Connection.disconnect(Connection connection)}
+  \end{itemize}
+  As has been seen a number of times the \inlinecode{connect()}
+  static method is used  to establish a connection to a database, and the
+  \inlinecode{disconnect()} method is used to terminate a connection.
+  \inlinecode{executeCommand()} in reality just sends a string of
+  text to across the socket connection represented by the
+  \inlinecode{Connection} object's
+  \inlinecode{m_socket_fd} to the database server where it will be
+  parsed and executed. The \inlinecode{executeQuery()} command
+  does nearly the exact same thing but will receive a different data structure from the
+  database in return.
+  \par\vspace{\baselineskip}
+
+  The \inlinecode{Result} class is made up of two private members:
+  \begin{itemize}
+    \item \inlinecode{m_rows}
+    \item \inlinecode{m_metaData}
+  \end{itemize}
+  \inlinecode{m_rows} is a \inlinecode{vector<ResultRow>}, \inlinecode{ResultRow} is a typedef for
+  a  \\ \inlinecode{vector<DataValue>}, and \inlinecode{DataValue} is a typedef for \inlinecode{boost::variant<>}.
+  So with all typedefs removed \inlinecode{m_rows} is actually a \inlinecode{vector<vector<boost:variant<> > >}.
+
+  \inlinecode{m_metaData} is the
+  \inlinecode{ResultMetaData} object that describes the
+  \inlinecode{Result} object. The contents of the
+  \inlinecode{ResultMetaData} class will be covered later.
+  \par\vspace{\baselineskip}
+  The \inlinecode{Result} class also contains thee instance methods:
+  \begin{itemize}
+    \item \inlinecode{getMetaData(): ResultMetaData}
+    \item \inlinecode{getValue(int index): DataValue}
+    \item \inlinecode{next(): bool}
+  \end{itemize}
+  \inlinecode{getMetaData()} is used to obtain the meta-data
+  information about the \inlinecode{Result}.
+  \inlinecode{getValue( index )} will return the
+  \inlinecode{DataValue} of the column at the specified index.
+  \inlinecode{next()} moves the
+  \inlinecode{Result} forward one row, if there are still rows
+  remaining in the \inlinecode{Result}. If there is not, it does
+  nothing and returns false.
+  \par\vspace{\baselineskip}
+  A detailed description of the methods contained in the \inlinecode{Result} class 
+  can be found in Figure~\ref{fig:result_methods}.
+  \begin{figure}[H]
+    \centering
+    \textbf{Result Class Layout}
+    \includegraphics{graphics/libomdb_result_layout.png}
+    \caption{Result Layout}
+    \label{fig:result_methods}
+  \end{figure}
+  \par\vspace{\baselineskip}
+  A quick overview of the the \inlinecode{ResultMetaData} class is necessary to fully understand 
+  the how the \inlinecode{Result} class is meant to work. The \inlinecode{ResultMetaData} class 
+  contains a private member, \inlinecode{m_data}, of type \inlinecode{std::vector<MetaDataColumn>}.
+  \inlinecode{MetaDataColumn} is a struct that contains two fields:
+  a \inlinecode{string name} and a \inlinecode{SQL_TYPE type}. \inlinecode{name}
+  is the name of the column and \inlinecode{type} is the
+  \inlinecode{SQL_TYPE} of the column, i.e. ''VARCHAR``, ''DATE``, etc.
+  \par\vspace{\baselineskip}
+  The \inlinecode{ResultMetaData} class also has
+  three instance methods available:
+  \begin{itemize}
+    \item \inlinecode{getColumnCount(): uint32_t}
+    \item \inlinecode{getColumnLabel(int index): string}
+    \item \inlinecode{getColumnType(int index): SQL_TYPE}
+  \end{itemize}
+
+  \inlinecode{getColumnCount()} returns the number of
+  columns contained in the \inlinecode{Result}.
+  \inlinecode{getColumnLabel(index)} returns the label of the
+  column at the passed in index, and
+  \inlinecode{getColumnType(index)} returns the type of data that
+  is stored in the column specified by index.
+  \par\vspace{\baselineskip}
+  A detailed description of the methods contained in the \inlinecode{ResultMetaData}
+  class can be found in Figure~\ref{fig:reultmetadata_methods}
+  \begin{figure}[H]
+    \centering
+    \textbf{ResultMetaData Class Layout}
+    \includegraphics[scale=.7]{graphics/libomdb_resultmetadata_layout.png}
+    \caption{ResultMetaData Layout}
+    \label{fig:reultmetadata_methods}
+  \end{figure}
+
+  %% Starting here, talk about the use of boost::variant.
+  %% Reasons for using it, how it is used, how to get value back from it.
+  \newpage
+  \subsection{SQL Engine}
+  The core of any Database Management System(DBMS), particularly one that implements the SQL standard, is the
+  engine that drives the actual parsing, planning, and execution of SQL queries and commands.
+  The module in our DBMS that handles those tasks is the SQL engine and it is specially designed to
+  be thread-safe, performant, and wait-free. Wait-freedom is the core requirement of the project
+  and it supersedes all other requirements, so it is imperative that this module is guaranteed to finish
+  parsing and executing any given SQL query in a finite amount of time. Keeping
+  that requirement in mind, we utilized C++11 features and single-responsibility modeling to
+  ensure that the various threads do not interact in ways that would require synchronization.
+  \par\vspace{\baselineskip}
+  One of those ways is utilizing a feature in the C++ memory model that was introduced in C++11, specifically
+  the \inlinecode{thread_local} storage specifier. That specifier instructs the compiler
+  to create a copy of each variable for each individual thread, and ties that variable's lifetime
+  to the lifetime of the thread. While not used extensively, this feature removes the guesswork
+  of whether a variable is safe to be made \inlinecode{static} or whether a copy
+  would need to be made in each thread's initialization routine via dynamic memory (e.g.
+  \inlinecode{new} or \inlinecode{malloc}). A visualization of the memory layout of the system
+  when using OpenMemDB can be found in Figure~\ref{fig:cpp_mem_model}.
+  \par\vspace{\baselineskip}
+  \begin{figure}[H]
+   \centering
+   % C++ memory model diagram
+    \textbf{C++ Memory Model}
+    \includegraphics{graphics/cpp_memory_model.png}
+    \caption{Diagram of the C++11 memory model as used by OpenMemDB}
+    \label{fig:cpp_mem_model}
+  \end{figure}
+  \par\vspace{\baselineskip}
+  Another decision in the design of the SQL engine that was important to maintaining wait-freedom and
+  thread-safety was the adoption of the Lemon parser engine. Lemon was built to be thread-safe and
+  reentrant without locks, meaning that each thread essentially has its own instance of the parser
+  and is independent of other threads. This cleanly avoids the need for costly, and forbidden
+  in our case, locks and other synchronization primitives. In addition, we have complete control over
+  the grammar from which Lemon generates its parser which gives us opportunity to ensure there
+  is no lack of progress made within the parsing of a query due to a poorly-constructed or ambiguous
+  grammar.
+  \par\vspace{\baselineskip}
+  The above decisions help guarantee wait-freedom within the parsing stage of the SQL engine, but there
+  is still the task of the planning and execution of SQL queries and commands. The strategies employed in
+  planning the execution of these queries has been detailed earlier in this document, so we will not
+  revisit them in detail. As a refresher, we have devised a way to reduce a series of boolean expressions
+  into a tree of predicates that a table's records can then be evaluated against, as can be seen in 
+  Figure~\ref{fig:sqlengine_pred_gen}. In order for a record to be in the result set of a query, it must 
+  satisfy the entire tree of predicates. Due to our reduced scope when implementing the SQL standard, we 
+  can comfortably guarantee that there will always be some form of progress when devising the execution 
+  plan. This is mainly due to the fact that advanced joins and other SQL constructs like nested queries, 
+  that OpenMemDB will not be supporting, require a full-featured solver that may not be able to progress 
+  in a way that can be called wait-free.
+  \par\vspace{\baselineskip}
+  \begin{figure}[H]
+   \centering
+   % SQL Engine generation of predicate tree activity diagram
+   \textbf{Predicate Tree Generation}
+   \includegraphics{graphics/SQLEngine_predicate_gen.png}
+   \caption{Diagram of the process used to generate the tree of predicates
+	    used within the SQL Engine component of OpenMemDB}
+    \label{fig:sqlengine_pred_gen}
+  \end{figure}
+  \par\vspace{\baselineskip}
+  Execution of the query plan is also within the purview of the SQL engine and also must be guaranteed to be
+  wait-free as well as performant. As our use case puts us entirely within memory, we have the necessarily low
+  latencies to feel comfortable in performing full table scans in the most naive case with options to
+  use indices and caches when available or reasonable. This will make us, in theory, faster than our disk-based
+  counterparts such as PostgreSQL or MySQL. This task within the SQL engine is the one that will actually
+  interact with the data store and actually performs operations upon the data stored there. We rely on the Tervel
+  data structures to guarantee us wait-freedom as we access the data, but otherwise we can verify that
+  progress in evaluating the query will be made in such a way to satisfy our wait-freedom requirement.
+  \par\vspace{\baselineskip}
+
+  \subsection{Work Manager}
+  The Work Manager, as the module responsible for distributing the system's workload across the
+  pool of worker threads, wears many small but important hats. It is the entry point of the
+  process and functions as the main thread that spawns all other threads in the system. The Work
+  Manager also is the owner of the various TCP sockets and other system resources that OpenMemDB
+  uses to communicate with clients. Communication between threads is also handled via the
+  Work Manager using Tervel's queue data structure and various C++11 constructs. The need for this
+  jack-of-all-trades module is that many of these tasks cannot be easily split out into
+  worker threads like the SQL Engine can and a couple act as a centralizing force, such as the
+  thread pool management and work distribution. Sharing sockets and connections across thread
+  boundaries also introduces complexity and the need for synchronization between threads which
+  can interfere with our core requirement to be non-blocking and wait-free.
+  \par\vspace{\baselineskip}
+  The specific task of managing network connections between OpenMemDB and its clients is a fairly
+  straightforward one as we don't have complex server-client interactions and relatively tame
+  throughput expectations. \\ Linux in particular exposes a well-documented and mature C interface
+  to setup and use network or UNIX sockets which favors using C-style freestanding functions
+  rather than a more object-oriented approach, at least in the initial setup and initialization
+  of the socket. As such, we only created a class for the connection between the server and client
+  and is suitably named \inlinecode{omdb::Connection}. This class holds
+  information about the client as well as the socket file descriptor that is needed to send
+  or receive data over the socket. Instances of the class are created when the server detects an
+  incoming new connection and they persist until the client disconnects or network conditions
+  prohibit further communication such as the Internet going down.
+  \par\vspace{\baselineskip}
+  The freestanding functions mentioned above abstract away the process of listening to a port
+  and accepting a connection. They are defined as shown in Figure~\ref{code:work_manager_func_def}.
+  \begin{figure}[H]
+  \begin{lstlisting}[language=C++]
+omdb::NetworkStatus omdb::ListenToPort(uint16_t port_id,
+				       uint32_t* socket_fd,
+				       bool dont_block = true)
+
+omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
+					   uint32_t* conn_fd,
+					   sockaddr_storage* conn_addr)
+  \end{lstlisting}
+  \caption{Work Manager network function definitions}
+  \label{code:work_manager_func_def}
+  \end{figure}
+  The \inlinecode{omdb::NetworkStatus} datatype is used to return various
+  possible error conditions and is internally used to classify whether the error is fatal
+  or can be recovered from. Due to our goal of being non-blocking, we utilize various specially-defined
+  functions in the Linux network API such as \inlinecode{accept4} and
+  \inlinecode{setsockopt} to coax Linux into making both non-blocking
+  sockets and non-blocking accepting of connections. This also has the interesting side effect of
+  changing certain error codes' meaning, specifically \inlinecode{EAGAIN} and
+  \inlinecode{EWOULDBLOCK}. Those two codes' meaning is now one of success, or not
+  failing, rather than failure. Our error-handling code reflects that, which makes for some initial
+  confusion if you are not familiar with the rationale behind it.
+  \par\vspace{\baselineskip}
+  As for the Work Manager's task of managing the worker threads that do the actual work, via the
+  SQL Engine, of fulfilling the client's commands or queries, we used a thread pool concept that
+  heavily relies on C++11 features. This thread pool is composed of three parts:
+  \begin{itemize}
+   \item A vector of \inlinecode{std::future<Result>} objects
+   \item A map that relates a job number to a connection, defined as:\\
+	 \inlinecode{std::map<uint32_t, omdb::Connection>}
+   \item A vector of \inlinecode{WorkThreadData} objects
+  \end{itemize}
+  The first part, the vector of \inlinecode{std::future<Result>} objects, is
+  essential to retrieving query results from the worker threads in an asynchronous way. This way
+  we can continue to be non-blocking without needing to wait for a thread to finish which also
+  allows us to be wait-free, our overriding requirement. Forcing the \inlinecode{std::future<Result>}
+  to be non-blocking when checking for a return value is currently clunky as shown in Figure~\ref{code:clunk_future}.
+  \par\vspace{\baselineskip}
+  
+  \begin{figure}[H]
+  \begin{lstlisting}[language=C++]
+[&results] (std::future<Result>& res) -> bool
+{
+  auto time_out = std::chrono::seconds(0);
+  // Typically, wait() blocks the thread,
+  // but if we wait for a time of 0 it returns immediately
+  if(res.valid() &&
+     res.wait_for(time_out) == std::future_status::ready)
+  {
+    results.push_back(res.get());
+    return true;
+  }
+
+  return false;
+};
+  \end{lstlisting}
+  
+  \caption{Example code to poll for a result from a future}
+  \label{code:clunk_future}
+  \end{figure}
+  
+  However, it does function in a way that is suitable for our needs. Thankfully the rest of the thread
+  pool is much smoother.
+  \par\vspace{\baselineskip}
+  The second part, the mapping of a job number to a connection, is needed to get the correct query results
+  to its originating connection and thus the client that requested the data in the first place. While simple,
+  implementing some sort of mapping or relationship similar to this makes a thread pool overly complicated
+  or could lead to putting reference to the connection within the query result object itself, introducing
+  complexity in that way.
+  \par\vspace{\baselineskip}
+  The vector of \inlinecode{WorkThreadData} objects is the mechanism in
+  which the Work Manager sends jobs, the queries or commands that a client sends to OpenMemDB, to the
+  worker threads in the thread pool. The jobs are contained within a \inlinecode{std::packaged_task<Result(int)>}
+  object which is a C++11 construct that can generate the previously mentioned \inlinecode{std::future<Result>}.
+  The generated future object is stored in the afore-mentioned vector and the job is then passed to a selected
+  worker thread to be evaluated. The selection process for where this job is placed is the work load distribution
+  task that the Work Manager is responsible for. To do this accurately, the Work Manager implements
+  uses a heuristic algorithm that estimates the computation needed to fulfill that query or command
+  and then places the job in the thread pool in a way that balances overall system load.
+  \par\vspace{\baselineskip}
+  The heuristic used to guess the complexity of a given query or command is fairly simple as we need to
+  be performant rather than accurate. The primary cost in this heuristic is length of the query/command itself
+  as that is a relatively cheap operation, though some other costs could be the amount of parentheses
+  or the actual classification of the query/command itself (i.e. whether it is a SELECT, INSERT INTO, or DELETE statement).
+  This heuristic will be a source of heavy experimentation and testing as overloading a single core or thread
+  with work can negatively affect the ability of the system to be wait-free as the rest of system is
+  starved for work.
+  \par\vspace{\baselineskip}
+  The UML diagram for the design of the few Work Manager classes is shown in Figure~\ref{fig:work_manager_class}
+  and shows the relationships between the different classes.
+  
+  \begin{figure}[H]
+   \centering
+   % WorkManager class diagram
+   \textbf{WorkManager Module Class Diagram}
+   \includegraphics[scale=.75]{graphics/WorkManager_class.png}
+   \caption{The class diagram of the main WorkManager class within OpenMemDB's Work Manager module}
+   \label{fig:work_manager_class}
+  \end{figure}
+
+  The flow of data from the client to the database and from there to the worker threads
+  is shown in Figure~\ref{fig:work_manager_activity}
+  \begin{figure}[H]
+   \centering
+   % Data flow diagram (client -> wrk_mgr.assign_job)
+   \textbf{Data Flow from Client to SQL Engine}
+   \includegraphics[scale=.8]{graphics/WorkManager_activity.png}
+   \caption{Shows the flow of data from a client to the worker threads within OpenMemDB}
+   \label{fig:work_manager_activity}
+  \end{figure}
+
+\newpage
+  \subsection{Data Store}
+	%author Robert Medina
+{\bfseries Introduction}
+%TODO: Redo this
+\par\vspace{\baselineskip}
+
+\newpage
+\subsubsection{Functions}
+Data Store is made up of multiple functions that takes in multiple arguments in order to reference tables in memory and return the references that point to the memory to the query planner for further modification. Data store primary objective is to allocate memory and assure that this is done using non-blocking techniques. 
+\par\vspace{\baselineskip}
+
+It is important to note that in order to de-allocate memory from the heap it is possible to do so when data store returns the pointers. The reasoning behind this is that data store should not perform any logic operations just as parsing inputs, etc, etc. Data store primary objective is to allocate memory and send references on where that memory can be located, in other words data storage and data retrieval. 
+\par\vspace{\baselineskip}
+The Data Store is made up of multiple functions that create and delete tables and insert, update, delete, or retrieve records within those tables:
+
+\begin{enumerate}
+  \item \inlinecode{createTable} takes in an internal struct that contains the table schema and name and then
+  allocates memory for the table on the heap and creates a relation between the table name and allocated table
+  memory.
+  \item \inlinecode{deleteTable} takes the name of a table and attempts to delete the table from the Data Store
+  instance, effectively equivalent to the DROP TABLE operation in SQL. It also frees the memory used by a deleted
+  table.
+  \item \inlinecode{getColumnIndex} takes a table name and column name and attempts to find that column in the given
+  table, returning the index of the column or a failure code.
+  \item \inlinecode{getTableSchema} takes a table name and returns the schema of that table if it exists.
+  \item \inlinecode{insertRecord} takes a table name and a vector of data that represents a new record and attempts
+  to insert that row into the Data Store, assuming that the data contained satisfies the table's schema.
+  \item \inlinecode{updateRecords} evaluates a predicate tree against a table and attempts to update the rows that
+  are found by the predicate evaluation. This method can run into contention which will be communicated to the caller.
+  \item \inlinecode{deleteRecords} evalutes a predicate tree against a table and attempts to delete the rows that
+  are found by the predicate evaluation.
+  \item \inlinecode{getRecords} evaluates a predicate tree and returns all records that satisfy the predicates, this 
+  operation is equivalent to a SELECT query in SQL.
+\end{enumerate}
+
+%TODO: Come back and review this for accuracy
+\subsubsection{Data Structures}
+Nested vectors are used to represent tables. Each table is stored into a hashmap called lookup{\_}table to refer to
+tables. A pair is used to group up table schema boost variant vector and the data table itself. Nested vectors
+are used since it most is the most efficient way to represent memory. A hashmap is used to refer tables because each
+table contains a unique identifier char array. A hashmap provides instant access table lookup. A pair is used to group
+up the table with its schema. Each table have their own unique schema and it is retrievable from the table lookup hashmap.
+
+\subsubsection{Accessing Data Performance}
+Nested vectors are instant access O(1), if you have the index of the column or row. This makes data retrieval
+linear time O(n). In the case of a full table scan, it is only necessary to find the columns desired, then each other row
+column data can be retrieved by using the column index. If a full table scan with all columns are desired then this is $O(n^2)$. 
+\par\vspace{\baselineskip}
+A pair is fairly easy to retrieve data from since it is only two pointers or objects grouped together in an object. In the case for a hashmap, it provides instant access O(1), until the hashmap becomes more filled up and collisions being to happen. Normally hashmaps become reindex whenever they are around half full but it may be more advantageous to use dynamic hashing. This is something that will be determine based on performance testing on a training data set.
+
+\newpage
+
+
+  \subsection{Logger}
+  %author Neil Moore
+  Comprehensive logging is essential for any database that wants to be ACID, or
+  at the very least persistent in the event of unexpected shutdown. However, we
+  have a unique problem when implementing a logger in that we cannot access the
+  hard disk. This is due to the fact that writing to hard disk is slow enough to
+  impact our wait-freedom within the database, which is something we cannot afford.
+  In order to be both non-blocking and persistent, at least in some rudimentary way,
+  we are going to use a distributed model where queries that manipulate the data
+  stored within a table (such as INSERT INTO, UPDATE, or DELETE) will be immediately
+  sent back out over the network to a helper process.
+  \par\vspace{\baselineskip}
+  Although this doesn't entirely remove the problem, it does move it to an auxiliary
+  program that doesn't have the same stringent requirements. This would allow us to
+  perform disk writes or reads as needed. The recovery from a crash in the main database
+  could be performed in much the same way that the logs were created. We would simply
+  ``playback'' the queries contained within the log and that should lead us to the same
+  state within the tables as it was when the database crashed.
+  \par\vspace{\baselineskip}
+  The diagram in Figure~\ref{fig:logger_interaction} shows the network interaction between
+  the client, database server, and the log server.
+  
+  % this is the interaction diagram between the main database and the logger
+  % should also include the interaction between database and client, just to be complete
+  \begin{figure}[H]
+    \centering
+    \textbf{Client, Database, and Logger Interaction Diagram}
+    \includegraphics{graphics/Logger_interaction.png}
+    \caption{The network interaction model employed by OpenMemDB to implement a
+	     write-ahead-logger(WAL)}
+    \label{fig:logger_interaction}
+  \end{figure}
+
+\newpage
+
+\section{Facilities and Equipment}
+Our primary meeting place as a team was the computer science senior design lab in Harris Engineering
+Center (HEC) 105. Workstations are provided along with collaboration equipment such as
+whiteboards and computers hooked up to TVs. A rack-mounted server was also made available and
+some members of the team were given virtual machines on it to use as development
+platforms.
+\par\vspace{\baselineskip}
+Individual group members were able to use their personal machines as development platforms, though
+eventually all but the most trivial testing had to be moved to the server(s) we had access to
+as their consumer-level hardware could not provide enough raw power to properly benchmark and
+stress-test the system. The hardware used by each member:
+\begin{itemize}
+ \item Thor (Neil Moore's personal machine)
+ \begin{itemize}
+  \item{\makebox[4cm]{CPU:\hfill} AMD FX-8350 (8-core)}
+  \item{\makebox[4cm]{RAM:\hfill} 16 GB DDR3}
+  \item{\makebox[4cm]{Motherboard:\hfill} Asus M5A99X EVO R2.0}
+  \item{\makebox[4cm]{GPU:\hfill} AMD Radeon R9 380}
+  \item{\makebox[4cm]{Primary Hard Disk:\hfill} PNY Optima 240 GB SSD}
+  \item{\makebox[4cm]{Total Storage:\hfill} 3 terabytes}
+  \item{\makebox[4cm]{Operating System:\hfill} Arch Linux}
+ \end{itemize}
+
+ \item Mike McGee's personal machine
+ \begin{itemize}
+  \item{\makebox[4cm]{CPU:\hfill} Intel i7-4790K}
+  \item{\makebox[4cm]{RAM:\hfill} 32 GB DDR3}
+  \item{\makebox[4cm]{Motherboard:\hfill} GIGABYTE G1 Gaming G1.Sniper}
+  \item{\makebox[4cm]{GPU:\hfill} GeForce GTX 970}
+  \item{\makebox[4cm]{Primary Hard Disk:\hfill} Samsung 840 EVO 120GB SSD}
+  \item{\makebox[4cm]{Total Storage:\hfill} 2 terabytes}
+  \item{\makebox[4cm]{Operating System:\hfill} Windows 10 / Arch Linux VM}
+ \end{itemize}
+
+ \item Jason Stavrinaky's personal machine
+ \begin{itemize}
+  \item{\makebox[4cm]{CPU:\hfill} Intel i7-4770K}
+  \item{\makebox[4cm]{RAM:\hfill} 8 GB DDR3}
+  \item{\makebox[4cm]{Motherboard:\hfill} ASUS Z87-A}
+  \item{\makebox[4cm]{GPU:\hfill} GeForce GTX 660 OC}
+  \item{\makebox[4cm]{Primary Hard Disk:\hfill} Seagate 1 terabyte}
+  \item{\makebox[4cm]{Operating System:\hfill} Windows 10 / Arch Linux dual boot}
+ \end{itemize}
+
+ \item Robert Medina's personal machine
+ \begin{itemize}
+  \item{\makebox[4cm]{CPU:\hfill} Intel Duo SU7300}
+  \item{\makebox[4cm]{RAM:\hfill} 4 GB DDR3}
+  \item{\makebox[4cm]{Motherboard:\hfill} ASUS UL50VT}
+  \item{\makebox[4cm]{GPU:\hfill} GeForce G210M}
+  \item{\makebox[4cm]{Primary Hard Disk:\hfill} Seagate 465 GB}
+  \item{\makebox[4cm]{Operating System:\hfill} Windows 7}
+ \end{itemize}
+
+\end{itemize}
+\par\vspace{\baselineskip}
+In addition to the senior design lab, we also had access to the Scalable and Secure Systems lab server
+thanks to Dr. Dechev. This server was the primary test-bed for OpenMemDB as consumer hardware simply
+doesn't have the necessary parallization or memory needed in order to truly test and stress a
+highly-parallelized and memory-intensive database management system. The server we were allowed to
+use had the following hardware characteristics:
+\begin{itemize}
+ \item 64 cores (AMD Operon)
+ \item 312 gigabytes of RAM
+ \item 1 terabyte of hard disk storage
+\end{itemize}
+
+\newpage
+
+\subsection{Consultants, Subcontractors, and Suppliers}
+Throughout the course of designing and developing this database management system we sought the advice
+and knowledge of various people, as none of us are experts or even particularly knowledgeable in
+massively parallel systems. Our primary source of information and advice was Steven Feldman, the
+original developer of Tervel and its maintainer, even past his departure from the University of Central
+Florida to Google. His insight into the internals of Tervel proved invaluable, as did his many
+explanations on the concepts of wait-freedom and how to create a wait-free system.
+\par\vspace{\baselineskip}
+Dr. Dechev also proved a reliable source to consult when either Steven was unavailable or when he
+had particular insight into a problem we were facing.
+%Include stuff about the other guy...
+\newpage
+
+\section{Budget and Financing}
+Thanks to the contributions from our sponsor and the nature of our project, we did not need to expend
+any additional funds outside of normal maintenance each team member performed on their personal
+machines.
+\newpage
+
+\section{System Test Plan}
+In order to verify the accuracy and performance characteristics required of a Database Management System,
+a holistic testing plan is needed. However, specific modules must be tested as well in order to 
+verify that they meet their individual requirements as well. Unfortunately we cannot explicitly test
+for wait-freedom as that in itself is a topic for a doctorate thesis, so that verification must
+be done manually.
+\par\vspace{\baselineskip}
+The testing architecture used is custom-made so as to be able to test specific configurations and 
+execution paths. Valgrind and cachegrind are heavily utilized within this architecture  to verify 
+memory safety and measure cache usage, and test programs were developed to stress test network 
+performance. Test data sets were randomly generated, but the configuration of the tables were
+specially chosen to mirror worst-case and real-world scenarios.
+\par\vspace{\baselineskip}
+These tests will be performed throughout the life of the project on a weekly basis against the current
+development branch in the project's GitHub repository. 
+
+%TODO: Come back and run some of these or drop them
+\subsection{Data Store}
+As the module on which all others rely on to store the actual data, the testing for this
+module must be comprehensive. The tests we performed are:
+\begin{itemize}
+ \item Access speed benchmark (regression test)
+ \item Query evaluation speed benchmark
+ \item Throughput on contested tables
+ \begin{itemize}
+  \item Many readers and writers on a single table
+  \item Effectively a stress-test for Tervel's ability to manage many \\ threads on the same
+	structure.
+ \end{itemize}
+ \item Cache coherency/efficiency benchmark 
+ \item Data consistency/determinism tests
+\end{itemize}
+
+\subsection{Work Manager}
+This module is broad with many moving parts, requiring special attention be paid to the individual
+pieces within it as well as the integration of those pieces. The tests we will implement will be:
+\begin{itemize}
+ \item Microbenchmarks of hotspots
+ \begin{itemize}
+  \item Connection management
+  \item Heuristic performance and job assignment
+ \end{itemize}
+ \item Heuristic accuracy analysis
+ \item Network stress tests
+ \begin{itemize}
+  \item Many connections (short-lived and long-lived)
+  \item Many packets
+  \item Both of the above
+ \end{itemize}
+\end{itemize}
+
+\subsection{SQL Engine}
+This module is relatively straightforward to test in breadth, as it only has a single execution path
+and feature set to implement. This is however the primary piece in OpenMemDB's SQL implementation
+so tests here are important as well. The list of tests we will perform on the SQL Engine module are
+as follows:
+\begin{itemize}
+ \item Tokenizer/parser accuracy test (regression test)
+ \item Parser speed benchmark
+ \item Query planner output analyzer
+ \item Query execution benchmark (regression test)
+\end{itemize}
+
+\subsection{System}
+In addition to the individual modules, the overall system must also be tested in order to verify certain
+properties we are required to have such as wait-freedom. Also, these tests can find issues in the interoperation
+of the various modules within the larger system. The list of tests we will perform on the overall system are
+as follows:
+\begin{itemize}
+ \item Overall system load stress test
+ \begin{itemize}
+  \item Many connections
+  \item Many statements to execute
+  \item Large data set
+  \item Many related tables within data set
+ \end{itemize}
+ \item Accuracy tests, specifically regarding determinism in edge cases
+ \item Contested resources
+ \begin{itemize}
+  \item I/O heavy background threads or processes
+  \item Reduced memory availability
+ \end{itemize}
+ \item Program execution over time
+ \begin{itemize}
+  \item Determine whether the system still perform within specifications after a relatively long time
+ \end{itemize}
+ \item End-to-End latency benchmark
+ \begin{itemize}
+  \item Determine which workloads the database excels at, and find which workload factor increases latency
+	the most
+ \end{itemize}
+\end{itemize}
+
+\newpage
+
+\section{Project Summary \& Conclusion}
+In summary, this project is a relational database that utilizes wait-free principles and
+data structures to better utilize the increasingly parallel hardware of today. This was a 
+difficult task as multiprocessor programming is far more difficult than traditional
+programming. We are confident that we will end up successful when evaluated against the 
+requirements given to us by our sponsor.
+\newpage
+
+\bibliography{final_document}
+\bibliographystyle{acm}
+\newpage
+
+\appendix
+\section{Appendix A}
+We use all copyrighted material under terms of fair use, as our project is an educational and research tool 
+rather than a commercial effort. This is supported by Section 107 of the United States Copyright Act which states:
+\begin{quotation}
+``the fair use of a copyrighted work, including such use by reproduction in copies or phonorecords 
+  or by any other means specified by that section, for purposes such as criticism, comment, news reporting, 
+  teaching (including multiple copies for classroom use), scholarship, or research, is not an infringement 
+  of copyright.''
+\end{quotation}
+\par\vspace{\baselineskip}
+
+
+
+\end{document}
