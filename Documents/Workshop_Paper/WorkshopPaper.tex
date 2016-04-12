@@ -215,7 +215,23 @@ possible.
 Our experiments took place on a 64-core AMD Opteron system with 300 GB of system memory running Ubuntu 14.04 and 
 GCC 4.8.4. Each database was given the same series of operations to perform for each test, with each database 
 connected to locally so as to remove network latency from the test. We explicitly only tested other databases
-with SQL frontends, as our goal was a SQL database.
+with SQL frontends, as our goal was a SQL database. We tested various workloads in order to evaluate 
+the databases' ability to interleave writes and reads at the same time as well as particularly write-heavy 
+loads. Each test was run with 1, 2, 4, 8, 16, 32, and 64 cores available to the database which maximizes the amount of hardware processors
+available to the OS but does not exceed it. 
+
+%TODO: Put images in here
+\begin{figure}
+  \caption{500,000 writes on the selected databases}
+\end{figure}
+
+\begin{figure}
+  \caption{500,000 reads on the selected databases}
+\end{figure}
+
+\begin{figure}
+  \caption{500,000 mixed reads and writes on the selected databases}
+\end{figure}
 
 \section{Conclusions}
 PENDING
