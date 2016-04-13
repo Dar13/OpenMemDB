@@ -281,7 +281,7 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
                 
                 test_data.push_back(insert_into);
 
-                year++;
+                year;
             }
             break;
         }
