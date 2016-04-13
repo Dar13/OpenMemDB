@@ -154,7 +154,7 @@ public class Sample {
 
         long totalTime = System.nanoTime() - starTime;
 
-        System.out.println(testName+" running time: "+totalTime);
+        System.out.println(testName+" running time (Micro): "+totalTime/1000);
 
     } // End of main
 }
