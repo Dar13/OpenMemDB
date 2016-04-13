@@ -36,15 +36,20 @@ public class Sample {
     public static void main(String[] args) throws ClassNotFoundException, SQLException, InterruptedException {
         Class.forName(Constants.dbClassName);
 
+        if (args.length < 3) {
+            System.out.println("Please provide arguments\n<num threads> <num operations> <path to sql_statement file>");
+            return;
+        }
         int numThreads = Integer.valueOf(args[0]);
         long numOps = Long.valueOf(args[1]);
+        String path = args[2];
 
         TestType testType = null;
 
         List<String> allCommands = null;
         try {
             // TODO: Change file path to command line arg
-            allCommands = Files.readAllLines(Paths.get("/home/mike/Development/OpenMemDB/database/tests/sql_statements.omdbt"));
+            allCommands = Files.readAllLines(Paths.get(path));
         } catch (IOException e) {
             e.printStackTrace();
         }
