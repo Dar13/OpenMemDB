@@ -207,11 +207,11 @@ void DataStoreTest::selectTest(std::vector<std::string> select_statements, void 
         if(parse_result.status == ResultStatus::SUCCESS)
         {
             printf("we did it\n");
-    //         // auto result = WorkThread::ExecuteStatement(parse_result.result, data);
-    //         // if(result-> status == ResultStatus::SUCCESS) 
-    //         // {
-    //         //     printf("reddit\n");
-    //         // }
+            auto result = WorkThread::ExecuteStatement(parse_result.result, data);
+            if(result.status == ResultStatus::SUCCESS) 
+            {
+                printf("reddit\n");
+            }
         }
     }
 
@@ -311,7 +311,8 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
 
             for (int i = 0; i < TestConstants::MaxSelects; ++i)
             {
-                std::string select_from = "SELECT TestT0.B FROM TestT0 WHERE TestT0.B==" + std::to_string(i) + ";";
+                // std::string select_from = "SELECT TestT0.B FROM TestT0 WHERE TestT0.B==" + std::to_string(i) + ";";
+                std::string select_from = "SELECT TestT0.B FROM TestT0;";
                 select_data.push_back(select_from);
             }
 
