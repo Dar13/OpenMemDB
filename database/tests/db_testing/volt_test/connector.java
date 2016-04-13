@@ -8,21 +8,45 @@ import org.voltdb.client.*;
 
 public class connector
 {
-    private String server;
-    private org.voltdb.client.Client db;
-
-    public connector(String server)
+    private class server
     {
-        this.server = server;
+        String name;
+        int port;
     }
 
-    //establish a connection to the server
+    private String host;
+    private server[] nodes;
+    private org.voltdb.client.Client db;
+
+    public connector(String host)
+    {
+        this.host = host;
+    }
+
+    //generate a list of client connections to connect to the cluster host
+    public void generateServers(int size)
+    {
+        nodes = new server[size];
+        for(int i = 0; i < size; i++)
+        {
+            nodes[i].name = "v"+Integer.toString(i);
+            nodes[i].port = 12345+i;
+        }
+    }
+
+    //establish a connection to the cluster host
     public void init()
     {
         try {
 
+            //initalize voltdb client and server list
             db = ClientFactory.createClient();
-            db.createConnection(server);
+            generateServers(64);
+
+            //connect nodes to host
+            for(int i = 0; i < nodes.length; i++)
+                db.createConnection(nodes[i].name, nodes[i].port);
+
         } catch(Exception e)
         {
             System.out.println("Could not create connection to voltdb");
