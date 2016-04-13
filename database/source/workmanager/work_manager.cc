@@ -480,7 +480,7 @@ bool WorkManager::SendResult(omdb::Connection& conn, const JointResult& result)
 void WorkManager::Abort()
 {
     // Perform emergency clean-up
-    close(m_server_socket_fd);
+    //close(m_server_socket_fd);
 
     // TODO: Others?
 }

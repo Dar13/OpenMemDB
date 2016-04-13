@@ -199,6 +199,11 @@ void DataStoreTest::selectTest(std::vector<std::string> select_statements, void 
     tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);    
     DataStore *data = grab->data;
 
+    std::unique_lock<std::mutex> locker(mu);
+
+    cond.wait(locker);
+    locker.unlock();
+
     for(auto i = select_statements.begin(); i != select_statements.end(); i++)
     {
         std::cout << *i << std::endl;
@@ -207,6 +212,7 @@ void DataStoreTest::selectTest(std::vector<std::string> select_statements, void 
         if(parse_result.status == ResultStatus::SUCCESS)
         {
             printf("we did it\n");
+
             auto result = WorkThread::ExecuteStatement(parse_result.result, data);
             if(result.status == ResultStatus::SUCCESS) 
             {
@@ -427,6 +433,7 @@ TestResult DataStoreTest::test()
             {
                 v_t.at(i).join();
             }
+
             auto time_end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
 
@@ -437,13 +444,34 @@ TestResult DataStoreTest::test()
         }
         case MODE_SELECT:
         {
-            tervel::ThreadContext* old_context2 = loadRows(test_data, statements, (void *) &share);
+            std::vector<std::thread> v_t;
 
-            std::thread t(selectTest, select_data, (void*) &share);
+            tervel::ThreadContext* old_context = loadRows(test_data, statements, (void *) &share);
 
-            t.join();
-            // delete old_context1, old_context2;
+            auto time_start = std::chrono::high_resolution_clock::now();
 
+            for(int i = 0; i < threadCount; i++)
+            {
+
+                i2tuple tuple = calculateArrayCut(threadCount, i); 
+
+                std::vector<std::string> cut(&select_data[std::get<0>(tuple)], &select_data[std::get<1>(tuple)]);
+                std::thread t(selectTest, cut, (void *) &share);
+
+                v_t.push_back(std::move(t));
+            }
+
+            cond.notify_all();
+
+            for(int i = 0; i < threadCount; i++)
+            {
+                v_t.at(i).join();
+            }
+
+            auto time_end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+            
+            delete old_context;
             break;
         }
     }

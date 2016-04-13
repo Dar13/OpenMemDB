@@ -197,44 +197,54 @@ JointResult WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
                 size_t record_size = record.size();
 
                 // Iterate over the record and grab the necessary metadata
-                for(uint32_t itr = 0; itr < record_size; itr++)
+                uint32_t output_col_itr = 0;
+                for(auto source_column : query->source_columns)
                 {
                     ResultColumn column;
-                    TervelData& data = record[itr];
+                    TervelData& data = record[source_column.column_idx];
                     column.type = static_cast<uint16_t>(data.data.type);
 
-                    std::string& col_name = query->output_columns[itr];
-                    if((col_name.length() + 1) < sizeof(column.name))
+                    std::string& col_name = query->output_columns[output_col_itr];
+                    if((col_name.length() + 1) <= sizeof(column.name))
                     {
                         // Assumes chars are 1 byte
                         strcpy(column.name, col_name.c_str());
                     }
                     else
                     {
-                        // Invalid length output column
-                        // Probably should be caught before this
-                        // Truncate?
-                        // TODO: Handle this
-                        assert(false);
+                        // Truncate
+                        strncpy(column.name, col_name.c_str(), COL_NAME_LEN - 1);
+                        column.name[COL_NAME_LEN - 1] = '\0';
+
+                        // TODO: Warn on truncation?
                     }
 
+                    output_col_itr++;
                     query_data.metadata.push_back(column);
                 }
 
-                // TODO: Enforce this being a move rather than a copy
-                query_data.data = statement_result.result;
-                for(auto r_data : query_data.data)
+                // Filter the results based on the source columns selected
+                auto query_filter = [&query_data, &query] (RecordData& record)
                 {
-                    for(auto t_data : r_data)
+                    RecordData filtered_record(query->source_columns.size(), {0});
+                    int itr = 0;
+                    for(auto source : query->source_columns)
                     {
-                        printf("%lu, ", t_data.value);
+                        filtered_record[itr] = record[source.column_idx];
+                        ++itr;
                     }
-                    printf("\n");
-                }
-                
+
+                    query_data.data.push_back(filtered_record);
+                };
+
+                std::for_each(statement_result.result.begin(),
+                        statement_result.result.end(),
+                        query_filter);
+
                 return JointResult(QueryResult(ResultStatus::SUCCESS, query_data));
             }
             break;
+
         // Invalid or unknown statement, don't attempt to execute
         default:
             // Might as well give them an error code and continue to run
@@ -312,11 +322,6 @@ MultiRecordResult WorkThread::ExecuteQuery(ParsedStatement* statement, DataStore
     }
 
     SelectQuery* query = reinterpret_cast<SelectQuery*>(statement);
-
-    for(auto table : query->tables)
-    {
-        printf("Table: %s\n", table.c_str());
-    }
 
     return store->getRecords(query->predicate, query->tables.front());
 }

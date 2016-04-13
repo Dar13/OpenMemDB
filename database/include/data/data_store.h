@@ -29,9 +29,6 @@
 #include <tervel/containers/wf/vector/vector.hpp>
 #include <tervel/containers/wf/hash-map/wf_hash_map.h>
 
-// Boost includes
-#include <boost/variant.hpp>
-
 // Project includes
 #include "data/types.h"
 #include "data/table.h"
