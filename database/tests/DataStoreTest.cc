@@ -287,8 +287,6 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
                 std::to_string(i) + ");";
                 
                 test_data.push_back(insert_into);
-
-                year;
             }
             break;
         }
@@ -311,8 +309,6 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
                 std::to_string(i) + ");";
 
                 test_data.push_back(insert_into);
-
-                year++;
             }
 
             for (int i = 0; i < TestConstants::MaxSelects; ++i)
@@ -545,7 +541,6 @@ void DataStoreTest::parseComplexity(int complexity)
 DataStoreTest& DataStoreTest::setThreadCount(int count)
 {
     threadCount = count;
-    printf("%d\n", threadCount);
     share.tervel_test = new tervel::Tervel(2*threadCount);
     return *this;
 }
