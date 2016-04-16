@@ -2,7 +2,7 @@
 # Admin port should be a default value
 
 admin=7001
-~/workspace/voltdb/bin/voltadmin shutdown -H localhost:$admin
+# ~/workspace/voltdb/bin/voltadmin shutdown -H localhost:$admin
 rm -r ~/workspace/OpenMemDB/database/tests/db_testing/volt_test/voltdbroot
 rm -r ~/workspace/OpenMemDB/database/tests/db_testing/volt_test/log
 

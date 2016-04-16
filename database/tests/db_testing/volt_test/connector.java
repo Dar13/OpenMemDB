@@ -111,4 +111,18 @@ public class connector
             e.printStackTrace();
         }
     }
+
+    public void shutdown()
+    {
+        try
+        {
+            db.callProcedure("@Shutdown");
+        } catch(org.voltdb.client.ProcCallException e)
+        {
+            System.out.println("Database shutting down");
+        } catch(Exception e)
+        {
+            e.printStackTrace():
+        }
+    }
 }

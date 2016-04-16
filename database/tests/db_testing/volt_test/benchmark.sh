@@ -11,8 +11,8 @@ for((i=0; i < cap; i++))
 do
     var=$((2**i))
     ./start.sh $var
-    sleep 30
-    make clean && make && java main -cp .:/home/heyblackduck/workspace/voltdb/voltdb/* main $var
+    sleep 10
+    #make clean && make && java -classpath ".:/home/heyblackduck/workspace/voltdb/voltdb/*" main 2
     ./stop.sh
-    sleep 30
+    sleep 5
 done

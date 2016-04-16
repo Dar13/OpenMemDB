@@ -8,6 +8,7 @@ public class main
     {
 
         long time = 0;
+        System.out.println(args[0]);
         int size = Integer.parseInt(args[0]);
         String filename = "output.txt";
         ArrayList<String> sqlStmt = readFile(filename);
@@ -28,6 +29,7 @@ public class main
         writeFile(time, size);
 
         link.close();
+        link.shutdown();
     }
 
     private static ArrayList<String> readFile(String filename)
@@ -56,7 +58,7 @@ public class main
         try
         {
             PrintWriter writer = new PrintWriter("execTime.txt", "UTF-8");
-            writer.println(output + " " + node);
+            writer.println("Execution time: " + time + '\t' + "Cluster Nodes: " + node);
             writer.close();
         } catch(Exception e)
         {
