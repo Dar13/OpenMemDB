@@ -6,9 +6,9 @@ public class main
 {
     public static void main(String[] args)
     {
+
         long time = 0;
-        int threadCount;
-        int size = 2;
+        int size = Integer.parseInt(args[0]);
         String filename = "output.txt";
         ArrayList<String> sqlStmt = readFile(filename);
         connector link = new connector();
@@ -25,12 +25,7 @@ public class main
         //run single batch sql instructions
         String batch = arrayToString(sqlStmt);
         time = link.run(batch);
-        
-        //run threaded sq; instructions
-        //threadCount = 1;
-        //time = link.runThread(sqlStmt, threadCount);
-        //System.out.println("Execution Time: " + time);
-        //System.out.println("Threads : " + threadCount);
+        writeFile(time, size);
 
         link.close();
     }
@@ -53,6 +48,19 @@ public class main
         {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    private static void writeFile(long time, int node)
+    {
+        try
+        {
+            PrintWriter writer = new PrintWriter("execTime.txt", "UTF-8");
+            writer.println(output + " " + node);
+            writer.close();
+        } catch(Exception e)
+        {
+            e.printStackTrace();
         }
     }
 
