@@ -15,11 +15,11 @@ size=2
 if test -f "deployment.xml"; then rm -f deployment.xml; fi
 
 #Default deployment file
-printf "<?xml version="1.0"?>
+printf "<?xml version=\"1.0\"?>
     <deployment>
-        <cluster hostcount="%s" sitesperhost="%s" kfactor="0" />
-        <httpd enabled="true">
-            <jsonapi enabled="true" />
+        <cluster hostcount=\"%s\" sitesperhost=\"%s\" kfactor=\"0\" />
+        <httpd enabled=\"true\">
+            <jsonapi enabled=\"true\" />
         </httpd>
     </deployment>\n" $size $size >> deployment.xml
 
@@ -47,22 +47,22 @@ offset=1000
 #Create a deattached screen
 screen -d -m -S nodes
 
-# Create multiple SSH connections and connect them to host
+# Create multiple screen windows and run multiple voltdb instances for cluster
 for ((j=1; j <= $size; j++))
 do
-    # Update ports
-    http=$http+$offset
-    admin=$admin+$offset
-    client=$client+$offset
-    internal=$internal+$offset
-    jmx=$jmx+$offset
-    zookeeper=$zookeeper+$offset
-    
     #Create multiple terminals and run commands
-    screen -S nodes -X screen $d
-    screen -S nodes -p $j -X stuff "commands"
+    screen -S nodes -X screen $j
+    screen -t $j 2 bash -c 'ls ; $j' #VOLTDB_OPTS="-Dvolt.rmi.agent.port=$jmx" ~/voltdb/bin/voltdb create -H localhost:$host --internal=$internal --http=$http --admin=$admin --client=$client --zookeeper=$zookeeper --deployment=deployment.xml
 
-    #VOLTDB_OPTS="-Dvolt.rmi.agent.port=$jmx" ~/voltdb/bin/voltdb create -H localhost:$host --internal=$internal --http=$http --admin=$admin --client=$client --zookeeper=$zookeeper --deployment=deployment.xml
+
+    # Update ports
+    http=$((http+offset))
+    admin=$((admin+offset))
+    client=$((client+offset))
+    internal=$((internal+offset))
+    jmx=$((jmx+offset))
+    zookeeper=$((zookeeper+offset))
+
 done
 
 # Host is running and each node should have connected to host

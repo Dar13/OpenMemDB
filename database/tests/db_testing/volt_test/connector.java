@@ -23,14 +23,18 @@ public class connector
         this.host = host;
     }
 
+    //TODO: Test if node client port is what Client.createConnection method requires
     //generate a list of client connections to connect to the cluster host
     public void generateServers(int size)
     {
+        int hostPort = 7010;
+        int offset = 1000;
+
         nodes = new server[size];
         for(int i = 0; i < size; i++)
         {
-            nodes[i].name = "v"+Integer.toString(i);
-            nodes[i].port = 12345+i;
+            nodes[i].name = "localhost";
+            nodes[i].port = hostPort+i*offset;
         }
     }
 
@@ -39,6 +43,7 @@ public class connector
     {
         try {
 
+            //TODO: Make 64 not hardcoded but dynammic
             //initalize voltdb client and server list
             db = ClientFactory.createClient();
             generateServers(64);
