@@ -1,5 +1,8 @@
 # Start up script to initalize database
 
+# How to run script
+# ./"scriptname" "number of nodes"
+
 # In order to start a cluster, for each node in the cluster they must be started as a seperate process with their own unique ports!!!
 # This script creates multiple directories for each node in the cluster with the exact same deployment file. This is useful when nodes crash and their logs are saved into their own directory
 # The script works as so
@@ -8,7 +11,7 @@
 # 3.) The script should end with "Server initalization complete"
 
 # TODO: Make size adjustable for benchmarking script [1, 2, 4, 8, ...] arguments, etc
-size=2
+size=$1
 
 if test -f "deployment.xml"; then rm -f deployment.xml; fi
 
@@ -42,7 +45,7 @@ offset=1000
 screen -AdmS nodes -t 0 bash
 
 # Create multiple SSH connections and connect them to host
-for ((j=1; j <= $size; j++))
+for((j=1; j <= $size; j++))
 do
     screen -S nodes -X screen -t $j
     screen -S nodes -p $j -X stuff "VOLTDB_OPTS="-Dvolt.rmi.agent.port=$jmx" ~/workspace/voltdb/bin/voltdb create -H localhost:$host --internal=$internal --http=$http --admin=$admin --client=$client --zookeeper=$zookeeper --deployment=deployment.xml \\r"

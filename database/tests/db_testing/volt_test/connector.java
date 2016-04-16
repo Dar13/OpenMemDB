@@ -69,7 +69,7 @@ public class connector
     }
 
     //perform concurrent writes to the database, assuming the connection has been made
-    public long insert(int threadCount)
+    public long runThread(String batch, int threadCount)
     {
         thread[] list = new thread[threadCount];
 
@@ -77,7 +77,7 @@ public class connector
             //spawn threads
             for(int i = 0; i < threadCount; i++)
             {
-                thread spawn = new thread(db, i);
+                thread spawn = new thread(db, String batch);
                 list[i] = spawn;
             }
 
@@ -97,11 +97,6 @@ public class connector
             e.printStackTrace();
             return -1; 
         }
-    }
-
-    public void print(ClientResponse response)
-    {
-
     }
 
     public void close()
