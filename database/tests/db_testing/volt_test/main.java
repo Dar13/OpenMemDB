@@ -3,16 +3,18 @@ public class main
 {
     public static void main(String[] args)
     {
-        String host = "localhost";
         //long time;
         //int threadCount;
 
-        connector link = new connector(host);
+        int size = 2;
+        connector link = new connector();
 
         //initalize client using host name and generate multiple node connections and connect them to host
         //default node size is 64
-        link.init();
+        link.init(size);
         
+        link.run();
+
         //threadCount = 4;
         //time = link.insert(threadCount);
         //System.out.println("Execution Time: " + time);
@@ -20,5 +22,10 @@ public class main
     
         //link.print();
         link.close();
+    }
+
+    public String readFile()
+    {
+
     }
 }

@@ -7,19 +7,17 @@
 # 2.) Start up each node and use localhost as their host using the host unique port
 # 3.) The script should end with "Server initalization complete"
 
-# Create multiple node directories with deployment.xml file included
-
 # TODO: Make size adjustable for benchmarking script [1, 2, 4, 8, ...] arguments, etc
 size=2
 
 if test -f "deployment.xml"; then rm -f deployment.xml; fi
 
 #Default deployment file
-printf "<?xml version="1.0"?>
+printf "<?xml version=\"1.0\"?>
     <deployment>
-        <cluster hostcount="%s" sitesperhost="%s" kfactor="0" />
-        <httpd enabled="true">
-            <jsonapi enabled="true" />
+        <cluster hostcount=\"%s\" sitesperhost=\"%s\" kfactor=\"0\" />
+        <httpd enabled=\"true\">
+            <jsonapi enabled=\"true\" />
         </httpd>
     </deployment>\n" $size $size >> deployment.xml
 
@@ -40,30 +38,22 @@ zookeeper=7030
 
 offset=1000
 
-# TODO: Command needed to be executed during ssh connection to server, each connection need their own voltdb database
-# Create host voltdb process
-#VOLTDB_OPTS="-Dvolt.rmi.agent.port=$jmx" ~/voltdb/bin/voltdb create -H localhost:$host --internal=$internal --http=$http --admin=$admin --client=$client --zookeeper=$zookeeper --deployment=deployment.xml
-
 #Create a deattached screen
-screen -d -m -S nodes
+screen -AdmS nodes -t 0 bash
 
 # Create multiple SSH connections and connect them to host
 for ((j=1; j <= $size; j++))
 do
+    screen -S nodes -X screen -t $j
+    screen -S nodes -p $j -X stuff "VOLTDB_OPTS="-Dvolt.rmi.agent.port=$jmx" ~/workspace/voltdb/bin/voltdb create -H localhost:$host --internal=$internal --http=$http --admin=$admin --client=$client --zookeeper=$zookeeper --deployment=deployment.xml \\r"
+
     # Update ports
-    http=$http+$offset
-    admin=$admin+$offset
-    client=$client+$offset
-    internal=$internal+$offset
-    jmx=$jmx+$offset
-    zookeeper=$zookeeper+$offset
-    
-    #Create multiple terminals and run commands
-    screen -S nodes -X screen $d
-    screen -S nodes -p $j -X stuff "commands"
-
-    #VOLTDB_OPTS="-Dvolt.rmi.agent.port=$jmx" ~/voltdb/bin/voltdb create -H localhost:$host --internal=$internal --http=$http --admin=$admin --client=$client --zookeeper=$zookeeper --deployment=deployment.xml
+    http=$((http+offset))
+    admin=$((admin+offset))
+    client=$((client+offset))
+    internal=$((internal+offset))
+    jmx=$((jmx+offset))
+    zookeeper=$((zookeeper+offset))
 done
-
-# Host is running and each node should have connected to host
+echo "Cluster is done!\n"
 
