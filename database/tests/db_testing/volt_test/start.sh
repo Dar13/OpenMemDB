@@ -1,5 +1,8 @@
 # Start up script to initalize database
 
+# How to run script
+# ./"scriptname" "number of nodes"
+
 # In order to start a cluster, for each node in the cluster they must be started as a seperate process with their own unique ports!!!
 # This script creates multiple directories for each node in the cluster with the exact same deployment file. This is useful when nodes crash and their logs are saved into their own directory
 # The script works as so
@@ -7,10 +10,8 @@
 # 2.) Start up each node and use localhost as their host using the host unique port
 # 3.) The script should end with "Server initalization complete"
 
-# Create multiple node directories with deployment.xml file included
-
 # TODO: Make size adjustable for benchmarking script [1, 2, 4, 8, ...] arguments, etc
-size=2
+size=$1
 
 if test -f "deployment.xml"; then rm -f deployment.xml; fi
 
@@ -40,20 +41,14 @@ zookeeper=7030
 
 offset=1000
 
-# TODO: Command needed to be executed during ssh connection to server, each connection need their own voltdb database
-# Create host voltdb process
-#VOLTDB_OPTS="-Dvolt.rmi.agent.port=$jmx" ~/voltdb/bin/voltdb create -H localhost:$host --internal=$internal --http=$http --admin=$admin --client=$client --zookeeper=$zookeeper --deployment=deployment.xml
-
 #Create a deattached screen
-screen -d -m -S nodes
+screen -AdmS nodes -t 0 bash
 
-# Create multiple screen windows and run multiple voltdb instances for cluster
-for ((j=1; j <= $size; j++))
+# Create multiple SSH connections and connect them to host
+for((j=1; j <= $size; j++))
 do
-    #Create multiple terminals and run commands
-    screen -S nodes -X screen $j
-    screen -t $j 2 bash -c 'ls ; $j' #VOLTDB_OPTS="-Dvolt.rmi.agent.port=$jmx" ~/voltdb/bin/voltdb create -H localhost:$host --internal=$internal --http=$http --admin=$admin --client=$client --zookeeper=$zookeeper --deployment=deployment.xml
-
+    screen -S nodes -X screen -t $j
+    screen -S nodes -p $j -X stuff "VOLTDB_OPTS="-Dvolt.rmi.agent.port=$jmx" ~/workspace/voltdb/bin/voltdb create -H localhost:$host --internal=$internal --http=$http --admin=$admin --client=$client --zookeeper=$zookeeper --deployment=deployment.xml \\r"
 
     # Update ports
     http=$((http+offset))
@@ -64,6 +59,5 @@ do
     zookeeper=$((zookeeper+offset))
 
 done
-
-# Host is running and each node should have connected to host
+echo "Cluster is done!\n"
 

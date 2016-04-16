@@ -5,70 +5,82 @@
 
 import org.voltdb.*;
 import org.voltdb.client.*;
+import java.util.ArrayList;
 
 public class connector
 {
-    private class server
-    {
-        String name;
-        int port;
-    }
-
-    private String host;
-    private server[] nodes;
+    private String[] serverName;
+    private int[] serverPort;
     private org.voltdb.client.Client db;
 
-    public connector(String host)
-    {
-        this.host = host;
-    }
-
-    //TODO: Test if node client port is what Client.createConnection method requires
     //generate a list of client connections to connect to the cluster host
     public void generateServers(int size)
     {
-        int hostPort = 7010;
+        //admin port necessary to connect to servers and offset is port increment
+        int adminPort = 7001;
         int offset = 1000;
 
-        nodes = new server[size];
+        serverName = new String[size];
+        serverPort = new int[size];
         for(int i = 0; i < size; i++)
         {
-            nodes[i].name = "localhost";
-            nodes[i].port = hostPort+i*offset;
+            serverName[i] = "localhost";
+            serverPort[i] = adminPort + i*offset;
         }
     }
 
     //establish a connection to the cluster host
-    public void init()
+    public void init(int size)
     {
         try {
 
             //TODO: Make 64 not hardcoded but dynammic
             //initalize voltdb client and server list
             db = ClientFactory.createClient();
-            generateServers(64);
+            generateServers(size);
 
             //connect nodes to host
-            for(int i = 0; i < nodes.length; i++)
-                db.createConnection(nodes[i].name, nodes[i].port);
+            for(int i = 0; i < size; i++)
+                db.createConnection(serverName[i], serverPort[i]);
 
         } catch(Exception e)
         {
-            System.out.println("Could not create connection to voltdb");
+            System.out.println("Failed to connect to a server");
             e.printStackTrace();
         }
     }
 
+    //runs sql statements that are predefined from file, different from generating sql statements
+    public long run(String batch)
+    {
+        //batch is a batch of sql statements
+        try
+        {
+            long start = System.currentTimeMillis();
+            db.callProcedure("@AdHoc", batch);
+            long stop = System.currentTimeMillis();
+            long executeTime = stop - start;
+
+            return executeTime;
+        } catch(Exception e)
+        {
+            System.out.println("Could not execute AdHoc command");
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
     //perform concurrent writes to the database, assuming the connection has been made
-    public long insert(int threadCount)
+    public long runThread(ArrayList<String> batch, int threadCount)
     {
         thread[] list = new thread[threadCount];
 
         try {
+
             //spawn threads
             for(int i = 0; i < threadCount; i++)
             {
-                thread spawn = new thread(db, i);
+                thread spawn = new thread(db, batch);
                 list[i] = spawn;
             }
 
@@ -90,14 +102,6 @@ public class connector
         }
     }
 
-    public void print(ClientResponse response)
-    {
-        //response would need to check if the custom made procedure returns success
-
-        VoltTable results[];
-        //db.callProcedure("Print");
-    }
-
     public void close()
     {
         try {
@@ -106,6 +110,20 @@ public class connector
         } catch(Exception e)
         {
             e.printStackTrace();
+        }
+    }
+
+    public void shutdown()
+    {
+        try
+        {
+            db.callProcedure("@Shutdown");
+        } catch(org.voltdb.client.ProcCallException e)
+        {
+            System.out.println("Database shutting down");
+        } catch(Exception e)
+        {
+            e.printStackTrace():
         }
     }
 }

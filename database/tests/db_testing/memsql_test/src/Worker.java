@@ -28,14 +28,6 @@ public class Worker implements Runnable {
 
     @Override
     public void run() {
-        // Wait for the gate that is controlled by the main thread before running
-        try {
-            this.gate.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (BrokenBarrierException e) {
-            e.printStackTrace();
-        }
 
         Properties properties = new Properties();
         properties.put("user", Constants.USER);
@@ -44,10 +36,18 @@ public class Worker implements Runnable {
             executeSQL(conn, "USE test");
             int startIndex = (commands.size() / numThreads) * threadNum;
             int totOps = (commands.size()/numThreads);
-            while (!Thread.interrupted()) {
-                for (int i = 0; i < totOps; ++i) {
-                    executeSQL(conn, commands.get(i+startIndex));
-                }
+
+            // Wait for the gate that is controlled by the main thread before running
+            try {
+                this.gate.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (BrokenBarrierException e) {
+                e.printStackTrace();
+            }
+
+            for (int i = 0; i < totOps; ++i) {
+                executeSQL(conn, commands.get(i+startIndex));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -57,6 +57,7 @@ public class Worker implements Runnable {
 
     public static void executeSQL(Connection conn, String sql) throws SQLException {
         try (Statement stmt = conn.createStatement()) {
+            //System.out.println("Attempting to execute statement: "+sql);
             stmt.execute(sql);
         } catch (SQLException e) {
             e.printStackTrace();

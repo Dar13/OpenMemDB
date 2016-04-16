@@ -1,24 +1,23 @@
+import java.util.ArrayList;
+
 public class thread extends Thread
 {
     private org.voltdb.client.Client myApp;
-    private int data;
+    private ArrayList<String> batch;
 
-    public thread(org.voltdb.client.Client myApp, int data)
+    public thread(org.voltdb.client.Client myApp, ArrayList<String> batch)
     {
-        this.data = data;
         this.myApp = myApp;
+        this.batch = batch;
     }
 
     public void insert()
     {
-        //length of data set
-        int size = 1;
-
-        for(int i = 0; i < size; i++)
+        //Calls procedure using client and uses stored procedure to do so
+        for(int i = 0; i < batch.size(); i++)
         {
             try {
-                System.out.println("Inserting data... " +data);
-                myApp.callProcedure("Insert", data);
+                //myApp.callProcedure("create");
             } catch(Exception e)
             {
                 e.printStackTrace();

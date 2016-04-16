@@ -1,4 +1,12 @@
-# This script stops multiple processes from each terminal in screen session and terminates screen
+# A script that stops the server by using voltadmin shutdown -H localhost:"adminport"
+# Admin port should be a default value
 
-#Delete deattached screens, maybe safe?? each screen shouldn't have anything running
+admin=7001
+# ~/workspace/voltdb/bin/voltadmin shutdown -H localhost:$admin
+rm -r ~/workspace/OpenMemDB/database/tests/db_testing/volt_test/voltdbroot
+rm -r ~/workspace/OpenMemDB/database/tests/db_testing/volt_test/log
+
+screen -d nodes
+
+#Clean up detached screens
 screen -ls | grep Detached | cut -d. -f1 | awk '{print $1}' | xargs kill
