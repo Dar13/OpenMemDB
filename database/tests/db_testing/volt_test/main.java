@@ -1,41 +1,52 @@
 import java.util.Scanner;
 import java.io.*;
+import java.util.ArrayList;
 
 public class main
 {
     public static void main(String[] args)
     {
         long time = 0;
-        //int threadCount;
-
+        int threadCount;
         int size = 2;
         String filename = "output.txt";
-        String sqlStmt = parseFile(readFile(filename));
+        ArrayList<String> sqlStmt = readFile(filename);
         connector link = new connector();
+
+        //Parse SQL statements to make sure they are valid
+        for(int i = 0; i < sqlStmt.size(); i++)
+        {
+            sqlStmt.set(i, parseSQL(sqlStmt.get(i)));
+        }
 
         //initalize client using host name and generate multiple node connections and connect them to host
         link.init(size);
 
-        time = link.run(sqlStmt);
-        //threadCount = 4;
-        //time = link.insert(threadCount);
-        System.out.println("Execution Time: " + time);
+        //run single batch sql instructions
+        String batch = arrayToString(sqlStmt);
+        time = link.run(batch);
+        
+        //run threaded sq; instructions
+        //threadCount = 1;
+        //time = link.runThread(sqlStmt, threadCount);
+        //System.out.println("Execution Time: " + time);
         //System.out.println("Threads : " + threadCount);
 
-        //link.print();
         link.close();
     }
 
-    private static String readFile(String filename)
+    private static ArrayList<String> readFile(String filename)
     {
         try
         {
             Scanner read = new Scanner(new File(filename));
-            String file = "";
+            ArrayList<String> file = new ArrayList<String>();
+            int i = 0;
 
             while(read.hasNextLine())
             {
-                file = file.concat(read.nextLine());
+                file.add(i, read.nextLine());
+                i++;
             }
             return file;
         } catch (Exception e)
@@ -45,8 +56,20 @@ public class main
         }
     }
 
+    //useful for AdHoc since it takes in a multiple SQL statements as a String
+    private static String arrayToString(ArrayList<String> array)
+    {
+        String convertArray = "";
+        for(int i = 0; i < array.size(); i++)
+        {
+            convertArray = convertArray.concat(array.get(i));
+        }
+
+        return convertArray;
+    }
+
     //Some data types are not supported such as STRING or DATE, this must be changed to VARCHAR and TIMESTAMP
-    private static String parseFile(String input)
+    private static String parseSQL(String input)
     {
         String clean = "STRING";
         String replace = "VARCHAR";

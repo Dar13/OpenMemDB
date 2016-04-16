@@ -12,6 +12,7 @@ CLASSES = \
     main.java \
     thread.java \
     connector.java \
+	create.java \
 
 default: classes
 

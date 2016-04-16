@@ -5,6 +5,7 @@
 
 import org.voltdb.*;
 import org.voltdb.client.*;
+import java.util.ArrayList;
 
 public class connector
 {
@@ -69,15 +70,16 @@ public class connector
     }
 
     //perform concurrent writes to the database, assuming the connection has been made
-    public long runThread(String batch, int threadCount)
+    public long runThread(ArrayList<String> batch, int threadCount)
     {
         thread[] list = new thread[threadCount];
 
         try {
+
             //spawn threads
             for(int i = 0; i < threadCount; i++)
             {
-                thread spawn = new thread(db, String batch);
+                thread spawn = new thread(db, batch);
                 list[i] = spawn;
             }
 
