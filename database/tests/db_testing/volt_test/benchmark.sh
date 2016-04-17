@@ -5,14 +5,36 @@
 # assumes that openmemdb input file is updated
 # run java program at 1 node
 # run stop script and redo using new node value
+cap=1
+declare -a flags=(ct st irt)
 
-cap=2
-for((i=0; i < cap; i++))
+#Compile Java Application
+make clean && make
+
+#Execute all OpenMemDB Flag Tests
+for i in ${flags[@]}
 do
-    var=$((2**i))
-    ./start.sh $var
-    sleep 10
-    #make clean && make && java -classpath ".:/home/heyblackduck/workspace/voltdb/voltdb/*" main 2
-    ./stop.sh
-    sleep 5
+    #Write header for type of test
+    head -n 1 ../../sql_statements.omdbt > execTime.txt
+
+    #Execute OpenMemDB tests
+    /home/OpenMemDb/OpenMemDB/database/tests/tests sqltf $i
+
+    #Parse SQL Statements
+    ./voltdb.sh
+    
+    echo "Executing $i"
+    for((i=0; i < cap; i++))
+    do
+        var=$((2**i))
+        ./start.sh $var
+        sleep $((30*var))
+        java -classpath ".:/home/OpenMemDb/voltdb/voltdb/*" main $var
+        ./stop.sh
+        sleep $((30*var))
+    done
+
+    rm -f create.txt insert.txt select.txt drop.txt
 done
+
+

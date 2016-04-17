@@ -123,7 +123,7 @@ public class connector
             System.out.println("Database shutting down");
         } catch(Exception e)
         {
-            e.printStackTrace():
+            e.printStackTrace();
         }
     }
 }

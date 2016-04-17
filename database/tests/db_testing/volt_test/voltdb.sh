@@ -18,23 +18,41 @@ do
         "drop" ) flag="drop" ;;
     esac
 
-    if [ "$flag" == "create" ] && [ "$line" != "$flag" ]; then
+    if [ "$flag" == "create" ] && [ "$line" != "$flag" ] && [ "$line" != "end" ]; then
         create+=("$line")
     fi
 
-        if [ "$flag" == "insert" ] && [ "$line" != "$flag" ]; then
+    if [ "$flag" == "insert" ] && [ "$line" != "$flag" ] && [ "$line" != "end" ]; then
         insert+=("$line")
     fi
 
-    if [ "$flag" == "select" ] && [ "$line" != "$flag" ]; then
+    if [ "$flag" == "select" ] && [ "$line" != "$flag" ] && [ "$line" != "end" ]; then
         select+=("$line")
     fi
 
-    if [ "$flag" == "drop" ] && [ "$line" != "$flag" ]; then
+    if [ "$flag" == "drop" ] && [ "$line" != "$flag" ] && [ "$line" != "end" ]; then
         drop+=("$line")
     fi
     
 done < $filename
-printf "%s\n" "${create[@]}" > temp.txt
-head -n -1 temp.txt > output.txt
-rm -f temp.txt
+
+len=${create[@]}
+if [[ $len > 0 ]]
+then
+    printf "%s\n" "${create[@]}" > create.txt
+fi
+len=${insert[@]}
+if [[ $len > 0 ]]
+then
+    printf "%s\n" "${insert[@]}" > insert.txt
+fi
+len=${select[@]}
+if [[ $len > 0 ]]
+then
+    printf "%s\n" "${select[@]}" > select.txt
+fi
+len=${drop[@]}
+if [[ $len > 0 ]]
+then
+    printf "%s\n" "${drop[@]}" > drop.txt
+fi

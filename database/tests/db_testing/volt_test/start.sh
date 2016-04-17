@@ -48,7 +48,7 @@ screen -AdmS nodes -t 0 bash
 for((j=1; j <= $size; j++))
 do
     screen -S nodes -X screen -t $j
-    screen -S nodes -p $j -X stuff "VOLTDB_OPTS="-Dvolt.rmi.agent.port=$jmx" ~/workspace/voltdb/bin/voltdb create -H localhost:$host --internal=$internal --http=$http --admin=$admin --client=$client --zookeeper=$zookeeper --deployment=deployment.xml \\r"
+    screen -S nodes -p $j -X stuff "VOLTDB_OPTS="-Dvolt.rmi.agent.port=$jmx" ~/voltdb/bin/voltdb create -H localhost:$host --internal=$internal --http=$http --admin=$admin --client=$client --zookeeper=$zookeeper --deployment=deployment.xml \\r"
 
     # Update ports
     http=$((http+offset))
@@ -57,7 +57,7 @@ do
     internal=$((internal+offset))
     jmx=$((jmx+offset))
     zookeeper=$((zookeeper+offset))
-
 done
+
 echo "Cluster is done!\n"
 
