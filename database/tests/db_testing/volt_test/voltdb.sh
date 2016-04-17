@@ -7,6 +7,7 @@ declare -a select
 declare -a drop
 flag=""
 
+echo "Reading SQL statements"
 #Reads file and determines how each line will be stored based on flags
 while read line
 do
@@ -35,23 +36,24 @@ do
     fi
     
 done < $filename
+echo "Done reading SQL statements"
 
-len=${create[@]}
+len=${#create[@]}
 if [[ $len > 0 ]]
 then
     printf "%s\n" "${create[@]}" > create.txt
 fi
-len=${insert[@]}
+len=${#insert[@]}
 if [[ $len > 0 ]]
 then
     printf "%s\n" "${insert[@]}" > insert.txt
 fi
-len=${select[@]}
+len=${#select[@]}
 if [[ $len > 0 ]]
 then
     printf "%s\n" "${select[@]}" > select.txt
 fi
-len=${drop[@]}
+len=${#drop[@]}
 if [[ $len > 0 ]]
 then
     printf "%s\n" "${drop[@]}" > drop.txt

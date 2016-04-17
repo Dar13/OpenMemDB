@@ -6,9 +6,11 @@ public class main
 {
     public static void main(String[] args)
     {
-
+        /*
+        //Execuion time, node size, filename, batch of sql statements, connector
         long time = 0;
         int size = Integer.parseInt(args[0]);
+        int threadCount = size;
         String[] filename = {"create.txt", "insert.txt", "select.txt", "drop.txt"};
         ArrayList<String> sqlStmt;
         connector link = new connector();
@@ -16,32 +18,51 @@ public class main
         //initalize client using host name and generate multiple node connections and connect them to host
         link.init(size);
 
-        String batch = "";
-
-        //run single batch sql instructions
+        //check each file for instructions to run
         for(int i = 0; i < filename.length; i++)
         {
             File file = new File(filename[i]);
+
+            //if that file exists then execute it's instructions using AdHoc with thread splitting up work
             if(file.exists() && !file.isDirectory())
             {
+                System.out.println("Executing AdHoc SQL Instructions");
                 sqlStmt = readFile(filename[i]);
 
-                System.out.println(sqlStmt.size());
                 //Parse SQL statements to make sure they are valid
                 for(int j = 0; j < sqlStmt.size(); j++)
                 {
                     sqlStmt.set(j, parseSQL(sqlStmt.get(j)));
-                    System.out.println("New statement: "+ sqlStmt.get(j));
                 }
 
-                batch = arrayToString(sqlStmt);
-                time = link.run(batch);
-                writeFile("execTime.txt", time, size);
+                time = time + link.runThread(sqlStmt, threadCount);
             }
         }
 
+        //write to execTime the time it took and the size of cluster and number of threads
+        writeFile("execTime.txt", time, size);
+        System.out.println("AdHoc Execution Complete\n"+ "Execution Time: "+ time + " Nodes: " + size);
+
         link.close();
-        link.shutdown();
+        //link.shutdown();
+        */
+        int nodes = Integer.parseInt(args[0]);
+        int threadCount = nodes;
+        connector link = new connector();
+        link.init(nodes);
+
+        //Load db and select from db
+        int numInserts=3;
+        long time = 0;
+        long time2 = 0;
+        for(int i = 0; i < numInserts; i++)
+        {
+            time = link.runProcedure("insert", numInserts, threadCount);
+            time2 = link.runProcedure("select", numInserts, threadCount);
+        }
+
+        writeFile("execTime.txt", time, threadCount);
+        writeFile("execTime.txt", time2, threadCount);
     }
 
     private static ArrayList<String> readFile(String filename)
@@ -74,7 +95,7 @@ public class main
             file = new File(filename);
             temp = file.createNewFile();
             FileWriter writer = new FileWriter(file, true);
-            String content = "Execution time: " + String.valueOf(time) + " " + "Cluster nodes: " + String.valueOf(node) + '\n';
+            String content = "Execution time: " + String.valueOf(time) + " " + "Nodes/Threads: " + String.valueOf(node) + '\n';
             writer.write(content);
             writer.flush();
             writer.close();

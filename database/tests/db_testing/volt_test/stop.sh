@@ -2,7 +2,7 @@
 # Admin port should be a default value
 
 size=$1
-admin=7001
+admin=12001
 ~/voltdb/bin/voltadmin shutdown -H localhost:$admin
 
 #offset=1000
