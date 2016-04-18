@@ -18,7 +18,7 @@ if test -f "deployment.xml"; then rm -f deployment.xml; fi
 #Default deployment file
 printf "<?xml version=\"1.0\"?>
     <deployment>
-        <cluster hostcount=\"%s\" sitesperhost=\"8\" kfactor=\"0\" />
+        <cluster hostcount=\"1\" sitesperhost=\"%s\" kfactor=\"0\" />
         <httpd enabled=\"true\">
             <jsonapi enabled=\"true\" />
         </httpd>
@@ -29,41 +29,43 @@ printf "<?xml version=\"1.0\"?>
 # Nodes will use host base port incremented by 1 for each exisiting node and use offset of 6 since each node uses 6 ports
 
 # Host port necessary for nodes to connect to host
-host=12003
+#host=12003
 
 #Temporary Node Port Arguments
-http=12000
-admin=12001
-client=12002
-internal=12003
-jmx=12004
-zookeeper=12010
-rep=12020
+#http=12000
+#admin=12001
+#client=12002
+#internal=12003
+#jmx=12004
+#zookeeper=12010
+#rep=12020
 
-offset=6
+#offset=6
 
-echo "Starting Cluster"
+~/voltdb/bin/voltdb create --deployment=deployment.xml
+
+#echo "Starting Cluster"
 #Create a deattached screen
-screen -AdmS nodes -t 0 bash
+#screen -AdmS nodes -t 0 bash
 
-screen -S nodes -X screen -t 1
-screen -S nodes -p 1 -X stuff "VOLTDB_OPTS="-Dvolt.rmi.agent.port=$jmx" ~/voltdb/bin/voltdb create -H localhost:$host --internal=$internal --http=$http --admin=$admin --client=$client --replication=$rep --zookeeper=$zookeeper --deployment=deployment.xml \\r"
+#screen -S nodes -X screen -t 1
+#screen -S nodes -p 1 -X stuff "VOLTDB_OPTS="-Dvolt.rmi.agent.port=$jmx" ~/voltdb/bin/voltdb create -H localhost:$host --internal=$internal --http=$http --admin=$admin --client=$client --replication=$rep --zookeeper=$zookeeper --deployment=deployment.xml \\r"
 
 # Create multiple SSH connections and connect them to host
-for((j=2; j <= $size; j++))
-do
+#for((j=2; j <= $size; j++))
+#do
     # Update ports
-    http=$((http+offset))
-    admin=$((admin+offset))
-    client=$((client+offset))
-    internal=$((internal+offset))
-    jmx=$((jmx+offset))
-    zookeeper=$((zookeeper+offset))
-    rep=$((rep+offset))
+    #http=$((http+offset))
+    #admin=$((admin+offset))
+    #client=$((client+offset))
+    #internal=$((internal+offset))
+    #jmx=$((jmx+offset))
+    #zookeeper=$((zookeeper+offset))
+    #rep=$((rep+offset))
 
-    screen -S nodes -X screen -t $j
-    screen -S nodes -p $j -X stuff "VOLTDB_OPTS="-Dvolt.rmi.agent.port=$jmx" ~/voltdb/bin/voltdb create -H localhost:$host --internal=$internal --http=$http --admin=$admin --client=$client --replication=$rep --zookeeper=$zookeeper --deployment=deployment.xml \\r"
-done
+    #screen -S nodes -X screen -t $j
+    #screen -S nodes -p $j -X stuff "VOLTDB_OPTS="-Dvolt.rmi.agent.port=$jmx" ~/voltdb/bin/voltdb create -H localhost:$host --internal=$internal --http=$http --admin=$admin --client=$client --replication=$rep --zookeeper=$zookeeper --deployment=deployment.xml \\r"
+#done
 
-echo "Cluster is setup!"
+#echo "Cluster is setup!"
 

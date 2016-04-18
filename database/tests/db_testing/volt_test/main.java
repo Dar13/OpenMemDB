@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 public class main
 {
+
+    public final static int NUM_OPERATIONS = 64;
+
     public static void main(String[] args)
     {
         //Execuion time, node size, filename, batch of sql statements, connector
@@ -39,7 +42,7 @@ public class main
         }
         */
 
-        
+        /*
         //initalize client using host name and generate multiple node connections and connect them to host
         link.init(size);
 
@@ -60,9 +63,7 @@ public class main
                     sqlStmt.set(j, parseSQL(sqlStmt.get(j)));
                 }
 
-                if(filename[i] == "create")
-                    time = time + link.run(arrayToString(sqlStmt));    
-                else
+                if(filename[i] != "create" || filename[i] != "drop.txt")
                     time = time + link.runThread(sqlStmt, threadCount);
                 
                 writeFile("execTime.txt", time/1000, threadCount);
@@ -74,27 +75,20 @@ public class main
 
         link.close();
         //link.shutdown();
+        */
         
-        
-        /* STORED PROCEDURE IMPLEMENTATION
-        int nodes = Integer.parseInt(args[0]);
-        int threadCount = nodes;
-        connector link = new connector();
-        link.init(nodes);
+        //STORED PROCEDURE IMPLEMENTATION
+        //Create connection to client
+        link.init(size);
 
-        //Load db and select from db
-        int numInserts=3;
-        long time = 0;
         long time2 = 0;
-        for(int i = 0; i < numInserts; i++)
-        {
-            time = link.runProcedure("insert", numInserts, threadCount);
-            time2 = link.runProcedure("select", numInserts, threadCount);
-        }
-
+        time = link.runProcedure("insert", main.NUM_OPERATIONS, threadCount);
+        time2 = link.runProcedure("select", main.NUM_OPERATIONS, threadCount);
+        
+        System.out.println("Done tests, writing to file");
         writeFile("execTime.txt", time, threadCount);
         writeFile("execTime.txt", time2, threadCount);
-        */
+        link.close();
     }
 
     private static ArrayList<String> readFile(String filename)
@@ -118,8 +112,7 @@ public class main
         }
     }
 
-    private static void writeFile(String filename, long time, int node)
-    {
+    private static void writeFile(String filename, long time, int node) {
         File file = null;
         boolean temp;
         try

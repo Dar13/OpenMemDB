@@ -20,19 +20,21 @@ public class thread implements Runnable
         this.gate = gate;
     }
 
-    public thread(org.voltdb.client.Client myApp, String flag, List<String> date, List<Integer> value)
+    public thread(org.voltdb.client.Client myApp, String flag, List<String> date, List<Integer> value,CyclicBarrier gate )
     {
         this.myApp = myApp;
         this.date = date;
         this.value = value;
         this.flag = flag;
+        this.gate = gate;
     }
 
-    public thread(org.voltdb.client.Client myApp, String flag, List<Integer> value)
+    public thread(org.voltdb.client.Client myApp, String flag, List<Integer> value, CyclicBarrier gate)
     {
         this.myApp = myApp;
         this.value = value;
         this.flag = flag;
+        this.gate = gate;
     }
 
     //Special Run Method to run Stored Procedures
@@ -61,8 +63,9 @@ public class thread implements Runnable
     @Override
     public void run()
     {
-        String sqlStmt = arrayToString(batch);
-        System.out.println(sqlStmt);
+        //String sqlStmt = arrayToString(batch);
+        //System.out.println(sqlStmt);
+        ClientResponse response = null;
         try
         {
             //wait for gate controlled by main
@@ -78,7 +81,26 @@ public class thread implements Runnable
             }
 
             //AdHoc executes multiple sql statements each seperated by ; threads their own instructions
-            myApp.callProcedure("@AdHoc", sqlStmt);
+            //myApp.callProcedure("@AdHoc", sqlStmt);
+            // date and value are lists of all of the arguments that this thread should run the stored procedure with
+            if (flag.equalsIgnoreCase("insert")) {
+                for (int i = 0; i < date.size(); ++i) {
+                    // Leaving date static as the epoch
+                    response = myApp.callProcedure("insert", 1, value.get(i));
+                    if(response.getStatus() != ClientResponse.SUCCESS)
+                    {
+                        throw new RuntimeException(response.getStatusString());
+                    }
+                }
+            } else if (flag.equalsIgnoreCase("select")) {
+                for (int i = 0; i < value.size(); ++i) {
+                    response = myApp.callProcedure("find", value.get(i));
+                    if(response.getStatus() != ClientResponse.SUCCESS)
+                    {
+                        throw new RuntimeException(response.getStatusString());
+                    }
+                } 
+            }
 
         } catch (NoConnectionsException e)
         {
