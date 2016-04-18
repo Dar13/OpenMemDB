@@ -3056,10 +3056,76 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
 
 \newpage
   \subsection{Data Store}
-	%author Robert Medina
 {\bfseries Introduction}
-%TODO: Redo this
+Our implementation of the Data Store revolves around working with and around Tervel and the
+realities of massively concurrent systems. One of the requirements of working with Tervel is
+the restriction of the type and size of the data stored within the various data structures.
+Tervel requires that all data stored within it is the size of a machine word, that it is 
+easily convertible into an integral representation, and allows the bottom three bits to be
+stolen. This means that we are restricted to 64-bit data types, but we actually only can
+use 61 of those bits for our actual data. We cannot rely on the bottom three bits to be 
+maintained by Tervel. Luckily, most SQL data types can be contained within 61 bits and the 
+others can be located elsewhere and the pointer to that data can be contained within Tervel
+instead.
 \par\vspace{\baselineskip}
+The data types currently supported by OpenMemDB in light of the above are SQL BOOLEAN, 
+INTEGER, SMALLINT, BIGINT, FLOAT, DATE, and TIME. Further type support can be added but they
+will be slower due to the added indirection and safety code that Tervel requires for pointers.
+That safety code is a concept that Tervel calls an accessor, a wrapper that interfaces with
+Tervel's hazard pointers to ensure that deletions only take place when all users are finished
+with the pointer. Essentially a wait-free, thread-safe smart pointer similar to the
+\inlinecode{std::shared\_ptr} found in modern C++.
+\par\vspace{\baselineskip}
+Our supported data types are contained in a structure called \inlinecode{TervelData} a 
+union of structs that uses bitfields in order to manipulate individual or small regions of
+bits within the larger 64-bit piece of memory. The definition of this union is shown in
+Figure~\ref{code:tervel_data_definition} with the definition of a further union that defines the 
+DATE data type in Figure~\ref{code:tervel_data_date_def}. An example that uses both of these
+unions to manipulate the data contained within is shown in Figure~\ref{code:tervel_data_example}.
+%TODO: Finish this
+\par\vspace{\baselineskip}
+\begin{figure}[H]
+  \begin{lstlisting}[language=C++]
+  union TervelData
+  {
+    struct 
+    {
+      int64\_t tervel\_status : 3;  //!< Tervel requires this be given to them
+      uint64\_t type : 3;          //!< This is mapped to \refer DataType
+      uint64\_t null : 1;          //!< Set if the value is NULL
+
+      uint64\_t value : 57;        //!< The actual value of the data stored in this union
+    } data;
+
+    int64\_t value;
+  } \_\_attribute\_\_((packed));
+  \end{lstlisting}
+
+  \caption{The definition of the TervelData object that is used to store data in Tervel data structures}
+  \label{code:tervel_data_definition}
+\end{figure}
+
+\begin{figure}[H]
+  \begin{lstlisting}[language=C++]
+  union DateData
+  {
+    struct
+    {
+      uint16\_t year;
+      uint8\_t month;
+      uint8\_t day;
+      uint32\_t pad;
+    };
+
+    uint64\_t value;
+  };
+  \end{lstlisting}
+
+  \caption{The defintion of the DateData object that is used to store dates in the TervelData object}
+  \label{code:tervel_data_date_def}
+\end{figure}
+
+%TODO: Add example showing date encoding/decoding into TervelData
 
 \newpage
 \subsubsection{Functions}
