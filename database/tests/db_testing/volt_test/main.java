@@ -6,15 +6,38 @@ public class main
 {
     public static void main(String[] args)
     {
-        /*
         //Execuion time, node size, filename, batch of sql statements, connector
         long time = 0;
         int size = Integer.parseInt(args[0]);
-        int threadCount = size;
+        int threadCount = Integer.parseInt(args[1]);
         String[] filename = {"create.txt", "insert.txt", "select.txt", "drop.txt"};
         ArrayList<String> sqlStmt;
         connector link = new connector();
 
+        link.initJDBC(size);
+        
+        for(int i = 0; i < filename.length; i++)
+        {
+            File file = new File(filename[i]);
+
+            //if that file exists then execute it's instructions using AdHoc with thread splitting up work
+            if(file.exists() && !file.isDirectory())
+            {
+                System.out.println("Executing AdHoc SQL Instructions");
+                sqlStmt = readFile(filename[i]);
+
+                //Parse SQL statements to make sure they are valid
+                for(int j = 0; j < sqlStmt.size(); j++)
+                {
+                    sqlStmt.set(j, parseSQL(sqlStmt.get(j)));
+                }
+
+                time = link.runJDBC(sqlStmt);
+                writeFile("execTime.txt", time/1000, threadCount);
+            }
+        }
+
+        /*
         //initalize client using host name and generate multiple node connections and connect them to host
         link.init(size);
 
@@ -35,17 +58,19 @@ public class main
                     sqlStmt.set(j, parseSQL(sqlStmt.get(j)));
                 }
 
-                time = time + link.runThread(sqlStmt, threadCount);
+                time = link.runThread(sqlStmt, threadCount);
+                writeFile("execTime.txt", time/1000, threadCount);
             }
         }
 
         //write to execTime the time it took and the size of cluster and number of threads
-        writeFile("execTime.txt", time, size);
-        System.out.println("AdHoc Execution Complete\n"+ "Execution Time: "+ time + " Nodes: " + size);
+        System.out.println("AdHoc Execution Complete\n"+ "Execution Time: "+ time + " Threads: " + threadCount);
 
         link.close();
         //link.shutdown();
-        */
+        
+        
+         * STORED PROCEDURE IMPLEMENTATION
         int nodes = Integer.parseInt(args[0]);
         int threadCount = nodes;
         connector link = new connector();
@@ -63,6 +88,7 @@ public class main
 
         writeFile("execTime.txt", time, threadCount);
         writeFile("execTime.txt", time2, threadCount);
+        */
     }
 
     private static ArrayList<String> readFile(String filename)
@@ -95,7 +121,7 @@ public class main
             file = new File(filename);
             temp = file.createNewFile();
             FileWriter writer = new FileWriter(file, true);
-            String content = "Execution time: " + String.valueOf(time) + " " + "Nodes/Threads: " + String.valueOf(node) + '\n';
+            String content = "Execution time: " + String.valueOf(time) + " " + "Threads: " + String.valueOf(node) + '\n';
             writer.write(content);
             writer.flush();
             writer.close();

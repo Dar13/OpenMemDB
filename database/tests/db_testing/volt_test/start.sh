@@ -42,6 +42,7 @@ rep=12020
 
 offset=6
 
+echo "Starting Cluster"
 #Create a deattached screen
 screen -AdmS nodes -t 0 bash
 

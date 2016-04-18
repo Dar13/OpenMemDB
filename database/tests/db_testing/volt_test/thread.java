@@ -1,16 +1,23 @@
 import java.util.*;
+import java.io.*;
+import java.util.concurrent.*;
+import org.voltdb.client.*;
+import org.voltdb.types.TimestampType;
 
-public class thread extends Thread
+public class thread implements Runnable
 {
     private org.voltdb.client.Client myApp;
     private List<String> batch;
     private List<Integer> value;
     private List<String> date;
     private String flag;
-    public thread(org.voltdb.client.Client myApp, List<String> batch)
+    private CyclicBarrier gate;
+
+    public thread(org.voltdb.client.Client myApp, List<String> batch, CyclicBarrier gate)
     {
         this.myApp = myApp;
         this.batch = batch;
+        this.gate = gate;
     }
 
     public thread(org.voltdb.client.Client myApp, String flag, List<String> date, List<Integer> value)
@@ -28,15 +35,19 @@ public class thread extends Thread
         this.flag = flag;
     }
 
-
+    //Special Run Method to run Stored Procedures
     public void runProc()
     {
         //Calls procedure using client and uses stored procedure to do so
         for(int i = 0; i < date.size(); i++)
         {
-            try {
+            try 
+            {
                 if(flag == "insert")
-                    myApp.callProcedure("insert", date.get(i), value.get(i));
+                {
+                    TimestampType convert = new TimestampType(date.get(i));
+                    myApp.callProcedure("insert", convert.getTime(), value.get(i));
+                }
                 else if(flag == "select")
                     myApp.callProcedure("find", value.get(i));
             } catch(Exception e)
@@ -46,13 +57,35 @@ public class thread extends Thread
         }
     }
 
-    public void runStmt()
+    //Special run Method to run AdHoc quieries
+    @Override
+    public void run()
     {
         String sqlStmt = arrayToString(batch);
         try
         {
+            //wait for gate controlled by main
+            try
+            {
+                this.gate.await();
+            } catch(InterruptedException e)
+            {
+                e.printStackTrace();
+            } catch(BrokenBarrierException e)
+            {
+                e.printStackTrace();
+            }
+
+            //AdHoc executes multiple sql statements each seperated by ; threads their own instructions
             myApp.callProcedure("@AdHoc", sqlStmt);
-        } catch(Exception e)
+
+        } catch (NoConnectionsException e)
+        {
+            e.printStackTrace();
+        } catch(IOException e)
+        {
+            e.printStackTrace();
+        } catch(ProcCallException e)
         {
             e.printStackTrace();
         }
@@ -68,25 +101,6 @@ public class thread extends Thread
         }
 
         return convertArray;
-    }
-
-
-    public void start(char flag)
-    {
-        switch(flag)
-        {
-            //run insert method
-            case 'i':
-                {
-                    runProc();
-                    break;
-                }
-            case 'r':
-                {
-                    runStmt();
-                    break;
-                }
-        }
     }
 }
 

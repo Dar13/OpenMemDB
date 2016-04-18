@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.sql.*;
 import java.io.*;
 import java.util.List;
+import java.util.concurrent.*;
 
 public class connector
 {
@@ -16,7 +17,9 @@ public class connector
     private int[] serverPort;
     private org.voltdb.client.Client db;
     private Connection conn;
-    
+    String driver = "org.voltdb.jdbc.Driver";
+    String url = "jdbc:voltdb://";
+
     //generate a list of client connections to connect to the cluster host
     public void generateServers(int size, int port)
     {
@@ -29,6 +32,20 @@ public class connector
         {
             serverName[i] = "localhost";
             serverPort[i] = port + i*offset;
+        }
+    }
+
+    private void genURL()
+    {
+        for(int i = 0; i < serverName.length; i++)
+        {
+            url = url.concat(serverName[i]);
+            url = url.concat(":");
+            url = url.concat(String.valueOf(serverPort[i]));
+            
+            //last server entry does not need a comma
+            if(i != serverName.length-1)
+                url = url.concat(",");
         }
     }
 
@@ -56,7 +73,53 @@ public class connector
         }
     }
 
-    //runs sql statements that are predefined from file, different from generating sql statements
+    public void initJDBC(int size)
+    {
+        try
+        {
+            // Load driver, create connection
+            int port = 12002;
+            Class.forName(driver);
+            generateServers(size, port);
+            genURL();
+
+            conn = DriverManager.getConnection(url);
+
+        } catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    //accepts multiple sql statements
+    public long runJDBC(ArrayList<String> batch)
+    {
+        try{
+            Statement sql = null;
+            //create and execute
+            //TODO: Use this with threads
+            long start = System.nanoTime();
+            for(int i = 0; i < batch.size(); i++)
+            {
+                sql = conn.createStatement();
+                if(!sql.execute(batch.get(i)))
+                    System.out.println("Error sql statement did not go through");
+            }
+            long executeTime = System.nanoTime() - start;
+
+            //close connection
+            sql.close();
+            conn.close();
+
+            return executeTime;
+        } catch(Exception e)
+        {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    //Does not use threads, runs sql statements
     public long run(String batch)
     {
         //batch is a batch of sql statements
@@ -76,27 +139,39 @@ public class connector
         }
     }
 
-    //perform concurrent writes to the database, assuming the connection has been made
+    //Does use threads, perform sql statements to the database, assuming the connection has been made
     public long runThread(ArrayList<String> batch, int threadCount)
     {
-        thread[] list = new thread[threadCount];
+        ArrayList<Thread> list = new ArrayList<Thread>();
         ArrayList<List<String>> split = splitBatch(batch, threadCount);
+        final CyclicBarrier gate = new CyclicBarrier(threadCount+1);
+
         try {
             //spawn threads
             for(int i = 0; i < threadCount; i++)
             {
-                thread spawn = new thread(db, split.get(i));
-                //print(split.get(i));
-                list[i] = spawn;
+                Runnable spawn = new thread(db, split.get(i), gate);
+                list.add(new Thread(spawn));
             }
 
             //execute threads
-            long start = System.currentTimeMillis();
-            for(int j = 0; j < threadCount; j++)
+            list.forEach(Thread::start);
+            long start;
+            try
             {
-                list[j].start('r');
+                start = System.nanoTime();
+                gate.await();
+            } catch(BrokenBarrierException e)
+            {
+                e.printStackTrace();
+                return -1;
             }
-            long stop = System.currentTimeMillis();
+
+            for (Thread t: list)
+            {
+                t.join();
+            }
+            long stop = System.nanoTime();
             long executeTime = stop - start;
 
             return executeTime;
@@ -108,6 +183,8 @@ public class connector
         }
     }
 
+    /*
+    //Stored Procedure method, different from AdHoc usage
     public long runProcedure(String procedure, int dataSize, int threadCount)
     {
         thread[] list = new thread[threadCount];
@@ -150,6 +227,7 @@ public class connector
             return -1;
         }
     }
+    
 
     private ArrayList<String> genDates(int size)
     {
@@ -182,6 +260,7 @@ public class connector
             System.out.println(list.get(i));
         }
     }
+    */
 
     //splits sql statements evenly to threads
     private ArrayList<List<String>> splitBatch(ArrayList<String> batch, int divide)
@@ -209,6 +288,7 @@ public class connector
         return splitArray;
     }
 
+    /*
     //splits sql statements evenly to threads
     private ArrayList<List<Integer>> splitIntArray(ArrayList<Integer> batch, int divide)
     {
@@ -234,6 +314,7 @@ public class connector
         splitArray.add(batch.subList(previous, next+remainder));
         return splitArray;
     }
+    */
 
     public void close()
     {

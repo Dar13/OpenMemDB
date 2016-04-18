@@ -8,7 +8,7 @@ public class insert extends VoltProcedure
     public final SQLStmt insert = new SQLStmt(
     "INSERT INTO TestT0 VALUES (?,?);");
 
-    public VoltTable[] run(String date, int value) throws VoltAbortException
+    public VoltTable[] run(long date, int value) throws VoltAbortException
     {
         voltQueueSQL(insert, date, value);
         return voltExecuteSQL();
