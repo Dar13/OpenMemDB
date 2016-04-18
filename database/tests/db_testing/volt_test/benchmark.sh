@@ -5,8 +5,8 @@
 # assumes that openmemdb input file is updated
 # run java program at 1 node
 # run stop script and redo using new node value
-cap=7
-declare -a flags=(ct st irt)
+cap=6
+declare -a flags=(irt)
 #ct st irt
 
 
@@ -35,27 +35,30 @@ do
     
     #Replace DATE with TIMESTAMP
     #./parse.sh
+    
+    #Add partition tables to create.txt
+    #./addPartition.sh
 
     #----------------Starts Cluster and Executes Java App and Stops Cluster-------------------------
     # stops are necessary since cluster start/stop takes time to execute
     echo "Executing VoltDB Test for $i"
-    for((i=0; i < cap; i++))
+    for((j=cap; j >= 0; j--))
     do
-        var=$((2**i))
-        ./start.sh 2
-        sleep 180
-        #sleep 10
+        var=$((2**j))
+        ./start.sh 1
+        sleep 10
 
         #Insert procedures
         #printf "%s\n" "CREATE PROCEDURE find AS SELECT TestT0.B FROM TestT0 WHERE TestT0.B=?; CREATE PROCEDURE insert AS INSERT INTO TestT0 VALUES (?,?);" >> create.txt
         #/home/OpenMemDb/voltdb/bin/sqlcmd --port=12002 load classes /home/OpenMemDb/OpenMemDB/database/tests/db_testing/volt_test/catalog.jar
+
+        #Load Database With Schema
         #/home/OpenMemDb/voltdb/bin/sqlcmd --port=12002 < create.txt
-        #sleep 30
-        java -classpath ".:/home/OpenMemDb/voltdb/voltdb/*" main 2 $var
+
+        java -classpath ".:/home/OpenMemDb/voltdb/voltdb/*" main 1 $var
         echo "Stopping Cluster"
         ./stop.sh
-        sleep 180
-        #sleep 30
+        sleep 10
     done
     echo "Done executing"
     rm -f create.txt insert.txt select.txt drop.txt

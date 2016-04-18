@@ -82,7 +82,7 @@ public class connector
             Class.forName(driver);
             generateServers(size, port);
             genURL();
-
+            System.out.println(url);
             conn = DriverManager.getConnection(url);
 
         } catch(Exception e)
@@ -101,6 +101,7 @@ public class connector
             long start = System.nanoTime();
             for(int i = 0; i < batch.size(); i++)
             {
+                System.out.println(batch.get(i));
                 sql = conn.createStatement();
                 if(!sql.execute(batch.get(i)))
                     System.out.println("Error sql statement did not go through");
@@ -131,9 +132,19 @@ public class connector
             long executeTime = stop - start;
 
             return executeTime;
-        } catch(Exception e)
+        } catch(ProcCallException e)
         {
-            System.out.println("Could not execute AdHoc command");
+            System.out.println("Voltdb error");
+            e.printStackTrace();
+            return -1;
+        } catch(NoConnectionsException e)
+        {
+            System.out.println("Client not found");
+            e.printStackTrace();
+            return -1;
+        } catch(IOException e)
+        {
+            System.out.println("Network problem");
             e.printStackTrace();
             return -1;
         }

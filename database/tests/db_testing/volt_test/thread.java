@@ -62,6 +62,7 @@ public class thread implements Runnable
     public void run()
     {
         String sqlStmt = arrayToString(batch);
+        System.out.println(sqlStmt);
         try
         {
             //wait for gate controlled by main

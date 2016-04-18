@@ -14,6 +14,7 @@ public class main
         ArrayList<String> sqlStmt;
         connector link = new connector();
 
+        /*
         link.initJDBC(size);
         
         for(int i = 0; i < filename.length; i++)
@@ -36,8 +37,9 @@ public class main
                 writeFile("execTime.txt", time/1000, threadCount);
             }
         }
+        */
 
-        /*
+        
         //initalize client using host name and generate multiple node connections and connect them to host
         link.init(size);
 
@@ -58,7 +60,11 @@ public class main
                     sqlStmt.set(j, parseSQL(sqlStmt.get(j)));
                 }
 
-                time = link.runThread(sqlStmt, threadCount);
+                if(filename[i] == "create")
+                    time = time + link.run(arrayToString(sqlStmt));    
+                else
+                    time = time + link.runThread(sqlStmt, threadCount);
+                
                 writeFile("execTime.txt", time/1000, threadCount);
             }
         }
@@ -70,7 +76,7 @@ public class main
         //link.shutdown();
         
         
-         * STORED PROCEDURE IMPLEMENTATION
+        /* STORED PROCEDURE IMPLEMENTATION
         int nodes = Integer.parseInt(args[0]);
         int threadCount = nodes;
         connector link = new connector();
