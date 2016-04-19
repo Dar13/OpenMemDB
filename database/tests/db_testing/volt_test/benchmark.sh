@@ -5,8 +5,8 @@
 # assumes that openmemdb input file is updated
 # run java program at 1 node
 # run stop script and redo using new node value
-cap=7
-declare -a flags=(ct st irt)
+cap=6
+declare -a flags=(irt)
 #ct st irt
 
 
@@ -14,50 +14,53 @@ declare -a flags=(ct st irt)
 make clean && make
 
 #Clean up directory and recompile
-#rm -f catalog.jar
-#jar cvf catalog.jar main.class connector.class thread.class insert.class find.class
+rm -f catalog.jar
+jar cvf catalog.jar main.class connector.class thread.class insert.class find.class
 
 #Need to clean up before executing tests
-rm -f execTime.txt create.txt select.txt drop.txt insert.txt
+#rm -f select.txt drop.txt insert.txt
 
 #Execute all OpenMemDB Flag Tests
-for i in ${flags[@]}
-do
+#for i in ${flags[@]}
+#do
     #Execute OpenMemDB tests
-    cd ../..
-    /home/OpenMemDb/OpenMemDB/database/tests/tests sqltf $i
-    cd /home/OpenMemDb/OpenMemDB/database/tests/db_testing/volt_test/
+    #cd ../..
+    #/home/OpenMemDb/OpenMemDB/database/tests/tests sqltf $i
+    #cd /home/OpenMemDb/OpenMemDB/database/tests/db_testing/volt_test/
 
-    head -n 1 ../../sql_statements.omdbt >> execTime.txt
+    #head -n 1 ../../sql_statements.omdbt >> execTime.txt
 
     #Parse SQL Statements
-    ./voltdb.sh
+    #./voltdb.sh
     
     #Replace DATE with TIMESTAMP
     #./parse.sh
+    
+    #Add partition tables to create.txt
+    #./addPartition.sh
 
     #----------------Starts Cluster and Executes Java App and Stops Cluster-------------------------
     # stops are necessary since cluster start/stop takes time to execute
-    echo "Executing VoltDB Test for $i"
-    for((i=0; i < cap; i++))
-    do
-        var=$((2**i))
-        ./start.sh 2
-        sleep 180
-        #sleep 10
+    #echo "Executing VoltDB Test for $i"
+    #for((j=cap; j >= 5; j--))
+    #do
+    #    var=$((2**j))
+    #    ./start.sh 2
+    #    sleep 10
 
         #Insert procedures
         #printf "%s\n" "CREATE PROCEDURE find AS SELECT TestT0.B FROM TestT0 WHERE TestT0.B=?; CREATE PROCEDURE insert AS INSERT INTO TestT0 VALUES (?,?);" >> create.txt
         #/home/OpenMemDb/voltdb/bin/sqlcmd --port=12002 load classes /home/OpenMemDb/OpenMemDB/database/tests/db_testing/volt_test/catalog.jar
+
+        #Load Database With Schema
         #/home/OpenMemDb/voltdb/bin/sqlcmd --port=12002 < create.txt
-        #sleep 30
-        java -classpath ".:/home/OpenMemDb/voltdb/voltdb/*" main 2 $var
-        echo "Stopping Cluster"
-        ./stop.sh
-        sleep 180
-        #sleep 30
-    done
-    echo "Done executing"
-    rm -f create.txt insert.txt select.txt drop.txt
-done
+
+    #    java -classpath ".:/home/OpenMemDb/voltdb/voltdb/*" main 2 $var
+    #    echo "Stopping Cluster"
+    #    ./stop.sh
+    #    sleep 10
+    #done
+    #echo "Done executing"
+    #rm -f create.txt insert.txt select.txt drop.txt
+#done
 

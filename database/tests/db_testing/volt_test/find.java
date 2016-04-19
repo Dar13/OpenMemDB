@@ -8,7 +8,7 @@ public class find extends VoltProcedure
     public final SQLStmt find = new SQLStmt(
     "SELECT TestT0.B FROM TestT0 WHERE TestT0.B=?;");
 
-    public VoltTable[] run(int value) throws VoltAbortException
+    public VoltTable[] run(long value) throws VoltAbortException
     {
         voltQueueSQL(find, value);
         return voltExecuteSQL();

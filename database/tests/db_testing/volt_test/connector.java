@@ -55,7 +55,7 @@ public class connector
         try {
 
             //initalize voltdb client and server list
-            int port = 12002;
+            int port = 21212;
             ClientConfig config = new ClientConfig("advent","xyzzy");
             config.setProcedureCallTimeout(90*10000);
             config.setConnectionResponseTimeout(180 * 10000);
@@ -63,8 +63,8 @@ public class connector
             generateServers(size, port);
 
             //connect nodes to host
-            for(int i = 0; i < size; i++)
-                db.createConnection(serverName[i], serverPort[i]);
+            //for(int i = 0; i < size; i++)
+                db.createConnection("localhost", 21212);
 
         } catch(Exception e)
         {
@@ -82,7 +82,7 @@ public class connector
             Class.forName(driver);
             generateServers(size, port);
             genURL();
-
+            System.out.println(url);
             conn = DriverManager.getConnection(url);
 
         } catch(Exception e)
@@ -101,6 +101,7 @@ public class connector
             long start = System.nanoTime();
             for(int i = 0; i < batch.size(); i++)
             {
+                System.out.println(batch.get(i));
                 sql = conn.createStatement();
                 if(!sql.execute(batch.get(i)))
                     System.out.println("Error sql statement did not go through");
@@ -131,9 +132,19 @@ public class connector
             long executeTime = stop - start;
 
             return executeTime;
-        } catch(Exception e)
+        } catch(ProcCallException e)
         {
-            System.out.println("Could not execute AdHoc command");
+            System.out.println("Voltdb error");
+            e.printStackTrace();
+            return -1;
+        } catch(NoConnectionsException e)
+        {
+            System.out.println("Client not found");
+            e.printStackTrace();
+            return -1;
+        } catch(IOException e)
+        {
+            System.out.println("Network problem");
             e.printStackTrace();
             return -1;
         }
@@ -171,6 +182,7 @@ public class connector
             {
                 t.join();
             }
+
             long stop = System.nanoTime();
             long executeTime = stop - start;
 
@@ -182,40 +194,51 @@ public class connector
             return -1; 
         }
     }
-
-    /*
+    
     //Stored Procedure method, different from AdHoc usage
-    public long runProcedure(String procedure, int dataSize, int threadCount)
+    public long runProcedure(String procedure, int numSQLStmt, int threadCount)
     {
-        thread[] list = new thread[threadCount];
-        ArrayList<String> date_tmp = genDates(dataSize);
-        ArrayList<Integer> value_tmp = genValues(dataSize);
+        ArrayList<Thread> list = new ArrayList<Thread>();
+        ArrayList<String> date_tmp = genDates(numSQLStmt);
+        ArrayList<Long> value_tmp = genValues(numSQLStmt);
+        final CyclicBarrier gate = new CyclicBarrier(threadCount+1);
 
         ArrayList<List<String>> date = splitBatch(date_tmp, threadCount);
-        ArrayList<List<Integer>> value = splitIntArray(value_tmp, threadCount);
+        ArrayList<List<Long>> value = splitLongArray(value_tmp, threadCount);
 
         try {
             //spawn threads
             for(int i = 0; i < threadCount; i++)
             {
-                thread spawn = null;
-                if(procedure == "insert")
+                Runnable spawn = null;
+                if(procedure.equalsIgnoreCase("insert"))
                 {
-                    spawn = new thread(db, "insert", date.get(i), value.get(i));
+                    spawn = new thread(db, "insert", date.get(i), value.get(i), gate);
                 }
-                if(procedure == "select")
+                if(procedure.equalsIgnoreCase("select"))
                 {
-                    spawn = new thread(db, "select", value.get(i));
+                    spawn = new thread(db, "select", value.get(i), gate);
                 }
-                list[i] = spawn;
+
+                list.add(new Thread(spawn));
             }
 
             //execute threads
             long start = System.currentTimeMillis();
-            for(int j = 0; j < threadCount; j++)
+            list.forEach(Thread::start);
+            try
             {
-                list[j].start('i');
+                gate.await();
+            } catch(Exception e)
+            {
+                e.printStackTrace();
             }
+
+            for(Thread t:list)
+            {
+                t.join();
+            }
+
             long stop = System.currentTimeMillis();
             long executeTime = stop - start;
 
@@ -242,10 +265,10 @@ public class connector
         return dates;
     }
 
-    private ArrayList<Integer> genValues(int size)
+    private ArrayList<Long> genValues(int size)
     {
-        ArrayList<Integer> values = new ArrayList<Integer>();
-        for(int i = 0; i < size; i++)
+        ArrayList<Long> values = new ArrayList<Long>();
+        for(long i = 0; i < size; i++)
         {
             values.add(i);
         }
@@ -260,7 +283,6 @@ public class connector
             System.out.println(list.get(i));
         }
     }
-    */
 
     //splits sql statements evenly to threads
     private ArrayList<List<String>> splitBatch(ArrayList<String> batch, int divide)
@@ -288,23 +310,23 @@ public class connector
         return splitArray;
     }
 
-    /*
+    
     //splits sql statements evenly to threads
-    private ArrayList<List<Integer>> splitIntArray(ArrayList<Integer> batch, int divide)
+    private ArrayList<List<Long>> splitLongArray(ArrayList<Long> batch, int divide)
     {
         if(divide == 0)
             System.out.println("Cannot divide by zero");
 
         int remainder = batch.size()%divide;
         int quotient = batch.size()/divide;
-        ArrayList<List<Integer>> splitArray = new ArrayList<List<Integer>>();
+        ArrayList<List<Long>> splitArray = new ArrayList<List<Long>>();
         int previous = 0;
         int next = quotient;
 
         //split array into sublists according to their ranges
         for(int i = 0; i < divide-1; i++)
         {
-            List<Integer> temp = batch.subList(previous, next);
+            List<Long> temp = batch.subList(previous, next);
             splitArray.add(temp);
             previous = previous + quotient;
             next = next + quotient;
@@ -314,7 +336,7 @@ public class connector
         splitArray.add(batch.subList(previous, next+remainder));
         return splitArray;
     }
-    */
+    
 
     public void close()
     {
