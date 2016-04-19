@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class main
 {
 
-    public final static int NUM_OPERATIONS = 64;
+    public final static int NUM_OPERATIONS = 500000;
 
     public static void main(String[] args)
     {

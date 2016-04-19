@@ -8,7 +8,7 @@ public class thread implements Runnable
 {
     private org.voltdb.client.Client myApp;
     private List<String> batch;
-    private List<Integer> value;
+    private List<Long> value;
     private List<String> date;
     private String flag;
     private CyclicBarrier gate;
@@ -20,7 +20,7 @@ public class thread implements Runnable
         this.gate = gate;
     }
 
-    public thread(org.voltdb.client.Client myApp, String flag, List<String> date, List<Integer> value,CyclicBarrier gate )
+    public thread(org.voltdb.client.Client myApp, String flag, List<String> date, List<Long> value,CyclicBarrier gate )
     {
         this.myApp = myApp;
         this.date = date;
@@ -29,7 +29,7 @@ public class thread implements Runnable
         this.gate = gate;
     }
 
-    public thread(org.voltdb.client.Client myApp, String flag, List<Integer> value, CyclicBarrier gate)
+    public thread(org.voltdb.client.Client myApp, String flag, List<Long> value, CyclicBarrier gate)
     {
         this.myApp = myApp;
         this.value = value;
@@ -86,7 +86,7 @@ public class thread implements Runnable
             if (flag.equalsIgnoreCase("insert")) {
                 for (int i = 0; i < date.size(); ++i) {
                     // Leaving date static as the epoch
-                    response = myApp.callProcedure("insert", 1, value.get(i));
+                    response = myApp.callProcedure("insert", value.get(i), 2);
                     if(response.getStatus() != ClientResponse.SUCCESS)
                     {
                         throw new RuntimeException(response.getStatusString());

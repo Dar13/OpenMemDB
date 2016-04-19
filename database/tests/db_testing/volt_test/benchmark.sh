@@ -18,7 +18,7 @@ rm -f catalog.jar
 jar cvf catalog.jar main.class connector.class thread.class insert.class find.class
 
 #Need to clean up before executing tests
-rm -f select.txt drop.txt insert.txt
+#rm -f select.txt drop.txt insert.txt
 
 #Execute all OpenMemDB Flag Tests
 #for i in ${flags[@]}

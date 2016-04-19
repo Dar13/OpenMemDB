@@ -200,11 +200,11 @@ public class connector
     {
         ArrayList<Thread> list = new ArrayList<Thread>();
         ArrayList<String> date_tmp = genDates(numSQLStmt);
-        ArrayList<Integer> value_tmp = genValues(numSQLStmt);
+        ArrayList<Long> value_tmp = genValues(numSQLStmt);
         final CyclicBarrier gate = new CyclicBarrier(threadCount+1);
 
         ArrayList<List<String>> date = splitBatch(date_tmp, threadCount);
-        ArrayList<List<Integer>> value = splitIntArray(value_tmp, threadCount);
+        ArrayList<List<Long>> value = splitLongArray(value_tmp, threadCount);
 
         try {
             //spawn threads
@@ -265,10 +265,10 @@ public class connector
         return dates;
     }
 
-    private ArrayList<Integer> genValues(int size)
+    private ArrayList<Long> genValues(int size)
     {
-        ArrayList<Integer> values = new ArrayList<Integer>();
-        for(int i = 0; i < size; i++)
+        ArrayList<Long> values = new ArrayList<Long>();
+        for(long i = 0; i < size; i++)
         {
             values.add(i);
         }
@@ -312,21 +312,21 @@ public class connector
 
     
     //splits sql statements evenly to threads
-    private ArrayList<List<Integer>> splitIntArray(ArrayList<Integer> batch, int divide)
+    private ArrayList<List<Long>> splitLongArray(ArrayList<Long> batch, int divide)
     {
         if(divide == 0)
             System.out.println("Cannot divide by zero");
 
         int remainder = batch.size()%divide;
         int quotient = batch.size()/divide;
-        ArrayList<List<Integer>> splitArray = new ArrayList<List<Integer>>();
+        ArrayList<List<Long>> splitArray = new ArrayList<List<Long>>();
         int previous = 0;
         int next = quotient;
 
         //split array into sublists according to their ranges
         for(int i = 0; i < divide-1; i++)
         {
-            List<Integer> temp = batch.subList(previous, next);
+            List<Long> temp = batch.subList(previous, next);
             splitArray.add(temp);
             previous = previous + quotient;
             next = next + quotient;
