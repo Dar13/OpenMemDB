@@ -21,7 +21,19 @@ deployment.xml - Cluster config file
 //------------------------------------------------------------------
 
 //--------How to Run-------------------------------------
-Steps:
+Quick Run Guide:
+1.) ./start.sh 16
+2.) ./sqlcmd
+    In sqlcmd prompt type
+    3.) load classes /home/OpenMemDb/OpenMemDB/database/tests/db_testing/volt_test/catalog.jar;
+    4.) file /home/OpenMemDb/OpenMemDB/database/tests/db_testing/volt_test/create.txt;
+    5.) exit;
+6.) ./run.sh "thread count"
+7.) vim execTime.txt
+*NOTE: if the java application is changed run ./benchmark.sh*
+*NOTE: execTime.txt is not removed after each run so test results are piled on each other*
+
+Long Steps:
 1.) Run the server with this script
 ./start.sh "number of sites per host"
 
