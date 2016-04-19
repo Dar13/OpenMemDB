@@ -199,9 +199,15 @@ void DataStoreTest::selectTest(std::vector<std::string> select_statements, void 
     tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);    
     DataStore *data = grab->data;
 
+    std::unique_lock<std::mutex> locker(mu);
+
+    cond.wait(locker);
+    locker.unlock();
+
+    int ct = 0; 
+
     for(auto i = select_statements.begin(); i != select_statements.end(); i++)
     {
-        std::cout << *i << std::endl;
         ParseResult parse_result = parse(*i, data);
 
         if(parse_result.status == ResultStatus::SUCCESS)
@@ -209,7 +215,6 @@ void DataStoreTest::selectTest(std::vector<std::string> select_statements, void 
             auto result = WorkThread::ExecuteStatement(parse_result.result, data);
             if(result.status == ResultStatus::SUCCESS) 
             {
-                // TODO
             }
         }
     }
@@ -280,8 +285,6 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
                 std::to_string(i) + ");";
                 
                 test_data.push_back(insert_into);
-
-                year;
             }
             break;
         }
@@ -304,13 +307,103 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
                 std::to_string(i) + ");";
 
                 test_data.push_back(insert_into);
-
-                year++;
             }
 
             for (int i = 0; i < TestConstants::MaxSelects; ++i)
             {
-                std::string select_from = "SELECT TestT0.B FROM TestT0 WHERE TestT0.B==" + std::to_string(i) + ";";
+                // std::string select_from = "SELECT TestT0.B FROM TestT0 WHERE TestT0.B==" + std::to_string(i) + ";";
+                std::string select_from = "SELECT TestT0.B FROM TestT0;";
+                select_data.push_back(select_from);
+            }
+
+            break;
+        }
+    }
+
+    return *this;
+}
+
+DataStoreTest& DataStoreTest::generateCompatCases(int testComplexity)
+{
+    complexity = testComplexity;
+    parseComplexity(complexity);
+    share.tervel_test = new tervel::Tervel(2*threadCount);
+
+    switch(mode)
+    {
+        case MODE_CREATE:
+        {
+            for(int i = 0; i < TestConstants::MaxTables; i++)
+            {
+                std::string create_table = "CREATE TABLE TestT"+ std::to_string(i) +" (A VARCHAR, B INTEGER PRIMARY KEY);";
+                statements.push_back(create_table);
+            }
+            break;
+        }
+
+        case MODE_DROP:
+        {
+
+            for(int i = 0; i < TestConstants::MaxTables; i++)
+            {
+                std::string create_table = "CREATE TABLE TestT"+ std::to_string(i) +" (A VARCHAR, B INTEGER PRIMARY KEY);";
+                statements.push_back(create_table);
+            }
+
+            for(int i = 0; i < TestConstants::MaxTables; i++)
+            {
+                std::string drop = "TestT"+std::to_string(i);
+                table_name.push_back(drop);
+            }
+
+            break;
+        }
+        
+        case MODE_INSERT:
+        {
+            for(int i = 0; i < TestConstants::InsertToTables; i++)
+            {
+                std::string create_table = "CREATE TABLE TestT"+ std::to_string(i) +" (A DATE, B INTEGER PRIMARY KEY);";
+                statements.push_back(create_table);
+            }
+
+            int year = 2016;
+            
+            for(int i = 0; i < TestConstants::MaxInserts; i++)
+            {
+                std::string date = std::to_string(year) + "-04-12";
+                std::string insert_into = "INSERT INTO TestT0 VALUES (\'" + date + "\'," +
+                std::to_string(i) + ");";
+                
+                test_data.push_back(insert_into);
+            }
+            break;
+        }
+
+        case MODE_SELECT:
+        {
+
+            for (int i = 0; i < TestConstants::SelectFromTables; ++i)
+            {
+                std::string create_table = "CREATE TABLE TestT" + std::to_string(i) + " (A DATE, B INTEGER PRIMARY KEY);";
+                statements.push_back(create_table);
+            }
+
+            int year = 2016;
+            
+            for(int i = 0; i < TestConstants::MaxSelects; ++i)
+            {
+                std::string date = std::to_string(year) + "-04-12";
+                std::string insert_into = "INSERT INTO TestT0 VALUES (\'" + date + "\'," +
+                std::to_string(i) + ");";
+
+                test_data.push_back(insert_into);
+            }
+
+            for (int i = 0; i < TestConstants::MaxSelects; ++i)
+            {
+                // std::string select_from = "SELECT TestT0.B FROM TestT0 WHERE TestT0.B==" + std::to_string(i) + ";";
+                std::string select_from = "SELECT TestT0.B FROM TestT0;";
                 select_data.push_back(select_from);
             }
 
@@ -425,6 +518,7 @@ TestResult DataStoreTest::test()
             {
                 v_t.at(i).join();
             }
+
             auto time_end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
 
@@ -435,13 +529,37 @@ TestResult DataStoreTest::test()
         }
         case MODE_SELECT:
         {
-            tervel::ThreadContext* old_context2 = loadRows(test_data, statements, (void *) &share);
+            std::vector<std::thread> v_t;
 
-            std::thread t(selectTest, select_data, (void*) &share);
+            tervel::ThreadContext* old_context = loadRows(test_data, statements, (void *) &share);
 
-            t.join();
-            // delete old_context1, old_context2;
 
+            for(int i = 0; i < threadCount; i++)
+            {
+
+                i2tuple tuple = calculateArrayCut(threadCount, i); 
+
+                std::vector<std::string> cut(&select_data[std::get<0>(tuple)], &select_data[std::get<1>(tuple)]);
+                std::thread t(selectTest, cut, (void *) &share);
+
+                v_t.push_back(std::move(t));
+            }
+
+
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            auto time_start = std::chrono::high_resolution_clock::now();
+
+            cond.notify_all();
+
+            for(int i = 0; i < threadCount; i++)
+            {
+                v_t.at(i).join();
+            }
+
+            auto time_end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+            
+            delete old_context;
             break;
         }
     }
@@ -467,6 +585,7 @@ i2tuple DataStoreTest::calculateArrayCut(int threadCount, int threadNumber)
             break;
         case MODE_SELECT:
             size = select_data.size();
+            break;
         default:
             size = 0;
             break;
@@ -474,6 +593,7 @@ i2tuple DataStoreTest::calculateArrayCut(int threadCount, int threadNumber)
 
     int cutPerThread = size / threadCount;
     int start = cutPerThread*threadNumber;
+
     int end = start + cutPerThread;
 
     return i2tuple(start, end);
@@ -515,7 +635,6 @@ void DataStoreTest::parseComplexity(int complexity)
 DataStoreTest& DataStoreTest::setThreadCount(int count)
 {
     threadCount = count;
-    printf("%d\n", threadCount);
     share.tervel_test = new tervel::Tervel(2*threadCount);
     return *this;
 }

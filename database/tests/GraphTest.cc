@@ -137,6 +137,9 @@ void GraphTest::createOrAppendOutputFile(int mode, int time, int threadCount)
                 case MODE_INSERT:
                     outputFile << "insert_test\n";
                     break;
+                case MODE_SELECT:
+                    outputFile << "select_test\n";
+                    break;
             }
             outputFile << threadCount << "\n";
             outputFile << time << "\n";
