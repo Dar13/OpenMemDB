@@ -20,6 +20,7 @@ class DataStoreTest
 		DataStoreTest();
 		DataStoreTest& with(int mode);
 		DataStoreTest& generateCases(int complexity);
+		DataStoreTest& generateCompatCases(int complexity);
 		DataStoreTest& setThreadCount(int count);
 		TestResult test();
 		void printStatementsToFile();
