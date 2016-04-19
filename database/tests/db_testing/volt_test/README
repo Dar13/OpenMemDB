@@ -21,11 +21,74 @@ deployment.xml - Cluster config file
 //------------------------------------------------------------------
 
 //--------How to Run-------------------------------------
-type ./benchmark.sh
+Steps:
+1.) Run the server with this script
+./start.sh "number of sites per host"
+
+    EXAMPLE:
+    ./start.sh 16
+
+*NOTE: SitesperHost should never exceed 24 sites, VoltDB reccommends 16 or 4*
+
+2.) Wait for VoltDB to finish setting up. It should say "Server completed initialization."
+
+3.) Run ./benchmark.sh to remove any leftover files from previous runs and compiles the Java Application.
+    This also compiles the stored procedures Java classes which we will use in the next step.
+
+    EXAMPLE:
+    ./benchmark.sh
+
+4.) Now that VoltDB is setup we will load it with our stored procedure class and load up our schema.
+    Run ./sqlcmd in the voltdb/bin directory. This will take you to the sqlcmd prompt.
+
+    *NOTE you can exit out of sqlcmd prompt by typing exit;*
+
+    EXAMPLE:
+    ./sqlcmd.sh
+
+5.) Now type in load classes /path/to/catalog.jar;
+    or type in the path to this catalog.jar generated from ./benchmark.sh
+    Once that is done it should say Command Succeeded.
+
+    EXAMPLE:
+    load classes /home/OpenMemDb/OpenMemDB/database/tests/db_testing/volt_test/catalog.jar;
+
+6.) Now type in file /path/to/create.txt
+
+    EXAMPLE:
+    file /home/OpenMemDb/OpenMemDB/database/tests/db_testing/volt_test/create.txt;
+
+7.) VoltDB database is now loaded with the precompiled tables and stored procedures.
+    !!BE SURE TO EXIT OUT OF SQLCMD!!
+    Do so by typing exit; when you are inside the sqlcmd prompt. This is an important step
+    since ./run.sh script will look for the VoltDB create processes sqlcmd process may confuse
+    the taskset within run script.
+
+9.) Next this script
+
+    ./run.sh "number of threads"
+
+    This will run the java app and also limits the program to a define amount of cores.
+    This also includes the VoltDB process will be limited to those cores.
+
+    *NOTE run.sh by DEFAULT uses only one node in the cluster*
+    Example:
+    ./run.sh 8
+
+10.) This will run the application which will connect to VoltDB database. Wait until the application returns "Done testing"
+
+11.) Test results are written to execTime.txt. The top result is insert test time. The bottom result is select test time.
+     Test results will display Execution Time: "time taken" Threads: "number of threads".
+
+*NOTE: Time is in milliseconds*
+
+12.) Now that you are done with the tests it is time to cleanup! Run ./stop.sh to stop VoltDB, this will take some time to shutoff
+     so wait before starting VoltDB again or VoltDB will state that ports are still in use.
 
 To see results type vim execTime.txt
 //-------------------------------------------------------
 
 //--------------------------Interupting the Results---------------------------
-The tests return the number of threads and the time it took to insert those results.
+The tests return the number of threads and the time it took to insert those results. Time is in milliseconds, the top result is insert test
+and the bottom result is select test.
 //------------------------------------------------------

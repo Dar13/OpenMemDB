@@ -11,12 +11,16 @@ declare -a flags=(irt)
 
 
 #Compile Java Application
+echo "Removing old class files and compiling Java"
 make clean && make
 
 #Clean up directory and recompile
+echo "Removing old catalog jar file"
 rm -f catalog.jar
+echo "Compiling stored procedure into catalog.jar"
 jar cvf catalog.jar main.class connector.class thread.class insert.class find.class
-
+echo "Removing old time results"
+rm -f execTime.txt
 #Need to clean up before executing tests
 #rm -f select.txt drop.txt insert.txt
 
