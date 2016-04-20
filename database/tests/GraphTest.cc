@@ -12,75 +12,6 @@
 GraphTest::GraphTest(int mode, int threadCount)
 {
 
-    // Creating a new instance because it fails the position < secondary_array_size_ otherwise
-    // todo: reset tervel after each test so I dont have to do this
-
-    // std::vector<int> timeVals;
-    // DataStoreTest dataStoreTest;
-
-    // TestResult result = dataStoreTest.with(MODE_CREATE)
-    // 				                 .generateCases(0b0000)
-    // 				                 .test();
-
-    // timeVals.push_back(result.duration);
-
-    // DataStoreTest dataStoreTest2;
-
-    // result = dataStoreTest2.with(MODE_CREATE)
-    //                       .generateCases(0b0010)
-    //                       .test();
-
-    // timeVals.push_back(result.duration);
-
-    // DataStoreTest dataStoreTest3;
-
-    // result = dataStoreTest3.with(MODE_CREATE)
-    //                       .generateCases(0b0100)
-    //                       .test();
-
-    // timeVals.push_back(result.duration);
-
-    // DataStoreTest dataStoreTest4;
-
-    // result = dataStoreTest4.with(MODE_CREATE)
-    //                       .generateCases(0b1000)
-    //                       .test();
-
-    // timeVals.push_back(result.duration);
-
-    // DataStoreTest dataStoreTest5;
-
-    // result = dataStoreTest5.with(MODE_CREATE)
-    //                                  .generateCases(0b0000)
-    //                                  .setThreadCount(16)
-    //                                  .test();
-
-    // timeVals.push_back(result.duration);
-
-    // DataStoreTest dataStoreTest6;
-
-    // result = dataStoreTest6.with(MODE_CREATE)
-    //                                 .generateCases(0b0000)
-    //                                 .setThreadCount(32)
-    //                                 .test();
-
-    // timeVals.push_back(result.duration);
-
-    // DataStoreTest dataStoreTest7;
-
-    // result = dataStoreTest7.with(MODE_CREATE)
-    //                             .generateCases(0b0000)
-    //                             .setThreadCount(64)
-    //                             .test();
-
-    // timeVals.push_back(result.duration);
-
-    // TestResult result = dataStoreTest.with(MODE_DROP)
-    //                                 .generateCases(0b0100)
-    //                                 .test();
-                               
-    // timeVals.push_back(result.duration);
-
     switch(mode) 
     {
 
@@ -95,6 +26,9 @@ GraphTest::GraphTest(int mode, int threadCount)
             break;
         case MODE_SELECT:
             selectPerformanceTest(threadCount);
+            break;
+        case MODE_MIXED:
+            mixedPerformanceTest(threadCount);
             break;
     }
 
@@ -139,6 +73,9 @@ void GraphTest::createOrAppendOutputFile(int mode, int time, int threadCount)
                     break;
                 case MODE_SELECT:
                     outputFile << "select_test\n";
+                    break;
+                case MODE_MIXED:
+                    outputFile << "mixed_test\n";
                     break;
             }
             outputFile << threadCount << "\n";
@@ -200,6 +137,18 @@ void GraphTest::selectPerformanceTest(int threadCount)
     DataStoreTest dataStoreTest;
 
     TestResult result = dataStoreTest.with(MODE_SELECT)
+                                    .generateCases(0b0000)
+                                    .setThreadCount(threadCount)
+                                    .test();
+
+    createOrAppendOutputFile(MODE_SELECT, result.duration, threadCount);
+}
+
+void GraphTest::mixedPerformanceTest(int threadCount)
+{
+    DataStoreTest dataStoreTest;
+
+    TestResult result = dataStoreTest.with(MODE_MIXED)
                                     .generateCases(0b0000)
                                     .setThreadCount(threadCount)
                                     .test();

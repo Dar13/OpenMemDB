@@ -13,24 +13,34 @@ with open("test_data.omdbt", "r") as f:
 test_name = test_data[0]
 test_case_count = test_data[1]
 
-thread_time = []
+speedup_time1 = []
+speedup_time2 = []
+speedup_time3 = []
+speedup_ideal = ['1','2','4','8','16','32','64']
 
-for x in range(2, len(test_data)):
-	thread_time.append(int(test_data[x]))
+for x in range(2, 9):
+	speedup_time1.append(float(test_data[x]))
 
+for x in range(9, 16):
+	speedup_time2.append(float(test_data[x]))
 
-for x in thread_time:
-	print(x)
+for x in range(16, 23):
+	speedup_time3.append(float(test_data[x]))
+
 
 # create and show plot
-xticks = ['1','2','4','8','16','24','32','64','64']
-x = list(range(len(thread_time)))
+xticks = ['1','2','4','8','16','32','64']
+x = list(range(len(speedup_time1)))
 
 style.use('ggplot')
-plt.plot(x, thread_time, linewidth=3)
+plt.plot(x, speedup_time1, linewidth=3, label="OpenMemDB")
+plt.plot(x, speedup_time2, linewidth=3, label="MemSQL")
+plt.plot(x, speedup_time3, linewidth=3, label="VoltDB")
+plt.plot(x, speedup_ideal, linewidth=3, label="Ideal")
 
 plt.xticks(x, xticks)
 plt.title(test_name)
-plt.ylabel('Time (microseconds)')
+plt.legend(loc='upper left', numpoints = 1)
+plt.ylabel('Speedup')
 plt.xlabel('Thread Count')
 plt.savefig("test_graph.png")

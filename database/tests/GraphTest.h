@@ -13,7 +13,7 @@ class GraphTest
 		void dropPerformanceTest(int threadCount);
 		void insertPerformanceTest(int threadCount);
 		void selectPerformanceTest(int threadCount);
-
+		void mixedPerformanceTest(int threadCount);
 	
 };
 

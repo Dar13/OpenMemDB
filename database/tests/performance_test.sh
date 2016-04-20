@@ -8,7 +8,6 @@ case $1 in
 		./tests pct 4
 		./tests pct 8
 		./tests pct 16
-		./tests pct 24
 		./tests pct 32
 		./tests pct 64
 		python graph_test.py
@@ -19,6 +18,10 @@ case $1 in
 		./tests pdt 1
 		./tests pdt 2
 		./tests pdt 4
+		./tests pdt 8
+		./tests pdt 16
+		./tests pdt 32
+		./tests pdt 64
 		python graph_test.py
 		
 		;;
@@ -31,7 +34,6 @@ case $1 in
 	 	./tests pirt 16
 	 	./tests pirt 32
 	 	./tests pirt 64
-
 		python graph_test.py
 		;;
 
@@ -47,6 +49,19 @@ case $1 in
 
 		python graph_test.py
 	 	;;
+
+	"st")
+		echo "Performing Mixed Test"
+		./tests pmt 1
+		./tests pmt 2
+	 	./tests pmt 4
+	 	./tests pmt 8
+	 	./tests pmt 16
+	 	./tests pmt 32
+	 	./tests pmt 64
+
+		python graph_test.py
+	 	;; 	
 
 	*)
 		echo "No test selected options are:"
