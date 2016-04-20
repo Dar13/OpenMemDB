@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.*;
@@ -15,7 +16,8 @@ public class Sample {
     private enum TestType {
         CREATE,
         INSERT,
-        SELECT
+        SELECT,
+        MIX
     }
 
     private static void ResetEnvironment() throws SQLException {
@@ -104,6 +106,22 @@ public class Sample {
             }
             testType = TestType.SELECT;
 
+        } else if (testName.equalsIgnoreCase("mixed_test")) {
+            // Need to run create statements then starter inserts then time remaining statement
+            try (Connection conn = DriverManager.getConnection(Constants.CONNECTION, properties)) {
+                Worker.executeSQL(conn, "USE test");
+                for (String createCommand: commands.getCreateCommands()) {
+                    Worker.executeSQL(conn, createCommand);
+                }
+                for (String starterInsert: commands.getStarterInserts()) {
+                    Worker.executeSQL(conn, starterInsert);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return;
+            }
+            testType = TestType.MIX;
+
         } else {
             System.err.println("Test name is not of expected type: "+testName);
         }
@@ -126,6 +144,9 @@ public class Sample {
                     break;
                 case SELECT:
                     finalAllCommands = commands.getSelectCommands();
+                    break;
+                case MIX:
+                    finalAllCommands = commands.getMixedCommands();
                     break;
                 default:
                     System.err.println("Test type not properly set");

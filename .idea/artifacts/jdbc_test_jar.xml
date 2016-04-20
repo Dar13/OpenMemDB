@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="jdbc_test:jar">
+    <output-path>$PROJECT_DIR$/database/tests/db_testing/memsql_test/out/artifacts/jdbc_test_jar</output-path>
+    <root id="archive" name="jdbc_test.jar">
+      <element id="module-output" name="jdbc_test" />
+      <element id="extracted-dir" path="/usr/share/java/mysql-connector-java.jar" path-in-jar="/" />
+      <element id="library" level="project" name="mysql-connector-java" />
+    </root>
+  </artifact>
+</component>
