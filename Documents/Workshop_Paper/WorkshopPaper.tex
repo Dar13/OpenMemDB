@@ -291,7 +291,18 @@ MemSQL has the best select only scaling of all of the databases that were bench-
 \end{figure}
 
 \section{Conclusions}
-PENDING
+We have presented OpenMemDB, an in-memory and wait-free database that achieves competitive scaling when compared to other
+in-memory SQL database management system.  OpenMemDB scales particularly well with read heavy workloads, achieving 90\% 
+scaling at 8 threads and 60\% scaling at 32 threads when running our select bench-mark. OpenMemDB is the first, and only fully
+wait-free database in existence at the time of writing this paper. 
+\par\vspace{\baselineskip}
+Based on the encouraging scaling achieved, further work toimprove individual thread performance would bring this database
+closer to commercial viability, in particular with embedded systems where consistent latency is preferable to inconsistent
+performance. 
+\par\vspace{\baselineskip}
+Some of the areas that can be improved with more time would be: improving the memory allocation model to reduce thread
+synchronization, further optimizations of the tokenization and parsing of SQL statements, and improved support for standard
+SQL operations.
 
 \newpage
 \bibliography{WorkshopPaper}
