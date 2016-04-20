@@ -47,6 +47,14 @@ int main(int argc, char* argv[])
 
 			GraphTest graphTest(MODE_SELECT, threadCount);
 		}
+		
+		if(strcmp(argv[1], "pmt") == 0) 
+		{
+			int threadCount;
+			sscanf(argv[2], "%d", &threadCount);
+
+			GraphTest graphTest(MODE_MIXED, threadCount);
+		}
 
 		if(strcmp(argv[1], "sqltf") == 0) 
 		{
@@ -119,10 +127,22 @@ int main(int argc, char* argv[])
 				}
 
 			}
-
-			if(strcmp(argv[2], "ut") == 0)
+			if(strcmp(argv[2], "mt") == 0)
 			{
-				
+
+				if(argv[3] && strcmp(argv[3], "-c") == 0) 
+				{
+					test.with(MODE_MIXED)
+						.generateCompatCases(0b0000)
+						.printStatementsToFile();
+				}
+				else
+				{
+					test.with(MODE_MIXED)
+						.generateCases(0b0000)
+						.printStatementsToFile();			
+				}
+
 			}
 		}
 	}

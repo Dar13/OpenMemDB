@@ -20,6 +20,7 @@
 #include <iostream>
 #include <fstream>
 #include <mutex>
+#include <random>
 #include <condition_variable>
 
 std::mutex mu;
@@ -222,6 +223,38 @@ void DataStoreTest::selectTest(std::vector<std::string> select_statements, void 
     delete main_context;
 }
 
+void DataStoreTest::mixedTest(std::vector<std::string> all_statements, void *t_data)
+{
+    struct thread_data *grab;
+    grab = (struct thread_data *) t_data;
+
+    setupTokenMappings();   
+
+    tervel::Tervel* tervel_test = grab->tervel_test;
+    tervel::ThreadContext* main_context = new tervel::ThreadContext(tervel_test);    
+    DataStore *data = grab->data;
+
+    std::unique_lock<std::mutex> locker(mu);
+
+    cond.wait(locker);
+    locker.unlock();
+
+    for(auto i = all_statements.begin(); i != all_statements.end(); i++)
+    {
+        ParseResult parse_result = parse(*i, data);
+
+        if(parse_result.status == ResultStatus::SUCCESS)
+        {
+            auto result = WorkThread::ExecuteStatement(parse_result.result, data);
+            if(result.status == ResultStatus::SUCCESS) 
+            {
+            }
+        }
+    }
+
+    delete main_context;
+}
+
 // First method that should be called when making a test, passes in just the type of test. 
 // Later on we will have the ability to set your own sql strings, this will also be passed in here
 DataStoreTest& DataStoreTest::with(int mode)
@@ -306,6 +339,7 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
                 std::string insert_into = "INSERT INTO TestT0 VALUES (" + date + "," +
                 std::to_string(i) + ");";
 
+
                 test_data.push_back(insert_into);
             }
 
@@ -313,10 +347,55 @@ DataStoreTest& DataStoreTest::generateCases(int testComplexity)
             {
                 // std::string select_from = "SELECT TestT0.B FROM TestT0 WHERE TestT0.B==" + std::to_string(i) + ";";
                 std::string select_from = "SELECT TestT0.B FROM TestT0;";
+
                 select_data.push_back(select_from);
             }
 
             break;
+        }
+        case MODE_MIXED:
+        {
+            
+            for (int i = 0; i < TestConstants::SelectFromTables; ++i)
+            {
+                std::string create_table = "CREATE TABLE TestT" + std::to_string(i) + " (A DATE, B INTEGER);";
+                statements.push_back(create_table);
+            }
+
+            std::mt19937 rng;
+            rng.seed(std::random_device()());
+            std::uniform_int_distribution<std::mt19937::result_type> dist(1,3); // distribution in range [1, 3]
+
+            int year = 2016;
+            std::string date = std::to_string(year) + "-04-12";
+
+            for(int i = 0; i < TestConstants::MaxSelects; ++i)
+            {
+                std::string date = std::to_string(year) + "-04-12";
+                std::string insert_into = "INSERT INTO TestT0 VALUES (" + date + "," +
+                std::to_string(i) + ");";
+
+                test_data.push_back(insert_into);
+            }
+
+            for(int i = 0; i < TestConstants::MaxMixed; ++i)
+            {
+
+                if(dist(rng) == 1) 
+                {
+                    std::string insert_into = "INSERT INTO TestT0 VALUES (" + date + "," +
+                    std::to_string(i+TestConstants::MaxMixed) + ");";
+
+                    all_data.push_back(insert_into);
+                }
+                else
+                {
+                    std::string select_from = "SELECT TestT0.B FROM TestT0;";
+
+                    all_data.push_back(select_from);
+                }
+            }
+
         }
     }
 
@@ -408,6 +487,50 @@ DataStoreTest& DataStoreTest::generateCompatCases(int testComplexity)
             }
 
             break;
+        }
+        case MODE_MIXED:
+        {
+            
+            for (int i = 0; i < TestConstants::SelectFromTables; ++i)
+            {
+                std::string create_table = "CREATE TABLE TestT" + std::to_string(i) + " (A DATE, B INTEGER PRIMARY KEY);";
+                statements.push_back(create_table);
+            }
+
+            int year = 2016;
+            std::string date = std::to_string(year) + "-04-12";
+
+            for(int i = 0; i < TestConstants::MaxSelects; ++i)
+            {
+                std::string date = std::to_string(year) + "-04-12";
+                std::string insert_into = "INSERT INTO TestT0 VALUES (\'" + date + "\'," +
+                std::to_string(i) + ");";
+
+                test_data.push_back(insert_into);
+            }
+
+            std::mt19937 rng;
+            rng.seed(std::random_device()());
+            std::uniform_int_distribution<std::mt19937::result_type> dist(1,3); // distribution in range [1, 3]
+
+            for(int i = 0; i < TestConstants::MaxMixed; ++i)
+            {
+
+                if(dist(rng) == 1) 
+                {
+                    std::string insert_into = "INSERT INTO TestT0 VALUES (\'" + date + "\'," +
+                    std::to_string(i+TestConstants::MaxMixed) + ");";
+
+                    all_data.push_back(insert_into);
+                }
+                else
+                {
+                    std::string select_from = "SELECT TestT0.B FROM TestT0;";
+
+                    all_data.push_back(select_from);
+                }
+            }
+
         }
     }
 
@@ -534,6 +657,7 @@ TestResult DataStoreTest::test()
             tervel::ThreadContext* old_context = loadRows(test_data, statements, (void *) &share);
 
 
+
             for(int i = 0; i < threadCount; i++)
             {
 
@@ -541,6 +665,41 @@ TestResult DataStoreTest::test()
 
                 std::vector<std::string> cut(&select_data[std::get<0>(tuple)], &select_data[std::get<1>(tuple)]);
                 std::thread t(selectTest, cut, (void *) &share);
+
+                v_t.push_back(std::move(t));
+            }
+
+
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            auto time_start = std::chrono::high_resolution_clock::now();
+
+            cond.notify_all();
+
+            for(int i = 0; i < threadCount; i++)
+            {
+                v_t.at(i).join();
+            }
+
+            auto time_end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+            
+            delete old_context;
+            
+            TestResult testResult(duration.count(), threadCount);
+            return testResult;
+        }
+        case MODE_MIXED:
+        {
+            std::vector<std::thread> v_t;
+
+            tervel::ThreadContext* old_context = loadRows(test_data, statements, (void *) &share);
+
+            for(int i = 0; i < threadCount; i++)
+            {
+                i2tuple tuple = calculateArrayCut(threadCount, i); 
+
+                std::vector<std::string> cut(&all_data[std::get<0>(tuple)], &all_data[std::get<1>(tuple)]);
+                std::thread t(mixedTest, cut, (void *) &share);
 
                 v_t.push_back(std::move(t));
             }
@@ -587,6 +746,9 @@ i2tuple DataStoreTest::calculateArrayCut(int threadCount, int threadNumber)
             break;
         case MODE_SELECT:
             size = select_data.size();
+            break;
+        case MODE_MIXED:
+            size = all_data.size();
             break;
         default:
             size = 0;
@@ -718,6 +880,32 @@ void DataStoreTest::printStatementsToFile()
             outputFile << "select" << std::endl;
 
             for(auto i = select_data.begin(); i  != select_data.end(); i++)
+            {
+                outputFile << *i << std::endl;
+            }
+
+            break;
+        }
+        case MODE_MIXED:
+        {
+            outputFile << "mixed_test" << std::endl;
+            outputFile << "create" << std::endl;
+
+            for(auto i = statements.begin(); i  != statements.end(); i++)
+            {
+                outputFile << *i << std::endl;
+            }
+
+            outputFile << "insert" << std::endl;
+
+            for(auto i = test_data.begin(); i  != test_data.end(); i++)
+            {
+                outputFile << *i << std::endl;
+            }
+
+            outputFile << "mixed" << std::endl;
+
+            for(auto i = all_data.begin(); i  != all_data.end(); i++)
             {
                 outputFile << *i << std::endl;
             }
