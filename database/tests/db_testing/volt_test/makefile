@@ -9,11 +9,11 @@ CLASS_FILES = ".:/home/OpenMemDb/voltdb/voltdb/*"
 	$(JC) $(JFLAGS) $(CP) $(CLASS_FILES) $*.java
 
 CLASSES = \
-    main.java \
-    thread.java \
-    connector.java \
-	insert.java \
-	find.java \
+    Run.java \
+    Worker.java \
+    Connector.java \
+	Insert.java \
+	Select.java \
 
 default: classes
 

@@ -18,9 +18,18 @@ make clean && make
 echo "Removing old catalog jar file"
 rm -f catalog.jar
 echo "Compiling stored procedure into catalog.jar"
-jar cvf catalog.jar main.class connector.class thread.class insert.class find.class
+jar cvf catalog.jar *.class
 echo "Removing old time results"
 rm -f execTime.txt
+
+echo "Running OpenMemDB tests"
+cd ../..
+/home/OpenMemDb/OpenMemDB/database/tests/tests sqltf $1
+cd /home/OpenMemDb/OpenMemDB/database/tests/db_testing/volt_test/
+
+echo "Spliting sql instructions into seperate files"
+./parseSQL.sh
+
 #Need to clean up before executing tests
 #rm -f select.txt drop.txt insert.txt
 
