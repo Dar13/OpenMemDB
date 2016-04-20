@@ -15,6 +15,7 @@
 \usepackage{helvet}
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
+\usepackage{tabularx,ragged2e,booktabs,caption}
 
 \ifCLASSOPTIONcompsoc
   % IEEE Computer Society needs nocompress option
@@ -77,9 +78,11 @@ linearizability, and avoids the write-skew problem that can occur when using
 snapshot isolation by eliminating writes that are out of data. 
 OpenMemDB's biggest contribution is it's completely wait-free 
 implementation. Every operation executed in OpenMemDB is guarenteed to be wait-free 
-and linearizeably correct. This implementation also scales extremely well, and performs 
-{{ENTER PERCENT HERE}} better than similar in-memory database management systems.
-{{NEED A LITTLE BIT MORE ABOUT THE PERFORMANCE}}
+and linearizeably correct. This implementation also scales competitively when to compared 
+against similar in-memory database management systems.
+OpenMemDB achieves its best scaling in select heavy operation loads with nearly 
+12 times speedup at 16 threads. This is better scaling than either VoltDB or MemSQL showed
+in our bench-marking. 
 \end{abstract}
 
 \section{Introduction}
@@ -125,7 +128,8 @@ executed on a relatively centralized data-set. This is due to the fact that Open
 provides all threads access to every part of the database. Some database systems attempt to 
 use data partitioning to help parallelize their operations, these systems would not be a 
 good choice if the data-set could not be efficiently partitioned. OpenMemDB does not do any 
-partitioning and still manages to achieve {{INSERT SCALING HERE}} scaling. 
+partitioning and still manages to achieve 90\% scaling at 8 threads and 60\% scaling at 32 
+threads. 
 \par\vspace{\baselineskip}
 OpenMemDB also 
 retains all necessary ACID properties, which is vital for most database systems. 
@@ -219,6 +223,59 @@ with SQL frontends, as our goal was a SQL database. We tested various workloads 
 the databases' ability to interleave writes and reads at the same time as well as particularly write-heavy 
 loads. Each test was run with 1, 2, 4, 8, 16, 32, and 64 cores available to the database which maximizes the amount of hardware processors
 available to the OS but does not exceed it. 
+\par\vspace{\baselineskip}
+We ran three tests on all of the databases: an insert only test, a select only test, and
+a mixed test that consisted of {{INSERT PERCENT}}\% writes and {{INSERT PERCENT}}\% reads.
+The resultant scaling found by running these tests can be seen in the tables below. 
+
+\par\vspace{\baselineskip}
+\begin{center}
+\captionof{table}{OpenMemDB Scaling} \label{tab:omdbScaling}
+  \begin{tabular}{  l  l  l  l }
+    \midrule
+    \bf Threads & \bf Insert & \bf Select & \bf Mixed \\ \midrule
+     2 & 1.84 & 1.93 & 5 \\ \midrule
+     4 & 2.94 & 3.08 & 5 \\ \midrule
+     8 & 4.19 & 6.97 & 5 \\ \midrule
+     16 & 4.98 & 11.87 & 5 \\ \midrule
+     32 & 4.75 & 19.05 & 5 \\ \midrule
+     64 & 3.16 & 26.03 & 5 \\ \midrule
+  \end{tabular}
+\end{center}
+
+\par\vspace{\baselineskip}
+\begin{center}
+\captionof{table}{MemSQL Scaling} \label{tab:memsqlScaling}
+  \begin{tabular}{  l  l  l  l }
+    \midrule
+    \bf Threads & \bf Insert & \bf Select & \bf Mixed \\ \midrule
+     2 & 1.20 & 1.58 & 5 \\ \midrule
+     4 & 2.31 & 2.62 & 5 \\ \midrule
+     8 & 4.53 & 3.74 & 5 \\ \midrule
+     16 & 8.54 & 4.85 & 5 \\ \midrule
+     32 & 15.13 & 4.87 & 5 \\ \midrule
+     64 & 20.18 & 1.80 & 5 \\ \midrule
+  \end{tabular}
+\end{center}
+
+\par\vspace{\baselineskip}
+\begin{center}
+\captionof{table}{VoltDB Scaling} \label{tab:voltScaling}
+  \begin{tabular}{  l  l  l  l }
+    \midrule
+    \bf Threads & \bf Insert & \bf Select & \bf Mixed \\ \midrule
+     2 & 1.75 & 1.61 & 5 \\ \midrule
+     4 & 3.58 & 2.70 & 5 \\ \midrule
+     8 & 6.13 & 4.51 & 5 \\ \midrule
+     16 & 9.12 & 7.97 & 5 \\ \midrule
+     32 & 10.71 & 11.92 & 5 \\ \midrule
+     64 & 10.56 & 15.30 & 5 \\ \midrule
+  \end{tabular}
+\end{center}
+
+\ref{tab:omdbScaling} shows the scaling achieved by OpenMemDB for each of the three
+benchmarks that were run. As is clear OpenMemDB scales much better in select only tests. 
+MemSQL has the best select only scaling of all of the databases that were bench-marked.  
 
 %TODO: Put images in here
 \begin{figure}
