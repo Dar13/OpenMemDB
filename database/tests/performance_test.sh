@@ -35,11 +35,26 @@ case $1 in
 		python graph_test.py
 		;;
 
+	"st")
+		echo "Performing Select Test"
+		./tests pst 1
+		./tests pst 2
+	 	./tests pst 4
+	 	./tests pst 8
+	 	./tests pst 16
+	 	./tests pst 32
+	 	./tests pst 64
+
+		python graph_test.py
+	 	;;
+
 	*)
 		echo "No test selected options are:"
 		echo "ct: Create Test"
 		echo "dtt: Drop Table Test"
 		echo "irt: Insert Row Test"
+		echo "st: Select Test"
+
 
 esac
 

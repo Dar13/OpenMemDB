@@ -560,7 +560,9 @@ TestResult DataStoreTest::test()
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
             
             delete old_context;
-            break;
+            
+            TestResult testResult(duration.count(), threadCount);
+            return testResult;
         }
     }
 
