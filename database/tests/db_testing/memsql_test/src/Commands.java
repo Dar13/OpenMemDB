@@ -70,9 +70,16 @@ public class Commands {
             ++i;
         }
 
+        // Move passed mixed word
+        ++i;
+
         // Add all remaining commands to toReturn
         while (i < commands.size()) {
+            if (commands.get(i).equalsIgnoreCase("end")) {
+                break;
+            }
             toReturn.add(commands.get(i));
+            i++;
         }
 
         return toReturn;
