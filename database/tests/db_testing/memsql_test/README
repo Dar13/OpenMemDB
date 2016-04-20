@@ -1,0 +1,24 @@
+In order to run MemSQL test you must be in the home directory of the server
+
+Step 1: Start MemSQL
+  Run the following commands:
+    a) sudo memsql-ops start
+    b) sudo memsql-ops memsql-start --all
+
+Step 2: Generate test sql_statements.omdbt
+  cd to tests directory
+  Make
+  generate the sql statements for whatever test you want to run using the following command
+    ./tests sqltf [st|irt]
+
+Step 3: Run test script
+  cd to the home directory
+  run the following command
+    sudo ./memsql_test_setup.sh
+
+Step 4: Repeat steps 2 and three for remaining test
+
+Step 5: When done with tests clean up memsql
+  a) sudo memsql-ops memsql-stop --all
+  b) sudo memsql-ops stop
+
