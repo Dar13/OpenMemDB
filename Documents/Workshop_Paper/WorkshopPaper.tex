@@ -32,7 +32,7 @@
 
 
 \pdfinfo{%
-  /Title    (OpenMemDB: A wait-free database)
+  /Title    (OpenMemDB: A Wait-Free, In-Memory Database)
   /Author   (Mike McGee, Neil Moore, Robert Medina, Jason Stavrinaky)
   /Creator  ()
   /Producer ()
@@ -54,7 +54,7 @@
 
 \begin{document}
 
-\title{OpenMemDB: A wait-free database\thanks{Sponsor: Dr. Damian Dechev}}
+\title{OpenMemDB: A Wait-Free, In-Memory Database\thanks{Sponsor: Dr. Damian Dechev}}
 \author{
 \IEEEauthorblockN{Michael McGee} \and 
 \IEEEauthorblockN{Robert Medina} \and 
@@ -70,7 +70,7 @@
 
 \pagenumbering{arabic}
 \begin{abstract}
-OpenMemDB is an in-memory database that is implemented using solely wait-free
+OpenMemDB is an in-memory database that is implemented solely using wait-free
 data structures. OpenMemDB is the first and only database currently developed in such a
 way. OpenMemDB also provides linearizable correctness guarantees for all operations
 executed on the database. OpenMemDB uses a form of snapshot isolation to ensure 
@@ -122,7 +122,7 @@ must complete within this valid range of time. An example of a real-time databas
 is a stock market analysis database. A database that is used to track the current state
 of the stock market and run calculations based on the temporarily valid data. 
 \par\vspace{\baselineskip}
-OpenMemDb
+OpenMemDB
 is also well suited for any situation in which a large amount of calculations need to be 
 executed on a relatively centralized data-set. This is due to the fact that OpenMemDB 
 provides all threads access to every part of the database. Some database systems attempt to 
@@ -196,7 +196,7 @@ an order of magnitude performance gain over standards SQL Server\cite{diaconu201
 
 \section{Technical Approach}
 Our database is built upon wait-free data structures found in Tervel, a collection of
-lock-free and wait-free data structures created by Steven Feldman, Pierre LaBorde, and Damian Dechev\cite{tervel:hazard_pointer}\cite{tervel:hash_map}\cite{tervel:vector}. 
+lock-free and wait-free data structures created by Feldman et al\cite{tervel:hazard_pointer}\cite{tervel:hash_map}\cite{tervel:vector}. 
 We use the common definition of wait-freedom as found in Herlihy's definitive text, which
 states that all threads must make progress within a finite amount of time\cite{herlihy:waitfree}. OpenMemDB is 
 built to be wait-free and linearizable by utilizing Tervel data structures to create the 
@@ -204,9 +204,10 @@ underlying data structures used by the database to service queries and commands.
 
 The datastore uses snapshot isolation to increase read performance and minimize the amount of time accessing
 the shared data structures. Snapshot isolation is the technique where a thread or transaction copies the data
-locally and then manipulates it, avoiding performing those manipulations directly on the data structures.
-A side effect of snapshot isolation is write skew, which is similar to the famous ABA problem in concurrent
-programming. We avoid write skew caused by snapshot isolation by only committing the writes
+locally and then manipulates it, which avoids performing those manipulations directly on the data structures.
+A side effect of snapshot isolation is write skew, which occurs when a write operation takes place even though the
+predicate that determined that record should be written to is no longer valid.
+We avoid write skew caused by snapshot isolation by only committing the writes
 if the expected data is in the table. This is done by using the Compare and Swap(CAS) operation provided
 by Tervel's vector data structure. The CAS operation checks if the element in the vector is the
 expected value and swaps the value with the given value if that check succeeds. Tervel's CAS
@@ -225,40 +226,45 @@ loads. Each test was run with 1, 2, 4, 8, 16, 32, and 64 cores available to the 
 available to the OS but does not exceed it. 
 \par\vspace{\baselineskip}
 We ran three tests on all of the databases: an insert only test, a select only test, and
-a mixed test that consisted of {{INSERT PERCENT}}\% writes and {{INSERT PERCENT}}\% reads.
+a mixed test that consisted of 33\% writes and 66\% reads.
 The resultant scaling found by running these tests can be seen in the tables below. 
 
 \par\vspace{\baselineskip}
+\begin{figure}[H]
 \begin{center}
 \captionof{table}{OpenMemDB Scaling} \label{tab:omdbScaling}
   \begin{tabular}{  l  l  l  l }
     \midrule
     \bf Threads & \bf Insert & \bf Select & \bf Mixed \\ \midrule
-     2 & 1.84 & 1.93 & 5 \\ \midrule
-     4 & 2.94 & 3.08 & 5 \\ \midrule
-     8 & 4.19 & 6.97 & 5 \\ \midrule
-     16 & 4.98 & 11.87 & 5 \\ \midrule
-     32 & 4.75 & 19.05 & 5 \\ \midrule
-     64 & 3.16 & 26.03 & 5 \\ \midrule
+     2 & 1.84 & 1.93 & 1.94 \\ \midrule
+     4 & 2.94 & 3.08 & 3.54 \\ \midrule
+     8 & 4.19 & 6.97 & 7.33 \\ \midrule
+     16 & 4.98 & 11.87 & 13.10 \\ \midrule
+     32 & 4.75 & 19.05 & 20.44 \\ \midrule
+     64 & 3.16 & 26.03 & 27.25 \\ \midrule
   \end{tabular}
 \end{center}
+\end{figure}
 
 \par\vspace{\baselineskip}
+\begin{figure}[H]
 \begin{center}
 \captionof{table}{MemSQL Scaling} \label{tab:memsqlScaling}
   \begin{tabular}{  l  l  l  l }
     \midrule
     \bf Threads & \bf Insert & \bf Select & \bf Mixed \\ \midrule
-     2 & 1.20 & 1.58 & 5 \\ \midrule
-     4 & 2.31 & 2.62 & 5 \\ \midrule
-     8 & 4.53 & 3.74 & 5 \\ \midrule
-     16 & 8.54 & 4.85 & 5 \\ \midrule
-     32 & 15.13 & 4.87 & 5 \\ \midrule
-     64 & 20.18 & 1.80 & 5 \\ \midrule
+     2 & 1.20 & 1.58 & 1.68 \\ \midrule
+     4 & 2.31 & 2.62 & 3.31 \\ \midrule
+     8 & 4.53 & 3.74 & 5.63 \\ \midrule
+     16 & 8.54 & 4.85 & 10.80 \\ \midrule
+     32 & 15.13 & 4.87 & 18.21 \\ \midrule
+     64 & 20.18 & 1.80 & 10.30 \\ \midrule
   \end{tabular}
 \end{center}
+\end{figure}
 
 \par\vspace{\baselineskip}
+\begin{figure}[H]
 \begin{center}
 \captionof{table}{VoltDB Scaling} \label{tab:voltScaling}
   \begin{tabular}{  l  l  l  l }
@@ -272,22 +278,39 @@ The resultant scaling found by running these tests can be seen in the tables bel
      64 & 10.56 & 15.30 & 5 \\ \midrule
   \end{tabular}
 \end{center}
+\end{figure}
 
-\ref{tab:omdbScaling} shows the scaling achieved by OpenMemDB for each of the three
+
+Table~\ref{tab:omdbScaling} shows the scaling achieved by OpenMemDB for each of the three
 benchmarks that were run. As is clear OpenMemDB scales much better in select only tests. 
 MemSQL has the best select only scaling of all of the databases that were bench-marked.  
+Table~\ref{tab:memsqlScaling} shows the scaling for MemSQL for each of the three benchmarks. 
+MemSQL does not scale as well as OpenMemDB in write heavy tests, this could be due to a number of factors
+and further testing is needed to assess the cause.
+Table~\ref{tab:voltScaling} shows the scaling for VoltDB for all three benchmarks.
 
-%TODO: Put images in here
-\begin{figure}
+\begin{figure}[H]
+ \begin{center}
+   \includegraphics[scale=.5]{WriteBenchmark.png}
   \caption{500,000 writes on the selected databases}
+  \label{fig:writeBenchmark}
+   \end{center}
 \end{figure}
 
-\begin{figure}
-  \caption{500,000 reads on the selected databases}
+\begin{figure}[H]
+   \begin{center}
+   \includegraphics[scale=.5]{ReadBenchmark.png}
+  \caption{10,000 reads on the selected databases}
+  \label{fig:readBenchmark}
+   \end{center}
 \end{figure}
 
-\begin{figure}
-  \caption{500,000 mixed reads and writes on the selected databases}
+\begin{figure}[H]
+ \begin{center}
+   \includegraphics[scale=.5]{MixedBenchmark.png}
+  \caption{10,000 mixed reads and writes on the selected databases}
+  \label{fig:mixedBenchmark}
+   \end{center}
 \end{figure}
 
 \section{Conclusions}
@@ -301,8 +324,8 @@ closer to commercial viability, in particular with embedded systems where consis
 performance. 
 \par\vspace{\baselineskip}
 Some of the areas that can be improved with more time would be: improving the memory allocation model to reduce thread
-synchronization, further optimizations of the tokenization and parsing of SQL statements, and improved support for standard
-SQL operations.
+synchronization, further optimizations of the tokenization and parsing of SQL statements, improved support for standard
+SQL operations and data types.
 
 \newpage
 \bibliography{WorkshopPaper}
