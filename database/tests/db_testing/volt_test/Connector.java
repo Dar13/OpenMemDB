@@ -197,7 +197,6 @@ public class Connector
     {
         ArrayList<Thread> list = new ArrayList<Thread>();
         final CyclicBarrier gate = new CyclicBarrier(threadCount+1);
-        ArrayList<VoltTable[]> results = new ArrayList<VoltTable[]>();
 
         //list of sql instructions passed to each thread
         ArrayList<List<String>> mixedSQL = splitBatch(batch, threadCount);
@@ -206,10 +205,9 @@ public class Connector
             //spawn threads
             for(int i = 0; i < threadCount; i++)
             {
-                VoltTable[] threadResult = null;
-                results.add(threadResult);
                 Runnable spawn = null;
-                spawn = new Worker(db, mixedSQL.get(i), gate, results.get(i));
+                spawn = new Worker(db, mixedSQL.get(i), gate);
+
                 list.add(new Thread(spawn));
             }
 
@@ -231,26 +229,6 @@ public class Connector
 
             long stop = System.currentTimeMillis();
             long executeTime = stop - start;
-
-            System.out.println("Printing out "+results.size()+" selects");
-            
-            for(int p = 0; p < results.size(); p++)
-            {
-                if(results.get(p) != null)
-                {
-                    VoltTable[] temp = results.get(p);
-                    int size = temp.length;
-                    for(int l = 0; l < size; l++)
-                    {
-                        System.out.println(temp[l].toString());
-                    }
-                    System.out.println("Done printing for one thread");
-                }
-                else
-                {
-                    System.out.println("Null");
-                }
-            }
 
             return executeTime;
 

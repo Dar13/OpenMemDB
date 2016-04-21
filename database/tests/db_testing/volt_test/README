@@ -22,7 +22,7 @@ deployment.xml - Cluster config file
 
 //--------How to Run-------------------------------------
 Quick Run Guide:
-1.) ./benchmark 
+1.) ./prep.sh "test flag" 
 2.) ./start.sh 16
 3.) ./sqlcmd
     In sqlcmd prompt type
@@ -31,6 +31,7 @@ Quick Run Guide:
     6.) exit;
 7.) ./run.sh "thread count"
 8.) vim execTime.txt
+9.) ./stop.sh
 *NOTE: if the java application is changed run ./benchmark.sh*
 *NOTE: execTime.txt is not removed after each run so test results are piled on each other*
 

@@ -23,22 +23,26 @@ public class Run
         long selectTime = 0, insertTime = 0, mixedTime = 0;
         ArrayList<String> mixedSqlBatch = (readFile("mixed.txt"));
         ArrayList<String> insertSqlBatch = (readFile("insert.txt"));
+        
+        //TODO: need to read sql_statements.omdbt instead
+        for(int i = 0; i < mixedSqlBatch.size(); i++)
+            insertSqlBatch.add(mixedSqlBatch.get(i));
 
         //insertTime = link.runProcedure("insert", Run.NUM_OPERATIONS, threadCount);
-        insertTime = link.runProcedure(insertSqlBatch, threadCount);
+        //insertTime = link.runProcedure(insertSqlBatch, threadCount);
         //selectTime = link.runProcedure("select", Run.NUM_OPERATIONS, threadCount);
-        mixedTime = mixedTime + link.runProcedure(mixedSqlBatch, threadCount);
+        mixedTime = mixedTime + link.runProcedure(insertSqlBatch, threadCount);
 
 
         System.out.println("Done, results written to execTime.txt");
         
 
-        String insertResult = printOut(insertTime, threadCount);
+        //String insertResult = printOut(insertTime, threadCount);
         //String selectResult = printOut(selectTime, threadCount);
         String mixedResult = printOut(mixedTime, threadCount);
 
-        writeFile("execTime.txt", "Insert Test: ");
-        writeFile("execTime.txt", insertResult);
+        //writeFile("execTime.txt", "Insert Test: ");
+        //writeFile("execTime.txt", insertResult);
         //writeFile("execTime.txt", "Select Test:");
         //writeFile("execTime.txt", selectResult);
         writeFile("execTime.txt", "Mixed Test:");

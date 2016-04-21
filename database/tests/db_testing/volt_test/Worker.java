@@ -16,12 +16,11 @@ public class Worker implements Runnable
     private VoltTable[] results;
 
     //used for mixed sql test
-    public Worker(org.voltdb.client.Client myApp, List<String> batch, CyclicBarrier gate, VoltTable[] results)
+    public Worker(org.voltdb.client.Client myApp, List<String> batch, CyclicBarrier gate)
     {
         this.myApp = myApp;
         this.batch_list = batch;
         this.gate = gate;
-        this.results = results;
     }
 
     //used for insert test
@@ -117,11 +116,13 @@ public class Worker implements Runnable
                         throw new RuntimeException(response.getStatusString());
                     }
                 } else if (flag.contains("SELECT")) {
-                    results = myApp.callProcedure("@AdHoc", flag).getResults();
-                    if(results == null)
-                    {
-                        System.out.println("Error: null");
-                    }
+                    response = myApp.callProcedure("SelectB");
+                    //results = myApp.callProcedure("SelectB").getResults();
+                    //System.out.println("Printing out results");
+                    //for(int k = 0; k < results.length; k++)
+                    //{
+                    //    System.out.println(results[k].toFormattedString());
+                    //}
                     if(response.getStatus() != ClientResponse.SUCCESS)
                     {
                         throw new RuntimeException(response.getStatusString());
