@@ -115,7 +115,7 @@ public class Worker implements Runnable
                         throw new RuntimeException(response.getStatusString());
                     }
                 } else if (flag.contains("SELECT")) {
-                    response = myApp.callProcedure("SelectB");
+                    response = myApp.callProcedure("@AdHoc", flag);
                     if(response.getStatus() != ClientResponse.SUCCESS)
                     {
                         throw new RuntimeException(response.getStatusString());

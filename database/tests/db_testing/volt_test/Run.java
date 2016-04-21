@@ -5,14 +5,13 @@ import java.util.ArrayList;
 public class Run
 {
 
-    public final static int NUM_OPERATIONS = 4999;
+    public final static int NUM_OPERATIONS = 500000;
 
     public static void main(String[] args)
     {
         //Execuion time, node size, filename, batch of sql statements, connector
         int size = Integer.parseInt(args[0]);
         int threadCount = Integer.parseInt(args[1]);
-        String[] filename = {"insert.txt", "select.txt", "drop.txt"};
         ArrayList<String> sqlStmt;
         Connector link = new Connector();
         
@@ -22,13 +21,13 @@ public class Run
 
         //mixed.txt contains mixed sql inserts and selects
         long selectTime = 0, insertTime = 0, mixedTime = 0;
-        ArrayList<String> sqlBatch = (readFile("mixed.txt"));
+        ArrayList<String> mixedSqlBatch = (readFile("mixed.txt"));
         ArrayList<String> insertSqlBatch = (readFile("insert.txt"));
 
         //insertTime = link.runProcedure("insert", Run.NUM_OPERATIONS, threadCount);
         insertTime = link.runProcedure(insertSqlBatch, threadCount);
         //selectTime = link.runProcedure("select", Run.NUM_OPERATIONS, threadCount);
-        mixedTime = mixedTime + link.runProcedure(sqlBatch, threadCount);
+        mixedTime = mixedTime + link.runProcedure(mixedSqlBatch, threadCount);
 
 
         System.out.println("Done, results written to execTime.txt");

@@ -6,7 +6,7 @@
 # run java program at 1 node
 # run stop script and redo using new node value
 cap=6
-declare -a flags=(irt)
+declare -a flags=(ct st irt mt)
 #ct st irt
 
 
@@ -19,12 +19,12 @@ echo "Removing old catalog jar file"
 rm -f catalog.jar
 echo "Compiling stored procedure into catalog.jar"
 jar cvf catalog.jar *.class
-echo "Removing old time results"
-rm -f execTime.txt
+
+printf "%s\n" "New Test Run" >> execTime.txt
 
 echo "Running OpenMemDB tests"
 cd ../..
-/home/OpenMemDb/OpenMemDB/database/tests/tests sqltf $1
+/home/OpenMemDb/OpenMemDB/database/tests/tests sqltf $1 -c
 cd /home/OpenMemDb/OpenMemDB/database/tests/db_testing/volt_test/
 
 echo "Spliting sql instructions into seperate files"
