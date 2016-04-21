@@ -5,12 +5,12 @@ import org.voltdb.*;
 
 public class Select extends VoltProcedure
 {
-    public final SQLStmt select = new SQLStmt(
+    public final SQLStmt Select = new SQLStmt(
     "SELECT TestT0.B FROM TestT0 WHERE TestT0.B=?;");
 
     public VoltTable[] run(long value) throws VoltAbortException
     {
-        voltQueueSQL(select, value);
+        voltQueueSQL(Select, value);
         return voltExecuteSQL();
     }
 }

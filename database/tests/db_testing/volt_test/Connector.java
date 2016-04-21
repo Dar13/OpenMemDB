@@ -192,7 +192,7 @@ public class Connector
     
     //Stored Procedure method, different from AdHoc usage
     //reads in sql statements in a batch and splits them up to each thread
-    public long runProcedure(ArrayList<String> batch, int numSQLStmt, int threadCount)
+    public long runProcedure(ArrayList<String> batch, int threadCount)
     {
         ArrayList<Thread> list = new ArrayList<Thread>();
         final CyclicBarrier gate = new CyclicBarrier(threadCount+1);

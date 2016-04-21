@@ -5,14 +5,14 @@ import java.util.ArrayList;
 public class Run
 {
 
-    public final static int NUM_OPERATIONS = 500000;
+    public final static int NUM_OPERATIONS = 4999;
 
     public static void main(String[] args)
     {
         //Execuion time, node size, filename, batch of sql statements, connector
         int size = Integer.parseInt(args[0]);
         int threadCount = Integer.parseInt(args[1]);
-        String[] filename = {"create.txt", "insert.txt", "select.txt", "drop.txt"};
+        String[] filename = {"insert.txt", "select.txt", "drop.txt"};
         ArrayList<String> sqlStmt;
         Connector link = new Connector();
         
@@ -23,15 +23,27 @@ public class Run
         //mixed.txt contains mixed sql inserts and selects
         long selectTime = 0, insertTime = 0, mixedTime = 0;
         ArrayList<String> sqlBatch = (readFile("mixed.txt"));
+        ArrayList<String> insertSqlBatch = (readFile("insert.txt"));
+
         //insertTime = link.runProcedure("insert", Run.NUM_OPERATIONS, threadCount);
+        insertTime = link.runProcedure(insertSqlBatch, threadCount);
         //selectTime = link.runProcedure("select", Run.NUM_OPERATIONS, threadCount);
-        mixedTime = mixedTime + link.runProcedure(sqlBatch, Run.NUM_OPERATIONS, threadCount);
+        mixedTime = mixedTime + link.runProcedure(sqlBatch, threadCount);
 
 
         System.out.println("Done, results written to execTime.txt");
-        writeFile("execTime.txt", insertTime, threadCount);
-        writeFile("execTime.txt", selectTime, threadCount);
-        writeFile("execTime.txt", mixedTime, threadCount);
+        
+
+        String insertResult = printOut(insertTime, threadCount);
+        //String selectResult = printOut(selectTime, threadCount);
+        String mixedResult = printOut(mixedTime, threadCount);
+
+        writeFile("execTime.txt", "Insert Test: ");
+        writeFile("execTime.txt", insertResult);
+        //writeFile("execTime.txt", "Select Test:");
+        //writeFile("execTime.txt", selectResult);
+        writeFile("execTime.txt", "Mixed Test:");
+        writeFile("execTime.txt", mixedResult);
         link.close();
 
         /*
@@ -71,6 +83,11 @@ public class Run
 
     }
 
+    private static String printOut(long time, int threadCount)
+    {
+        return "Execution time: " + String.valueOf(time) + " Threads: " + String.valueOf(threadCount) + '\n';
+    }
+
     private static ArrayList<String> readFile(String filename)
     {
         try
@@ -90,15 +107,16 @@ public class Run
         }
     }
 
-    private static void writeFile(String filename, long time, int node) {
+    private static void writeFile(String filename, String content)
+    {
         File file = null;
         boolean temp;
+        
         try
         {
             file = new File(filename);
             temp = file.createNewFile();
             FileWriter writer = new FileWriter(file, true);
-            String content = "Execution time: " + String.valueOf(time) + " " + "Threads: " + String.valueOf(node) + '\n';
             writer.write(content);
             writer.flush();
             writer.close();
@@ -106,6 +124,7 @@ public class Run
         {
             e.printStackTrace();
         }
+
     }
 
     //useful for AdHoc since it takes in a multiple SQL statements as a String

@@ -14,19 +14,11 @@ public class Worker implements Runnable
     private String flag;
     private CyclicBarrier gate;
 
-    //used for AdHoc procedure
-    public Worker(org.voltdb.client.Client myApp, List<String> batch, CyclicBarrier gate)
+    //used for mixed sql test
+    public Worker(org.voltdb.client.Client myApp, List<String> batch, CyclicBarrier gate )
     {
         this.myApp = myApp;
         this.batch_list = batch;
-        this.gate = gate;
-    }
-
-    //used for mixed sql test
-    public Worker(org.voltdb.client.Client myApp, ArrayList<String> batch, List<Long> value,CyclicBarrier gate )
-    {
-        this.myApp = myApp;
-        this.batch_array = batch;
         this.gate = gate;
     }
 
@@ -49,6 +41,8 @@ public class Worker implements Runnable
         this.gate = gate;
     }
 
+     /*
+      * AdHoc run method
     @Override
     public void run()
     {
@@ -68,20 +62,60 @@ public class Worker implements Runnable
             }
 
             // sql mixed batch must be parsed so each sql statement is executed using appropiate stored procedure
-            for(int i = 0; i < batch_array.size(); i++)
+            for(int i = 0; i < batch_list.size(); i++)
             {
-                String procedure = batch_array.get(i);
+                myApp.callProcedure("@AdHoc", batch_list.get(i));
+            }
+
+        } catch (NoConnectionsException e)
+        {
+            e.printStackTrace();
+        } catch(IOException e)
+        {
+            e.printStackTrace();
+        } catch(ProcCallException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    */
+
+    //Special run Method to run batch sql statements, it parse the batch and determine which stored procedure is used
+    @Override
+    public void run()
+    {
+        ClientResponse response = null;
+        try
+        {
+            //wait for gate controlled by main
+            try
+            {
+                this.gate.await();
+            } catch(InterruptedException e)
+            {
+                e.printStackTrace();
+            } catch(BrokenBarrierException e)
+            {
+                e.printStackTrace();
+            }
+
+            //AdHoc executes multiple sql statements each seperated by ; threads their own instructions
+            //myApp.callProcedure("@AdHoc", sqlStmt);
+            // date and value are lists of all of the arguments that this thread should run the stored procedure with
+            for(int j = 0; j < batch_list.size(); j++)
+            {
+                String flag = batch_list.get(j);
                 long value = 0;
-                if (procedure.contains("INSERT")) {
+                if (flag.contains("INSERT")) {
                     // Leaving date static as the epoch
-                    value = grabInsertData(procedure);
-                    response = myApp.callProcedure("insert", value, 2);
+                    value = grabInsertData(flag);
+                    response = myApp.callProcedure("Insert", value, 2);
                     if(response.getStatus() != ClientResponse.SUCCESS)
                     {
                         throw new RuntimeException(response.getStatusString());
                     }
-                } else if (procedure.contains("SELECT")) {
-                    response = myApp.callProcedure("select", value);
+                } else if (flag.contains("SELECT")) {
+                    response = myApp.callProcedure("SelectB");
                     if(response.getStatus() != ClientResponse.SUCCESS)
                     {
                         throw new RuntimeException(response.getStatusString());
@@ -101,9 +135,8 @@ public class Worker implements Runnable
         }
     }
 
-
     /*
-    //Special run Method to run sequential sql statements
+    //Special run Method to run generated sql values and use a flag to determine which sql instruction to use
     @Override
     public void run()
     {
@@ -126,9 +159,9 @@ public class Worker implements Runnable
             //myApp.callProcedure("@AdHoc", sqlStmt);
             // date and value are lists of all of the arguments that this thread should run the stored procedure with
             if (flag.equalsIgnoreCase("insert")) {
-                for (int i = 0; i < date.size(); ++i) {
+                for (int i = 0; i < value.size(); ++i) {
                     // Leaving date static as the epoch
-                    response = myApp.callProcedure("insert", value.get(i), 2);
+                    response = myApp.callProcedure("Insert", value.get(i), 2);
                     if(response.getStatus() != ClientResponse.SUCCESS)
                     {
                         throw new RuntimeException(response.getStatusString());
@@ -136,7 +169,7 @@ public class Worker implements Runnable
                 }
             } else if (flag.equalsIgnoreCase("select")) {
                 for (int i = 0; i < value.size(); ++i) {
-                    response = myApp.callProcedure("find", value.get(i));
+                    response = myApp.callProcedure("Select", value.get(i));
                     if(response.getStatus() != ClientResponse.SUCCESS)
                     {
                         throw new RuntimeException(response.getStatusString());
@@ -182,7 +215,6 @@ public class Worker implements Runnable
             sqlStmt = sqlStmt.replace(frontStatement,"");
             sqlStmt = sqlStmt.replace(backStatement,"");
 
-            System.out.println(sqlStmt);
             insertData = Long.valueOf(sqlStmt);
         }
 

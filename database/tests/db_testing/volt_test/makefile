@@ -14,6 +14,7 @@ CLASSES = \
     Connector.java \
 	Insert.java \
 	Select.java \
+	SelectB.java \
 
 default: classes
 
