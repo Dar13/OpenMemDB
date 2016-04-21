@@ -23,12 +23,12 @@ jar cvf catalog.jar *.class
 printf "%s\n" "New Test Run" >> execTime.txt
 
 echo "Running OpenMemDB tests"
-cd ../..
-/home/OpenMemDb/OpenMemDB/database/tests/tests sqltf $1 -c
-cd /home/OpenMemDb/OpenMemDB/database/tests/db_testing/volt_test/
+#cd ../..
+#/home/OpenMemDb/OpenMemDB/database/tests/tests sqltf $1 -c
+#cd /home/OpenMemDb/OpenMemDB/database/tests/db_testing/volt_test/
 
 echo "Spliting sql instructions into seperate files"
-./parseSQL.sh
+#./parseSQL.sh
 
 #Need to clean up before executing tests
 #rm -f select.txt drop.txt insert.txt
