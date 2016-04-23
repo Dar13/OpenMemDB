@@ -131,8 +131,7 @@ good choice if the data-set could not be efficiently partitioned. OpenMemDB does
 partitioning and still manages to achieve 90\% scaling at 8 threads and 60\% scaling at 32 
 threads. 
 \par\vspace{\baselineskip}
-OpenMemDB also 
-retains all necessary ACID properties, which is vital for most database systems. 
+OpenMemDB also retains all necessary ACID properties, which is vital for most database systems. 
 The requirements of being wait-free dictate that 
 OpenMemDB is an in-memory database and thus avoids the bottlenecks associated with 
 going to hard disk. OpenMemDB is written in \CC 11 and uses the modern constructs defined by 
@@ -201,14 +200,15 @@ We use the common definition of wait-freedom as found in Herlihy's definitive te
 states that all threads must make progress within a finite amount of time\cite{herlihy:waitfree}. OpenMemDB is 
 built to be wait-free and linearizable by utilizing Tervel data structures to create the 
 underlying data structures used by the database to service queries and commands.
-
+\par\vspace{\baselineskip}
 OpenMemDB tables are made up of a composition of Tervel data structures, namely the hash map and the
 vector. The hashmap handles the relation of a table's name to its table object. The vectors used in a
 way that a vector, referred to as the table vector, holds references to other Tervel vectors that contain
 the actual data used. As only references to records are stored in the table vector, most operations on the
 table take place as whole record operations rather than a more fine-grained approach that would update
-records on a per-column basis.
-
+records on a per-column basis. This easily facilitates snapshot isolation and mitigation of the write skew
+that comes with it.
+\par\vspace{\baselineskip}
 The datastore uses snapshot isolation to increase read performance and minimize the amount of time accessing
 the shared data structures. Snapshot isolation is the technique where a thread or transaction copies the data
 locally and then manipulates it, which avoids performing those manipulations directly on the data structures.
@@ -261,12 +261,12 @@ The resultant scaling found by running these tests can be seen in the tables bel
   \begin{tabular}{  l  l  l  l }
     \midrule
     \bf Threads & \bf Insert & \bf Select & \bf Mixed \\ \midrule
-     2 & 1.20 & 1.58 & 1.68 \\ \midrule
-     4 & 2.31 & 2.62 & 3.31 \\ \midrule
-     8 & 4.53 & 3.74 & 5.63 \\ \midrule
-     16 & 8.54 & 4.85 & 10.80 \\ \midrule
-     32 & 15.13 & 4.87 & 18.21 \\ \midrule
-     64 & 20.18 & 1.80 & 10.30 \\ \midrule
+     2 & 1.20 & 1.90 & 1.68 \\ \midrule
+     4 & 2.31 & 3.49 & 3.31 \\ \midrule
+     8 & 4.53 & 6.26 & 5.63 \\ \midrule
+     16 & 8.54 & 10.77 & 10.80 \\ \midrule
+     32 & 15.13 & 16.84 & 18.21 \\ \midrule
+     64 & 20.18 & 9.43 & 10.30 \\ \midrule
   \end{tabular}
 \end{center}
 \end{figure}
@@ -290,12 +290,17 @@ The resultant scaling found by running these tests can be seen in the tables bel
 
 
 Table~\ref{tab:omdbScaling} shows the scaling achieved by OpenMemDB for each of the three
-benchmarks that were run. As is clear OpenMemDB scales much better in select only tests. 
-MemSQL has the best select only scaling of all of the databases that were bench-marked.  
+benchmarks that were run. It is clear OpenMemDB scales much better in read-heavy tests compared to 
+the other databases. This is likely due to a reduction in memory allocations in this test
+compared to the Insert test, which allocates memory frequently in OpenMemDB.
+MemSQL has the best scaling of all of the databases in the Insert test that were benchmarked.
 Table~\ref{tab:memsqlScaling} shows the scaling for MemSQL for each of the three benchmarks. 
-MemSQL does not scale as well as OpenMemDB in write heavy tests, this could be due to a number of factors
-and further testing is needed to assess the cause.
-Table~\ref{tab:voltScaling} shows the scaling for VoltDB for all three benchmarks.
+MemSQL does not scale as well as OpenMemDB in read-heavy tests, this could be due to a number of factors
+and further testing is needed to assess the cause. An interesting anomaly is the precipitous drop in
+scaling after 32 cores, which was repeated in multiple runs of the benchmark.
+Table~\ref{tab:voltScaling} shows the scaling for VoltDB for all three benchmarks. It performed 
+consistently in each benchmark though with less scaling than expected. This is likely due to
+our configuration for these tests are not optimal for VoltDB's architecture.
 
 \begin{figure}[H]
  \begin{center}
@@ -324,15 +329,15 @@ Table~\ref{tab:voltScaling} shows the scaling for VoltDB for all three benchmark
 \section{Conclusions}
 We have presented OpenMemDB, an in-memory and wait-free database that achieves competitive scaling when compared to other
 in-memory SQL database management system.  OpenMemDB scales particularly well with read heavy workloads, achieving 90\% 
-scaling at 8 threads and 60\% scaling at 32 threads when running our select bench-mark. OpenMemDB is the first, and only fully
+scaling at 8 threads and 60\% scaling at 32 threads when running our read operation tests. OpenMemDB is the first, and only fully
 wait-free database in existence at the time of writing this paper. 
 \par\vspace{\baselineskip}
-Based on the encouraging scaling achieved, further work toimprove individual thread performance would bring this database
-closer to commercial viability, in particular with embedded systems where consistent latency is preferable to inconsistent
-performance. 
+Based on the encouraging scaling achieved, further work to improve individual thread performance would bring this database
+closer to commercial viability, in particular with embedded systems where consistent latency is preferable to faster average
+performance with higher amounts of jitter in latency.
 \par\vspace{\baselineskip}
 Some of the areas that can be improved with more time would be: improving the memory allocation model to reduce thread
-synchronization, further optimizations of the tokenization and parsing of SQL statements, improved support for standard
+synchronization, further optimizations of the tokenization and parsing of SQL statements, and improved support for standard
 SQL operations and data types.
 
 \newpage
