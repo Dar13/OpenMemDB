@@ -76,13 +76,13 @@ way. OpenMemDB also provides linearizable correctness guarantees for all operati
 executed on the database. OpenMemDB uses a form of snapshot isolation to ensure 
 linearizability, and avoids the write-skew problem that can occur when using
 snapshot isolation by eliminating writes that are out of data. 
-OpenMemDB's biggest contribution is it's completely wait-free 
-implementation. Every operation executed in OpenMemDB is guarenteed to be wait-free 
-and linearizeably correct. This implementation also scales competitively when to compared 
+OpenMemDB's biggest contribution is its completely wait-free 
+implementation. Every operation executed in OpenMemDB is guaranteed to be wait-free 
+and linearizeably correct. This implementation also scales competitively when compared 
 against similar in-memory database management systems.
 OpenMemDB achieves its best scaling in select heavy operation loads with nearly 
 12 times speedup at 16 threads. This is better scaling than either VoltDB or MemSQL showed
-in our bench-marking. 
+in our testing. 
 \end{abstract}
 
 \section{Introduction}
@@ -202,6 +202,13 @@ states that all threads must make progress within a finite amount of time\cite{h
 built to be wait-free and linearizable by utilizing Tervel data structures to create the 
 underlying data structures used by the database to service queries and commands.
 
+OpenMemDB tables are made up of a composition of Tervel data structures, namely the hash map and the
+vector. The hashmap handles the relation of a table's name to its table object. The vectors used in a
+way that a vector, referred to as the table vector, holds references to other Tervel vectors that contain
+the actual data used. As only references to records are stored in the table vector, most operations on the
+table take place as whole record operations rather than a more fine-grained approach that would update
+records on a per-column basis.
+
 The datastore uses snapshot isolation to increase read performance and minimize the amount of time accessing
 the shared data structures. Snapshot isolation is the technique where a thread or transaction copies the data
 locally and then manipulates it, which avoids performing those manipulations directly on the data structures.
@@ -211,10 +218,11 @@ We avoid write skew caused by snapshot isolation by only committing the writes
 if the expected data is in the table. This is done by using the Compare and Swap(CAS) operation provided
 by Tervel's vector data structure. The CAS operation checks if the element in the vector is the
 expected value and swaps the value with the given value if that check succeeds. Tervel's CAS
-operation is wait-free and atomic, any contention will have a clear ``winner'' or ``loser'' in terms
-of if a thread succeeds in updating or writing to the vector. The loser thread or threads then report
-that they encountered contention during execution, but continue to perform their operation as best as 
-possible.
+operation is wait-free and atomic, so any contention will have a clear ``winner'' or ``loser'' in terms
+of if a thread succeeds in updating or writing to the vector. This translates to a thread failing to update the
+table with the new record reference if another thread replaces the record before the attempted write but 
+after the initial read of the record.  The loser thread or threads then report that they encountered 
+contention during execution, but continue to perform their operation as best as possible.
 
 \section{Experimental Results}
 Our experiments took place on a 64-core AMD Opteron system with 300 GB of system memory running Ubuntu 14.04 and 
