@@ -24,4 +24,4 @@ run:
 	$(JJ) $(CP) $(CLASS_FILES) main
 
 clean:
-	$(RM) *.class *.jar
+	$(RM) *.class

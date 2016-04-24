@@ -18,4 +18,4 @@ set_num_cpus()
 
 # Runs java App
 set_num_cpus $1
-java -classpath ".:/home/OpenMemDb/voltdb/voltdb/*" Run 1 $1
+java -classpath ".:/home/OpenMemDb/voltdb/voltdb/*" Run $1
