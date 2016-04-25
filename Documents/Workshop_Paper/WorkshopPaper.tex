@@ -80,7 +80,7 @@ linearizability, and avoids the write-skew problem that can occur when using
 snapshot isolation by eliminating writes that are out of data. 
 OpenMemDB's biggest contribution is its completely wait-free 
 implementation. Every operation executed in OpenMemDB is guaranteed to be wait-free 
-and linearizeably correct. This implementation also scales competitively when compared 
+and linearizable. This implementation also scales competitively when compared 
 against similar in-memory database management systems.
 OpenMemDB achieves its best scaling in select heavy operation loads with nearly 
 12 times speedup at 16 threads. This is better scaling than either VoltDB or MemSQL showed
@@ -162,17 +162,17 @@ intelligent partitioning of data and does not allow for multi-threaded execution
 on a single partition. 
 \par\vspace{\baselineskip}
 Silo is an in-memory database that uses optimistic concurrency control (OCC) to try and 
-limit the affects of locks on their system. Silo avoids locking during the computation
+limit the effects of locks on their system. Silo avoids locking during the computation
 of a transaction and waits until commit time to execute all writes to shared memory.
 This avoids the contention involved in acquiring a lock until a short period of time 
 at the end of transaction. This style of system can be particularly effective if
 concurrent writes to shared memory are uncommon. Silo claims to achieve 700,000
-transaction per second an a 32 core machine. Silo relies heavily on concurrent 
+transaction per second on a 32 core machine. Silo relies heavily on concurrent 
 B+ tree for its back end data-store \cite{tu2013speedy}. 
 \par\vspace{\baselineskip}
 Hekaton is Microsoft's main memory optimized database engine.
 Hekaton uses a combination of lock-free data-structures and optimistic concurrency control
-in order to achieve scaleable performance gains. Hekaton is like Silo and OpenMemDB in that 
+in order to achieve scalable performance gains. Hekaton is like Silo and OpenMemDB in that 
 it does not use partitioning to achieve performance gains. Any thread can access any 
 row in a table without acquiring a lock\cite{diaconu2013hekaton}. Hekaton claims to gain
 an order of magnitude performance gain over standards SQL Server\cite{diaconu2013hekaton}
@@ -204,7 +204,7 @@ built to be wait-free and linearizable by utilizing Tervel data structures to cr
 underlying data structures used by the database to service queries and commands.
 \par\vspace{\baselineskip}
 OpenMemDB tables are made up of a composition of Tervel data structures, namely the hash map and the
-vector. The hashmap handles the relation of a table's name to its table object. The vectors used in a
+vector. The hash map handles the relation of a table's name to its table object. The vectors used in a
 way that a vector, referred to as the table vector, holds references to other Tervel vectors that contain
 the actual data used. As only references to records are stored in the table vector, most operations on the
 table take place as whole record operations rather than a more fine-grained approach that would update
@@ -217,7 +217,7 @@ locally and then manipulates it, which avoids performing those manipulations dir
 A side effect of snapshot isolation is write skew, which occurs when a write operation takes place even though the
 predicate that determined that record should be written to is no longer valid.
 We avoid write skew caused by snapshot isolation by only committing the writes
-if the expected data is in the table. This is done by using the Compare and Swap(CAS) operation provided
+if the expected data is in the table. This is done by using the Compare and Swap (CAS) operation provided
 by Tervel's vector data structure. 
 \par\vspace{\baselineskip}
 The CAS operation checks if the element in the vector is the
