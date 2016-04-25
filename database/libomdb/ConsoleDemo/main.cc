@@ -110,7 +110,7 @@ void doQuery(libomdb::Connection connection, std::string command) {
         // Print one row per line
         std::cout << "| ";
         for (uint32_t i = 0; i < metaData.getColumnCount(); ++i) {
-            std::cout << result.getValue(i) << "\t| ";
+            std::cout << (result.getValue(i)>>7) << "\t| ";
         }
         std::cout << std::endl;
         printLine('-');
