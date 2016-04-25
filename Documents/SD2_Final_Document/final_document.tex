@@ -2550,8 +2550,7 @@ nable dashDB to maximize hardware performance.
   checkpoints. Hekaton tables are recovered when a database is \\ recovered.
   \end{itemize} \cite{hekaton}
 
-  \item SAP HANA
-  is short for "High Performance Analytic Appliance" and is an in-memory,
+  \item SAP HANA is short for "High-Performance Analytic Appliance" and is an in-memory,
   column-oriented, relational database management system. SAP HANA employs a
   massively parallel in-memory architecture to eliminate the I/O bottleneck
   that slows disk backed database management systems.
@@ -3084,17 +3083,17 @@ DATE data type in Figure~\ref{code:tervel_data_date_def}. An example that uses b
 unions to manipulate the data contained within is shown in Figure~\ref{code:tervel_data_example}.
 %TODO: Finish this
 \par\vspace{\baselineskip}
-\begin{figure}[H]
+\begin{figure}
   \begin{lstlisting}[language=C++]
   union TervelData
   {
     struct 
     {
-      int64\_t tervel\_status : 3;  //!< Tervel requires this be given to them
-      uint64\_t type : 3;          //!< This is mapped to \refer DataType
-      uint64\_t null : 1;          //!< Set if the value is NULL
+      int64\_t tervel\_status : 3;
+      uint64\_t type : 3;
+      uint64\_t null : 1;
 
-      uint64\_t value : 57;        //!< The actual value of the data stored in this union
+      uint64\_t value : 57;
     } data;
 
     int64\_t value;
@@ -3105,7 +3104,7 @@ unions to manipulate the data contained within is shown in Figure~\ref{code:terv
   \label{code:tervel_data_definition}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}
   \begin{lstlisting}[language=C++]
   union DateData
   {
@@ -3125,7 +3124,22 @@ unions to manipulate the data contained within is shown in Figure~\ref{code:terv
   \label{code:tervel_data_date_def}
 \end{figure}
 
-%TODO: Add example showing date encoding/decoding into TervelData
+\begin{figure}
+\begin{lstlisting}[language=C++]
+TervelData terv_data = { .value = 0 };
+
+DateData date = { .value = 0 };
+date.year = 2016;
+date.month = 1;
+date.day = 1;
+
+terv_data.data.value = date.value;
+terv_data.type = DATE;
+\end{lstlisting}
+\caption{An example of using TervelData and DateData together, specifically the encoding of 
+the date January 1st, 2016}
+\label{code:tervel_data_example}
+\end{figure}
 
 \newpage
 \subsubsection{Functions}
@@ -3158,18 +3172,37 @@ The Data Store is made up of multiple functions that create and delete tables an
 
 %TODO: Come back and review this for accuracy
 \subsubsection{Data Structures}
-Nested vectors are used to represent tables. Each table is stored into a hashmap called lookup{\_}table to refer to
-tables. A pair is used to group up table schema boost variant vector and the data table itself. Nested vectors
-are used since it most is the most efficient way to represent memory. A hashmap is used to refer tables because each
-table contains a unique identifier char array. A hashmap provides instant access table lookup. A pair is used to group
-up the table with its schema. Each table have their own unique schema and it is retrievable from the table lookup hashmap.
-
-\subsubsection{Accessing Data Performance}
-Nested vectors are instant access O(1), if you have the index of the column or row. This makes data retrieval
-linear time O(n). In the case of a full table scan, it is only necessary to find the columns desired, then each other row
-column data can be retrieved by using the column index. If a full table scan with all columns are desired then this is $O(n^2)$. 
+OpenMemDB uses nested vectors to represent tables in memory, with a ``table vector'' that holds references
+to all records held within that particular table. Records are themselves vectors, though they are not 
+resized after creation as a table's record length is fixed. Our group extended, with the help of 
+one of Tervel's creators Steven Feldman, Tervel's ability to safely store and access pointers in its vector. 
+This ensures that we do not leak memory or cause other memory errors when changing already existing records
+in the table.
 \par\vspace{\baselineskip}
-A pair is fairly easy to retrieve data from since it is only two pointers or objects grouped together in an object. In the case for a hashmap, it provides instant access O(1), until the hashmap becomes more filled up and collisions being to happen. Normally hashmaps become reindex whenever they are around half full but it may be more advantageous to use dynamic hashing. This is something that will be determine based on performance testing on a training data set.
+Tervel allows for any particular element in a vector to be atomically swapped out if the expected item is still
+in the element. As a result of us storing pointers and this functionality, we decided to make OpenMemDB perform 
+updates to a record by entirely replacing it with another record in the same location within the table. This has
+relatively mild overhead costs in computation and memory while allowing us to solve the write skew problem introduced by
+our use of snapshot isolation. This mitigation is due to the fact that any outdated write to the database, where
+the element in the table that is supposed to be updated has changed due to another operation, will not pass the compare
+test done by the vector's \inlinecode{cas()} method.
+\par\vspace{\baselineskip}
+OpenMemDB also uses the wait-free hash map provided by Tervel to map table names to table objects that contain
+the ``table vector'', table schema, and record counter. We use the standard C++11 hash function for the 
+\inlinecode{std::string} class to do our hashing and avoid expensive resizing by using a large starting capacity.
+
+\subsubsection{Performance Characteristics}
+OpenMemDB is in a relatively unique situation of having to build a database from data structures that typically do not
+comprise the core storage of data in a database. As such, our algorithmic complexity is not ideal for a relational database
+and if those commonly used data structures can be made wait-free, then OpenMemDB will only increase in performance compared
+to competitors that use blocking or lock-free variants. For tables, we use vectors, that have $\mathcal{O}(n)$ lookup and 
+as we are nesting them, as described above, we can then expect that a full table scan to have a algorithmic complexity 
+of $\mathcal{O}(n^2)$. This is quite inefficient, though we are effectively stuck with this until either a wait-free 
+skip-list or B+-tree using Tervel is created or some approximation of those structures can be hacked together using 
+existing data structures. However, insertions into a table have a better algorithmic complexity as vectors have 
+$\mathcal{O}(1)$ inserts unless a resize is triggered. Deletions have a complexity of $\mathcal{O}(n)$ as they are a 
+sequential pair of operations, a lookup to the element and then the deletion itself. As deletions don't have to reach all
+columns, it avoids the squared complexity that lookups suffer and maintains linear complexity.
 
 \newpage
 
