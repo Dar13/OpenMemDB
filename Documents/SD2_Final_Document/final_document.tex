@@ -2136,7 +2136,7 @@ wait free is next, then wait free bounded, and finally wait free population obli
 One of the most important pieces of a Database Management System is the SQL Engine.
 This component is responsible for receiving commands written in the standard query
 language and transforming those commands into an internal representation that can be
-executed by the DBMS. The SQL Engine often consists of three pieces: the tokenizer \and
+executed by the DBMS. The SQL Engine often consists of three pieces: the tokenizer and
 parser, code generator/query planner, and the query executor.
 
 \subsubsection{Tokenizer}
@@ -3319,15 +3319,12 @@ As the module on which all others rely on to store the actual data, the testing 
 module must be comprehensive. The tests we performed are:
 \begin{itemize}
  \item Access speed benchmark (regression test)
- \item Query evaluation speed benchmark
  \item Throughput on contested tables
  \begin{itemize}
   \item Many readers and writers on a single table
   \item Effectively a stress-test for Tervel's ability to manage many \\ threads on the same
-	structure.
+	structure
  \end{itemize}
- \item Cache coherency/efficiency benchmark 
- \item Data consistency/determinism tests
 \end{itemize}
 
 \subsection{Work Manager}
@@ -3340,12 +3337,7 @@ pieces within it as well as the integration of those pieces. The tests we will i
   \item Heuristic performance and job assignment
  \end{itemize}
  \item Heuristic accuracy analysis
- \item Network stress tests
- \begin{itemize}
-  \item Many connections (short-lived and long-lived)
-  \item Many packets
-  \item Both of the above
- \end{itemize}
+
 \end{itemize}
 
 \subsection{SQL Engine}
@@ -3355,8 +3347,6 @@ so tests here are important as well. The list of tests we will perform on the SQ
 as follows:
 \begin{itemize}
  \item Tokenizer/parser accuracy test (regression test)
- \item Parser speed benchmark
- \item Query planner output analyzer
  \item Query execution benchmark (regression test)
 \end{itemize}
 
@@ -3368,7 +3358,6 @@ as follows:
 \begin{itemize}
  \item Overall system load stress test
  \begin{itemize}
-  \item Many connections
   \item Many statements to execute
   \item Large data set
   \item Many related tables within data set
@@ -3380,9 +3369,6 @@ as follows:
   \item Reduced memory availability
  \end{itemize}
  \item Program execution over time
- \begin{itemize}
-  \item Determine whether the system still perform within specifications after a relatively long time
- \end{itemize}
  \item End-to-End latency benchmark
  \begin{itemize}
   \item Determine which workloads the database excels at, and find which workload factor increases latency
@@ -3390,6 +3376,91 @@ as follows:
  \end{itemize}
 \end{itemize}
 
+\section{Testing Harness}
+
+In order to test OpenMemDB, a custom testing harness was written.
+
+\begin{itemize}
+	\item Built from scratch
+	\item Follows builder pattern with added static method chaining for less verbose code
+	\item Automatically generates SQL statements that can be reused for testing on other platforms
+\end{itemize}
+
+\subsection{Test Customization}
+
+In order to make customization easy, a bitmask (deemed the complexity bitmask) is used to tweak individual parts of the test.This bitmask uses a 5 bit binary string to customize tests. The individual bits' function is shown below (in big endian order).
+
+\begin{enumerate}
+	\item Randomize number of cases
+	\item 8 thread test
+	\item 4 thread test
+	\item 2 thread test
+	\item SQL Statement randomization
+\end{enumerate}
+
+An example of a complexity bitmask is {\bfseries 11001}. In this case, it would generate test that has a random number of cases(SQL statements), uses 8 threads, and each SQL statement is randomized. In addition to the complexity bitmask, the ability to change the value of any parameter is also given. 
+
+  \begin{figure}[H]
+  	\begin{lstlisting}[language=C++]
+		DatastoreTest dataStoreTest;
+
+		dataStoreTest.with(MODE_CREATE)
+					 .parseComplexity(0b000011)
+					 .generateCases()
+					 .test();
+  	\end{lstlisting}
+  	\caption{Simple customized test}
+  	\label{testharnesscode}
+  \end{figure}
+  
+    \begin{figure}[H]
+    	\begin{lstlisting}[language=C++]
+    	DatastoreTest dataStoreTest;
+    	
+    	dataStoreTest.with(MODE_CREATE)
+    	.setThreadCount(32)
+    	.generateCases(0b00011)
+    	.test();
+    	\end{lstlisting}
+    	\caption{Further customized test using explicit variable customization}
+    	\label{testharnesscustomized}
+    \end{figure}
+    
+    
+    Figure \ref{testharnesscode} shows a simple test customized with the bitmask while figure \ref{testharnesscustomized}
+    shows the ability to explicitly change any parameter manually.
+    
+\subsection{Testing Competitors}
+
+The testing harness also provides the functionality to print generated SQL statements to a file. This allows for easy testing on other systems. SQL generation is printed to a file in a very similar way to generating a test. 
+  
+  \begin{figure}[H]
+  	\begin{lstlisting}[language=C++]
+  	DatastoreTest dataStoreTest;
+  	
+  	dataStoreTest.with(MODE_CREATE)
+				 .generateCases(0b0000)
+				 .printStatementsToFile();
+  	\end{lstlisting}
+  	\caption{SQL generation and printing to file}
+  	\label{testharnessprint}
+  \end{figure}
+ 
+ 
+  \begin{figure}[H]
+  	\begin{lstlisting}[language=C++]
+  	DatastoreTest dataStoreTest;
+  	
+  	dataStoreTest.with(MODE_CREATE)
+  	.generateCompatCases(0b0000)
+  	.printStatementsToFile();
+  	\end{lstlisting}
+  	\caption{Compatible SQL generation}
+  	\label{testharnessprintcompat}
+  \end{figure}
+  
+  
+  Figure \ref{testharnessprint} shows test SQL generation and figure \ref{testharnessprintcompat} shows SQL generation that is compatible with other DBMS competitors via the \newline {\bfseries generateCompatCases()} function.
 \newpage
 
 \section{Project Summary \& Conclusion}
