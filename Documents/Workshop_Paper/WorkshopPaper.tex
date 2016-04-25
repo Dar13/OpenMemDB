@@ -45,6 +45,8 @@
 
 \newcommand{\CC}{C\nolinebreak\hspace{-.05em}\raisebox{.4ex}{\tiny\bf +}\nolinebreak\hspace{-.10em}\raisebox{.4ex}{\tiny\bf +}}
 
+\hyphenation{manage-ment}
+\hyphenation{pro-gress}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codered}{rgb}{0.6,0,0}
@@ -111,7 +113,7 @@ developed by Feldman et. al\cite{tervel:hazard_pointer}\cite{tervel:hash_map}\ci
 guarantees that the Tervel data-structures provide will achieve the performance gains that 
 have been lacking in the DBMS field. 
 \par\vspace{\baselineskip}
-OpenMemDB's biggest contribution is in being the first completely wait-free database 
+OpenMemDB's largest contribution is being the first wait-free database 
 management system. Wait-freedom is a progress guarantee for concurrent data-structures 
 which states that all threads running operations on the data-structure are guaranteed 
 to complete in a finite number of steps. This sort of guarantee can be vital in 
@@ -141,8 +143,8 @@ that standard extensively.
 
 \section{Related Work}
 There are several other in-memory database management systems that attempt to solve the 
-problem of data-contention. This being the main source of slow downs for in-memory systems.
-
+problem of data-contention. This is the main source of lowered performance for in-memory systems.
+\par\vspace{\baselineskip}
 The database management system most related to OpenMemDB is MemSQL.
 MemSQL uses lock-free data structures for every component of their database management
 system. MemSQL uses lock-free skips lists and hash tables for the bulk of their data-store\cite{MemSQL}.
@@ -150,7 +152,7 @@ They also use MVCC (Multi-version Concurrency Control) to provide fast transacti
 OpenMemDB does something similar with snapshot isolation. MemSQL also compiles SQL
 statement to C++ code and stores this code to be used if the SQL statement is ever called
 again. Something that OpenMemDB does not implement.
-
+\par\vspace{\baselineskip}
 VoltDB is an in-memory database management system that uses pure SQL, is completely ACID
 compliant, and does not use locks. They claim to achieve 100 times the performance of 
 a traditional relation database management system, with near linear scaling with added nodes \cite{voltdb2010voltdb}. They claim to achieve 560,000 transaction per second on a 12
@@ -159,7 +161,7 @@ VoltDB uses a shared nothing architecture. Their execution engine is single thre
 avoiding the overhead of locking or latching \cite{voltdb2010voltdb}. This requires
 intelligent partitioning of data and does not allow for multi-threaded execution 
 on a single partition. 
-
+\par\vspace{\baselineskip}
 Silo is an in-memory database that uses optimistic concurrency control (OCC) to try and 
 limit the affects of locks on their system. Silo avoids locking during the computation
 of a transaction and waits until commit time to execute all writes to shared memory.
@@ -168,7 +170,7 @@ at the end of transaction. This style of system can be particularly effective if
 concurrent writes to shared memory are uncommon. Silo claims to achieve 700,000
 transaction per second an a 32 core machine. Silo relies heavily on concurrent 
 B+ tree for its back end data-store \cite{tu2013speedy}. 
-
+\par\vspace{\baselineskip}
 Hekaton is Microsoft's main memory optimized database engine.
 Hekaton uses a combination of lock-free data-structures and optimistic concurrency control
 in order to achieve scaleable performance gains. Hekaton is like Silo and OpenMemDB in that 
@@ -201,14 +203,14 @@ We use the common definition of wait-freedom as found in Herlihy's definitive te
 states that all threads must make progress within a finite amount of time\cite{herlihy:waitfree}. OpenMemDB is 
 built to be wait-free and linearizable by utilizing Tervel data structures to create the 
 underlying data structures used by the database to service queries and commands.
-
+\par\vspace{\baselineskip}
 OpenMemDB tables are made up of a composition of Tervel data structures, namely the hash map and the
 vector. The hashmap handles the relation of a table's name to its table object. The vectors used in a
 way that a vector, referred to as the table vector, holds references to other Tervel vectors that contain
 the actual data used. As only references to records are stored in the table vector, most operations on the
 table take place as whole record operations rather than a more fine-grained approach that would update
 records on a per-column basis.
-
+\par\vspace{\baselineskip}
 The datastore uses snapshot isolation to increase read performance and minimize the amount of time accessing
 the shared data structures. Snapshot isolation is the technique where a thread or transaction copies the data
 locally and then manipulates it, which avoids performing those manipulations directly on the data structures.
@@ -216,7 +218,9 @@ A side effect of snapshot isolation is write skew, which occurs when a write ope
 predicate that determined that record should be written to is no longer valid.
 We avoid write skew caused by snapshot isolation by only committing the writes
 if the expected data is in the table. This is done by using the Compare and Swap(CAS) operation provided
-by Tervel's vector data structure. The CAS operation checks if the element in the vector is the
+by Tervel's vector data structure. 
+\par\vspace{\baselineskip}
+The CAS operation checks if the element in the vector is the
 expected value and swaps the value with the given value if that check succeeds. Tervel's CAS
 operation is wait-free and atomic, so any contention will have a clear ``winner'' or ``loser'' in terms
 of if a thread succeeds in updating or writing to the vector. This translates to a thread failing to update the
@@ -315,7 +319,7 @@ Table~\ref{tab:voltScaling} shows the scaling for VoltDB for all three benchmark
 
 \begin{figure}[H]
  \begin{center}
-   \includegraphics[scale=.5]{MixedBenchmark.png}
+   \includegraphics[scale=.35]{MixedBenchmark.png}
   \caption{10,000 mixed reads and writes on the selected databases}
   \label{fig:mixedBenchmark}
    \end{center}
