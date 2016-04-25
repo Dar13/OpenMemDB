@@ -41,6 +41,8 @@ stringstyle=\color{codered}
 }
 \lstset{style=omdb_code}
 
+\hyphenation{architecture ar-chi-tec-ture}
+
 \newcommand{\inlinecode}[1]{\colorbox{codegrey}{\lstinline[language=C++]{#1}}}
 
 \renewcommand{\familydefault}{\sfdefault}
@@ -56,7 +58,7 @@ stringstyle=\color{codered}
 
 \title{Non-Blocking In-Memory Database\thanks{Sponsor: Dr. Damian Dechev}}
 \author{Michael McGee \and Robert Medina \and Neil Moore \and Jason Stavrinaky}
-\date{11/4/2015}
+\date{24 April 2016}
 
 \pdfinfo{%
   /Title    (Non-blocking, In-memory Database)
@@ -368,17 +370,17 @@ Zeal is shown in figure \ref{zeal}.
 
 \subsection{Database Management Systems}
 To begin researching a database management system you must first understand what a
-database is. According to the book "Database Management Systems" a database is
+database is. According to the book ``Database Management Systems'' a database is
 
 \begin{quote}
-"... a collection of data, typically describing the activities of one or more related
-organizations."\cite{ramakrishnan2000database}
+``... a collection of data, typically describing the activities of one or more related
+organizations.''\cite{ramakrishnan2000database}
 \end{quote}
 
 A database management system, according to the same text is
 
 \begin{quote}
-"... software designed to assist in maintaining and utilizing large collections of data".
+``... software designed to assist in maintaining and utilizing large collections of data.''
 \cite{ramakrishnan2000database}
 \end{quote}
 
@@ -400,12 +402,12 @@ Some different types of database management systems are:
 Perhaps the most common and well known of all database management systems is the
 Relational DBMS. The relation data model is based off of tables that represent
 the data, as well as the relationship among the data. It is defined in the book
-"Fundamentals of Relational Database Management Systems" as such:
+``Fundamentals of Relational Database Management Systems'' as such:
 \begin{quote}
-"The relational model uses a collection of tables to represent both data and
+``The relational model uses a collection of tables to represent both data and
 the relationships among those data. Tables are logical structures maintained
 by the database manager. The relational model is a combination of three
-components, such as Structural, Integrity, and Manipulative parts."
+components, such as Structural, Integrity, and Manipulative parts.''
 \cite{sumathi2007fundamentals}
 \end{quote}
 \par\vspace{\baselineskip}
@@ -445,10 +447,10 @@ that column.
 \end{itemize}
 
 The idea of a \textit{key} is an important one in the world of relational database
-management systems. So it is worth taking some time to talk about it. "A key is an
-attribute or a group of attributes, which is used to identify a row in a relation."
+management systems. So it is worth taking some time to talk about it. ``A key is an
+attribute or a group of attributes, which is used to identify a row in a relation.''
 \cite{sumathi2007fundamentals}
-According to the author of "Fundamentals of Relational Database Management Systems" a
+According to the author of ``Fundamentals of Relational Database Management Systems'' a
 key can be classified into one of three categories.
 \begin{itemize}
 \setlength{\itemsep}{1pt}
@@ -458,28 +460,28 @@ key can be classified into one of three categories.
 \item Candidate key
 \item Primary key
 \end{itemize}
-A superkey is "a subset of attributes of an entity-set that uniquely identifies
+A superkey is ``a subset of attributes of an entity-set that uniquely identifies
 the entities. Superkeys represent a constraint that prevents two entities from
-ever having the same value for those attributes."\cite{sumathi2007fundamentals}
+ever having the same value for those attributes.''\cite{sumathi2007fundamentals}
 \par\vspace{\baselineskip}
-A candidate key is "a minimal superkey. A candidate key for a relation schema
+A candidate key is ``a minimal superkey. A candidate key for a relation schema
 is a minimal set of attributes whose values uniquely identify tuples in the
-corresponding relation."\cite{sumathi2007fundamentals}
+corresponding relation.''\cite{sumathi2007fundamentals}
 \par\vspace{\baselineskip}
-A primary key is a " designated candidate key. It is to be noted that the
-primary key should not be null."\cite{sumathi2007fundamentals}
+A primary key is a ``designated candidate key. It is to be noted that the
+primary key should not be null.''\cite{sumathi2007fundamentals}
 \par\vspace{\baselineskip}
-There is also a key known as a foreign key, which is a "set of fields or attributes in one
-relation that is used to “refer” to a tuple in another relation."
+There is also a key known as a foreign key, which is a ``set of fields or attributes in one
+relation that is used to `refer' to a tuple in another relation.''
 \cite{sumathi2007fundamentals}
 \par\vspace{\baselineskip}
 \par\vspace{\baselineskip}
 There are many other aspects that full make up what it is to be a relational database
 management system. The most important of which being relational algebra.
 \par\vspace{\baselineskip}
-"Relational algebra is a theoretical language with operations that work on
+``Relational algebra is a theoretical language with operations that work on
 one or more relations to define another relation without changing the original
-relation"\cite{sumathi2007fundamentals}
+relation''\cite{sumathi2007fundamentals}
 Operations of relational algebra include such things as selection operations, projection
 operations, rename operations, union operations, intersection operations, difference
 operations, division operations, as well as joins.
@@ -521,7 +523,7 @@ The Network Model for a database management system is structures similarly to th
 hierarchical model in that it consists of parent and child nodes. However the network
 model does not limit itself to having every child have only one parent. In the network
 model all children can have multiple parents, and obviously parents can have multiple
-children. The network model also consists of items called "records" that which is a
+children. The network model also consists of items called ``records'' that is a
 collection of data items. Each data item has a name and a value.
 \par\vspace{\baselineskip}
 An example of a network model record can be seen in Figure~\ref{fig:networkDBMS_record}
@@ -549,8 +551,8 @@ An example of network model structure can be seen in Figure~\ref{fig:networkDBMS
 \end{figure}
 
 Relationships between records can be implemented by using logical constructions.
-This is called a "Data Set" . In the most basic case, each set consists of a father
-and a child. The "Data Set" has the following properties:
+This is called a ``Data Set'' . In the most basic case, each set consists of a father
+and a child. The ``Data Set'' has the following properties:
 \begin{itemize}
   \item Each set includes exactly one record of the first type. This record is called an Owner of the set.
   \item Each set may include 0 (i.e. an Empty set occurrence), 1 or N records of the same type. These records are called members of the data set.
@@ -606,8 +608,8 @@ some observable change (eg. in a graphical user interface).
 \end{figure}
 
 \subsubsection{NoSQL}
-NoSQL databases, which originally stood for "Non SQL" and now some people refer to as
-"Not only SQL", are databases that store information in a non-relational, non-tabular
+NoSQL databases, which originally stood for ``Non SQL'' and now some people refer to as
+``Not only SQL'', are databases that store information in a non-relational, non-tabular
 manner. Some of the ways that a NoSQL database management system may store information are:
 
 \begin{itemize}
@@ -616,7 +618,7 @@ manner. Some of the ways that a NoSQL database management system may store infor
 \end{itemize}
 
 Some examples of document-style stores are CouchDB and MongoDB. These are stores
-"in which a database record consists of a collection of key-value pairs plus a payload."
+``in which a database record consists of a collection of key-value pairs plus a payload.''
 \cite{stonebraker2010sql}
 \par\vspace{\baselineskip}
 Examples of key-value stores include MemcacheDB and Dynamo. These type of database
@@ -639,7 +641,7 @@ and over time found performance to be
 inadequate. My options were:
 
 \begin{enumerate}
-  \item “Shard” my data to partition it
+  \item ``Shard'' my data to partition it
 across several sites, giving me a serious
 headache managing distributed data
 in my application or
@@ -655,7 +657,7 @@ like the following: My data does
 not conform to a rigid relational schema.
 Hence, I can’t be bound by the
 structure of a RDBMS and need something
-more flexible``\cite{stonebraker2010sql}\footnote{Formatting mine}
+more flexible''\cite{stonebraker2010sql}\footnote{Formatting mine}
 \end{quote} 
 \par\vspace{\baselineskip}
 %\newpage
@@ -1794,9 +1796,9 @@ This causes a loop, and neither lock ever gets released.
 \par\vspace{\baselineskip}
 
 Not all threads are created equal. In reality some threads take up resources much more often than others.
-"{\bfseries Starvation} describes a situation where a thread is unable to gain regular access
+``{\bfseries Starvation} describes a situation where a thread is unable to gain regular access
 to shared resources and is unable to make progress. This happens when shared resources are
-made unavailable for long periods by 'greedy' threads"\citep{oracleconcurrency}.
+made unavailable for long periods by `greedy' threads\citep{oracleconcurrency}.''
 
 \par\vspace{\baselineskip}
 
@@ -1906,9 +1908,9 @@ almost all benefits of multiple threads.
 \subsubsection{Starvation Free}
 
 \begin{quotation}
-"As long as one thread is in the critical section, then some other thread that wants 
+``As long as one thread is in the critical section, then some other thread that wants 
 to enter in the critical section will eventually succeed (even if the thread in the 
-critical section has halted)." \citep{artofmulti}.
+critical section has halted).'' \citep{artofmulti}.
 \end{quotation}
 
 An example of a Starvation Free algorithm would be some code with a very strict fairness 
@@ -2030,8 +2032,8 @@ Starvation is still possible. Does not guarantee thread level progress.
 
 \subsubsection{Wait Free}
 \begin{quotation}
-	"A method is wait-free if it guarantees that every call finishes its execution
-	in a finite number of steps"\citep[p. 59]{artofmulti}.
+	``A method is wait-free if it guarantees that every call finishes its execution
+	in a finite number of steps.''\citep[p. 59]{artofmulti}
 \end{quotation}
 
 Wait freedom holds the strongest guarantee of system progress. It is so complex that it is 
@@ -2048,8 +2050,8 @@ even divided into categories itself, the categories are as follows:
 
 \par\vspace{\baselineskip}
 
-{\bfseries Bounded Wait Freedom} limits the number of steps a method call can take. "This bound 
-may depend on the number of threads"\citep[p. 59]{artofmulti}. Let's take a look at a 
+{\bfseries Bounded Wait Freedom} limits the number of steps a method call can take. ``This bound 
+may depend on the number of threads.''\citep[p. 59]{artofmulti} Let's take a look at a 
 piece of code. 
 \par\vspace{\baselineskip}
 
@@ -2073,8 +2075,8 @@ public void funcWaitFreeBounded() {
 \end{figure}
  
 
-Finally, in {\bfseries Population Oblivious} wait freedom, "performance does not depend on the 
-number of active threads" \citep[p. 59]{artofmulti}. Let's take a look at a piece of code in
+Finally, in {\bfseries Population Oblivious} wait freedom, ``performance does not depend on the 
+number of active threads.''\citep[p. 59]{artofmulti} Let's take a look at a piece of code in
 Figure~\ref{wfpo_ex}.
 \par\vspace{\baselineskip}
 
@@ -2162,18 +2164,18 @@ The purpose of any parser generator is to implement a parser in the programming
 language desired that will accurately parse the context free grammar that it
 was passed in the grammar specification file.
 \par\vspace{\baselineskip}
-The two parser generators that we found were "Lemon" and "YACC". PostgreSQL uses
-"YACC", which stands for "Yet Another Compiler Compiler", while SQLite uses
-"Lemon", which was created to be a simpler alternative to YACC. Both tools will
+The two parser generators that we found were ``Lemon'' and ``YACC''. PostgreSQL uses
+``YACC'', which stands for Yet Another Compiler Compiler, while SQLite uses
+``Lemon'', which was created to be a simpler alternative to YACC that is re-entrant. Both tools will
 generate a Look-Ahead Left-to-right Right-most-derivation (LALR) parser in C when
 given a grammar specification file. Both tools share a base syntax in their grammar files,
 but Lemon varies from YACC in some very important ways and enumerates those in its tutorial document.
 \par\vspace{\baselineskip}
-“It uses a different grammar syntax which is designed to reduce the number of coding
+``It uses a different grammar syntax which is designed to reduce the number of coding
 errors. Lemon also uses a more sophisticated parsing engine that is faster than yacc and
 bison and which is both reentrant and thread-safe. Furthermore, Lemon implements features
 that can be used to eliminate resource leaks, making is suitable for use in long-running
-programs such as graphical user interfaces or embedded controllers.”\cite{lemon_parser}
+programs such as graphical user interfaces or embedded controllers.''\cite{lemon_parser}
 \par\vspace{\baselineskip}
 It is because of these benefits, especially thread safety, that we chose to use Lemon
 as our parser generator. The Lemon parser generator is contained in one C code file and
@@ -2402,19 +2404,19 @@ known and less well documented DBMS that are worthy of note:
   a brand new project and as such has very limited documentation. They claim on there
   github page to be
   \begin{quote}
-  "... a data management platform that provides real-time, consistent access to
-  data-intensive applications throughout widely distributed cloud architectures."
+  ``... a data management platform that provides real-time, consistent access to
+  data-intensive applications throughout widely distributed cloud architectures.''
   \cite{aerospike}
   \end{quote}
   The specifics of their architecture is not listed.
   \par\vspace{\baselineskip}
   \item dashDB is IBM's in-memory data warehouse. Self described as
   \begin{quote}
-  "a high performance, massively scalable cloud data warehouse service,
-  fully managed by IBM." \cite{dashDB}
+  ``[A] high performance, massively scalable cloud data warehouse service,
+  fully managed by IBM.'' \cite{dashDB}
   \end{quote}
   dashDB comes in a couple different configurations, the one that most resembles
-  our project is the MPP, "Massively Parallel Processing", configuration.
+  our project is the MPP, ``Massively Parallel Processing'', configuration.
   MPP operates by allowing the data warehouse to leverage multiple servers
   in a network cluster to process data simultaneously.
   \par\vspace{\baselineskip}
@@ -2461,11 +2463,11 @@ nable dashDB to maximize hardware performance.
 \par\vspace{\baselineskip}
 \item eXtremeDB is the in-memory variant of the McObject family of data management projects.
   It stores its data entirely in main memory, eliminating the need for disk I/O.
-  eXtremeDB claims to have an "Ultra-small" footprint stating that through
+  eXtremeDB claims to have an ``Ultra-small'' footprint stating that through
   streamlining of core database functions they are able to reduce their RAM footprint
   to around 100KB. They also do not translate the data they store in memory. They
-  store the data exactly how it will be used by the application. "No mapping a C data
-  element to a relational representation"\cite{extremeDB} eXtremeDB claims to fully
+  store the data exactly how it will be used by the application. ``No mapping a C data
+  element to a relational representation''\cite{extremeDB} eXtremeDB claims to fully
   support ACID properties. It does this by ensuring that operations grouped into
   transactions will complete together or the database will be rolled back to a
   pre-transaction state.\cite{extremeDB}
@@ -2483,11 +2485,11 @@ nable dashDB to maximize hardware performance.
   GemFire is designed for working with operational data needed by real time
   applications. It is not meant for working on very large quantities. To
   achieve massive speeds GemFire relies on being primarily, not fully,
-  main memory based. " It uses highly-concurrent main-memory data structures to avoid
+  main memory based. ``It uses highly-concurrent main-memory data structures to avoid
   lock contention and a data distribution
   layer that avoids redundant message copying, and it uses native serialization and
   smart buffering to ensure messages move from node to node faster than what
-  traditional messaging would provide."\cite{gemfire}
+  traditional messaging would provide.''\cite{gemfire}
   \par\vspace{\baselineskip}
   An illustration of GemFire's peer architecture can be seen in Figure~\ref{fig:gemfire_peer}.
   \begin{figure}
@@ -2550,13 +2552,13 @@ nable dashDB to maximize hardware performance.
   checkpoints. Hekaton tables are recovered when a database is \\ recovered.
   \end{itemize} \cite{hekaton}
 
-  \item SAP HANA is short for "High-Performance Analytic Appliance" and is an in-memory,
-  column-oriented, relational database management system. SAP HANA employs a
-  massively parallel in-memory architecture to eliminate the I/O bottleneck
-  that slows disk backed database management systems.
+  \item SAP HANA stands for ``High-Performance Analytic Appliance'' and 
+  is an in-memory, column-oriented RDBMS. SAP HANA employs a massively parallel 
+  in-memory architecture to eliminate the I/O bottleneck that slows disk backed 
+  database management systems.
   \par\vspace{\baselineskip}
-  An example of a massively parallel layout can be seen in Figure~\ref{fig:saphana_architecture}
-  \begin{figure}[H]
+  An example of a massively parallel layout can be seen in Figure~\ref{fig:saphana_architecture}.
+  \begin{figure}
 	\centering
 	\includegraphics[scale=.5]{graphics/sap_hana_dbms_architecture.png}
 	\caption{SAP HANA Massively Parallel Architecture \copyright 2015 SAP \citep{saphana}}
@@ -2576,7 +2578,7 @@ multiple components are necessary to meet the technical requirements of the proj
 comprised of an application connector API, SQL Engine, Data Store, and Work Manager.
 It is necessary for the client to be able to communicate with the database through the connector, 
 dubbed libomdb. On the server since the client is using SQL to provide
-statements to the database a SQL Engine is necessary to correctly and efficently parse
+statements to the database a SQL Engine is necessary to correctly and efficiently parse
 such statements into a type of representation that the database can then understand and evaluate.
 It is also important that certain statements be distributed in an organized manner. More specifically, 
 the Work Manager will be responsible for distributing the system's workload among its pool of worker threads. 
@@ -2777,7 +2779,7 @@ if (result.isSuccess) {
   \end{itemize}
   \inlinecode{m_rows} is a \inlinecode{vector<ResultRow>}, \inlinecode{ResultRow} is a typedef for
   a  \\ \inlinecode{vector<DataValue>}, and \inlinecode{DataValue} is a typedef for \inlinecode{boost::variant<>}.
-  So with all typedefs removed \inlinecode{m_rows} is actually a \inlinecode{vector<vector<boost:variant<> > >}.
+  So with all type definitions removed \inlinecode{m_rows} is actually a \inlinecode{vector<vector<boost:variant<> > >}.
 
   \inlinecode{m_metaData} is the
   \inlinecode{ResultMetaData} object that describes the
@@ -2849,7 +2851,7 @@ if (result.isSuccess) {
   The core of any Database Management System(DBMS), particularly one that implements the SQL standard, is the
   engine that drives the actual parsing, planning, and execution of SQL queries and commands.
   The module in our DBMS that handles those tasks is the SQL engine and it is specially designed to
-  be thread-safe, performant, and wait-free. Wait-freedom is the core requirement of the project
+  be thread-safe, efficient, and wait-free. Wait-freedom is the core requirement of the project
   and it supersedes all other requirements, so it is imperative that this module is guaranteed to finish
   parsing and executing any given SQL query in a finite amount of time. Keeping
   that requirement in mind, we utilized C++11 features and single-responsibility modeling to
@@ -2875,7 +2877,7 @@ if (result.isSuccess) {
   \par\vspace{\baselineskip}
   Another decision in the design of the SQL engine that was important to maintaining wait-freedom and
   thread-safety was the adoption of the Lemon parser engine. Lemon was built to be thread-safe and
-  reentrant without locks, meaning that each thread essentially has its own instance of the parser
+  re-entrant without locks, meaning that each thread essentially has its own instance of the parser
   and is independent of other threads. This cleanly avoids the need for costly, and forbidden
   in our case, locks and other synchronization primitives. In addition, we have complete control over
   the grammar from which Lemon generates its parser which gives us opportunity to ensure there
@@ -2905,8 +2907,8 @@ if (result.isSuccess) {
   \end{figure}
   \par\vspace{\baselineskip}
   Execution of the query plan is also within the purview of the SQL engine and also must be guaranteed to be
-  wait-free as well as performant. As our use case puts us entirely within memory, we have the necessarily low
-  latencies to feel comfortable in performing full table scans in the most naive case with options to
+  wait-free as well as efficient. As our use case puts us entirely within memory, we have the necessarily low
+  latency to feel comfortable in performing full table scans in the most naive case with options to
   use indices and caches when available or reasonable. This will make us, in theory, faster than our disk-based
   counterparts such as PostgreSQL or MySQL. This task within the SQL engine is the one that will actually
   interact with the data store and actually performs operations upon the data stored there. We rely on the Tervel
@@ -2954,7 +2956,7 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
   \caption{Work Manager network function definitions}
   \label{code:work_manager_func_def}
   \end{figure}
-  The \inlinecode{omdb::NetworkStatus} datatype is used to return various
+  The \inlinecode{omdb::NetworkStatus} data-type is used to return various
   possible error conditions and is internally used to classify whether the error is fatal
   or can be recovered from. Due to our goal of being non-blocking, we utilize various specially-defined
   functions in the Linux network API such as \inlinecode{accept4} and
@@ -3016,14 +3018,14 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
   which the Work Manager sends jobs, the queries or commands that a client sends to OpenMemDB, to the
   worker threads in the thread pool. The jobs are contained within a \inlinecode{std::packaged_task<Result(int)>}
   object which is a C++11 construct that can generate the previously mentioned \inlinecode{std::future<Result>}.
-  The generated future object is stored in the afore-mentioned vector and the job is then passed to a selected
+  The generated future object is stored in the aforementioned vector and the job is then passed to a selected
   worker thread to be evaluated. The selection process for where this job is placed is the work load distribution
   task that the Work Manager is responsible for. To do this accurately, the Work Manager implements
   uses a heuristic algorithm that estimates the computation needed to fulfill that query or command
   and then places the job in the thread pool in a way that balances overall system load.
   \par\vspace{\baselineskip}
   The heuristic used to guess the complexity of a given query or command is fairly simple as we need to
-  be performant rather than accurate. The primary cost in this heuristic is length of the query/command itself
+  be efficient and simple rather than accurate. The primary cost in this heuristic is length of the query/command itself
   as that is a relatively cheap operation, though some other costs could be the amount of parentheses
   or the actual classification of the query/command itself (i.e. whether it is a SELECT, INSERT INTO, or DELETE statement).
   This heuristic will be a source of heavy experimentation and testing as overloading a single core or thread
@@ -3076,7 +3078,7 @@ with the pointer. Essentially a wait-free, thread-safe smart pointer similar to 
 \inlinecode{std::shared\_ptr} found in modern C++.
 \par\vspace{\baselineskip}
 Our supported data types are contained in a structure called \inlinecode{TervelData} a 
-union of structs that uses bitfields in order to manipulate individual or small regions of
+union of structs that uses bit-fields in order to manipulate individual or small regions of
 bits within the larger 64-bit piece of memory. The definition of this union is shown in
 Figure~\ref{code:tervel_data_definition} with the definition of a further union that defines the 
 DATE data type in Figure~\ref{code:tervel_data_date_def}. An example that uses both of these
@@ -3120,7 +3122,7 @@ unions to manipulate the data contained within is shown in Figure~\ref{code:terv
   };
   \end{lstlisting}
 
-  \caption{The defintion of the DateData object that is used to store dates in the TervelData object}
+  \caption{The definition of the DateData object that is used to store dates in the TervelData object}
   \label{code:tervel_data_date_def}
 \end{figure}
 
@@ -3146,7 +3148,7 @@ the date January 1st, 2016}
 Data Store is made up of multiple functions that takes in multiple arguments in order to reference tables in memory and return the references that point to the memory to the query planner for further modification. Data store primary objective is to allocate memory and assure that this is done using non-blocking techniques. 
 \par\vspace{\baselineskip}
 
-It is important to note that in order to de-allocate memory from the heap it is possible to do so when data store returns the pointers. The reasoning behind this is that data store should not perform any logic operations just as parsing inputs, etc, etc. Data store primary objective is to allocate memory and send references on where that memory can be located, in other words data storage and data retrieval. 
+It is important to note that in order to deallocate memory from the heap it is possible to do so when data store returns the pointers. The reasoning behind this is that data store should not perform any logic operations just as parsing inputs, etc, etc. Data store primary objective is to allocate memory and send references on where that memory can be located, in other words data storage and data retrieval. 
 \par\vspace{\baselineskip}
 The Data Store is made up of multiple functions that create and delete tables and insert, update, delete, or retrieve records within those tables:
 
@@ -3164,7 +3166,7 @@ The Data Store is made up of multiple functions that create and delete tables an
   to insert that row into the Data Store, assuming that the data contained satisfies the table's schema.
   \item \inlinecode{updateRecords} evaluates a predicate tree against a table and attempts to update the rows that
   are found by the predicate evaluation. This method can run into contention which will be communicated to the caller.
-  \item \inlinecode{deleteRecords} evalutes a predicate tree against a table and attempts to delete the rows that
+  \item \inlinecode{deleteRecords} evaluates a predicate tree against a table and attempts to delete the rows that
   are found by the predicate evaluation.
   \item \inlinecode{getRecords} evaluates a predicate tree and returns all records that satisfy the predicates, this 
   operation is equivalent to a SELECT query in SQL.
@@ -3174,7 +3176,7 @@ The Data Store is made up of multiple functions that create and delete tables an
 \subsubsection{Data Structures}
 OpenMemDB uses nested vectors to represent tables in memory, with a ``table vector'' that holds references
 to all records held within that particular table. Records are themselves vectors, though they are not 
-resized after creation as a table's record length is fixed. Our group extended, with the help of 
+re-sized after creation as a table's record length is fixed. Our group extended, with the help of 
 one of Tervel's creators Steven Feldman, Tervel's ability to safely store and access pointers in its vector. 
 This ensures that we do not leak memory or cause other memory errors when changing already existing records
 in the table.
@@ -3189,7 +3191,7 @@ test done by the vector's \inlinecode{cas()} method.
 \par\vspace{\baselineskip}
 OpenMemDB also uses the wait-free hash map provided by Tervel to map table names to table objects that contain
 the ``table vector'', table schema, and record counter. We use the standard C++11 hash function for the 
-\inlinecode{std::string} class to do our hashing and avoid expensive resizing by using a large starting capacity.
+\inlinecode{std::string} class to do our hashing and avoid expensive re-sizing by using a large starting capacity.
 
 \subsubsection{Performance Characteristics}
 OpenMemDB is in a relatively unique situation of having to build a database from data structures that typically do not
@@ -3200,9 +3202,9 @@ as we are nesting them, as described above, we can then expect that a full table
 of $\mathcal{O}(n^2)$. This is quite inefficient, though we are effectively stuck with this until either a wait-free 
 skip-list or B+-tree using Tervel is created or some approximation of those structures can be hacked together using 
 existing data structures. However, insertions into a table have a better algorithmic complexity as vectors have 
-$\mathcal{O}(1)$ inserts unless a resize is triggered. Deletions have a complexity of $\mathcal{O}(n)$ as they are a 
+$\mathcal{O}(1)$ inserts unless a re-size is triggered. Deletions have a complexity of $\mathcal{O}(n)$ as they are a 
 sequential pair of operations, a lookup to the element and then the deletion itself. As deletions don't have to reach all
-columns, it avoids the squared complexity that lookups suffer and maintains linear complexity.
+columns, it avoids the squared complexity that look-ups suffer and maintains linear complexity.
 
 \newpage
 
@@ -3300,11 +3302,11 @@ stress-test the system. The hardware used by each member:
 \par\vspace{\baselineskip}
 In addition to the senior design lab, we also had access to the Scalable and Secure Systems lab server
 thanks to Dr. Dechev. This server was the primary test-bed for OpenMemDB as consumer hardware simply
-doesn't have the necessary parallization or memory needed in order to truly test and stress a
+doesn't have the necessary number of cores or memory needed in order to truly test and stress a
 highly-parallelized and memory-intensive database management system. The server we were allowed to
 use had the following hardware characteristics:
 \begin{itemize}
- \item 64 cores (AMD Operon)
+ \item 64 cores (AMD Opteron)
  \item 312 gigabytes of RAM
  \item 1 terabyte of hard disk storage
 \end{itemize}
@@ -3364,13 +3366,11 @@ module must be comprehensive. The tests we performed are:
 This module is broad with many moving parts, requiring special attention be paid to the individual
 pieces within it as well as the integration of those pieces. The tests we will implement will be:
 \begin{itemize}
- \item Microbenchmarks of hotspots
+ \item Micro-benchmarks of hot-spots
  \begin{itemize}
   \item Connection management
   \item Heuristic performance and job assignment
  \end{itemize}
- \item Heuristic accuracy analysis
-
 \end{itemize}
 
 \subsection{SQL Engine}
@@ -3393,35 +3393,20 @@ as follows:
  \begin{itemize}
   \item Many statements to execute
   \item Large data set
-  \item Many related tables within data set
- \end{itemize}
- \item Accuracy tests, specifically regarding determinism in edge cases
- \item Contested resources
- \begin{itemize}
-  \item I/O heavy background threads or processes
-  \item Reduced memory availability
- \end{itemize}
- \item Program execution over time
- \item End-to-End latency benchmark
- \begin{itemize}
-  \item Determine which workloads the database excels at, and find which workload factor increases latency
-	the most
  \end{itemize}
 \end{itemize}
 
 \section{Testing Harness}
-
-In order to test OpenMemDB, a custom testing harness was written.
-
+In order to test OpenMemDB, a custom testing harness was written:
 \begin{itemize}
 	\item Built from scratch
 	\item Follows builder pattern with added static method chaining for less verbose code
-	\item Automatically generates SQL statements that can be reused for testing on other platforms
+	\item Automatically generates SQL statements that can be reused for testing on other databases
 \end{itemize}
 
 \subsection{Test Customization}
 
-To make customization easy, a bitmask (deemed the complexity bitmask) is used to tweak individual parts of the test.This bitmask uses a 5 bit binary string to customize tests. The individual bits' function is shown below (in big endian order).
+To make customization of generated statements easy, a bitmask (referred to as the complexity bitmask) is used to tweak individual parts of the test. This bitmask uses a 5 bit binary string to customize tests. The individual bits' function is shown below (in big-endian order).
 
 \begin{enumerate}
 	\item Randomize number of cases
@@ -3431,41 +3416,44 @@ To make customization easy, a bitmask (deemed the complexity bitmask) is used to
 	\item SQL Statement randomization
 \end{enumerate}
 
-An example of a complexity bitmask is {\bfseries 11001}. In this case, it would generate test that has a random number of cases(SQL statements), uses 8 threads, and each SQL statement is randomized. In addition to the complexity bitmask, the ability to change the value of any parameter is also given. 
+An example of a complexity bitmask is {\bfseries 11001}. In this case, it would generate a test sequence 
+that has a random number of cases(SQL statements), uses 8 threads, and each SQL statement is randomized. 
+In addition to the complexity bitmask, the ability to change the value of any parameter is also given. 
 
-  \begin{figure}[H]
-  	\begin{lstlisting}[language=C++]
+\begin{figure}[H]
+ \begin{lstlisting}[language=C++]
 		DatastoreTest dataStoreTest;
 
 		dataStoreTest.with(MODE_CREATE)
 					 .parseComplexity(0b00011)
 					 .generateCases()
 					 .test();
-  	\end{lstlisting}
-  	\caption{Simple customized test}
-  	\label{testharnesscode}
-  \end{figure}
+ \end{lstlisting}
+ \caption{Simple example of a customized test}
+ \label{testharnesscode}
+\end{figure}
   
-    \begin{figure}[H]
-    	\begin{lstlisting}[language=C++]
+\begin{figure}[H]
+  \begin{lstlisting}[language=C++]
     	DatastoreTest dataStoreTest;
     	
     	dataStoreTest.with(MODE_CREATE)
-    	.setThreadCount(32)
-    	.generateCases(0b00011)
-    	.test();
-    	\end{lstlisting}
-    	\caption{Further customized test using explicit variable customization}
-    	\label{testharnesscustomized}
-    \end{figure}
+    				 .setThreadCount(32)
+    				 .generateCases(0b00011)
+    				 .test();
+  \end{lstlisting}
+  \caption{Further customized test that explicitly sets the thread count variable}
+  \label{testharnesscustomized}
+\end{figure}
     
     
-    Figure \ref{testharnesscode} shows a simple test customized with the bitmask while figure \ref{testharnesscustomized}
-    shows the ability to explicitly change any parameter manually.
+Figure~\ref{testharnesscode} shows a simple test customized with the bitmask while 
+Figure~\ref{testharnesscustomized} shows the ability to explicitly change any parameter manually.
     
 \subsection{Testing Competitors}
-
-The testing harness also provides the functionality to print generated SQL statements to a file. This allows for easy testing on other systems. SQL generation is printed to a file in a very similar way to generating a test. 
+The testing harness also provides the functionality to print generated SQL statements to a file. 
+This allows for easy testing on other systems. The file generated reflects the order of execution 
+of statements when running the test against OpenMemDB.
   
   \begin{figure}[H]
   	\begin{lstlisting}[language=C++]
@@ -3493,21 +3481,23 @@ The testing harness also provides the functionality to print generated SQL state
   \end{figure}
   
   
-  Figure \ref{testharnessprint} shows test SQL generation and figure \ref{testharnessprintcompat} shows SQL generation that is compatible with other DBMS competitors via the \newline {\bfseries generateCompatCases()} function.
+Figure~\ref{testharnessprint} shows test SQL generation and Figure~\ref{testharnessprintcompat} 
+shows SQL generation that is compatible with other DBMS competitors via the \newline 
+\inlinecode{generateCompatCases()} function.
 
 \subsection{Supported Tests}
 
 Currently, OpenMemDB's testing harness supports the following tests:
 
 \begin{itemize}
-	\item CREATE
-	\item DROP
-	\item INSERT
-	\item SELECT
+	\item CREATE TABLE
+	\item DROP TABLE
+	\item INSERT (100\% writes)
+	\item SELECT (100\% reads)
 	\item Mixed test
 	\begin{itemize}
-		\item 1/3 INSERT
-		\item 2/3 SELECT
+		\item 1/3 INSERT (1/3 writes)
+		\item 2/3 SELECT (2/3 reads)
 	\end{itemize}
 \end{itemize}
 
