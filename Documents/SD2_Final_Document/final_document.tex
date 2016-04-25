@@ -3438,7 +3438,7 @@ An example of a complexity bitmask is {\bfseries 11001}. In this case, it would 
 		DatastoreTest dataStoreTest;
 
 		dataStoreTest.with(MODE_CREATE)
-					 .parseComplexity(0b000011)
+					 .parseComplexity(0b00011)
 					 .generateCases()
 					 .test();
   	\end{lstlisting}
@@ -3472,7 +3472,7 @@ The testing harness also provides the functionality to print generated SQL state
   	DatastoreTest dataStoreTest;
   	
   	dataStoreTest.with(MODE_CREATE)
-				 .generateCases(0b0000)
+				 .generateCases(0b00000)
 				 .printStatementsToFile();
   	\end{lstlisting}
   	\caption{SQL generation and printing to file}
@@ -3485,7 +3485,7 @@ The testing harness also provides the functionality to print generated SQL state
   	DatastoreTest dataStoreTest;
   	
   	dataStoreTest.with(MODE_CREATE)
-  	.generateCompatCases(0b0000)
+  	.generateCompatCases(0b00000)
   	.printStatementsToFile();
   	\end{lstlisting}
   	\caption{Compatible SQL generation}
@@ -3494,6 +3494,24 @@ The testing harness also provides the functionality to print generated SQL state
   
   
   Figure \ref{testharnessprint} shows test SQL generation and figure \ref{testharnessprintcompat} shows SQL generation that is compatible with other DBMS competitors via the \newline {\bfseries generateCompatCases()} function.
+
+\subsection{Supported Tests}
+
+Currently, OpenMemDB's testing harness supports the following tests:
+
+\begin{itemize}
+	\item CREATE
+	\item DROP
+	\item INSERT
+	\item SELECT
+	\item Mixed test
+	\begin{itemize}
+		\item 1/3 INSERT
+		\item 2/3 SELECT
+	\end{itemize}
+\end{itemize}
+
+
 \newpage
 
 \section{Project Summary \& Conclusion}
