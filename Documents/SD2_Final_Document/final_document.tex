@@ -3405,7 +3405,7 @@ An example of a complexity bitmask is {\bfseries 11001}. In this case, it would 
 		DatastoreTest dataStoreTest;
 
 		dataStoreTest.with(MODE_CREATE)
-					 .parseComplexity(0b000011)
+					 .parseComplexity(0b00011)
 					 .generateCases()
 					 .test();
   	\end{lstlisting}
@@ -3439,7 +3439,7 @@ The testing harness also provides the functionality to print generated SQL state
   	DatastoreTest dataStoreTest;
   	
   	dataStoreTest.with(MODE_CREATE)
-				 .generateCases(0b0000)
+				 .generateCases(0b00000)
 				 .printStatementsToFile();
   	\end{lstlisting}
   	\caption{SQL generation and printing to file}
@@ -3452,7 +3452,7 @@ The testing harness also provides the functionality to print generated SQL state
   	DatastoreTest dataStoreTest;
   	
   	dataStoreTest.with(MODE_CREATE)
-  	.generateCompatCases(0b0000)
+  	.generateCompatCases(0b00000)
   	.printStatementsToFile();
   	\end{lstlisting}
   	\caption{Compatible SQL generation}
