@@ -1,0 +1,14 @@
+In order to build this document you need to download and unzip the "graphics.7z" file on the Google Drive.
+
+Instructions on how to do that:
+	- Download the archive from: https://drive.google.com/file/d/0B9j_rdidll-JQlA1N3BMUEYzbkk/view?usp=sharing
+	- Unzip it using the p7zip tool into a directory called "graphics"
+	- All done!
+
+# Jason's Notes
+
+I added a command to redefine include graphics so I dont get any errors. Just comment that out when testing graphics.
+I also commented out a line because it was giving me a ton of errors.
+
+These changes are in lines:
+  - ??

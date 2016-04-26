@@ -41,6 +41,8 @@ stringstyle=\color{codered}
 }
 \lstset{style=omdb_code}
 
+\hyphenation{architecture ar-chi-tec-ture}
+
 \newcommand{\inlinecode}[1]{\colorbox{codegrey}{\lstinline[language=C++]{#1}}}
 
 \renewcommand{\familydefault}{\sfdefault}
@@ -56,7 +58,7 @@ stringstyle=\color{codered}
 
 \title{Non-Blocking In-Memory Database\thanks{Sponsor: Dr. Damian Dechev}}
 \author{Michael McGee \and Robert Medina \and Neil Moore \and Jason Stavrinaky}
-\date{11/4/2015}
+\date{24 April 2016}
 
 \pdfinfo{%
   /Title    (Non-blocking, In-memory Database)
@@ -232,25 +234,23 @@ to satisfy by our requirements.
 \par\vspace{\baselineskip}
 As such, the following are the specification for this project:
 \begin{itemize}
- \item A wait-free data store that can be performant when handling large amounts
+ \item A wait-free data store that can be high-performing when handling large amounts
  of memory without utilizing the hard disk
  \item A minimalistic implementation of the SQL standard:
  \begin{itemize}
   \item CREATE TABLE, DROP TABLE commands
-  \item SELECT query, with qualifications such as lack of nested queries
+  \item SELECT query, with qualifications such as no nesting of queries 
   \item INSERT, UPDATE, and DELETE commands with certain clauses not implemented
   \item Certain datatypes:
     \begin{itemize}
       \item Integral types (e.g. INTEGER, SMALLINT, BIGINT)
       \item Boolean types (e.g. BOOLEAN)
-      \item Character string types( e.g. CHAR,VARCHAR)
       \item Floating-precision types (e.g. FLOAT)
-      \item Date and time types (e.g. DATE, TIME, TIMESTAMP)
+      \item Date and time types (e.g. DATE, TIME)
     \end{itemize}
-  \item Column aggregate functions: MIN, MAX, AVG, COUNT, SUM, etc.
-  \item Table constraints: PRIMARY KEY, NOT NULL, DEFAULT, FOREIGN KEY, UNIQUE, AUTO\_INCREMENT
-  \item WHERE, ORDER BY, GROUP BY, IN, BETWEEN clauses with support for boolean expressions within them
-  \item ODBC connector implementation
+  \item Table constraints: NOT NULL, DEFAULT, AUTO\_INCREMENT
+  \item WHERE clauses with support for boolean expressions within them
+  \item Custom library used to interface with the database
  \end{itemize}
 \end{itemize}
 
@@ -289,8 +289,8 @@ functionality.
     \caption{Vim} \label{vim}
 \end{figure}
 
- In figure \ref{vim}, we have Vim running with the powerline plugin as
- well as git integration. 
+In figure \ref{vim}, we have Vim running with the powerline plugin as
+well as git integration. 
  
 \newpage
 
@@ -370,17 +370,17 @@ Zeal is shown in figure \ref{zeal}.
 
 \subsection{Database Management Systems}
 To begin researching a database management system you must first understand what a
-database is. According to the book "Database Management Systems" a database is
+database is. According to the book ``Database Management Systems'' a database is
 
 \begin{quote}
-"... a collection of data, typically describing the activities of one or more related
-organizations."\cite{ramakrishnan2000database}
+``... a collection of data, typically describing the activities of one or more related
+organizations.''\cite{ramakrishnan2000database}
 \end{quote}
 
 A database management system, according to the same text is
 
 \begin{quote}
-"... software designed to assist in maintaining and utilizing large collections of data".
+``... software designed to assist in maintaining and utilizing large collections of data.''
 \cite{ramakrishnan2000database}
 \end{quote}
 
@@ -402,12 +402,12 @@ Some different types of database management systems are:
 Perhaps the most common and well known of all database management systems is the
 Relational DBMS. The relation data model is based off of tables that represent
 the data, as well as the relationship among the data. It is defined in the book
-"Fundamentals of Relational Database Management Systems" as such:
+``Fundamentals of Relational Database Management Systems'' as such:
 \begin{quote}
-"The relational model uses a collection of tables to represent both data and
+``The relational model uses a collection of tables to represent both data and
 the relationships among those data. Tables are logical structures maintained
 by the database manager. The relational model is a combination of three
-components, such as Structural, Integrity, and Manipulative parts."
+components, such as Structural, Integrity, and Manipulative parts.''
 \cite{sumathi2007fundamentals}
 \end{quote}
 \par\vspace{\baselineskip}
@@ -447,10 +447,10 @@ that column.
 \end{itemize}
 
 The idea of a \textit{key} is an important one in the world of relational database
-management systems. So it is worth taking some time to talk about it. "A key is an
-attribute or a group of attributes, which is used to identify a row in a relation."
+management systems. So it is worth taking some time to talk about it. ``A key is an
+attribute or a group of attributes, which is used to identify a row in a relation.''
 \cite{sumathi2007fundamentals}
-According to the author of "Fundamentals of Relational Database Management Systems" a
+According to the author of ``Fundamentals of Relational Database Management Systems'' a
 key can be classified into one of three categories.
 \begin{itemize}
 \setlength{\itemsep}{1pt}
@@ -460,28 +460,28 @@ key can be classified into one of three categories.
 \item Candidate key
 \item Primary key
 \end{itemize}
-A superkey is "a subset of attributes of an entity-set that uniquely identifies
+A superkey is ``a subset of attributes of an entity-set that uniquely identifies
 the entities. Superkeys represent a constraint that prevents two entities from
-ever having the same value for those attributes."\cite{sumathi2007fundamentals}
+ever having the same value for those attributes.''\cite{sumathi2007fundamentals}
 \par\vspace{\baselineskip}
-A candidate key is "a minimal superkey. A candidate key for a relation schema
+A candidate key is ``a minimal superkey. A candidate key for a relation schema
 is a minimal set of attributes whose values uniquely identify tuples in the
-corresponding relation."\cite{sumathi2007fundamentals}
+corresponding relation.''\cite{sumathi2007fundamentals}
 \par\vspace{\baselineskip}
-A primary key is a " designated candidate key. It is to be noted that the
-primary key should not be null."\cite{sumathi2007fundamentals}
+A primary key is a ``designated candidate key. It is to be noted that the
+primary key should not be null.''\cite{sumathi2007fundamentals}
 \par\vspace{\baselineskip}
-There is also a key known as a foreign key, which is a "set of fields or attributes in one
-relation that is used to “refer” to a tuple in another relation."
+There is also a key known as a foreign key, which is a ``set of fields or attributes in one
+relation that is used to `refer' to a tuple in another relation.''
 \cite{sumathi2007fundamentals}
 \par\vspace{\baselineskip}
 \par\vspace{\baselineskip}
 There are many other aspects that full make up what it is to be a relational database
 management system. The most important of which being relational algebra.
 \par\vspace{\baselineskip}
-"Relational algebra is a theoretical language with operations that work on
+``Relational algebra is a theoretical language with operations that work on
 one or more relations to define another relation without changing the original
-relation"\cite{sumathi2007fundamentals}
+relation''\cite{sumathi2007fundamentals}
 Operations of relational algebra include such things as selection operations, projection
 operations, rename operations, union operations, intersection operations, difference
 operations, division operations, as well as joins.
@@ -523,7 +523,7 @@ The Network Model for a database management system is structures similarly to th
 hierarchical model in that it consists of parent and child nodes. However the network
 model does not limit itself to having every child have only one parent. In the network
 model all children can have multiple parents, and obviously parents can have multiple
-children. The network model also consists of items called "records" that which is a
+children. The network model also consists of items called ``records'' that is a
 collection of data items. Each data item has a name and a value.
 \par\vspace{\baselineskip}
 An example of a network model record can be seen in Figure~\ref{fig:networkDBMS_record}
@@ -551,8 +551,8 @@ An example of network model structure can be seen in Figure~\ref{fig:networkDBMS
 \end{figure}
 
 Relationships between records can be implemented by using logical constructions.
-This is called a "Data Set" . In the most basic case, each set consists of a father
-and a child. The "Data Set" has the following properties:
+This is called a ``Data Set'' . In the most basic case, each set consists of a father
+and a child. The ``Data Set'' has the following properties:
 \begin{itemize}
   \item Each set includes exactly one record of the first type. This record is called an Owner of the set.
   \item Each set may include 0 (i.e. an Empty set occurrence), 1 or N records of the same type. These records are called members of the data set.
@@ -608,8 +608,8 @@ some observable change (eg. in a graphical user interface).
 \end{figure}
 
 \subsubsection{NoSQL}
-NoSQL databases, which originally stood for "Non SQL" and now some people refer to as
-"Not only SQL", are databases that store information in a non-relational, non-tabular
+NoSQL databases, which originally stood for ``Non SQL'' and now some people refer to as
+``Not only SQL'', are databases that store information in a non-relational, non-tabular
 manner. Some of the ways that a NoSQL database management system may store information are:
 
 \begin{itemize}
@@ -618,7 +618,7 @@ manner. Some of the ways that a NoSQL database management system may store infor
 \end{itemize}
 
 Some examples of document-style stores are CouchDB and MongoDB. These are stores
-"in which a database record consists of a collection of key-value pairs plus a payload."
+``in which a database record consists of a collection of key-value pairs plus a payload.''
 \cite{stonebraker2010sql}
 \par\vspace{\baselineskip}
 Examples of key-value stores include MemcacheDB and Dynamo. These type of database
@@ -641,7 +641,7 @@ and over time found performance to be
 inadequate. My options were:
 
 \begin{enumerate}
-  \item “Shard” my data to partition it
+  \item ``Shard'' my data to partition it
 across several sites, giving me a serious
 headache managing distributed data
 in my application or
@@ -657,7 +657,7 @@ like the following: My data does
 not conform to a rigid relational schema.
 Hence, I can’t be bound by the
 structure of a RDBMS and need something
-more flexible``\cite{stonebraker2010sql}\footnote{Formatting mine}
+more flexible''\cite{stonebraker2010sql}\footnote{Formatting mine}
 \end{quote} 
 \par\vspace{\baselineskip}
 %\newpage
@@ -711,18 +711,19 @@ This class provides an interface that allows us to generate a \\ \inlinecode{std
 object that is a thread-safe interface to a thread's return value. The bulk of the
 ideas behind this thread pool were found online \cite{stackoverflow1} though we substituted
 the command queue that was initially implemented using a \inlinecode{std::mutex}
-and \inlinecode{std::queue<>}, with a Tervel queue that allows
+and \inlinecode{std::queue<>}, with a Tervel FIFO queue that allows
 non-blocking and wait-free access and insertion into the command queue.
 \par\vspace{\baselineskip}
 The reference used mutual exclusion objects such as \inlinecode{std::mutex}
 which is contrary to our goal of a fully non-blocking and wait-free system. Using the Tervel
-queue as detailed above allows us to remain non-blocking and wait-free as long as Tervel
-is also considered non-blocking and wait-free. While the implementation uses condition variables,
-they are used to sleep inactive threads rather than block waiting for a process. Letting these
-threads sleep allow the operating system to schedule other threads in their place such as
-background processes or other worker threads and their helper threads. This practice is also
-considered common courtesy in multi-process systems so that the server is able to run more than
-a single process and can conserve power in times of low demand.
+queue as detailed above allows us to remain non-blocking and wait-free as Tervel
+is non-blocking and wait-free. While our implementation does use condition variables,
+they are used to sleep inactive threads and are woken immediately upon the queue receiving 
+a job for the inactive thread. Letting these threads sleep allow the operating system to 
+schedule other threads in their place such as background processes or other worker threads 
+and their helper threads. This practice is also considered common courtesy in multi-process 
+systems so that the server is able to run more than a single process and can conserve power 
+in times of low demand.
 \par\vspace{\baselineskip}
 The task of communicating between the client and the server, which is the database itself,
 is given to the work manager as it is the main thread and is where all the results of
@@ -749,7 +750,7 @@ and reported by the server is as follows:
 There would be more extensive reporting features, except that a lot of 
 nice statistics about process memory and the system in general are found through files within the /proc
 directory. While these are likely memory-mapped files, Linux's file I/O cannot be guaranteed to be
-asynchronous or non-blocking which means that we cannot use them likely. As such, we have decided
+asynchronous or non-blocking which means that we cannot use them safely. As such, we have decided
 to shelve those monitoring features until further testing can be done.
 \par\vspace{\baselineskip}
 
@@ -765,7 +766,7 @@ can accept. This is represented as a pair in the table lookup hashmap.
 \begin{figure}
   \centering
   \includegraphics[scale=.45]{graphics/Table_In_Memory.png}
-  \caption{Example of tervel vector table representation in memory}
+  \caption{Example of Tervel vector table representation in memory}
   \label{fig:tables_in_memory}
 \end{figure}
 
@@ -820,7 +821,7 @@ being rewritten and maniuplated which would be a costly operation to perform.
 \par\vspace{\baselineskip}
 
 Figure~\ref{fig:row_col_access_data} shows that it would be 
-difficult to find the sales column in a row store column, and it is easily
+difficult to find the sales column in a row store column, and it is also easily
 noticeable to see how adding a new row in column store would require multiple
 access to multiple column vectors.
 \par\vspace{\baselineskip}
@@ -1795,9 +1796,9 @@ This causes a loop, and neither lock ever gets released.
 \par\vspace{\baselineskip}
 
 Not all threads are created equal. In reality some threads take up resources much more often than others.
-"{\bfseries Starvation} describes a situation where a thread is unable to gain regular access
+``{\bfseries Starvation} describes a situation where a thread is unable to gain regular access
 to shared resources and is unable to make progress. This happens when shared resources are
-made unavailable for long periods by 'greedy' threads"\citep{oracleconcurrency}.
+made unavailable for long periods by `greedy' threads\citep{oracleconcurrency}.''
 
 \par\vspace{\baselineskip}
 
@@ -1907,9 +1908,9 @@ almost all benefits of multiple threads.
 \subsubsection{Starvation Free}
 
 \begin{quotation}
-"As long as one thread is in the critical section, then some other thread that wants 
+``As long as one thread is in the critical section, then some other thread that wants 
 to enter in the critical section will eventually succeed (even if the thread in the 
-critical section has halted)." \citep{artofmulti}.
+critical section has halted).'' \citep{artofmulti}.
 \end{quotation}
 
 An example of a Starvation Free algorithm would be some code with a very strict fairness 
@@ -2031,8 +2032,8 @@ Starvation is still possible. Does not guarantee thread level progress.
 
 \subsubsection{Wait Free}
 \begin{quotation}
-	"A method is wait-free if it guarantees that every call finishes its execution
-	in a finite number of steps"\citep[p. 59]{artofmulti}.
+	``A method is wait-free if it guarantees that every call finishes its execution
+	in a finite number of steps.''\citep[p. 59]{artofmulti}
 \end{quotation}
 
 Wait freedom holds the strongest guarantee of system progress. It is so complex that it is 
@@ -2049,8 +2050,8 @@ even divided into categories itself, the categories are as follows:
 
 \par\vspace{\baselineskip}
 
-{\bfseries Bounded Wait Freedom} limits the number of steps a method call can take. "This bound 
-may depend on the number of threads"\citep[p. 59]{artofmulti}. Let's take a look at a 
+{\bfseries Bounded Wait Freedom} limits the number of steps a method call can take. ``This bound 
+may depend on the number of threads.''\citep[p. 59]{artofmulti} Let's take a look at a 
 piece of code. 
 \par\vspace{\baselineskip}
 
@@ -2074,8 +2075,8 @@ public void funcWaitFreeBounded() {
 \end{figure}
  
 
-Finally, in {\bfseries Population Oblivious} wait freedom, "performance does not depend on the 
-number of active threads" \citep[p. 59]{artofmulti}. Let's take a look at a piece of code in
+Finally, in {\bfseries Population Oblivious} wait freedom, ``performance does not depend on the 
+number of active threads.''\citep[p. 59]{artofmulti} Let's take a look at a piece of code in
 Figure~\ref{wfpo_ex}.
 \par\vspace{\baselineskip}
 
@@ -2137,7 +2138,7 @@ wait free is next, then wait free bounded, and finally wait free population obli
 One of the most important pieces of a Database Management System is the SQL Engine.
 This component is responsible for receiving commands written in the standard query
 language and transforming those commands into an internal representation that can be
-executed by the DBMS. The SQL Engine often consists of three pieces: the tokenizer, the
+executed by the DBMS. The SQL Engine often consists of three pieces: the tokenizer and
 parser, code generator/query planner, and the query executor.
 
 \subsubsection{Tokenizer}
@@ -2163,18 +2164,18 @@ The purpose of any parser generator is to implement a parser in the programming
 language desired that will accurately parse the context free grammar that it
 was passed in the grammar specification file.
 \par\vspace{\baselineskip}
-The two parser generators that we found were "Lemon" and "YACC". PostgreSQL uses
-"YACC", which stands for "Yet Another Compiler Compiler", while SQLite uses
-"Lemon", which was created to be a simpler alternative to YACC. Both tools will
+The two parser generators that we found were ``Lemon'' and ``YACC''. PostgreSQL uses
+``YACC'', which stands for Yet Another Compiler Compiler, while SQLite uses
+``Lemon'', which was created to be a simpler alternative to YACC that is re-entrant. Both tools will
 generate a Look-Ahead Left-to-right Right-most-derivation (LALR) parser in C when
 given a grammar specification file. Both tools share a base syntax in their grammar files,
 but Lemon varies from YACC in some very important ways and enumerates those in its tutorial document.
 \par\vspace{\baselineskip}
-“It uses a different grammar syntax which is designed to reduce the number of coding
+``It uses a different grammar syntax which is designed to reduce the number of coding
 errors. Lemon also uses a more sophisticated parsing engine that is faster than yacc and
 bison and which is both reentrant and thread-safe. Furthermore, Lemon implements features
 that can be used to eliminate resource leaks, making is suitable for use in long-running
-programs such as graphical user interfaces or embedded controllers.”\cite{lemon_parser}
+programs such as graphical user interfaces or embedded controllers.''\cite{lemon_parser}
 \par\vspace{\baselineskip}
 It is because of these benefits, especially thread safety, that we chose to use Lemon
 as our parser generator. The Lemon parser generator is contained in one C code file and
@@ -2247,7 +2248,8 @@ implement a very strong or robust query planner with large amounts of optimizing
 capability. This is due to the fact that we have determined that the queries we are supporting
 can be decomposed into a series of predicates that then can be evaluated almost independently.
 These predicates are modeled in a way similar to the tree formed by boolean expressions, as shown
-in Figure~\ref{fig:bool_expr_tree}.
+in Figure~\ref{fig:bool_expr_tree}. This does mean that we do not support SQL joins as that would
+necessitate the implementation of a scheduler and query planner.
 \par\vspace{\baselineskip}
 
 \begin{figure}[H]
@@ -2402,19 +2404,19 @@ known and less well documented DBMS that are worthy of note:
   a brand new project and as such has very limited documentation. They claim on there
   github page to be
   \begin{quote}
-  "... a data management platform that provides real-time, consistent access to
-  data-intensive applications throughout widely distributed cloud architectures."
+  ``... a data management platform that provides real-time, consistent access to
+  data-intensive applications throughout widely distributed cloud architectures.''
   \cite{aerospike}
   \end{quote}
   The specifics of their architecture is not listed.
   \par\vspace{\baselineskip}
   \item dashDB is IBM's in-memory data warehouse. Self described as
   \begin{quote}
-  "a high performance, massively scalable cloud data warehouse service,
-  fully managed by IBM." \cite{dashDB}
+  ``[A] high performance, massively scalable cloud data warehouse service,
+  fully managed by IBM.'' \cite{dashDB}
   \end{quote}
   dashDB comes in a couple different configurations, the one that most resembles
-  our project is the MPP, "Massively Parallel Processing", configuration.
+  our project is the MPP, ``Massively Parallel Processing'', configuration.
   MPP operates by allowing the data warehouse to leverage multiple servers
   in a network cluster to process data simultaneously.
   \par\vspace{\baselineskip}
@@ -2461,11 +2463,11 @@ nable dashDB to maximize hardware performance.
 \par\vspace{\baselineskip}
 \item eXtremeDB is the in-memory variant of the McObject family of data management projects.
   It stores its data entirely in main memory, eliminating the need for disk I/O.
-  eXtremeDB claims to have an "Ultra-small" footprint stating that through
+  eXtremeDB claims to have an ``Ultra-small'' footprint stating that through
   streamlining of core database functions they are able to reduce their RAM footprint
   to around 100KB. They also do not translate the data they store in memory. They
-  store the data exactly how it will be used by the application. "No mapping a C data
-  element to a relational representation"\cite{extremeDB} eXtremeDB claims to fully
+  store the data exactly how it will be used by the application. ``No mapping a C data
+  element to a relational representation''\cite{extremeDB} eXtremeDB claims to fully
   support ACID properties. It does this by ensuring that operations grouped into
   transactions will complete together or the database will be rolled back to a
   pre-transaction state.\cite{extremeDB}
@@ -2483,11 +2485,11 @@ nable dashDB to maximize hardware performance.
   GemFire is designed for working with operational data needed by real time
   applications. It is not meant for working on very large quantities. To
   achieve massive speeds GemFire relies on being primarily, not fully,
-  main memory based. " It uses highly-concurrent main-memory data structures to avoid
+  main memory based. ``It uses highly-concurrent main-memory data structures to avoid
   lock contention and a data distribution
   layer that avoids redundant message copying, and it uses native serialization and
   smart buffering to ensure messages move from node to node faster than what
-  traditional messaging would provide."\cite{gemfire}
+  traditional messaging would provide.''\cite{gemfire}
   \par\vspace{\baselineskip}
   An illustration of GemFire's peer architecture can be seen in Figure~\ref{fig:gemfire_peer}.
   \begin{figure}
@@ -2550,14 +2552,13 @@ nable dashDB to maximize hardware performance.
   checkpoints. Hekaton tables are recovered when a database is \\ recovered.
   \end{itemize} \cite{hekaton}
 
-  \item SAP HANA
-  is short for "High Performance Analytic Appliance" and is an in-memory,
-  column-oriented, relational database management system. SAP HANA employs a
-  massively parallel in-memory architecture to eliminate the I/O bottleneck
-  that slows disk backed database management systems.
+  \item SAP HANA stands for ``High-Performance Analytic Appliance'' and 
+  is an in-memory, column-oriented RDBMS. SAP HANA employs a massively parallel 
+  in-memory architecture to eliminate the I/O bottleneck that slows disk backed 
+  database management systems.
   \par\vspace{\baselineskip}
-  An example of a massively parallel layout can be seen in Figure~\ref{fig:saphana_architecture}
-  \begin{figure}[H]
+  An example of a massively parallel layout can be seen in Figure~\ref{fig:saphana_architecture}.
+  \begin{figure}
 	\centering
 	\includegraphics[scale=.5]{graphics/sap_hana_dbms_architecture.png}
 	\caption{SAP HANA Massively Parallel Architecture \copyright 2015 SAP \citep{saphana}}
@@ -2571,13 +2572,13 @@ nable dashDB to maximize hardware performance.
 \section{Design Summary}
 %% A summary describing the overall architecture should go here. Followed by subsections
 %% for each major piece.
-OpenMemDB is a SQL compliant database that utilizes advanced multiprocessor techniques and non-blocking
+OpenMemDB is a SQL-compliant database that utilizes advanced multiprocessor techniques and non-blocking
 data structures to offer high scalability and guaranteed high throughput. To accomplish this
 multiple components are necessary to meet the technical requirements of the project. OpenMemDB is 
 comprised of an application connector API, SQL Engine, Data Store, and Work Manager.
 It is necessary for the client to be able to communicate with the database through the connector, 
 dubbed libomdb. On the server since the client is using SQL to provide
-statements to the database a SQL Engine is necessary to correctly and efficently parse
+statements to the database a SQL Engine is necessary to correctly and efficiently parse
 such statements into a type of representation that the database can then understand and evaluate.
 It is also important that certain statements be distributed in an organized manner. More specifically, 
 the Work Manager will be responsible for distributing the system's workload among its pool of worker threads. 
@@ -2777,8 +2778,8 @@ if (result.isSuccess) {
     \item \inlinecode{m_metaData}
   \end{itemize}
   \inlinecode{m_rows} is a \inlinecode{vector<ResultRow>}, \inlinecode{ResultRow} is a typedef for
-  a  \\ \inlinecode{vector<DataValue>}, and \inlinecode{DataValue} is a typedef for \inlinecode{boost::variant<>}.
-  So with all typedefs removed \inlinecode{m_rows} is actually a \inlinecode{vector<vector<boost:variant<> > >}.
+  a  \\ \inlinecode{vector<DataValue>}, and \inlinecode{DataValue} is a typedef for \inlinecode{TervelData}.
+  So with all type definitions removed \inlinecode{m_rows} is actually a \inlinecode{vector<vector<TervelData > >}.
 
   \inlinecode{m_metaData} is the
   \inlinecode{ResultMetaData} object that describes the
@@ -2850,8 +2851,9 @@ if (result.isSuccess) {
   The core of any Database Management System(DBMS), particularly one that implements the SQL standard, is the
   engine that drives the actual parsing, planning, and execution of SQL queries and commands.
   The module in our DBMS that handles those tasks is the SQL engine and it is specially designed to
-  be thread-safe, performant, and wait-free. Wait-freedom is the core requirement of the project
-  and it supersedes all other requirements, so it is imperative that this module is wait-free. Keeping
+  be thread-safe, efficient, and wait-free. Wait-freedom is the core requirement of the project
+  and it supersedes all other requirements, so it is imperative that this module is guaranteed to finish
+  parsing and executing any given SQL query in a finite amount of time. Keeping
   that requirement in mind, we utilized C++11 features and single-responsibility modeling to
   ensure that the various threads do not interact in ways that would require synchronization.
   \par\vspace{\baselineskip}
@@ -2875,7 +2877,7 @@ if (result.isSuccess) {
   \par\vspace{\baselineskip}
   Another decision in the design of the SQL engine that was important to maintaining wait-freedom and
   thread-safety was the adoption of the Lemon parser engine. Lemon was built to be thread-safe and
-  reentrant without locks, meaning that each thread essentially has its own instance of the parser
+  re-entrant without locks, meaning that each thread essentially has its own instance of the parser
   and is independent of other threads. This cleanly avoids the need for costly, and forbidden
   in our case, locks and other synchronization primitives. In addition, we have complete control over
   the grammar from which Lemon generates its parser which gives us opportunity to ensure there
@@ -2905,8 +2907,8 @@ if (result.isSuccess) {
   \end{figure}
   \par\vspace{\baselineskip}
   Execution of the query plan is also within the purview of the SQL engine and also must be guaranteed to be
-  wait-free as well as performant. As our use case puts us entirely within memory, we have the necessarily low
-  latencies to feel comfortable in performing full table scans in the most naive case with options to
+  wait-free as well as efficient. As our use case puts us entirely within memory, we have the necessarily low
+  latency to feel comfortable in performing full table scans in the most naive case with options to
   use indices and caches when available or reasonable. This will make us, in theory, faster than our disk-based
   counterparts such as PostgreSQL or MySQL. This task within the SQL engine is the one that will actually
   interact with the data store and actually performs operations upon the data stored there. We rely on the Tervel
@@ -2954,7 +2956,7 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
   \caption{Work Manager network function definitions}
   \label{code:work_manager_func_def}
   \end{figure}
-  The \inlinecode{omdb::NetworkStatus} datatype is used to return various
+  The \inlinecode{omdb::NetworkStatus} data-type is used to return various
   possible error conditions and is internally used to classify whether the error is fatal
   or can be recovered from. Due to our goal of being non-blocking, we utilize various specially-defined
   functions in the Linux network API such as \inlinecode{accept4} and
@@ -3016,14 +3018,14 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
   which the Work Manager sends jobs, the queries or commands that a client sends to OpenMemDB, to the
   worker threads in the thread pool. The jobs are contained within a \inlinecode{std::packaged_task<Result(int)>}
   object which is a C++11 construct that can generate the previously mentioned \inlinecode{std::future<Result>}.
-  The generated future object is stored in the afore-mentioned vector and the job is then passed to a selected
+  The generated future object is stored in the aforementioned vector and the job is then passed to a selected
   worker thread to be evaluated. The selection process for where this job is placed is the work load distribution
   task that the Work Manager is responsible for. To do this accurately, the Work Manager implements
   uses a heuristic algorithm that estimates the computation needed to fulfill that query or command
   and then places the job in the thread pool in a way that balances overall system load.
   \par\vspace{\baselineskip}
   The heuristic used to guess the complexity of a given query or command is fairly simple as we need to
-  be performant rather than accurate. The primary cost in this heuristic is length of the query/command itself
+  be efficient and simple rather than accurate. The primary cost in this heuristic is length of the query/command itself
   as that is a relatively cheap operation, though some other costs could be the amount of parentheses
   or the actual classification of the query/command itself (i.e. whether it is a SELECT, INSERT INTO, or DELETE statement).
   This heuristic will be a source of heavy experimentation and testing as overloading a single core or thread
@@ -3055,337 +3057,154 @@ omdb::NetworkStatus omdb::AcceptConnection(uint32_t socket_fd,
 
 \newpage
   \subsection{Data Store}
-	%author Robert Medina
-{\bfseries Introduction} :
+{\bfseries Introduction}
+Our implementation of the Data Store revolves around working with and around Tervel and the
+realities of massively concurrent systems. One of the requirements of working with Tervel is
+the restriction of the type and size of the data stored within the various data structures.
+Tervel requires that all data stored within it is the size of a machine word, that it is 
+easily convertible into an integral representation, and allows the bottom three bits to be
+stolen. This means that we are restricted to 64-bit data types, but we actually only can
+use 61 of those bits for our actual data. We cannot rely on the bottom three bits to be 
+maintained by Tervel. Luckily, most SQL data types can be contained within 61 bits and the 
+others can be located elsewhere and the pointer to that data can be contained within Tervel
+instead.
 \par\vspace{\baselineskip}
-Boost.Variant focuses on type-safe storage and retrieval of a bounded set of types that composes a 
-discriminated union. A variant data type exposes an interface independent of the current value's type. 
-The user defines the set of types that are allowed in a variant and this can contain any number of 
-disparate variant instructions. Two ways to retrieve a type from the value that is held in a variant is 
-either the program must store this type or use boost visitor mechanism. This variant data type is stored 
-as a stack instead of a heap to avoid expensive memory allocations.
+The data types currently supported by OpenMemDB in light of the above are SQL BOOLEAN, 
+INTEGER, SMALLINT, BIGINT, FLOAT, DATE, and TIME. Further type support can be added but they
+will be slower due to the added indirection and safety code that Tervel requires for pointers.
+That safety code is a concept that Tervel calls an accessor, a wrapper that interfaces with
+Tervel's hazard pointers to ensure that deletions only take place when all users are finished
+with the pointer. Essentially a wait-free, thread-safe smart pointer similar to the
+\inlinecode{std::shared\_ptr} found in modern C++.
 \par\vspace{\baselineskip}
-
-{\bfseries BoundedType} :
+Our supported data types are contained in a structure called \inlinecode{TervelData} a 
+union of structs that uses bit-fields in order to manipulate individual or small regions of
+bits within the larger 64-bit piece of memory. The definition of this union is shown in
+Figure~\ref{code:tervel_data_definition} with the definition of a further union that defines the 
+DATE data type in Figure~\ref{code:tervel_data_date_def}. An example that uses both of these
+unions to manipulate the data contained within is shown in Figure~\ref{code:tervel_data_example}.
+%TODO: Finish this
 \par\vspace{\baselineskip}
-Every type that is specified as a template argument to variant must satisfy the above requirements. 
-In addition, certain features of variant are available if its bounded types meet certain extra 
-requirements. The minimum requirements for a type to be accepted in a boost variant object are:
-\begin{enumerate}
- \item CopyConstructible or MoveConstructible
- \item Destructor upholds the no-throw exception-safety guarantee
- \item Complete at the point of variant template instantiation
-\end{enumerate}
-
-Additional Features are:
-\begin{enumerate}
- \item Assignable: variant is itself Assignable if and only if every one of its bounded
- types meets the requirements of the concept (Note that top-level const-qualified
- types and reference types do not meet these requirements)
- \item MoveAssignable: variant is itself MoveAssignable if and only if every one of its
- bounded types meets the requirements of the concept (Note that top-level const-qualified
- types and reference types do not meet these requirements)
- \item DefaultConstructible [20.1.4]: variant is itself DefaultConstructible if and only
- if its first bounded type (i.e., T1) meets the requirements of the concept
- \item EqualityComparable: variant is itself EqualityComparable if and only if every one
- of its bounded types meets the requirements of the concept
- \item LessThanComparable: variant is itself LessThanComparable if and only if every one
- of its bounded types meets the requirements of the concept
- \item OutputStreamable: variant is itself OutputStreamable if and only if every one of
- its bounded types meets the requirements of the concept
- \item Hashable: variant is itself Hashable if and only if every one of its bounded types
- meets the requirements of the concept
-\end{enumerate}
-
-CopyConstructible is a type that can be constructed from a value or reference of the same
-type. Move constructible type is a type that can be constructed from an rvalue reference of its type.
-No-throw guarantee, also known as failure transparency are operations that are guaranteed to
-succedd and satisfy all requirements even in bizarre situations. Should an exception
-occur, it will be handled internally and not by the programmer.
-\par\vspace{\baselineskip}
-
-{\bfseries Using Boost variant}:
-\par\vspace{\baselineskip}
-Whenever a \inlinecode{boost::variant} object is created the default constructor makes the first type its first bounded type.
-A discriminated union container is defined by instantiating \inlinecode{boost::variant} with the desired argument types.
-These types are called bounded types and derive from the BoundedType concept. To limit the different
-types that bounded types can accept the \inlinecode{BOOST_VARIANT_LIMIT_TYPES} must be manipulated to reflect this.
-To retrieve data types from \inlinecode{boost::variant} there are multiple functions available in order to accomplish this task.
-Value retrieval can be accomplish by using the get function. Get takes in a type as an argument and returns the first
-data value in a \inlinecode{boost::variant} object that matches with that data type.
-\par\vspace{\baselineskip}
-Figure \ref{templateboostvar} shows the various types that can be accepted using the get function
-
-\begin{figure}[H]
-  \centering
-  \textbf{Template for boost variant}
-   \begin{lstlisting}[language=C++,basicstyle=\tiny]
-namespace boost {
-class bad_get;
-template<typename U, typename T1, typename T2, ..., typename TN> 
-U * relaxed_get(variant<T1, T2, ..., TN> *);
-template<typename U, typename T1, typename T2, ..., typename TN> 
-const U * relaxed_get(const variant<T1, T2, ..., TN> *);
-template<typename U, typename T1, typename T2, ..., typename TN> 
-U & relaxed_get(variant<T1, T2, ..., TN> &);
-template<typename U, typename T1, typename T2, ..., typename TN> 
-const U & relaxed_get(const variant<T1, T2, ..., TN> &);
-template<typename U, typename T1, typename T2, ..., typename TN> 
-U * strict_get(variant<T1, T2, ..., TN> *);
-template<typename U, typename T1, typename T2, ..., typename TN> 
-const U * strict_get(const variant<T1, T2, ..., TN> *);
-template<typename U, typename T1, typename T2, ..., typename TN> 
-U & strict_get(variant<T1, T2, ..., TN> &);
-template<typename U, typename T1, typename T2, ..., typename TN> 
-const U & strict_get(const variant<T1, T2, ..., TN> &);
-template<typename U, typename T1, typename T2, ..., typename TN> 
-U * get(variant<T1, T2, ..., TN> *);
-template<typename U, typename T1, typename T2, ..., typename TN> 
-const U * get(const variant<T1, T2, ..., TN> *);
-template<typename U, typename T1, typename T2, ..., typename TN> 
-U & get(variant<T1, T2, ..., TN> &);
-template<typename U, typename T1, typename T2, ..., typename TN> 
-const U & get(const variant<T1, T2, ..., TN> &);
-   \end{lstlisting}
-  
-  \caption{Describes the type of data variant will accept\copyright Friedman, Maman 2002, reprinted with permission.\cite{boostvariant}} 
-  \label{templateboostvar}
-\end{figure}
-
-While \inlinecode{boost::get<T>} is an acceptable means for value retrieval it suffers from several flaws.
-The get function can only work for one static type of \inlinecode{boost::variant},
-the heterogeneous data variant at declaration. If the \\ \inlinecode{boost::variant} object
-changes its data type then \inlinecode{boost::get<T>} will lead to logical errors that were not considered.
-Thus boost variant needs a more robust un-static function to retrieve
-data from a \inlinecode{boost::variant} object. The variant library offers a compile-time visitation
-via \inlinecode{boost::apply_visitor}. Visitation requires the program to explicity handle or ignore bounded types.
-\par\vspace{\baselineskip}
-
-\begin{figure}[H]
-  \centering
-  \textbf{Visitation example}
+\begin{figure}
   \begin{lstlisting}[language=C++]
-  	class times_two_visitor
-  	: public boost::static_visitor<>
-  	{
-  	public:
-  	
-  	void operator()(int & i) const
-  	{
-  	i *= 2;
-  	}
-  	
-  	void operator()(std::string & str) const
-  	{
-  	str += str;
-  	}
-  	
-  	};
+  union TervelData
+  {
+    struct 
+    {
+      int64\_t tervel\_status : 3;
+      uint64\_t type : 3;
+      uint64\_t null : 1;
+
+      uint64\_t value : 57;
+    } data;
+
+    int64\_t value;
+  } \_\_attribute\_\_((packed));
   \end{lstlisting}
-  \cite{boostvariant}
-  \caption{Improvement on data retrevial, betterthan get function since types are not predefined \copyright Friedman, Maman 2002, reprinted with permission} \label{visitationexample}
+
+  \caption{The definition of the TervelData object that is used to store data in Tervel data structures}
+  \label{code:tervel_data_definition}
 \end{figure}
-
-This provides the same functionality as get but now this code allows the program to write
-generic visitors at compile-time. \inlinecode{boost::apply_visitor} also contains one more benefit for
-value retrieval. Delayed visitation is a type of \inlinecode{boost::apply_visitor} that returns
-a function object that operates on any variant given to it. This is useful when operating on a sequence of
-variant types.
-\par\vspace{\baselineskip}
-
-{\bfseries Preprocessor macros:}
-
-\par\vspace{\baselineskip}
-The variant class greatly simplifies use for specific instructions of the template but it
-significantly complicates use for generic instructions. When creating a variant instruction
-it is very easy to declare a variant object but it is less clear on how such types are
-accepted into a function.The Preprocessor library provides a powerful solution to this dilemma.
-
-\newpage
-
-The Boost.Variant library has a macro \inlinecode{BOOST_VARIANT_ENUM_PARAMS} that
-simplifies the process for the user of declaring variant types in function templates or
-other things of such nature. It is possible to use a type sequence to specify bounded types
-instead of using boost variant default function. Essentially a type sequence performs the
-same functionality of Boost.Variant but if the program for whatever needs must edit and
-create specific types of type sequences it is possible with \inlinecode{make_variant_over}
-function. As shown in Figures~\ref{typesequence} and~\ref{typesequence2}, you can create a 
-type sequence that is customizable.
-\par\vspace{\baselineskip}
-
-Problems with the variant class template is parameter list is limiting in
-two factors. There must be a implementation maximum limit of the types available and the
-nature of parameter lists makes compile-time manipulation of the list excessively difficult.
-This is where editing a type sequence on your own would be helpful in these two aspects
-however not all compilers are able to this function.
-\par\vspace{\baselineskip}
-
-\begin{figure}[H]
-  \centering
-  \textbf{Under the hood for variant implementation}
-  \begin{lstlisting}[language=C++]
-    typedef mpl::vector< std::string > types_initial;
-    typedef mpl::push_front< types_initial, int >::type types;
-    
-    boost::make_variant_over< types >::type v1;
-  \end{lstlisting}
-  \caption{Allows the program to create their own type sequence without using variant constructor\copyright Friedman, Maman 2002, reprinted with permission.\cite{boostvariant}} 
-  \label{typesequence}
-\end{figure}
-
-\begin{figure}[H]
-  \centering
-  \textbf{Behaves equivalently to figure \ref{typesequence}}
-  \begin{lstlisting}[language=C++]
-boost::variant< int, std::string > v2;
-  \end{lstlisting}
-  \caption{Allows the program to create their own type sequence without using variant constructor \copyright Friedman, Maman 2002, reprinted with permission.\cite{boostvariant}} 
-  \label{typesequence2}
-\end{figure}
-
-{\bfseries Extending Visitation Even Further}:
-\par\vspace{\baselineskip}
-Visitation is a powerful mechanism for manipulating a boost variant object content. Binary visitation
-extends this by allowing simultaneous visitation of content of two different variant objects. An example is 
-shown in Figure~\ref{binvisitation}.
-\par\vspace{\baselineskip}
 
 \begin{figure}
-  \centering
-  \textbf{Example code using binary visitation}
   \begin{lstlisting}[language=C++]
-class are_strict_equals
-: public boost::static_visitor<bool>
-{
-public:
-
-  template <typename T, typename U>
-  bool operator()( const T &, const U & ) const
+  union DateData
   {
-    return false; // cannot compare different types
-  }
+    struct
+    {
+      uint16\_t year;
+      uint8\_t month;
+      uint8\_t day;
+      uint32\_t pad;
+    };
 
-  template <typename T>
-  bool operator()( const T & lhs, const T & rhs ) const
-  {
-    return lhs == rhs;
-  } 
-};
+    uint64\_t value;
+  };
   \end{lstlisting}
-  \caption{Compares two variant objects \copyright Friedman, Maman 2002, reprinted with permission.\cite{boostvariant}} 
-  \label{binvisitation}
+
+  \caption{The definition of the DateData object that is used to store dates in the TervelData object}
+  \label{code:tervel_data_date_def}
 \end{figure}
 
-\newpage
-{\bfseries Multi visitation}:
-\par\vspace{\baselineskip}
-Multi visitation is like binary visitation with respect to functionality except that it allows for
-three or more boost variant objects to be compared. This maybe an useful tool when used for
-multiple compares between variants objects with in tables. An example code that performs multiple 
-visitation can be found in Figure~\ref{code:multi_visit}.
+\begin{figure}
+\begin{lstlisting}[language=C++]
+TervelData terv_data = { .value = 0 };
 
-\begin{figure}[H]
-  \centering
-  \textbf{Example code for multi visitation}
-  \begin{lstlisting}[language=C++, basicstyle=\small]
-#include <boost/variant/multivisitors.hpp>
+DateData date = { .value = 0 };
+date.year = 2016;
+date.month = 1;
+date.day = 1;
 
-typedef boost::variant<int, double, bool> bool_like_t;
-typedef boost::variant<int, double> arithmetics_t;
-
-struct if_visitor :
-  public boost::static_visitor<arithmetics_t>
-{
-  template <class T1, class T2>
-  arithmetics_t operator()(bool b, T1 v1, T2 v2) const {
-    if (b) {
-      return v1;
-    } else {
-      return v2;
-    }
-  }
-};
-  \end{lstlisting}
-  \cite{boostvariant}
-  \caption{Compares three or more variant objects \copyright Friedman, Maman 2002, reprinted with permission} 
-  \label{code:multi_visit}
+terv_data.data.value = date.value;
+terv_data.type = DATE;
+\end{lstlisting}
+\caption{An example of using TervelData and DateData together, specifically the encoding of 
+the date January 1st, 2016}
+\label{code:tervel_data_example}
 \end{figure}
-
-\par\vspace{\baselineskip}
-{\bfseries Boost variant over boost any}:
-\par\vspace{\baselineskip}
-Boost variant contains several advantages over boost any such as guaranteeing the type of its
-content is a user-specified set of types. Boost variant provides compile-time checked
-visitation of its content, before run-time. This allows for safer type storage. Boost variant
-enables generic visitation of its content and offers an efficient stack-based storage scheme
-that avoids the overhead of dynamic allocation. Boost any had some advantages over variant such
-as virtually any type for its template argument content, no-throw guarantee of exception safety
-for swap operation and less expensive compile-time processor/memory demands. Overall boost
-variant was chosen for its highly customizable type storage. The user-specified set of types
-is something that was highly sought for our data structures.
-\par\vspace{\baselineskip}
-
-\newpage
-\subsubsection{Data Types}
-Data Store has multiple types predefined that allow for a variant of types that tables can be
-comprosided of. There are over seven data types that are used to make up data store. One of which
-uses data types that the query planner will used. This is how the query planner and the data store
-interact with one another.
-
-\begin{enumerate}
-  \item \inlinecode{DataVariant} made up of SQL data types with a boost variant vector
-  \item \inlinecode{TervDataVariant} is TervWrapper around an exisiting data variant
-  \item \inlinecode{DataTableRecord} is a vector of a tervel data variant. This makes up one row in
-  a table
-  \item \inlinecode{DataTable} is a vector of a data table record. This makes up a table that contains multiple rows.
-  This is how a table will be represented in data store. Each table will be registered into lookup table
-  for data access
-  \item \inlinecode{TableSchema} is a boost variant vector that stores the table schema
-  \item \inlinecode{SchemaTablePair} is a pair that bundles table nested vector with the table schema
-  \item \inlinecode{TableMap} is a hashmap that stores the location of schematablepair with the table name. This
-allows for easy fast instant access retrevial of tables
-\end{enumerate}
 
 \newpage
 \subsubsection{Functions}
 Data Store is made up of multiple functions that takes in multiple arguments in order to reference tables in memory and return the references that point to the memory to the query planner for further modification. Data store primary objective is to allocate memory and assure that this is done using non-blocking techniques. 
 \par\vspace{\baselineskip}
 
-It is important to note that in order to de-allocate memory from the heap it is possible to do so when data store returns the pointers. The reasoning behind this is that data store should not perform any logic operations just as parsing inputs, etc, etc. Data store primary objective is to allocate memory and send references on where that memory can be located, in order words data storage and data retrieval. 
+It is important to note that in order to deallocate memory from the heap it is possible to do so when data store returns the pointers. The reasoning behind this is that data store should not perform any logic operations just as parsing inputs, etc, etc. Data store primary objective is to allocate memory and send references on where that memory can be located, in other words data storage and data retrieval. 
 \par\vspace{\baselineskip}
-The Data Store is made up of multiple functions that create data tables and returns specific data: 
+The Data Store is made up of multiple functions that create and delete tables and insert, update, delete, or retrieve records within those tables:
 
 \begin{enumerate}
-  \item \inlinecode{createRow} takes in a DataVariant row and a tablename in order to find the specific table
-  you want to insert the row into. The DataVariant row is checked by checkSchema function in
-  order to see if the table schema registered into the lookup\_table hashmap exists and whether
-  or not the new row data type fits into the table schema
-  \item \inlinecode{createTable} takes in a char array tablename and a \inlinecode{TableSchema} object in order to add
-  the string to the hashmap lookup table as well as the table schema. This is added as a pair
-  into the lookup table and now the table is registered into the lookup table and memory is allocated
-  for that table
-  \item \inlinecode{checkSchema} takes in a char array tablename and checks whether or not if the table exists in the
-  hashmap lookup table. If it does exist then it checks whether the TableSchema schema matches the
-  schema from the lookup table. If it does match up then it returns true otherwise false.
-  \item \inlinecode{getRow} takes in a char array tablename and an int rowID in order to find the table in the lookup table
-  and finds the row based on the rowID index. It then returns the row pointer it found
-  \item \inlinecode{getTable} takes in a char array tablename and finds the table from the lookup table. If it finds the table
-  then it returns the table pointer
+  \item \inlinecode{createTable} takes in an internal struct that contains the table schema and name and then
+  allocates memory for the table on the heap and creates a relation between the table name and allocated table
+  memory.
+  \item \inlinecode{deleteTable} takes the name of a table and attempts to delete the table from the Data Store
+  instance, effectively equivalent to the DROP TABLE operation in SQL. It also frees the memory used by a deleted
+  table.
+  \item \inlinecode{getColumnIndex} takes a table name and column name and attempts to find that column in the given
+  table, returning the index of the column or a failure code.
+  \item \inlinecode{getTableSchema} takes a table name and returns the schema of that table if it exists.
+  \item \inlinecode{insertRecord} takes a table name and a vector of data that represents a new record and attempts
+  to insert that row into the Data Store, assuming that the data contained satisfies the table's schema.
+  \item \inlinecode{updateRecords} evaluates a predicate tree against a table and attempts to update the rows that
+  are found by the predicate evaluation. This method can run into contention which will be communicated to the caller.
+  \item \inlinecode{deleteRecords} evaluates a predicate tree against a table and attempts to delete the rows that
+  are found by the predicate evaluation.
+  \item \inlinecode{getRecords} evaluates a predicate tree and returns all records that satisfy the predicates, this 
+  operation is equivalent to a SELECT query in SQL.
 \end{enumerate}
 
+%TODO: Come back and review this for accuracy
 \subsubsection{Data Structures}
-Nested vectors are used to represent tables. Each table is stored into a hashmap called lookup{\_}table to refer to
-tables. A pair is used to group up table schema boost variant vector and the data table itself. Nested vectors
-are used since it most is the most efficient way to represent memory. A hashmap is used to refer tables because each
-table contains a unique identifier char array. A hashmap provides instant access table lookup. A pair is used to group
-up the table with its schema. Each table have their own unique schema and it is retrievable from the table lookup hashmap.
-
-\subsubsection{Accessing Data Performance}
-Nested vectors are instant access O(1), if you have the index of the column or row. This makes data retrieval
-linear time O(n). In the case of a full table scan, it is only necessary to find the columns desired, then each other row
-column data can be retrieved by using the column index. If a full table scan with all columns are desired then this is $O(n^2)$. 
+OpenMemDB uses nested vectors to represent tables in memory, with a ``table vector'' that holds references
+to all records held within that particular table. Records are themselves vectors, though they are not 
+re-sized after creation as a table's record length is fixed. Our group extended, with the help of 
+one of Tervel's creators Steven Feldman, Tervel's ability to safely store and access pointers in its vector. 
+This ensures that we do not leak memory or cause other memory errors when changing already existing records
+in the table.
 \par\vspace{\baselineskip}
-A pair is fairly easy to retrieve data from since it is only two pointers or objects grouped together in an object. In the case for a hashmap, it provides instant access O(1), until the hashmap becomes more filled up and collisions being to happen. Normally hashmaps become reindex whenever they are around half full but it may be more advantageous to use dynamic hashing. This is something that will be determine based on performance testing on a training data set.
+Tervel allows for any particular element in a vector to be atomically swapped out if the expected item is still
+in the element. As a result of us storing pointers and this functionality, we decided to make OpenMemDB perform 
+updates to a record by entirely replacing it with another record in the same location within the table. This has
+relatively mild overhead costs in computation and memory while allowing us to solve the write skew problem introduced by
+our use of snapshot isolation. This mitigation is due to the fact that any outdated write to the database, where
+the element in the table that is supposed to be updated has changed due to another operation, will not pass the compare
+test done by the vector's \inlinecode{cas()} method.
+\par\vspace{\baselineskip}
+OpenMemDB also uses the wait-free hash map provided by Tervel to map table names to table objects that contain
+the ``table vector'', table schema, and record counter. We use the standard C++11 hash function for the 
+\inlinecode{std::string} class to do our hashing and avoid expensive re-sizing by using a large starting capacity.
+
+\subsubsection{Performance Characteristics}
+OpenMemDB is in a relatively unique situation of having to build a database from data structures that typically do not
+comprise the core storage of data in a database. As such, our algorithmic complexity is not ideal for a relational database
+and if those commonly used data structures can be made wait-free, then OpenMemDB will only increase in performance compared
+to competitors that use blocking or lock-free variants. For tables, we use vectors, that have $\mathcal{O}(n)$ lookup and 
+as we are nesting them, as described above, we can then expect that a full table scan to have a algorithmic complexity 
+of $\mathcal{O}(n^2)$. This is quite inefficient, though we are effectively stuck with this until either a wait-free 
+skip-list or B+-tree using Tervel is created or some approximation of those structures can be hacked together using 
+existing data structures. However, insertions into a table have a better algorithmic complexity as vectors have 
+$\mathcal{O}(1)$ inserts unless a re-size is triggered. Deletions have a complexity of $\mathcal{O}(n)$ as they are a 
+sequential pair of operations, a lookup to the element and then the deletion itself. As deletions don't have to reach all
+columns, it avoids the squared complexity that look-ups suffer and maintains linear complexity.
 
 \newpage
 
@@ -3442,7 +3261,7 @@ stress-test the system. The hardware used by each member:
   \item{\makebox[4cm]{CPU:\hfill} AMD FX-8350 (8-core)}
   \item{\makebox[4cm]{RAM:\hfill} 16 GB DDR3}
   \item{\makebox[4cm]{Motherboard:\hfill} Asus M5A99X EVO R2.0}
-  \item{\makebox[4cm]{GPU:\hfill} AMD Radeon HD 7870}
+  \item{\makebox[4cm]{GPU:\hfill} AMD Radeon R9 380}
   \item{\makebox[4cm]{Primary Hard Disk:\hfill} PNY Optima 240 GB SSD}
   \item{\makebox[4cm]{Total Storage:\hfill} 3 terabytes}
   \item{\makebox[4cm]{Operating System:\hfill} Arch Linux}
@@ -3483,11 +3302,11 @@ stress-test the system. The hardware used by each member:
 \par\vspace{\baselineskip}
 In addition to the senior design lab, we also had access to the Scalable and Secure Systems lab server
 thanks to Dr. Dechev. This server was the primary test-bed for OpenMemDB as consumer hardware simply
-doesn't have the necessary parallization or memory needed in order to truly test and stress a
+doesn't have the necessary number of cores or memory needed in order to truly test and stress a
 highly-parallelized and memory-intensive database management system. The server we were allowed to
 use had the following hardware characteristics:
 \begin{itemize}
- \item 64 cores (AMD Operon)
+ \item 64 cores (AMD Opteron)
  \item 312 gigabytes of RAM
  \item 1 terabyte of hard disk storage
 \end{itemize}
@@ -3529,37 +3348,28 @@ specially chosen to mirror worst-case and real-world scenarios.
 These tests will be performed throughout the life of the project on a weekly basis against the current
 development branch in the project's GitHub repository. 
 
+%TODO: Come back and run some of these or drop them
 \subsection{Data Store}
 As the module on which all others rely on to store the actual data, the testing for this
-module must be comprehensive. The tests we are going to perform are:
+module must be comprehensive. The tests we performed are:
 \begin{itemize}
  \item Access speed benchmark (regression test)
- \item Query evaluation speed benchmark
  \item Throughput on contested tables
  \begin{itemize}
   \item Many readers and writers on a single table
   \item Effectively a stress-test for Tervel's ability to manage many \\ threads on the same
-	structure.
+	structure
  \end{itemize}
- \item Cache coherency/efficiency benchmark 
- \item Data consistency/determinism tests
 \end{itemize}
 
 \subsection{Work Manager}
 This module is broad with many moving parts, requiring special attention be paid to the individual
 pieces within it as well as the integration of those pieces. The tests we will implement will be:
 \begin{itemize}
- \item Microbenchmarks of hotspots
+ \item Micro-benchmarks of hot-spots
  \begin{itemize}
   \item Connection management
   \item Heuristic performance and job assignment
- \end{itemize}
- \item Heuristic accuracy analysis
- \item Network stress tests
- \begin{itemize}
-  \item Many connections (short-lived and long-lived)
-  \item Many packets
-  \item Both of the above
  \end{itemize}
 \end{itemize}
 
@@ -3570,8 +3380,6 @@ so tests here are important as well. The list of tests we will perform on the SQ
 as follows:
 \begin{itemize}
  \item Tokenizer/parser accuracy test (regression test)
- \item Parser speed benchmark
- \item Query planner output analyzer
  \item Query execution benchmark (regression test)
 \end{itemize}
 
@@ -3583,27 +3391,116 @@ as follows:
 \begin{itemize}
  \item Overall system load stress test
  \begin{itemize}
-  \item Many connections
   \item Many statements to execute
   \item Large data set
-  \item Many related tables within data set
- \end{itemize}
- \item Accuracy tests, specifically regarding determinism in edge cases
- \item Contested resources
- \begin{itemize}
-  \item I/O heavy background threads or processes
-  \item Reduced memory availability
- \end{itemize}
- \item Program execution over time
- \begin{itemize}
-  \item Determine whether the system still perform within specifications after a relatively long time
- \end{itemize}
- \item End-to-End latency benchmark
- \begin{itemize}
-  \item Determine which workloads the database excels at, and find which workload factor increases latency
-	the most
  \end{itemize}
 \end{itemize}
+
+\section{Testing Harness}
+In order to test OpenMemDB, a custom testing harness was written:
+\begin{itemize}
+	\item Built from scratch
+	\item Follows builder pattern with added static method chaining for less verbose code
+	\item Automatically generates SQL statements that can be reused for testing on other databases
+\end{itemize}
+
+\subsection{Test Customization}
+
+To make customization of generated statements easy, a bitmask (referred to as the complexity bitmask) is used to tweak individual parts of the test. This bitmask uses a 5 bit binary string to customize tests. The individual bits' function is shown below (in big-endian order).
+
+\begin{enumerate}
+	\item Randomize number of cases
+	\item 8 thread test
+	\item 4 thread test
+	\item 2 thread test
+	\item SQL Statement randomization
+\end{enumerate}
+
+An example of a complexity bitmask is {\bfseries 11001}. In this case, it would generate a test sequence 
+that has a random number of cases(SQL statements), uses 8 threads, and each SQL statement is randomized. 
+In addition to the complexity bitmask, the ability to change the value of any parameter is also given. 
+
+\begin{figure}[H]
+ \begin{lstlisting}[language=C++]
+		DatastoreTest dataStoreTest;
+
+		dataStoreTest.with(MODE_CREATE)
+					 .parseComplexity(0b00011)
+					 .generateCases()
+					 .test();
+ \end{lstlisting}
+ \caption{Simple example of a customized test}
+ \label{testharnesscode}
+\end{figure}
+  
+\begin{figure}[H]
+  \begin{lstlisting}[language=C++]
+    	DatastoreTest dataStoreTest;
+    	
+    	dataStoreTest.with(MODE_CREATE)
+    				 .setThreadCount(32)
+    				 .generateCases(0b00011)
+    				 .test();
+  \end{lstlisting}
+  \caption{Further customized test that explicitly sets the thread count variable}
+  \label{testharnesscustomized}
+\end{figure}
+    
+    
+Figure~\ref{testharnesscode} shows a simple test customized with the bitmask while 
+Figure~\ref{testharnesscustomized} shows the ability to explicitly change any parameter manually.
+    
+\subsection{Testing Competitors}
+The testing harness also provides the functionality to print generated SQL statements to a file. 
+This allows for easy testing on other systems. The file generated reflects the order of execution 
+of statements when running the test against OpenMemDB.
+  
+  \begin{figure}[H]
+  	\begin{lstlisting}[language=C++]
+  	DatastoreTest dataStoreTest;
+  	
+  	dataStoreTest.with(MODE_CREATE)
+				 .generateCases(0b00000)
+				 .printStatementsToFile();
+  	\end{lstlisting}
+  	\caption{SQL generation and printing to file}
+  	\label{testharnessprint}
+  \end{figure}
+ 
+ 
+  \begin{figure}[H]
+  	\begin{lstlisting}[language=C++]
+  	DatastoreTest dataStoreTest;
+  	
+  	dataStoreTest.with(MODE_CREATE)
+  	.generateCompatCases(0b00000)
+  	.printStatementsToFile();
+  	\end{lstlisting}
+  	\caption{Compatible SQL generation}
+  	\label{testharnessprintcompat}
+  \end{figure}
+  
+  
+Figure~\ref{testharnessprint} shows test SQL generation and Figure~\ref{testharnessprintcompat} 
+shows SQL generation that is compatible with other DBMS competitors via the \newline 
+\inlinecode{generateCompatCases()} function.
+
+\subsection{Supported Tests}
+
+Currently, OpenMemDB's testing harness supports the following tests:
+
+\begin{itemize}
+	\item CREATE TABLE
+	\item DROP TABLE
+	\item INSERT (100\% writes)
+	\item SELECT (100\% reads)
+	\item Mixed test
+	\begin{itemize}
+		\item 1/3 INSERT (1/3 writes)
+		\item 2/3 SELECT (2/3 reads)
+	\end{itemize}
+\end{itemize}
+
 
 \newpage
 
