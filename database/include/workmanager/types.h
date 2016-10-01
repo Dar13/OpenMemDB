@@ -163,6 +163,8 @@ struct WorkThreadData
         id = other.id;
         tervel = other.tervel;
         notifier = other.notifier;
+
+        return *this;
     }
 
     //! Thread ID

@@ -43,7 +43,7 @@ ManipResult DataStore::createTable(CreateTableCommand table_info)
     TableSchema* schema = new (std::nothrow) TableSchema;
     if(schema == nullptr)
     {
-        // TODO: Error handling
+        return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_NO_MEMORY);
     }
 
     // Copy the column information into the stored schema
@@ -52,13 +52,13 @@ ManipResult DataStore::createTable(CreateTableCommand table_info)
     DataTable* new_table = new (std::nothrow) DataTable();
     if(new_table == nullptr)
     {
-        // TODO: Error handling
+        return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_NO_MEMORY);
     }
 
     SchemaTablePair* pair = new (std::nothrow) SchemaTablePair(new_table, schema);
     if(pair == nullptr)
     {
-        // TODO: Error handling
+        return ManipResult(ResultStatus::FAILURE, ManipStatus::ERR_NO_MEMORY);
     }
 
     size_t key = hash_functor(table_info.table_name);
@@ -311,6 +311,7 @@ ManipResult DataStore::updateRecords(Predicate* predicates,
     if(predicates == nullptr)
     {
         // TODO: Allow a full update?
+        printf("%s: Attempting a full table update which is currently not supported!\n", __FUNCTION__);
     }
     else
     {
@@ -416,6 +417,7 @@ ManipResult DataStore::deleteRecords(Predicate* predicates, const std::string& t
     if(predicates == nullptr)
     {
         // TODO: Allow a full delete?
+        printf("%s: Attempting a full table delete which is currently not supported!\n", __FUNCTION__);
     }
     else
     {

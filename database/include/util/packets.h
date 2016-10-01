@@ -95,7 +95,7 @@ struct ResultPacket {
     PacketType type;      // 1 byte
     ResultStatus status;  // 2 bytes
     uint16_t rowLen;      // Length of the row in columns, number of columns in the row
-    uint32_t resultSize;  // Size in bytes that he data array will be
+    uint32_t resultSize;  // Size in bytes that the data array will be
     uint64_t* data;
     uint8_t terminator;
 } __attribute__((packed));

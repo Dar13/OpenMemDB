@@ -361,7 +361,7 @@ bool WorkManager::SendResult(omdb::Connection& conn, const JointResult& result)
                     // TODO: Implement packet splitting to stay within packet maximums
 
                     uint64_t* result_data = new uint64_t[result_size/sizeof(uint64_t)];
-                    memset(result_data, 0, result_size / sizeof(uint64_t));
+                    memset(result_data, 0, result_size);
 
                     uint32_t result_idx = 0;
                     for(auto record : query.result.data)
@@ -407,8 +407,8 @@ bool WorkManager::SendResult(omdb::Connection& conn, const JointResult& result)
                     return false;
                 }
 
-                delete metadata_buffer;
-                delete result_buffer;
+                delete[] metadata_buffer;
+                delete[] result_buffer;
             }
             break;
         case ResultType::COMMAND:
@@ -464,8 +464,8 @@ bool WorkManager::SendResult(omdb::Connection& conn, const JointResult& result)
                 }
 
                 // TODO: Remove when switched to static buffer
-                delete metadata_buffer;
-                delete result_buffer;
+                delete[] metadata_buffer;
+                delete[] result_buffer;
             }
             break;
         default:

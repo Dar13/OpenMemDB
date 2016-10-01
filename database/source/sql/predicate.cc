@@ -38,7 +38,8 @@ Predicate* makePredicateFromExpression(Expression* expr, DataStore* data_store)
         NestedPredicate* nested_pred = new (std::nothrow) NestedPredicate;
         if(nested_pred == nullptr)
         {
-            // TODO: Error handling
+            printf("%s: Allocation failure!\n", __FUNCTION__);
+            return nullptr;
         }
 
         Predicate* left = makePredicateFromExpression(expr->left, data_store);
@@ -58,7 +59,7 @@ Predicate* makePredicateFromExpression(Expression* expr, DataStore* data_store)
             nested_pred->right_child = right;
         }
 
-	nested_pred->op = expr->op;
+        nested_pred->op = expr->op;
         pred = nested_pred;
     }
 
