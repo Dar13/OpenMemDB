@@ -263,9 +263,6 @@ bool WorkManager::ReceiveCommand(omdb::Connection& conn)
     {
         job_number++;
 
-        // TODO: Remove this, for debugging purposes only
-        printf("Creating job number %d\n", job_number);
-
         CommandPacket command;
         memcpy(&command, command_buffer, sizeof(CommandPacket));
 
