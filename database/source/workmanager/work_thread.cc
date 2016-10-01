@@ -194,7 +194,6 @@ JointResult WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
 
                 // Grab first record to get metadata
                 RecordData& record = statement_result.result.front();
-                size_t record_size = record.size();
 
                 // Iterate over the record and grab the necessary metadata
                 uint32_t output_col_itr = 0;
@@ -226,7 +225,7 @@ JointResult WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
                 // Filter the results based on the source columns selected
                 auto query_filter = [&query_data, &query] (RecordData& record)
                 {
-                    RecordData filtered_record(query->source_columns.size(), {0});
+                    RecordData filtered_record(query->source_columns.size(), {0,0,0,0});
                     int itr = 0;
                     for(auto source : query->source_columns)
                     {

@@ -223,6 +223,8 @@ std::vector<TokenPair> tokenize(std::string input)
                                 date.day = std::stoul(token.substr(8, 2), nullptr, 10); 
                                 
                                 data.data.value = date.value;
+
+                                pair.token->value = data;
                             }
                             else
                             {

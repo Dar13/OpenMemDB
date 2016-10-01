@@ -164,8 +164,8 @@ void builderAddQualifiedSelectColumn(StatementBuilder* builder,
     else
     {
         // TODO: Error handling
-        printf("%s: Error encountered finding column index! Error code = %d\n",
-                __FUNCTION__, res.status);
+        printf("%s: Error encountered while finding column index! Error code = %u\n",
+                __FUNCTION__, (uint16_t)res.status);
     }
   
     SelectQuery* query = reinterpret_cast<SelectQuery*>(builder->statement);
@@ -209,6 +209,7 @@ void builderAddDataItem(StatementBuilder* builder, Token data)
 
 void builderFinishInsertCommand(StatementBuilder* builder)
 {
+    (void)builder;
 }
 
 // Update command helper functions ////////////////////////////////////////////
@@ -306,6 +307,8 @@ void builderFinishUpdateCommand(StatementBuilder* builder)
 void builderAddColumn(StatementBuilder* builder, Token column_name,
                       Token column_type, Token column_constraints)
 {
+    (void)column_constraints;
+
     //printf("Entered builderAddColumn\n");
 
     if(!builder->started)
@@ -329,12 +332,11 @@ void builderAddColumn(StatementBuilder* builder, Token column_name,
         }
         break;
         case SQLStatement::SELECT:
-        { }
-        break;
-
         case SQLStatement::INVALID:
         default:
-        {}
+        {
+            printf("%s: SQL statement type isn't supported in this function!\n", __FUNCTION__);
+        }
         break;
     }
 }
