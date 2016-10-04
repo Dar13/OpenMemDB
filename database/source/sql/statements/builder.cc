@@ -121,10 +121,27 @@ void builderAddSelectAllColumns(StatementBuilder* builder, Token table)
         // TODO: Error handling
     }
 
-    // TODO: Add all columns in the given table to this query
     switch(builder->statement->type)
     {
         case SQLStatement::SELECT:
+            {
+                SelectQuery* query = reinterpret_cast<SelectQuery*>(builder->statement);
+                SchemaResult schema = builder->data_store->getTableSchema(table->text);
+                if(schema.status != ResultStatus::SUCCESS)
+                {
+                    printf("Error retrieving schema for table \"%s\"\n", table->text.c_str());
+                }
+
+                size_t num_columns = schema.result.columns.size();
+                for(size_t i = 0; i < num_columns; i++)
+                {
+                    ColumnReference col;
+                    col.column_idx = i;
+                    col.table = table->text;
+                    query->source_columns.push_back(col);
+                    query->output_columns.push_back(schema.result.columns[i].name);
+                }
+            }
             break;
         default:
             // TODO: Error handling?
