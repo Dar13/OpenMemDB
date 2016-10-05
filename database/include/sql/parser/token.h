@@ -25,6 +25,12 @@
 #include "util/types.h"
 
 // TODO: Document this
+/**
+ *  \brief A struct that represents a token in a SQL statement
+ *
+ *  \detail Used by the parser to determine if a SQL statement is valid and/or
+ *  supported by OpenMemDB.
+ */
 struct TokenData
 {
     TokenData()

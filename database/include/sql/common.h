@@ -59,28 +59,42 @@ struct SQLConstraint
   uint16_t ref_column_idx;
 };
 
-// TODO: Document this
+/**
+ *  \brief Representation of a SQL column in a table
+ */
 struct SQLColumn
 {
+    //! Title of the column
     std::string name;
+
+    //! Data type of the data contained in the column
     DataType type;
+
+    //! The constraint(s) placed upon the column
     std::vector<SQLConstraint> constraint;
 };
 
-// TODO: Document this
+/**
+ *  \brief Representation of an update to a specific column with specific data
+ */
 struct ColumnUpdate
 {
     uint32_t column_idx;
     TervelData new_data;
 };
 
-// TODO: Document this
+/**
+ *  \brief A reference to a specific column within a table
+ */
 struct ColumnReference
 {
     std::string table;
     uint32_t column_idx;
 };
 
+/**
+ *  \brief An enumeration of the various types of SQL statements supported by OpenMemDB
+ */
 enum class SQLStatement : uint16_t
 {
   INVALID = 0,

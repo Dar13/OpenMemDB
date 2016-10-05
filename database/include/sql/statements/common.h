@@ -22,12 +22,19 @@
 
 #include "sql/types/common.h"
 
-// TODO: Document this
+/**
+ *  \brief Base type of all SQL statement types that defines the type
+ *  and some useful metadata.
+ */
 class ParsedStatement
 {
 public:
     ParsedStatement(SQLStatement type) : type(type) {}
+
+    //! The type of SQL statement that this struct represents
     SQLStatement type;
+
+    //! The amount of time that has elapsed in the processing of this statement.
     uint32_t time_elapsed;
 };
 

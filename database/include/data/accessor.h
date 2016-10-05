@@ -41,6 +41,9 @@ class VectorAccessor {
         VectorAccessor() : value(nullptr) {}
 
         bool init(tervel::containers::wf::vector::Vector<Value*>& vector, uint32_t index) {
+            ///////////////////////
+            // MAGIC DON'T TOUCH //
+            ///////////////////////
             Value* retrieved_value;
             Value* value_ptr;
             if(vector.at(index, retrieved_value))

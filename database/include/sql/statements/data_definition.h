@@ -29,6 +29,9 @@
 #include "sql/statements/common.h"
 #include "util/types.h"
 
+/**
+ *  \brief A struct that holds internal data comprising a CREATE TABLE statement
+ */
 struct CreateTableCommand : public ParsedStatement
 {
     CreateTableCommand() : ParsedStatement(SQLStatement::CREATE_TABLE) {}
@@ -36,6 +39,9 @@ struct CreateTableCommand : public ParsedStatement
     std::vector<SQLColumn> columns;
 };
 
+/**
+ *  /brief A struct that holds internal data comprising a DROP TABLE statement
+ */
 struct DropTableCommand : public ParsedStatement
 {
     DropTableCommand() : ParsedStatement(SQLStatement::DROP_TABLE) {}

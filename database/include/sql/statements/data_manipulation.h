@@ -20,6 +20,7 @@
 #ifndef DATA_MANIP_H
 #define DATA_MANIP_H
 
+// STL Includes
 #include <vector>
 #include <string>
 
@@ -32,8 +33,9 @@
 #include "sql/predicate.h"
 #include "sql/statements/common.h"
 
-// TODO: Document these structures
-
+/**
+ *  \brief A struct that holds internal data comprising a SELECT query
+ */
 struct SelectQuery : public ParsedStatement
 {
     SelectQuery() : ParsedStatement(SQLStatement::SELECT), predicate(nullptr) {}
@@ -54,38 +56,70 @@ struct SelectQuery : public ParsedStatement
         }
     }
 
+    //! Vector of columns in the source table that are targeted
     std::vector<ColumnReference> source_columns;
+
+    //! Tables that are targeted in this query
     std::vector<std::string> tables;
+
+    //! Names of output columns
     std::vector<std::string> output_columns;
+
+    //! The binary expression tree that determines which rows are selected
     Predicate* predicate;
 };
 
+/**
+ *  \brief A struct that holds internal data comprising a INSERT INTO statement
+ */
 struct InsertCommand : public ParsedStatement
 {
     InsertCommand() : ParsedStatement(SQLStatement::INSERT_INTO) {}
 
+    //! The vector of data that represents the row being inserted
     std::vector<TervelData> data;
+
+    //! The table that's being inserted into
     std::string table;
 };
 
+/**
+ *  \brief A struct that holds internal data comprising a UPDATE statement
+ */
 struct UpdateCommand : public ParsedStatement
 {
     UpdateCommand() : ParsedStatement(SQLStatement::UPDATE) {}
 
+    //! The name of the target table
     std::string table;
+
+    //! The schema of the target table
     TableSchema table_schema;
+
+    //! The columns to be updated and their data
     std::vector<ColumnUpdate> columns;
+
+    //! A full record
     RecordData full_record;
+
+    //! The binary expression that determines which records are operated on
     Predicate* predicate;
 
+    //! Is actually executable by the SQL Engine
     bool runnable;
 };
 
+/**
+ *  \brief A struct that holds internal data comprising a DELETE statement
+ */
 struct DeleteCommand : public ParsedStatement
 {
     DeleteCommand() : ParsedStatement(SQLStatement::DELETE) {}
 
+    //! Name of the table to be operated on
     std::string table;
+
+    //! The binary expression tree that determines which records are deleted
     Predicate* predicate;
 };
 
