@@ -307,7 +307,7 @@ void builderFinishUpdateCommand(StatementBuilder* builder)
         }
 
         TervelData null_data = { .value = 0 };
-        null_data.data.null = 1;
+        null_data.null = 1;
 
         update_cmd->full_record.resize(update_cmd->table_schema.columns.size(), null_data);
         for(auto updated_col : update_cmd->columns)

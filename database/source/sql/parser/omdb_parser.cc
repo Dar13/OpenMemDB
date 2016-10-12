@@ -222,7 +222,7 @@ std::vector<TokenPair> tokenize(std::string input)
                                 date.month = std::stoul(token.substr(5, 2), nullptr, 10);
                                 date.day = std::stoul(token.substr(8, 2), nullptr, 10); 
                                 
-                                data.data.value = date.value;
+                                data.data_value = date.value;
 
                                 pair.token->value = data;
                             }

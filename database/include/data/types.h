@@ -63,7 +63,7 @@ struct RecordCopy
     RecordCopy() : id(0) {}
     RecordCopy(RecordData&& data)
     {
-        id = data.back().data.value;
+        id = data.back().data_value;
         data.pop_back();
         this->data = std::move(data);
     }

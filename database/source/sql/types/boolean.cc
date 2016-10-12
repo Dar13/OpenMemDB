@@ -38,14 +38,14 @@ SQLBoolean::SQLBoolean(bool value)
 SQLBoolean::SQLBoolean(TervelData value)
     : SQLNullable(false, true)
 {
-    if(value.data.null == 1 || value.data.type == BOOLEAN)
+    if(value.null == 1 || value.type == BOOLEAN)
     {
         m_is_null = true;
         return;
     }
 
     // TODO: Convert to BooleanData and then pull it out?
-    m_value = (BooleanValue)(value.data.value);
+    m_value = (BooleanValue)(value.data_value);
 }
 
 SQLBoolean::SQLBoolean(BooleanValue value)

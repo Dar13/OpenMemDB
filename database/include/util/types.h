@@ -149,8 +149,8 @@ union TervelData
         uint64_t type : 3;          //!< This is mapped to \refer DataType
         uint64_t null : 1;          //!< Set if the value is NULL
 
-        uint64_t value : 57;        //!< 
-    } data;
+        uint64_t data_value : 57;        //!< 
+    };
 
     int64_t value;
 } __attribute__((packed));

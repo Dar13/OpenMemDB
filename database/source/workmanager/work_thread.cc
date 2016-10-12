@@ -201,7 +201,7 @@ JointResult WorkThread::ExecuteStatement(ParsedStatement* statement, DataStore* 
                 {
                     ResultColumn column;
                     TervelData& data = record[source_column.column_idx];
-                    column.type = static_cast<uint16_t>(data.data.type);
+                    column.type = static_cast<uint16_t>(data.type);
 
                     std::string& col_name = query->output_columns[output_col_itr];
                     if((col_name.length() + 1) <= sizeof(column.name))

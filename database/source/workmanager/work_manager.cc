@@ -365,7 +365,7 @@ bool WorkManager::SendResult(omdb::Connection& conn, const JointResult& result)
                     {
                         for(auto data : record)
                         {
-                            data.data.tervel_status = 0;
+                            data.tervel_status = 0;
                             result_data[result_idx] = data.value;
                             result_idx++;
                         }

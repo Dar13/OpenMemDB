@@ -190,7 +190,7 @@ Predicate* makePredicateFromExpression(Expression* expr, DataStore* data_store)
                 }
                 else
                 {
-                    val_type = (DataType)val_pred->expected_value.getValue().data.type;
+                    val_type = (DataType)val_pred->expected_value.getValue().type;
                 }
 
                 if((val_type == col_type) ||
@@ -275,7 +275,7 @@ SQLBoolean operator==(ExpressionValue& lhs, ExpressionValue& rhs)
     }
 
     // You can't compare against a NULL value
-    if(lhs.getValue().data.null || rhs.getValue().data.null)
+    if(lhs.getValue().null || rhs.getValue().null)
     {
         return SQL_UNKNOWN;
     }
@@ -283,7 +283,7 @@ SQLBoolean operator==(ExpressionValue& lhs, ExpressionValue& rhs)
     // TODO: Verify this works for floats
     // This should work for the integral types as the bit layouts should be 
     // the same for equivalent values.
-    if(lhs.getValue().data.value == rhs.getValue().data.value)
+    if(lhs.getValue().value == rhs.getValue().value)
     {
         return SQL_TRUE;
     }

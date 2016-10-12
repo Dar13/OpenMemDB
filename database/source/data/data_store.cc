@@ -215,7 +215,7 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair& table_pair, RecordDat
                 //data cannot be null
                 case SQLConstraintType::NOT_NULL:
                     {
-                        if(row_data.data.null == 1)
+                        if(row_data.null == 1)
                         {
                             return ConstraintResult(ResultStatus::FAILURE, ConstraintStatus::ERR_NULL);
                         }
@@ -226,16 +226,16 @@ ConstraintResult DataStore::schemaChecker(SchemaTablePair& table_pair, RecordDat
                 case SQLConstraintType::AUTO_INCREMENT:
                     {
                         TervelData insert = {.value = 0};
-                        insert.data.type = INTEGER;
-                        insert.data.value = table->record_counter.load()+1;
-                        insert.data.tervel_status = 0;
+                        insert.type = INTEGER;
+                        insert.data_value = table->record_counter.load()+1;
+                        insert.tervel_status = 0;
 
                         row->at(i) = insert;
                         break;
                     }
                 case SQLConstraintType::DEFAULT:
                     {
-                        if(row_data.data.null == 1)
+                        if(row_data.null == 1)
                         {
                             row->at(i) = constraint.value;
                         }
@@ -279,7 +279,7 @@ ManipResult DataStore::insertRecord(const std::string& table_name, RecordData re
 
         // Ensure Tervel's bits are zeroed and copy the rest of the data over
         terv_data.value = data.value;
-        terv_data.data.tervel_status = 0;
+        terv_data.tervel_status = 0;
 
         new_record->push_back_w_ra(terv_data.value);
     }
@@ -288,7 +288,7 @@ ManipResult DataStore::insertRecord(const std::string& table_name, RecordData re
     TervelData counter_data = {.value = 0};
     uint64_t counter = table_pair.table->record_counter.fetch_add(1);
     
-    counter_data.data.value = counter;
+    counter_data.data_value = counter;
     new_record->push_back_w_ra(counter_data.value);
 
     ValuePointer<Record>* record_ptr = new ValuePointer<Record>(new_record);
@@ -1090,9 +1090,8 @@ RecordCopy DataStore::copyRecord(Record* record)
 
         data.value = tervel_data;
 
-        // TODO: This is ugly af, rethink this naming scheme in Data/TervelData
         // Clear out any Tervel status bits so as to make later comparisons trivial
-        data.data.tervel_status = 0;
+        data.tervel_status = 0;
         copy.push_back(data);
     }
 
@@ -1123,12 +1122,12 @@ Record* DataStore::updateRecord(const RecordCopy& old_record, RecordData& new_re
         old_data = old_record.data.at(idx);
 
         // Reset the Tervel status bits for insertion into a new record (if needed)
-        old_data.data.tervel_status = 0;
+        old_data.tervel_status = 0;
 
         // If the new data for this column is null,
         // then we need to keep the old data,
         // else bring in the new.
-        if(new_data.data.null)
+        if(new_data.null)
         {
             updated_record->push_back_w_ra(old_data.value);
         }

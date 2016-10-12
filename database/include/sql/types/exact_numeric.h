@@ -42,18 +42,18 @@ public:
     SQLExactNumeric(TervelData value)
         : SQLNullable(false, true)
     {
-        if(value.data.null == 1)
+        if(value.null == 1)
         {
             m_is_null = true;
             return;
         }
 
-        switch(value.data.type)
+        switch(value.type)
         {
             case SMALL_INT:
                 if(sizeof(T) == sizeof(SQLSmallIntType))
                 {
-                    ShortData short_data = static_cast<ShortData>(value.data.value);
+                    ShortData short_data = static_cast<ShortData>(value.data_value);
                     m_data = short_data.value;
                 }
                 else
@@ -64,7 +64,7 @@ public:
             case INTEGER:
                 if(sizeof(T) == sizeof(SQLIntegerType))
                 {
-                    IntData int_data = static_cast<IntData>(value.data.value);
+                    IntData int_data = static_cast<IntData>(value.data_value);
                     m_data = int_data.value;
                 }
                 else
@@ -75,7 +75,7 @@ public:
             case BIG_INT:
                 if(sizeof(T) == sizeof(SQLBigIntType))
                 {
-                    m_data = value.data.value;
+                    m_data = value.data_value;
                 }
                 else
                 {

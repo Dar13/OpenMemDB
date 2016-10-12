@@ -46,7 +46,7 @@ struct TokenData
         {
             is_value = true;
             value = TervelData { .value = 0 };
-            value.data.null = 1;
+            value.null = 1;
         }
     }
 
@@ -54,14 +54,14 @@ struct TokenData
         : text(std::move(str)), is_value(true), is_operation(false), is_column(false)
     {
         value.value = 0; // Initialize the struct to be all 0's
-        value.data.type = BOOLEAN;
+        value.type = BOOLEAN;
         if(val)
         {
-            value.data.value = 1;
+            value.data_value = 1;
         }
         else
         {
-            value.data.value = 0;
+            value.data_value = 0;
         }
     }
 
@@ -69,32 +69,32 @@ struct TokenData
         : text(std::move(str)), is_value(true), is_operation(false), is_column(false)
     {
         value.value = 0; // Initialize the struct to be all 0's
-        value.data.type = SMALL_INT;
-        value.data.value = val;
+        value.type = SMALL_INT;
+        value.data_value = val;
     }
     
     TokenData(std::string str, int32_t val)
         : text(std::move(str)), is_value(true), is_operation(false), is_column(false)
     {
         value.value = 0; // Initialize the struct to be all 0's
-        value.data.type = INTEGER;
-        value.data.value = val;
+        value.type = INTEGER;
+        value.data_value = val;
     }
 
     TokenData(std::string str, int64_t val)
         : text(std::move(str)), is_value(true), is_operation(false), is_column(false)
     {
         value.value = 0; // Initialize the struct to be all 0's
-        value.data.type = BIG_INT;
-        value.data.value = val;
+        value.type = BIG_INT;
+        value.data_value = val;
     }
 
     TokenData(std::string str, float val)
         : text(std::move(str)), is_value(true), is_operation(false), is_column(false)
     {
         value.value = 0; // Initialize the struct to be all 0's
-        value.data.type = FLOAT;
-        value.data.value = static_cast<int64_t>(val);
+        value.type = FLOAT;
+        value.data_value = static_cast<int64_t>(val);
     }
 
     TokenData(std::string str, std::string table, std::string column)

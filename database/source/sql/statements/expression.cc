@@ -124,16 +124,16 @@ static void print_expr(Expression* expr)
                 std::cout << expr->table_name << "." << expr->table_column;
                 break;
             case ExpressionFlags::VALUE:
-                switch(expr->value.data.type)
+                switch(expr->value.type)
                 {
                     case DataType::SMALL_INT:
                     case DataType::INTEGER:
                     case DataType::BIG_INT:
-                        std::cout << expr->value.data.value;
+                        std::cout << expr->value.data_value;
                         break;
                     case DataType::FLOAT:
                     {
-                        FloatData float_data = { .value = expr->value.data.value};
+                        FloatData float_data = { .value = expr->value.data_value};
                         std::cout << float_data.data;
                     }
                         break;

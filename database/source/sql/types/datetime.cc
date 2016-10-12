@@ -57,13 +57,13 @@ SQLDate::SQLDate(uint16_t year, uint8_t month, uint8_t day, bool nullable)
 SQLDate::SQLDate(TervelData value)
     : SQLNullable(false, true)
 {
-    if(value.data.null == 1 || value.data.type != DATE)
+    if(value.null == 1 || value.type != DATE)
     {
         m_is_null = true;
         return;
     }
 
-    DateData date_data = { .value = value.data.value };
+    DateData date_data = { .value = value.data_value };
 
     m_year = date_data.year;
     m_month = date_data.month;
@@ -208,13 +208,13 @@ SQLTime::SQLTime(uint16_t hour, uint16_t minute, uint32_t second, bool nullable)
 SQLTime::SQLTime(TervelData value)
     : SQLNullable(false, true)
 {
-    if(value.data.null == 1 || value.data.type != TIME)
+    if(value.null == 1 || value.type != TIME)
     {
         m_is_null = true;
         return;
     }
 
-    TimeData time_data = { .value = value.data.value};
+    TimeData time_data = { .value = value.data_value};
 
     m_hour = time_data.hour;
     m_minute = time_data.minute;
