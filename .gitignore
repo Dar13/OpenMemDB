@@ -44,7 +44,7 @@ omdb_console
 *.log
 *.pdf
 *.backup
-Documents/doxygen
+database/docs/doxygen
 
 # Gedit backup file
 .*~
