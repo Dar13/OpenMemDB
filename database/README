@@ -1,0 +1,3 @@
+To build:
+1) "make lemon"
+2) "make" / "make release"

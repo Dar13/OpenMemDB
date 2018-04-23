@@ -157,6 +157,8 @@ static void print_expr(Expression* expr)
 // TODO: Document this
 void printExpressionTree(Expression* expr, int indent)
 {
+    (void)indent;
+
     printf("Expression tree evaluates to following expression: ");
     if(expr == nullptr)
     {

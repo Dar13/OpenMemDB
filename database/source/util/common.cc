@@ -45,6 +45,7 @@ bool checkDateFormat(std::string str)
 			case 4:
 			case 7:
 				if(str[i] != '-') { return false; }
+                break;
 			default:
 				return false;
 		}
